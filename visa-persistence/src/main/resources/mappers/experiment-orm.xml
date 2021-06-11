@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+
+    <named-query name="experiment.getById">
+        <query>SELECT e FROM Experiment e WHERE e.id = :id</query>
+    </named-query>
+
+    <named-query name="experiment.getAll">
+        <query>SELECT e FROM Experiment e ORDER BY e.id ASC</query>
+    </named-query>
+
+    <named-query name="experiment.getYearsForUser">
+        <query>
+            SELECT distinct YEAR(e.startDate)
+            FROM Experiment e
+            JOIN e.users u
+            WHERE u = :user
+        </query>
+    </named-query>
+
+    <named-query name="experiment.getByIdAndUser">
+        <query>
+            SELECT e FROM Experiment e
+            JOIN e.users u
+            WHERE u = :user
+            AND e.id = :id
+        </query>
+    </named-query>
+
+    <named-query name="experiment.getAllForInstance">
+        <query>
+            SELECT e FROM Experiment e
+            JOIN e.instances i
+            WHERE i = :instance
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.Experiment">
+        <table name="experiment"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false" length="32"/>
+            </id>
+            <basic name="startDate">
+                <column name="start_date" nullable="true" />
+            </basic>
+            <basic name="endDate">
+                <column name="end_date" nullable="true"/>
+            </basic>
+            <many-to-one name="cycle">
+                <join-column name="cycle_id" nullable="false"/>
+                <foreign-key name="fk_cycle_id"/>
+            </many-to-one>
+            <many-to-one name="instrument">
+                <join-column name="instrument_id" nullable="false"/>
+                <foreign-key name="fk_instrument_id"/>
+            </many-to-one>
+            <many-to-one name="proposal">
+                <join-column name="proposal_id" nullable="false"/>
+                <foreign-key name="fk_proposal_id"/>
+            </many-to-one>
+            <many-to-many name="users" target-entity="eu.ill.visa.core.domain.User">
+                <join-table name="experiment_user">
+                    <join-column name="experiment_id"/>
+                    <foreign-key name="fk_experiment_id" />
+                    <inverse-join-column name="user_id"/>
+                    <inverse-foreign-key name="fk_users_id" />
+                </join-table>
+            </many-to-many>
+            <many-to-many name="instances" target-entity="eu.ill.visa.core.domain.Instance">
+                <join-table name="instance_experiment">
+                    <join-column name="experiment_id"/>
+                    <foreign-key name="fk_experiment_id"/>
+                    <inverse-join-column name="instance_id"/>
+                    <inverse-foreign-key name="fk_instance_id"/>
+                </join-table>
+            </many-to-many>
+        </attributes>
+    </entity>
+
+</entity-mappings>

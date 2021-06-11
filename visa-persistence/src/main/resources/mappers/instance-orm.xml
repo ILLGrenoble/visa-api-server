@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+    <named-query name="instance.getById">
+        <query>
+            SELECT i FROM Instance i
+            LEFT JOIN i.members m
+            WHERE i.id = :id
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+    <named-query name="instance.getAll">
+        <query>
+            SELECT DISTINCT i FROM Instance i
+            LEFT JOIN i.members m
+            WHERE i.deletedAt IS NULL
+        </query>
+    </named-query>
+    <named-query name="instance.getAllInactive">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT i FROM Instance i
+                LEFT JOIN i.members m
+                WHERE i.deletedAt IS NULL
+                AND i.terminationDate IS NOT NULL
+                AND i.lastSeenAt < :date
+             ]]>
+        </query>
+    </named-query>
+    <named-query name="instance.getAllNewInactive">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT i FROM Instance i
+                LEFT JOIN i.members m
+                LEFT OUTER JOIN InstanceExpiration ie on ie.instance = i
+                WHERE i.deletedAt IS NULL
+                AND i.terminationDate IS NOT NULL
+                AND i.lastSeenAt < :date
+                AND ie IS NULL
+             ]]>
+        </query>
+    </named-query>
+    <named-query name="instance.getAllNewTerminations">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT i FROM Instance i
+                LEFT JOIN i.members m
+                LEFT OUTER JOIN InstanceExpiration ie on ie.instance = i
+                WHERE i.deletedAt IS NULL
+                AND i.terminationDate IS NOT NULL
+                AND i.terminationDate < :date
+                AND ie IS NULL
+             ]]>
+        </query>
+    </named-query>
+    <named-query name="instance.countAll">
+        <query>
+            SELECT COUNT(i) FROM Instance i
+            WHERE i.deletedAt IS NULL
+        </query>
+    </named-query>
+    <named-query name="instance.countAllForState">
+        <query>
+            SELECT COUNT(i) FROM Instance i
+            WHERE i.state = :state AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <named-query name="instance.getAllForUser">
+        <query>
+            SELECT i FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND i.deletedAt IS NULL
+            ORDER BY i.createdAt DESC
+        </query>
+    </named-query>
+
+    <named-query name="instance.countAllForUser">
+        <query>
+            SELECT COUNT(i) FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <named-query name="instance.getAllForUserAndRole">
+        <query>
+            SELECT i FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND m.role = :role
+            AND i.deletedAt IS NULL
+            ORDER BY i.createdAt DESC
+        </query>
+    </named-query>
+
+    <named-query name="instance.countAllForUserAndRole">
+        <query>
+            SELECT COUNT(i) FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND m.role = :role
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <named-query name="instance.getAllWithStates">
+        <query>
+            SELECT i FROM Instance i
+            WHERE i.state in :states
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <named-query name="instance.getAllToDelete">
+        <query>
+            SELECT i FROM Instance i
+            WHERE i.state = 'STOPPED'
+            AND i.deleteRequested = true
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <named-query name="instance.getInstanceForMember">
+        <query>
+            SELECT i FROM Instance i
+            JOIN i.members m
+            WHERE m = :member
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <named-query name="instance.getByIdForInstrumentScientist">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT i FROM Instance i
+                LEFT JOIN i.experiments e
+                LEFT JOIN e.instrument instr
+                LEFT JOIN InstrumentScientist ir on ir.instrument = instr
+                WHERE ir.user = :user
+                AND i.id = :instanceId
+                AND i.deletedAt IS NULL
+            ]]>
+        </query>
+    </named-query>
+
+    <named-query name="instance.getByIdForExperimentBetweenDates">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT i FROM Instance i
+                LEFT JOIN i.experiments e
+                WHERE i.id = :id
+                AND e.startDate <= :periodEnd
+                AND e.endDate >= :periodStart
+                AND i.deletedAt IS NULL
+            ]]>
+        </query>
+    </named-query>
+
+    <named-query name="instance.getDeletedByComputeId">
+        <query>
+            <![CDATA[
+                SELECT i FROM Instance i
+                WHERE i.computeId = :computeId
+                AND i.deletedAt IS NULL
+            ]]>
+        </query>
+    </named-query>
+
+    <named-native-query name="instance.countByFlavour" result-set-mapping="countByFlavourMapping">
+        <query>
+            SELECT f.id as id, f.name as name, COUNT(i.id) as total
+            FROM instance i
+            JOIN plan p on i.plan_id = p.id
+            JOIN flavour f on p.flavour_id = f.id AND i.deleted_at IS NULL
+            GROUP BY f.id
+            ORDER BY f.name
+        </query>
+    </named-native-query>
+
+    <sql-result-set-mapping name="countByFlavourMapping">
+        <constructor-result target-class="eu.ill.visa.core.domain.NumberInstancesByFlavour">
+            <column name="id" class="java.lang.Long"/>
+            <column name="name" class="java.lang.String" />
+            <column name="total" class="java.lang.Long"/>
+        </constructor-result>
+    </sql-result-set-mapping>
+
+    <named-native-query name="instance.countByImage" result-set-mapping="countByImageMapping">
+        <query>
+            SELECT im.id as id, im.name as name, COUNT(i.id) as total
+            FROM instance i
+            JOIN plan p on i.plan_id = p.id
+            JOIN image im on p.image_id = im.id AND i.deleted_at IS NULL
+            GROUP BY im.id
+            ORDER BY im.name
+        </query>
+    </named-native-query>
+
+    <sql-result-set-mapping name="countByImageMapping">
+        <constructor-result target-class="eu.ill.visa.core.domain.NumberInstancesByImage">
+            <column name="id" class="java.lang.Long"/>
+            <column name="name" class="java.lang.String" />
+            <column name="total" class="java.lang.Long"/>
+        </constructor-result>
+    </sql-result-set-mapping>
+
+    <entity class="eu.ill.visa.core.domain.Instance">
+        <table name="instance"/>
+        <convert converter="eu.ill.visa.persistence.converter.CommaSeparatedListConverter" attribute-name="securityGroups"/>
+
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="computeId">
+                <column name="compute_id" length="250" nullable="true"/>
+            </basic>
+            <basic name="name">
+                <column name="name" length="250" nullable="false"/>
+            </basic>
+            <basic name="comments">
+                <column name="comments" length="2500" nullable="true"/>
+            </basic>
+            <basic name="username">
+                <column name="username" length="100" nullable="true"/>
+            </basic>
+            <basic name="ipAddress">
+                <column name="ip_address" nullable="true" />
+            </basic>
+            <basic name="screenWidth">
+                <column name="screen_width" nullable="false"/>
+            </basic>
+            <basic name="screenHeight">
+                <column name="screen_height" nullable="false"/>
+            </basic>
+            <basic name="lastSeenAt">
+                <column name="last_seen_at" nullable="true"/>
+            </basic>
+            <basic name="lastInteractionAt">
+                <column name="last_interaction_at" nullable="true"/>
+            </basic>
+            <basic name="terminationDate">
+                <column name="termination_date" nullable="true"/>
+            </basic>
+            <basic name="deletedAt">
+                <column name="deleted_at" nullable="true"/>
+            </basic>
+            <basic name="deleteRequested">
+                <column name="delete_requested" nullable="false" column-definition="" default="false"/>
+            </basic>
+            <basic name="state">
+                <column name="state" length="50" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="keyboardLayout">
+                <column name="keyboard_layout" nullable="false" column-definition="" default="en-gb-qwerty"/>
+            </basic>
+            <basic name="securityGroups">
+                <column name="security_groups" nullable="true" column-definition="TEXT"/>
+            </basic>
+            <many-to-one name="plan">
+                <join-column name="plan_id"/>
+                <foreign-key name="fk_plan_id"/>
+            </many-to-one>
+            <one-to-many name="members" orphan-removal="true">
+                <join-column name="instance_id" nullable="false"/>
+                <foreign-key name="fk_instance_member_id"/>
+                <cascade>
+                    <cascade-persist/>
+                    <cascade-merge/>
+                    <cascade-refresh/>
+                    <cascade-remove/>
+                </cascade>
+            </one-to-many>
+            <many-to-many name="experiments" target-entity="eu.ill.visa.core.domain.Experiment">
+                <join-table name="instance_experiment">
+                    <join-column name="instance_id"/>
+                    <foreign-key name="fk_instance_id"/>
+                    <inverse-join-column name="experiment_id"/>
+                    <inverse-foreign-key name="fk_experiment_id"/>
+                </join-table>
+            </many-to-many>
+            <one-to-many name="attributes" orphan-removal="true">
+                <join-column name="instance_id" nullable="false"/>
+                <foreign-key name="fk_instance_id"/>
+                <cascade>
+                    <cascade-persist/>
+                    <cascade-merge/>
+                    <cascade-refresh/>
+                    <cascade-remove/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+</entity-mappings>

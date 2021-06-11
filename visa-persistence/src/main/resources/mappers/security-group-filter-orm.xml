@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+
+    <named-query name="securityGroupFilter.getById">
+        <query>SELECT l FROM SecurityGroupFilter l WHERE l.id = :id</query>
+    </named-query>
+
+    <named-query name="securityGroupFilter.getByObjectIdAndObjectType">
+        <query>SELECT l FROM SecurityGroupFilter l WHERE l.id = :id</query>
+    </named-query>
+
+    <named-query name="securityGroupFilter.getAll">
+        <query>SELECT l FROM SecurityGroupFilter l</query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.SecurityGroupFilter">
+        <table name="security_group_filter"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false" length="32"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="objectId">
+                <column name="object_id" nullable="false"/>
+            </basic>
+            <basic name="objectType">
+                <column name="object_type" nullable="false"/>
+            </basic>
+            <many-to-one name="securityGroup">
+                <join-column name="security_group_id" nullable="false"/>
+                <foreign-key name="fk_security_group_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>

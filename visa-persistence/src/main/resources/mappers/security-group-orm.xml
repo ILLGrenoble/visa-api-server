@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+    <named-query name="securityGroup.getById">
+        <query>SELECT sg FROM SecurityGroup sg WHERE sg.id = :id</query>
+    </named-query>
+    <named-query name="securityGroup.getAll">
+        <query>SELECT sg FROM SecurityGroup sg order by name</query>
+    </named-query>
+
+    <named-query name="securityGroup.getDefaultSecurityGroups">
+        <query>
+            SELECT DISTINCT sg FROM SecurityGroup sg
+            LEFT OUTER JOIN SecurityGroupFilter sgf ON sgf.securityGroup = sg
+            WHERE sgf.objectId IS NULL
+        </query>
+    </named-query>
+
+    <named-native-query name="securityGroup.getRoleBasedSecurityGroups" result-class="eu.ill.visa.core.domain.SecurityGroup">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT sg.id, sg.name
+                FROM security_group sg
+                LEFT JOIN security_group_filter sgf ON sg.id = sgf.security_group_id
+                LEFT JOIN role r ON r.id = sgf.object_id
+                LEFT JOIN user_role ur ON r.id = ur.role_id
+                LEFT JOIN users u ON ur.user_id = u.id
+                WHERE sgf.object_type = 'ROLE'
+                AND u.id = :userId
+            ]]>
+        </query>
+    </named-native-query>
+
+    <named-native-query name="securityGroup.getInstrumentBasedSecurityGroups" result-class="eu.ill.visa.core.domain.SecurityGroup">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT sg.id, sg.name
+                FROM security_group sg
+                LEFT JOIN security_group_filter sgf ON sg.id = sgf.security_group_id
+                WHERE sgf.object_type = 'INSTRUMENT'
+                AND sgf.object_id in :instrumentIds
+            ]]>
+        </query>
+    </named-native-query>
+
+    <named-native-query name="securityGroup.getAllInstrumentBasedSecurityGroups" result-class="eu.ill.visa.core.domain.SecurityGroup">
+        <query>
+            <![CDATA[
+                SELECT DISTINCT sg.id, sg.name
+                FROM security_group sg
+                LEFT OUTER JOIN security_group_filter sgf ON sg.id = sgf.security_group_id
+                WHERE sgf.object_type = 'INSTRUMENT'
+            ]]>
+        </query>
+    </named-native-query>
+
+
+    <entity class="eu.ill.visa.core.domain.SecurityGroup">
+        <table name="security_group"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="name">
+                <column name="name" length="250" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+</entity-mappings>

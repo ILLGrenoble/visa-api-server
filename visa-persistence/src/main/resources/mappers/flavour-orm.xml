@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+    <named-query name="flavour.getById">
+        <query>
+            SELECT f
+            FROM Flavour f
+            WHERE f.id = :id
+            AND f.deleted = false
+        </query>
+    </named-query>
+    <named-query name="flavour.getAll">
+        <query>
+            SELECT f
+            FROM Flavour f
+            WHERE f.deleted = false
+            ORDER BY cpu, memory</query>
+    </named-query>
+
+    <named-query name="flavour.countAllForAdmin">
+        <query>
+            SELECT count(distinct f.id)
+            FROM Flavour f, Plan p, Instance i
+            where p.flavour = f.id
+            and i.plan = p.id
+            and i.deletedAt IS NULL
+        </query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.Flavour">
+        <table name="flavour"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="name">
+                <column name="name" length="250" nullable="false"/>
+            </basic>
+            <basic name="memory">
+                <column name="memory" nullable="false"/>
+            </basic>
+            <basic name="cpu">
+                <column name="cpu" precision="2" nullable="false"/>
+            </basic>
+            <basic name="computeId">
+                <column name="compute_id" length="250" nullable="false"/>
+            </basic>
+            <basic name="deleted">
+                <column name="deleted" nullable="false" column-definition="" default="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+</entity-mappings>

@@ -1,0 +1,88 @@
+input QueryFilter {
+    query: String!
+    parameters: [Parameter]
+}
+
+input OrderBy {
+    name: String!
+    ascending: Boolean = true
+}
+
+input CreateRoleInput {
+    name: String!
+    description: String
+}
+
+input CreateImageInput {
+    name: String!
+    version: String
+    description: String
+    icon: String
+    computeId: String!
+    visible: Boolean!
+    deleted: Boolean!
+    protocolIds: [Int]
+    bootCommand: String
+    autologin: String
+}
+
+input UpdateImageInput {
+    name: String!
+    version: String
+    description: String
+    icon: String
+    computeId: String!
+    visible: Boolean!
+    deleted: Boolean!
+    protocolIds: [Int]
+    bootCommand: String
+    autologin: String
+}
+
+input CreatePlanInput {
+    imageId: Int!
+    flavourId: Int!
+    preset: Boolean!
+}
+
+input UpdatePlanInput {
+    imageId: Int!
+    flavourId: Int!
+    preset: Boolean!
+}
+
+input Parameter {
+    name: String
+    value: String
+}
+
+input CreateFlavourInput {
+    name: String!
+    description: String
+    memory: Int!
+    cpu: Int!
+    computeId: String!
+}
+
+input UpdateFlavourInput {
+    name: String!
+    description: String
+    memory: Int!
+    cpu: Int!
+    computeId: String!
+}
+
+input Pagination {
+    offset: Int!
+    limit:  Int
+}
+
+input CreateSystemNotificationInput{
+    level: String!
+    message: String!
+}
+
+input UpdateSystemNotificationInput{
+    level: String!
+    message: String!
+}

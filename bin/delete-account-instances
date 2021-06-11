@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import requests
+import time
+import sys
+
+parser = argparse.ArgumentParser(description='Delete instances for my account')
+parser.add_argument('--delay', type=int, required=True, help='Delay to wait before deleting another instance')
+parser.add_argument('--server', required=True)
+parser.add_argument('--state', required=False)
+
+args = parser.parse_args()
+
+delay = int(args.delay)
+server = args.server
+state = args.state
+
+token = os.getenv('TOKEN')
+
+if token is None:
+    print("Please set the TOKEN env variable to a valid JWT token")
+    sys.exit()
+
+response = requests.get('%s/api/account/instances' % (server),
+                        headers={
+                            'Authorization': 'bearer %s' % (token),
+                            'Content-type': 'application/json', 
+                            'Accept': 'application/json'})
+
+if response.status_code == 200:
+    instances = response.json()['data']
+    if state is not None:
+        instances = list(filter(lambda x: x['state'] == state, instances))
+    if len(instances) == 0:
+        print("Found no instances to delete")
+        sys.exit()
+    print("Fetched %d instances. Starting to delete..." % (len(instances)))
+    for instance in instances:
+        print("Deleting instance: %s (%d)" % (instance['name'], instance['id']))
+        response = requests.delete('%s/api/account/instances/%d' % (server, instance['id']),
+                            headers={
+                                'Authorization': 'bearer %s' % (token),
+                                'Content-type': 'application/json', 
+                                'Accept': 'application/json'})    
+        if response.status_code == 200:
+            print("Successfully deleted instance. Waiting %d seconds before deleting the next instance..." % (delay))
+        else:
+            print("Could not delete instance. Got error: %s. Exiting" % (response.content))
+            sys.exit()
+        time.sleep(delay)
+
+else:
+    print("Could not fetch instances for account. Got error: %s. Exiting" % (response.content))

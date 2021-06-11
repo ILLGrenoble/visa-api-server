@@ -1,0 +1,16 @@
+{% extends "emails/templates/base.twig" %}
+{% block title %} [VISA] You have been added as a member to an instance {% endblock %}
+{% block content %}
+    <p>Hi {{ member.user.firstName }},</p>
+    <p>
+       You have been added to the compute instance <b>{{  instance.name }}</b> ({{  instance.id }}) by {{  owner.fullName }} {% if owner.affiliation is not null %} ({{ owner.affiliation.name}}) {% endif %}.
+    </p>
+    <p>
+        You can access the
+        instance at this address: <a style="color:#3777b0;text-decoration:none;"
+                                     href="{{ rootURL }}/instances/{{ instance.id }}">{{ rootURL }}/instances/{{ instance.id }}</a>
+    </p>
+    <p>Thank you for using VISA.</p>
+{% endblock %}
+
+

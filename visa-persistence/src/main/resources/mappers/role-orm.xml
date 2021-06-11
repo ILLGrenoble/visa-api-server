@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+    <named-query name="role.getById">
+        <query>SELECT i FROM Role i WHERE i.id = :id</query>
+    </named-query>
+
+    <named-query name="role.getAll">
+        <query>SELECT i FROM Role i ORDER BY i.name ASC</query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.Role">
+        <table name="role">
+            <unique-constraint name="uk_role_name">
+                <column-name>name</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="name">
+                <column name="name" nullable="false" length="100"/>
+            </basic>
+            <basic name="description">
+                <column name="description" nullable="true" length="250"/>
+            </basic>
+        </attributes>
+    </entity>
+
+</entity-mappings>

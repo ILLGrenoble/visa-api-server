@@ -1,0 +1,299 @@
+scalar Date
+
+enum InstanceState {
+    UNKNOWN
+    BUILDING
+    STARTING
+    ACTIVE
+    STOPPING
+    STOPPED
+    REBOOTING
+    UNAVAILABLE
+    ERROR
+    DELETING
+    DELETED
+}
+
+enum SystemNotificationLevel {
+    INFO
+    WARN
+    ERROR
+}
+
+type Cycle {
+    id: Int!
+    name: String!
+    startDate: String!
+    endDate: String!
+}
+
+type Instrument {
+    id: Int!
+    name: String!
+}
+
+type Role {
+    id: Int!
+    name: String!
+}
+
+type Proposal {
+    id: Int!
+    identifier: String!
+    title: String!
+    summary: String
+}
+
+type Flavour {
+    id: Int!
+    name: String!
+    memory: Int!
+    cpu: Int!
+    computeId: String!
+}
+
+type CloudFlavour {
+    id: String!
+    name: String!
+    cpus: Int!
+    disk: Int!
+    ram: Int!
+}
+
+
+type CloudImage {
+    id: String!
+    name: String!
+    size: Int!
+    createdAt: String!
+}
+
+type Image {
+    id: Int!
+    name: String!
+    version: String
+    description: String
+    icon: String
+    computeId: String!
+    cloudImage: CloudImage
+    visible: Boolean!
+    deleted: Boolean!
+    protocols: [ImageProtocol]
+    bootCommand: String
+    autologin: String
+}
+
+type Plan {
+    id: Int!
+    image: Image!
+    flavour: Flavour!
+    preset: Boolean!
+}
+
+type ImageProtocol {
+    id: Int!
+    name: String!
+    port: Int!
+    isUp: Boolean!
+}
+
+type Experiment {
+    # Experiment identifier
+    id: String!
+    instrument: Instrument!
+    cycle: Cycle!
+    proposal: Proposal!
+    startDate: String!
+    endDate: String!
+}
+
+type CloudInstanceFault {
+    message: String
+    code: Int
+    details: String
+    created: String
+}
+
+type CloudInstance {
+    id: String
+    name: String
+    address: String
+    fault: CloudInstanceFault
+    securityGroups: [String]
+}
+
+type InstanceMember {
+    id: Int!
+    user: User!
+    role: String!
+    createdAt: Date!
+}
+
+type InstanceAttribute {
+    id: Int!
+    name: String!
+    value: String!
+}
+
+type Instance {
+    id: Int!
+    name: String!
+    comments: String
+    state: InstanceState!
+    members: [InstanceMember]
+    plan: Plan
+    cloudInstance: CloudInstance
+    experiments: [Experiment]
+    protocols: [ProtocolStatus]
+    createdAt: Date!
+    lastSeenAt: Date
+    lastInteractionAt: Date
+    terminationDate: Date
+    owner: User
+    sessions: [InstanceSessionMember]
+    activeSessions: [InstanceSessionMember]
+    username: String!
+    keyboardLayout: String!
+    attributes: [InstanceAttribute]
+}
+
+type CloudLimit {
+    maxTotalRAMSize: Int!
+    totalRAMUsed: Int!
+    maxTotalInstances: Int!
+    totalInstancesUsed: Int!
+    maxTotalCores: Int!
+    totalCoresUsed: Int!
+}
+
+type ProtocolStatus {
+    protocol: ImageProtocol!
+    active: Boolean!
+}
+
+
+type Employer {
+    id: Int!
+    name: String
+    town: String
+    countryCode: String
+}
+
+type User {
+    id: String!
+    firstName: String
+    lastName: String
+    email: String
+    fullName: String
+    affiliation: Employer
+    instances: [Instance]
+    experiments: [Experiment]
+    roles: [Role]
+    lastSeenAt: Date
+    activatedAt: Date
+}
+
+type PageInfo {
+    currentPage: Int!
+    totalPages: Int!
+    count: Int!
+    offset: Int!
+    limit: Int!
+    hasNextPage: Boolean!
+    hasPrevPage: Boolean!
+}
+
+type InstanceConnection {
+    pageInfo: PageInfo
+    data: [Instance]
+}
+
+type ExperimentConnection {
+    pageInfo: PageInfo
+    data: [Experiment]
+}
+
+type FlavourConnection {
+    pageInfo: PageInfo
+    data: [Flavour]
+}
+
+type CycleConnection {
+    pageInfo: PageInfo
+    data: [Cycle]
+}
+
+type PlanConnection {
+    pageInfo: PageInfo
+    data: [Plan]
+}
+
+type ImageConnection {
+    pageInfo: PageInfo
+    data: [Image]
+}
+
+type InstanceStateCount {
+    state: InstanceState!
+    count: Int!
+}
+
+type UserConnection {
+    pageInfo: PageInfo
+    data: [User]
+}
+
+type Message {
+    message: String!
+}
+
+type Memory {
+    total: Int!
+    max: Int!
+    free: Int!
+    used: Int!
+}
+
+type InstanceSession {
+    id: Int!
+    connectionId : String!
+    instance: Instance!
+    current: Boolean!
+}
+
+type InstanceSessionMember {
+    id : Int!
+    createdAt: Date!
+    updatedAt: Date
+    lastInteractionAt: Date
+    instanceSession: InstanceSession!
+    sessionId: String!
+    user: User!
+    role: String
+    active: Boolean
+    duration: Long!
+}
+
+type InstanceSessionMemberConnection {
+    pageInfo: PageInfo
+    data: [InstanceSessionMember]
+}
+
+type NumberInstancesByFlavour {
+    id: Int!
+    name: String!
+    total: Int!
+}
+
+type NumberInstancesByImage {
+    id: Int!
+    name: String!
+    total: Int!
+}
+
+type SystemNotification{
+    id: Int!
+    level: SystemNotificationLevel!
+    message: String!
+}
+

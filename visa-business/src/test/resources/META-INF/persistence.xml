@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://java.sun.com/xml/ns/persistence"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+	http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd" version="1.0">
+
+    <!-- A JPA Persistence Unit -->
+    <persistence-unit name="visa" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <mapping-file>mappers/orm.xml</mapping-file>
+        <mapping-file>mappers/configuration-orm.xml</mapping-file>
+        <mapping-file>mappers/cycle-orm.xml</mapping-file>
+        <mapping-file>mappers/experiment-orm.xml</mapping-file>
+        <mapping-file>mappers/flavour-orm.xml</mapping-file>
+        <mapping-file>mappers/flavour-limit-orm.xml</mapping-file>
+        <mapping-file>mappers/image-orm.xml</mapping-file>
+        <mapping-file>mappers/image-protocol-orm.xml</mapping-file>
+        <mapping-file>mappers/plan-orm.xml</mapping-file>
+        <mapping-file>mappers/instrument-orm.xml</mapping-file>
+        <mapping-file>mappers/proposal-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-orm.xml</mapping-file>
+        <mapping-file>mappers/role-orm.xml</mapping-file>
+        <mapping-file>mappers/user-orm.xml</mapping-file>
+        <mapping-file>mappers/employer-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-command-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-attribute-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-session-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-session-member-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-jupyter-session-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-expiration-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-member-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-thumbnail-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-authentication-token-orm.xml</mapping-file>
+        <mapping-file>mappers/security-group-orm.xml</mapping-file>
+        <mapping-file>mappers/security-group-filter-orm.xml</mapping-file>
+        <mapping-file>mappers/system-notification-orm.xml</mapping-file>
+        <mapping-file>mappers/instrument-scientist-orm.xml</mapping-file>
+
+        <class>eu.ill.visa.core.domain.Configuration</class>
+        <class>eu.ill.visa.core.domain.Cycle</class>
+        <class>eu.ill.visa.core.domain.Experiment</class>
+        <class>eu.ill.visa.core.domain.Flavour</class>
+        <class>eu.ill.visa.core.domain.FlavourLimit</class>
+        <class>eu.ill.visa.core.domain.Image</class>
+        <class>eu.ill.visa.core.domain.ImageProtocol</class>
+        <class>eu.ill.visa.core.domain.Plan</class>
+        <class>eu.ill.visa.core.domain.Instrument</class>
+        <class>eu.ill.visa.core.domain.Proposal</class>
+        <class>eu.ill.visa.core.domain.Instance</class>
+        <class>eu.ill.visa.core.domain.InstanceAuthenticationToken</class>
+        <class>eu.ill.visa.core.domain.InstanceCommand</class>
+        <class>eu.ill.visa.core.domain.InstanceAttribute</class>
+        <class>eu.ill.visa.core.domain.InstanceMember</class>
+        <class>eu.ill.visa.core.domain.InstanceSession</class>
+        <class>eu.ill.visa.core.domain.InstanceSessionMember</class>
+        <class>eu.ill.visa.core.domain.InstanceJupyterSession</class>
+        <class>eu.ill.visa.core.domain.InstanceExpiration</class>
+        <class>eu.ill.visa.core.domain.InstanceThumbnail</class>
+        <class>eu.ill.visa.core.domain.Role</class>
+        <class>eu.ill.visa.core.domain.User</class>
+        <class>eu.ill.visa.core.domain.Employer</class>
+        <class>eu.ill.visa.core.domain.SecurityGroup</class>
+        <class>eu.ill.visa.core.domain.SecurityGroupFilter</class>
+        <class>eu.ill.visa.core.domain.SystemNotification</class>
+        <class>eu.ill.visa.core.domain.InstrumentScientist</class>
+
+        <properties>
+            <property name="hibernate.connection.url" value="jdbc:hsqldb:mem:foobar;sql.syntax_pgs=true"/>
+            <property name="hibernate.dialect" value=" org.hibernate.dialect.HSQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.archive.autodetection" value="class, hbm"/>
+            <property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver"/>
+            <property name="hibernate.enable_lazy_load_no_trans" value="true"/>
+
+        </properties>
+    </persistence-unit>
+
+</persistence>
+
+

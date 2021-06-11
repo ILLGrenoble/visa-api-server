@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+    <named-query name="user.getById">
+        <query>SELECT u FROM User u WHERE u.id = :id</query>
+    </named-query>
+
+    <named-query name="user.getAll">
+        <query>SELECT u FROM User u ORDER BY u.lastName ASC</query>
+    </named-query>
+
+    <named-query name="user.getAllActivated">
+        <query>
+            SELECT u
+            FROM User u
+            WHERE u.activatedAt IS NOT NULL
+            ORDER BY u.lastName ASC
+        </query>
+    </named-query>
+
+    <named-query name="user.countAll">
+        <query>
+            SELECT COUNT(u) FROM User u
+        </query>
+    </named-query>
+
+    <named-query name="user.countAllUsersForRole">
+        <query>
+            SELECT COUNT(u) FROM User u
+            JOIN u.roles r
+            WHERE r.name = :role
+        </query>
+    </named-query>
+
+    <named-query name="user.getAllLikeLastName">
+        <query>
+            SELECT DISTINCT(u) FROM User u WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            AND u.activatedAt IS NOT NULL
+            ORDER BY u.lastName, u.firstName ASC
+        </query>
+    </named-query>
+
+    <named-query name="user.countAllLikeLastName">
+        <query>
+            SELECT COUNT(u) FROM User u WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            AND u.activatedAt IS NOT NULL
+        </query>
+    </named-query>
+
+    <named-native-query name="user.getExperimentalTeamForInstance" result-class="eu.ill.visa.core.domain.User">
+        <query>
+            SELECT DISTINCT u.id, u.affiliation_id, u.email, u.first_name, u.last_name, u.activated_at, u.last_seen_at, u.instance_quota
+            FROM users u
+            LEFT JOIN experiment_user eu ON eu.user_id = u.id
+            WHERE eu.experiment_id IN (
+            SELECT i.experiment_id
+            FROM instance_experiment i
+            WHERE i.instance_id = ?1
+            )
+            ORDER BY u.last_name
+        </query>
+    </named-native-query>
+
+    <named-query name="user.getAllStaff">
+        <query>
+            SELECT DISTINCT u FROM User u
+            JOIN u.roles r
+            WHERE r.name = 'STAFF'
+            ORDER BY u.lastName
+        </query>
+    </named-query>
+
+    <named-query name="user.getAllSupport">
+        <query>
+            SELECT DISTINCT u FROM User u
+            JOIN u.roles r
+            WHERE r.name in ('INSTRUMENT_SCIENTIST', 'INSTRUMENT_CONTROL', 'IT_SUPPORT', 'SCIENTIFIC_COMPUTING')
+            ORDER BY u.lastName
+        </query>
+    </named-query>
+
+    <named-query name="user.countAllActivated">
+        <query>
+            SELECT count(distinct u.id)
+            FROM User u
+            WHERE u.activatedAt IS NOT NULL
+        </query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.User">
+        <table name="users"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+            </id>
+            <basic name="firstName">
+                <column name="first_name" length="100" nullable="true"/>
+            </basic>
+            <basic name="lastName">
+                <column name="last_name" length="100" nullable="false"/>
+            </basic>
+            <basic name="email">
+                <column name="email" length="100" nullable="true"/>
+            </basic>
+            <basic name="activatedAt">
+                <column name="activated_at" nullable="true"/>
+            </basic>
+            <basic name="lastSeenAt">
+                <column name="last_seen_at" nullable="true"/>
+            </basic>
+            <basic name="instanceQuota">
+                <column name="instance_quota" nullable="false"/>
+            </basic>
+            <many-to-one name="affiliation">
+                <join-column name="affiliation_id" nullable="true"/>
+                <foreign-key name="fk_employer_id"/>
+            </many-to-one>
+            <many-to-many name="roles" target-entity="eu.ill.visa.core.domain.Role">
+                <join-table name="user_role">
+                    <join-column name="user_id"/>
+                    <foreign-key name="fk_users_id"/>
+                    <inverse-join-column name="role_id"/>
+                    <inverse-foreign-key name="fk_role_id"/>
+                </join-table>
+            </many-to-many>
+            <transient name="fullName"/>
+        </attributes>
+    </entity>
+
+</entity-mappings>

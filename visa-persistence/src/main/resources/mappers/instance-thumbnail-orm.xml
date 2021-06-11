@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+
+    <named-query name="instanceThumbnail.getForInstance">
+        <query>
+            SELECT it FROM InstanceThumbnail it
+            WHERE it.instance = :instance
+        </query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.InstanceThumbnail">
+
+        <table name="instance_thumbnail">
+            <unique-constraint name="uk_instance_thumbnail_instance_id">
+                <column-name>instance_id</column-name>
+            </unique-constraint>
+        </table>
+        <convert converter="eu.ill.visa.persistence.converter.Base64Converter"  attribute-name="data"/>
+
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="data">
+                <column name="data" nullable="false" column-definition="TEXT" />
+            </basic>
+            <one-to-one name="instance" optional="false">
+                <join-column name="instance_id" nullable="false"/>
+                <foreign-key name="fk_instance_id"/>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>

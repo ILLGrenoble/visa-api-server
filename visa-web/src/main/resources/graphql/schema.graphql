@@ -1,0 +1,121 @@
+directive @isAuthorised(
+    role: String!
+) on FIELD_DEFINITION
+
+type Query {
+    # The authenticated user
+    viewer: User
+    # Get all cycles
+    cycles (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : CycleConnection!
+    # Get all plans
+    plans (pagination: Pagination!) : PlanConnection!  @isAuthorised(role: "ADMIN")
+    # Count  cycles
+    countCycles (filter: QueryFilter) : Int!
+    # Get experiments
+    experiments (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : ExperimentConnection!  @isAuthorised(role: "ADMIN")
+    # Count experiments
+    countExperiments (filter: QueryFilter) : Int!  @isAuthorised(role: "ADMIN")
+    # Get all flavours
+    flavours (pagination: Pagination!) : FlavourConnection!  @isAuthorised(role: "ADMIN")
+    # Count all flavours
+    countFlavours: Int!  @isAuthorised(role: "ADMIN")
+    # Get all images
+    images ( pagination: Pagination!) : ImageConnection!  @isAuthorised(role: "ADMIN")
+    # Count all images
+    countImages: Int!  @isAuthorised(role: "ADMIN")
+    # Get all instruments
+    instruments: [Instrument!]
+    # Get all image protcocols
+    imageProtocols: [ImageProtocol]  @isAuthorised(role: "ADMIN")
+    # Get all instances
+    instances (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : InstanceConnection!  @isAuthorised(role: "ADMIN")
+    # Count all instances
+    countInstances(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
+    # Get instance by their identifier
+    instance (id: Int!) : Instance!  @isAuthorised(role: "ADMIN")
+    # Get recently created instances
+    recentInstances(pagination: Pagination!): InstanceConnection!  @isAuthorised(role: "ADMIN")
+    # Count all instances for a given state
+    countInstancesForState(state: InstanceState!): Int!  @isAuthorised(role: "ADMIN")
+    # Count all instances for a given set of states
+    countInstancesForStates(states: [InstanceState]): [InstanceStateCount]  @isAuthorised(role: "ADMIN")
+    # Get all users
+    users (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : UserConnection!  @isAuthorised(role: "ADMIN")
+    # Count all users
+    countUsers(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
+    # Count activated users
+    countActivatedUsers: Int!  @isAuthorised(role: "ADMIN")
+    recentActiveUsers(pagination: Pagination!): UserConnection!  @isAuthorised(role: "ADMIN")
+    # Get user by their identifier
+    user(id: Int!): User!  @isAuthorised(role: "ADMIN")
+    # Find a user by their last name
+    searchForUserByLastName(lastName: String!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
+    # Get all roles
+    roles: [Role]  @isAuthorised(role: "ADMIN")
+    # Get memory information for the server instance
+    memory: Memory! @isAuthorised(role: "ADMIN")
+    # Get images from cloud provider
+    cloudImages: [CloudImage] @isAuthorised(role: "ADMIN")
+    # Get flavours from cloud prrovider
+    cloudFlavours: [CloudFlavour] @isAuthorised(role: "ADMIN")
+    # Get cloud limits
+    cloudLimits: CloudLimit @isAuthorised(role: "ADMIN")
+    # Count all sessions
+    countSessions(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
+    # Count all active sessions
+    countActiveSessions(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
+    # Get all sessions
+    sessions(filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!): InstanceSessionMemberConnection @isAuthorised(role: "ADMIN")
+    # Count instances by flavours
+    countInstancesByFlavours: [NumberInstancesByFlavour]  @isAuthorised(role: "ADMIN")
+    # Count instances by images
+    countInstancesByImages: [NumberInstancesByImage]  @isAuthorised(role: "ADMIN")
+    # Get system notification
+    systemNotifications: [SystemNotification] @isAuthorised(role: "ADMIN")
+
+}
+
+type Mutation {
+    # Create an image
+    createImage(input: CreateImageInput!): Image! @isAuthorised(role: "ADMIN")
+    # Update an image
+    updateImage(id: Int!,input: UpdateImageInput!): Image! @isAuthorised(role: "ADMIN")
+    # Delete an image
+    deleteImage(id: Int!) : Image! @isAuthorised(role: "ADMIN")
+    # Create a flavour
+    createFlavour(input: CreateFlavourInput!): Flavour!  @isAuthorised(role: "ADMIN")
+    # Update an flavour
+    updateFlavour(id: Int!,input: UpdateFlavourInput!): Flavour! @isAuthorised(role: "ADMIN")
+    # Delete a flavour
+    deleteFlavour(id: Int!) : Flavour! @isAuthorised(role: "ADMIN")
+    # Create a plan
+    createPlan(input: CreatePlanInput): Plan! @isAuthorised(role: "ADMIN")
+    # Update a plan
+    updatePlan(id: Int!,input: UpdatePlanInput!): Plan! @isAuthorised(role: "ADMIN")
+    # Delete a plan
+    deletePlan(id: Int!) : Plan! @isAuthorised(role: "ADMIN")
+    # Reboot an instance
+    rebootInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
+    # Start an instance
+    startInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
+    # Shutdown an instance
+    shutdownInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
+    # Delete an instance
+    deleteInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
+    # Create a role
+    createRole(input: CreateRoleInput!): Role! @isAuthorised(role: "ADMIN")
+    # Delete a role
+    deleteRole(id: Int!): Role! @isAuthorised(role: "ADMIN")
+    # Create a system notification
+    createSystemNotification(input: CreateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
+    # Update a system notification
+    updateSystemNotification(id: Int!,input: UpdateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
+    # Delete a system notification
+    deleteSystemNotification(id: Int!): SystemNotification! @isAuthorised(role: "ADMIN")
+
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+}

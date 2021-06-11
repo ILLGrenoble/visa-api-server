@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "file": "swagger-ui-standalone-preset.js",
+  "sources": [
+    "webpack:///swagger-ui-standalone-preset.js"
+  ],
+  "mappings": "AAAA;;;;;AA4QA;AAmvGA;AAyjGA;;;;;;AA2EA;AAkvFA;AAu+CA;AAo+CA;AAgrCA;AAuyEA",
+  "sourceRoot": ""
+}

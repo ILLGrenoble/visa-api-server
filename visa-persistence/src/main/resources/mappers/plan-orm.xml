@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+    <named-query name="plan.getById">
+        <query>
+            SELECT p FROM Plan p
+            WHERE p.id = :id
+            AND p.image.deleted = false
+            AND p.flavour.deleted = false
+        </query>
+    </named-query>
+
+    <named-query name="plan.getAll">
+        <query>
+            SELECT p FROM Plan p
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+            AND p.image.visible = true
+        </query>
+    </named-query>
+
+    <named-query name="plan.getAllForAdmin">
+        <query>
+            SELECT p FROM Plan p
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+        </query>
+    </named-query>
+
+    <named-query name="plan.countAllForAdmin">
+        <query>
+            SELECT COUNT(p) FROM Plan p
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+        </query>
+    </named-query>
+
+    <named-query name="plan.getAllForInstrumentIds">
+        <query>
+            SELECT DISTINCT p FROM Plan p
+            LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+            AND p.image.visible = true
+            AND (fl.objectId IN :instrumentIds OR fl.objectId IS NULL)
+        </query>
+    </named-query>
+
+    <named-query name="plan.getAllForExperimentIds">
+        <query>
+            SELECT DISTINCT p FROM Plan p
+            LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
+            LEFT OUTER JOIN Experiment e ON e.instrument.id = fl.objectId
+            LEFT OUTER JOIN Cycle c ON c.id = e.cycle.id
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+            AND p.image.visible = true
+            AND (e.id IN :experimentIds OR fl.objectId IS NULL)
+        </query>
+    </named-query>
+
+    <named-query name="plan.getAllForUserAndExperimentIds">
+        <query>
+            SELECT DISTINCT p FROM Plan p
+            LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
+            LEFT OUTER JOIN Experiment e ON e.instrument.id = fl.objectId
+            LEFT OUTER JOIN InstrumentScientist ir on ir.instrument.id = fl.objectId
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+            AND p.image.visible = true
+            AND (ir.user = :user OR e.id IN :experimentIds OR fl.objectId IS NULL)
+        </query>
+    </named-query>
+
+    <named-query name="plan.getAllForAllInstruments">
+        <query>
+            SELECT DISTINCT p FROM Plan p
+            LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+            AND p.image.visible = true
+            AND fl.objectId IS NULL
+        </query>
+    </named-query>
+
+    <named-query name="plan.getAllForUserAndAllInstruments">
+        <query>
+            SELECT DISTINCT p FROM Plan p
+            LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
+            LEFT OUTER JOIN InstrumentScientist ir on ir.instrument.id = fl.objectId
+            WHERE p.image.deleted = false
+            AND p.flavour.deleted = false
+            AND p.image.visible = true
+            AND (ir.user = :user OR fl.objectId IS NULL)
+        </query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.Plan">
+        <table name="plan"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="preset">
+                <column name="preset" nullable="false" />
+            </basic>
+            <many-to-one name="flavour">
+                <join-column name="flavour_id"/>
+                <foreign-key name="fk_flavour_id"/>
+            </many-to-one>
+            <many-to-one name="image">
+                <join-column name="image_id"/>
+                <foreign-key name="fk_image_id"/>
+            </many-to-one>
+        </attributes>
+
+    </entity>
+
+</entity-mappings>

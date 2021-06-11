@@ -1,0 +1,24 @@
+{% extends "emails/templates/base.twig" %}
+{% block title %} [VISA] Your instance has been deleted {% endblock %}
+{% block content %}
+    <p>Hi {{ user.firstName }},</p>
+    <p>
+        The <a href="{{  rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
+        compute instance <b>{{ instance.name }}</b> that you created on
+        <b>{{ instance.createdAt | date("dd MMMM yyyy") }}</b>
+        {% if reachedMaxLifetime %}
+            for analysing your scientific data has been deleted due to reaching its maximum
+            lifetime.
+        {% else %}
+            for analysing your scientific data has been deleted due to inactivity.
+        {% endif %}
+    </p>
+    <p>
+        Instances {{ isStaff ? 'created by staff' : '' }} have a maximum lifetime of {{ maxLifetimeDurationDays }} days, after which the
+        instance will be automatically deleted to free up resources on
+        our infrastructure. Similarly, if the instance has not had any active connections for {{ maxInactivityDurationDays }} days it will be automatically
+        deleted.</p>
+    <p>Thank you for using VISA.</p>
+{% endblock %}
+
+

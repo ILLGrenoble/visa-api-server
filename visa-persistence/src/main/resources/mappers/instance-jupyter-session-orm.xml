@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+    <named-query name="instanceJupyterSession.getAll">
+        <query>SELECT i FROM InstanceJupyterSession i WHERE i.active = true ORDER BY i.id DESC</query>
+    </named-query>
+
+    <named-query name="instanceJupyterSession.getAllByInstance">
+        <query>
+            SELECT i
+            FROM InstanceJupyterSession i
+            WHERE i.instance = :instance
+            AND i.active = true
+            ORDER BY i.id DESC
+        </query>
+    </named-query>
+
+    <named-query name="instanceJupyterSession.getByInstanceKernelSession">
+        <query>
+            SELECT i
+            FROM InstanceJupyterSession i
+            WHERE i.instance = :instance
+            AND i.kernelId = :kernelId
+            AND i.sessionId = :sessionId
+            AND i.active = true
+            ORDER BY i.id DESC
+        </query>
+    </named-query>
+
+
+    <entity class="eu.ill.visa.core.domain.InstanceJupyterSession">
+        <table name="instance_jupyter_session"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="kernelId">
+                <column name="kernel_id" nullable="false" length="150"/>
+            </basic>
+            <basic name="sessionId">
+                <column name="session_id" nullable="false" length="150"/>
+            </basic>
+            <basic name="active">
+                <column name="active" nullable="false" default="false"/>
+            </basic>
+            <many-to-one name="instance" optional="false">
+                <join-column name="instance_id" nullable="false"/>
+                <foreign-key name="fk_instance_id"/>
+            </many-to-one>
+            <many-to-one name="user" optional="false">
+                <join-column name="user_id" nullable="false"/>
+                <foreign-key name="fk_users_id" />
+            </many-to-one>
+        </attributes>
+
+    </entity>
+
+</entity-mappings>

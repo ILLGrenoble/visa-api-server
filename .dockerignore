@@ -1,0 +1,5 @@
+*.md
+*.env
+.editorconfig
+.gitignore
+.git

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
+                 version="2.1">
+
+
+    <named-query name="instanceSessionMember.getAll">
+        <query>
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.active = true
+        </query>
+    </named-query>
+
+    <named-query name="instanceSessionMember.getByInstanceSessionAndSessionId">
+        <query>
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.instanceSession = :instanceSession
+            AND i.sessionId = :sessionId
+            AND i.active = true
+        </query>
+    </named-query>
+
+    <named-query name="instanceSessionMember.getAllForInstanceSession">
+        <query>
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.instanceSession = :instanceSession
+            AND i.active = true
+        </query>
+    </named-query>
+
+    <named-query name="instanceSessionMember.getAllForInstance">
+        <query>
+            SELECT i FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            WHERE instanceSession.instance = :instance
+            AND i.active = true
+        </query>
+    </named-query>
+
+    <named-query name="instanceSessionMember.getAllHistoryForInstance">
+        <query>
+            SELECT i FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            WHERE instanceSession.instance = :instance
+            ORDER BY i.id DESC
+        </query>
+    </named-query>
+
+    <named-query name="instanceSessionMember.getBySessionId">
+        <query>
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.sessionId = :sessionId
+            AND i.active = true
+        </query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.InstanceSessionMember">
+        <table name="instance_session_member"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY" />
+            </id>
+            <basic name="sessionId">
+                <column name="session_id" nullable="false" length="150"/>
+            </basic>
+            <basic name="role">
+                <column name="role" nullable="false" length="150"/>
+            </basic>
+            <basic name="active">
+                <column name="active" nullable="false"/>
+            </basic>
+            <basic name="lastSeenAt">
+                <column name="last_seen_at" nullable="true"/>
+            </basic>
+            <basic name="lastInteractionAt">
+                <column name="last_interaction_at" nullable="true"/>
+            </basic>
+            <many-to-one name="instanceSession" optional="false">
+                <join-column name="instance_session_id" nullable="false"/>
+                <foreign-key name="fk_instance_session_id"/>
+            </many-to-one>
+            <many-to-one name="user" optional="false">
+                <join-column name="user_id" nullable="false"/>
+                <foreign-key name="fk_users_id"/>
+            </many-to-one>
+        </attributes>
+
+    </entity>
+
+</entity-mappings>
