@@ -1,4 +1,4 @@
-2.0.0-SNAPSHOT
+2.0.0 15/06/2021
 ==============
  * VISA platform open sourced and moved to GitHub
  * Updated docker build
