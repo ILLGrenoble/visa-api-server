@@ -114,10 +114,10 @@ vdi:
   signature:
     privateKeyPath: ${VISA_VDI_SIGNATURE_PRIVATE_KEY_PATH}
     publicKeyPath: ${VISA_VDI_SIGNATURE_PUBLIC_KEY_PATH}
-  protocol: ${VSI_VDI_GUACD_PARAMETER_PROTOCOL:-'rdp'}
+  protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:-'rdp'}
   guacd:
-    ignore-cert: ${VSI_VDI_GUACD_PARAMETER_IGNORE_CERT:-true}
-    port: ${VSI_VDI_GUACD_PARAMETER_PORT:-3389}
+    ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:-true}
+    port: ${VISA_VDI_GUACD_PARAMETER_PORT:-3389}
 
 scheduler:
   enabled: ${VISA_SCHEDULER_ENABLED:-true}
