@@ -18,6 +18,11 @@ public class ImageProtocolService {
     @Inject
     public ImageProtocolService(ImageProtocolRepository repository) {
         this.repository = repository;
+
+        // Initialise data if empty
+        if (this.getAll().size() == 0) {
+            this.repository.initialise();
+        }
     }
 
     public List<ImageProtocol> getAll() {

@@ -13,10 +13,15 @@ import java.util.List;
 @Singleton
 public class ImageProtocolRepository extends AbstractRepository<ImageProtocol> {
 
+    private static final String FIXTURES_FILE = "fixtures/protocols.sql";
 
     @Inject
     ImageProtocolRepository(final Provider<EntityManager> entityManager) {
         super(entityManager);
+    }
+
+    public void initialise() {
+        this.initialiseData(FIXTURES_FILE);
     }
 
     public List<ImageProtocol> getAll() {

@@ -18,6 +18,11 @@ public class RoleService {
     @Inject
     public RoleService(RoleRepository repository) {
         this.repository = repository;
+
+        // Initialise data if empty
+        if (this.getAll().size() == 0) {
+            this.repository.initialise();
+        }
     }
 
     public List<Role> getAll() {

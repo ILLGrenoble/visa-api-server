@@ -13,10 +13,15 @@ import java.util.List;
 @Singleton
 public class RoleRepository extends AbstractRepository<Role> {
 
+    private static final String FIXTURES_FILE = "fixtures/roles.sql";
 
     @Inject
     RoleRepository(final Provider<EntityManager> entityManager) {
         super(entityManager);
+    }
+
+    public void initialise() {
+        this.initialiseData(FIXTURES_FILE);
     }
 
     public List<Role> getAll() {

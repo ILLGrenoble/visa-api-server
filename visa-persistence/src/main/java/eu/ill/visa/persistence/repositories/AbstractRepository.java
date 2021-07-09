@@ -7,9 +7,15 @@ import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.Parameter;
 import eu.ill.visa.core.domain.QueryFilter;
+import org.hibernate.Session;
 
 import javax.persistence.EntityManager;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Statement;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNullElseGet;
 
@@ -71,5 +77,27 @@ abstract class AbstractRepository<T> {
         return query.getResultList();
     }
 
+    public void initialiseData(String filename) {
+        final String sql = getFileAsString(filename);
 
+        EntityManager em = this.getEntityManager();
+        em.clear();
+        Session session = em.unwrap(Session.class);
+        session.doWork(connection -> {
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate(sql);
+            } catch (Exception exception) {
+                System.out.println(exception.getMessage());
+            }
+        });
+    }
+
+    private String getFileAsString(String fileName) {
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(fileName);
+        if (is != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
+        return null;
+    }
 }
