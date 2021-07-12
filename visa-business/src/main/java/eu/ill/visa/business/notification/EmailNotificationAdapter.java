@@ -116,7 +116,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = "[VISA] Your instance has been deleted";
-                final NotificationRenderer renderer = new InstanceDeletedEmailRenderer(instance, instanceExpiration, user, emailTemplatesDirectory,rootURL, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
+                final NotificationRenderer renderer = new InstanceDeletedEmailRenderer(instance, instanceExpiration, user, emailTemplatesDirectory, rootURL, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
                 final Email email = buildEmail(user.getEmail(), subject, renderer.render());
                 mailer.sendMail(email);
             } else {
