@@ -81,7 +81,7 @@ public class InstanceExpirationService {
             Instance instance = instanceExpiration.getInstance();
 
             // Create action to delete the instance (if not already deleted)
-            if (instance.getDeleted()) {
+            if (!instance.getDeleted()) {
                 logger.info("Deleting expired instance {}", instance.getId());
                 InstanceState previousState = instance.getState();
 
