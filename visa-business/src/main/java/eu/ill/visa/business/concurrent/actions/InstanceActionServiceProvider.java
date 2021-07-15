@@ -20,6 +20,7 @@ public class InstanceActionServiceProvider {
     private InstanceCommandService instanceCommandService;
     private SecurityGroupService securityGroupService;
     private InstrumentService instrumentService;
+    private SignatureService signatureService;
 
     private CloudClient cloudClient;
 
@@ -31,7 +32,8 @@ public class InstanceActionServiceProvider {
                                          SecurityGroupService securityGroupService,
                                          InstrumentService instrumentService,
                                          CloudClient cloudClient,
-                                         NotificationService notificationService) {
+                                         NotificationService notificationService,
+                                         SignatureService signatureService) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceCommandService = instanceCommandService;
@@ -39,6 +41,7 @@ public class InstanceActionServiceProvider {
         this.instrumentService = instrumentService;
         this.cloudClient = cloudClient;
         this.notificationService = notificationService;
+        this.signatureService = signatureService;
     }
 
     /**
@@ -82,5 +85,9 @@ public class InstanceActionServiceProvider {
 
     public NotificationService getNotificationService() {
         return notificationService;
+    }
+
+    public SignatureService getSignatureService() {
+        return signatureService;
     }
 }

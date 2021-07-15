@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import eu.ill.visa.business.http.SecurityGroupServiceClient;
 import eu.ill.visa.business.services.NotificationFactory;
 import eu.ill.visa.business.services.NotificationService;
+import eu.ill.visa.business.services.SignatureService;
 
 public class BusinessModule extends AbstractModule {
 
@@ -28,4 +29,17 @@ public class BusinessModule extends AbstractModule {
         return new SecurityGroupServiceClient(configuration.getSecurityGroupServiceClientConfiguration());
     }
 
+
+    @Provides
+    public SignatureConfiguration providesSignatureConfiguration(final BusinessConfiguration configuration) {
+        return configuration.getSignatureConfiguration();
+    }
+
+    @Provides
+    public SignatureService providesSignatureService(final SignatureConfiguration configuration) {
+        return new SignatureService(
+            configuration.getPrivateKeyPath(),
+            configuration.getPublicKeyPath()
+        );
+    }
 }

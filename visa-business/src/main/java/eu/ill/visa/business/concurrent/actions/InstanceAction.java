@@ -44,6 +44,10 @@ public abstract class InstanceAction {
         return this.serviceProvider.getInstrumentService();
     }
 
+    public SignatureService getSignatureService() {
+        return this.serviceProvider.getSignatureService();
+    }
+
     public InstanceCommand getCommand() {
         return command;
     }

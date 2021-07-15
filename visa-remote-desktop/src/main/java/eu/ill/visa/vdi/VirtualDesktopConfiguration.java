@@ -1,7 +1,6 @@
 package eu.ill.visa.vdi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.ill.visa.vdi.configuration.SignatureConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -49,10 +48,6 @@ public class VirtualDesktopConfiguration {
 
     @NotNull
     private int pingInterval;
-
-    @NotNull
-    @Valid
-    private SignatureConfiguration signatureConfiguration;
 
     @NotNull
     @Valid
@@ -144,11 +139,6 @@ public class VirtualDesktopConfiguration {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    @JsonProperty("signature")
-    public SignatureConfiguration getSignatureConfiguration() {
-        return signatureConfiguration;
     }
 
     public int getPingTimeout() {

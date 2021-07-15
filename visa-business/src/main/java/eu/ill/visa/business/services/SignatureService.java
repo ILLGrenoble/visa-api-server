@@ -1,5 +1,6 @@
-package eu.ill.visa.vdi.services;
+package eu.ill.visa.business.services;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -10,10 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import static java.lang.String.format;
@@ -30,15 +32,26 @@ public class SignatureService {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private String privateKey;
-
-    private String publicKey;
+    private final String privateKeyPath;
+    private final String publicKeyPath;
 
     @Inject
     public SignatureService(final String privateKeyPath,
                             final String publicKeyPath) {
-        this.privateKey = privateKeyPath;
-        this.publicKey = publicKeyPath;
+        this.privateKeyPath = privateKeyPath;
+        this.publicKeyPath = publicKeyPath;
+
+        if (Strings.isNullOrEmpty(privateKeyPath)) {
+            logger.info("VISA not configured to generated signed VISA PAM token for remote desktop access");
+        } else {
+            logger.info("VISA configured to generated signed VISA PAM token for remote desktop access");
+        }
+
+        if (Strings.isNullOrEmpty(publicKeyPath)) {
+            logger.info("VISA not configured to send VISA PAM public key to instances");
+        } else {
+            logger.info("VISA configured to send VISA PAM public key to instances");
+        }
     }
 
     public String createSignature(String username) {
@@ -63,29 +76,6 @@ public class SignatureService {
         }
     }
 
-    /**
-     * Verify a signature a verify the payload has not been tampered with
-     */
-    public boolean verify(final String payload, final String signature) {
-        final byte[] decodedSignature = decodeBase64(signature);
-        try {
-            return verifySignature(payload, decodedSignature);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException |
-            IOException | InvalidKeyException | SignatureException exception) {
-            logger.error("Could not verify signature: {}", exception.getMessage());
-            return false;
-        }
-    }
-
-    private boolean verifySignature(final String payload, final byte[] signature) throws InvalidKeySpecException,
-        NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException {
-        final Signature signatureInstance = createSignatureInstance();
-        final PublicKey key = createPublicKey();
-        signatureInstance.initVerify(key);
-        signatureInstance.update(payload.getBytes());
-        return signatureInstance.verify(signature);
-    }
-
     private byte[] createSignature(final byte[] payload) throws InvalidKeySpecException,
         NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException {
 
@@ -101,11 +91,6 @@ public class SignatureService {
     private String encodeBase64(final byte[] payload) {
         Base64.Encoder encoder = Base64.getEncoder();
         return encoder.encodeToString(payload);
-    }
-
-    private byte[] decodeBase64(final String payload) {
-        Base64.Decoder decoder = Base64.getDecoder();
-        return decoder.decode(payload);
     }
 
     private KeyFactory createKeyFactoryInstance() throws NoSuchAlgorithmException {
@@ -124,17 +109,23 @@ public class SignatureService {
     }
 
     private PrivateKey createPrivateKey() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-        final byte[] bytes = readKey(privateKey);
+        final byte[] bytes = readKey(privateKeyPath);
         final PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(bytes);
         final KeyFactory keyFactory = createKeyFactoryInstance();
         return keyFactory.generatePrivate(encodedKeySpec);
     }
 
-    private PublicKey createPublicKey() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-        final byte[] bytes = readKey(publicKey);
-        final X509EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(bytes);
-        final KeyFactory keyFactory = createKeyFactoryInstance();
-        return keyFactory.generatePublic(encodedKeySpec);
+    public String readPublicKey()  {
+        if (!Strings.isNullOrEmpty(publicKeyPath)) {
+            try {
+                String publicKey = Files.readString(Paths.get(publicKeyPath));
+                return publicKey;
+
+            } catch (IOException e) {
+                logger.error("Could not read public key from {}: {}", publicKeyPath, e.getMessage());
+            }
+        }
+        return null;
     }
 
 }

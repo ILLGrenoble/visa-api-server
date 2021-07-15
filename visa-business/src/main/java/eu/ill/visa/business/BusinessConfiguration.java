@@ -15,6 +15,10 @@ public class BusinessConfiguration {
 
     private InstanceConfiguration instanceConfiguration;
 
+    @NotNull
+    @Valid
+    private SignatureConfiguration signatureConfiguration;
+
     private SecurityGroupServiceClientConfiguration securityGroupServiceClientConfiguration;
 
     private String rootURL;
@@ -43,6 +47,11 @@ public class BusinessConfiguration {
 
     public void setNotificationConfiguration(List<NotificationConfiguration> notificationConfiguration) {
         this.notificationConfiguration = notificationConfiguration;
+    }
+
+    @JsonProperty("signature")
+    public SignatureConfiguration getSignatureConfiguration() {
+        return signatureConfiguration;
     }
 
     @JsonProperty("instance")

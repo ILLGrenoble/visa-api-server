@@ -9,9 +9,7 @@ import com.corundumstudio.socketio.store.StoreFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import eu.ill.visa.vdi.configuration.SignatureConfiguration;
 import eu.ill.visa.vdi.exceptions.DefaultExceptionListener;
-import eu.ill.visa.vdi.services.SignatureService;
 import org.redisson.Redisson;
 import org.redisson.config.Config;
 import org.slf4j.Logger;
@@ -24,19 +22,6 @@ public class VirtualDesktopModule extends AbstractModule {
     @Override
     protected void configure() {
 
-    }
-
-    @Provides
-    public SignatureConfiguration providesSignatureConfiguration(final VirtualDesktopConfiguration configuration) {
-        return configuration.getSignatureConfiguration();
-    }
-
-    @Provides
-    public SignatureService providesSignatureService(final SignatureConfiguration configuration) {
-        return new SignatureService(
-            configuration.getPrivateKeyPath(),
-            configuration.getPublicKeyPath()
-        );
     }
 
     @Singleton

@@ -3,6 +3,7 @@ package eu.ill.visa.vdi.services;
 import com.google.inject.Inject;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.InstanceSessionService;
+import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.ImageProtocol;
@@ -32,7 +33,7 @@ public class GuacamoleSocketService {
     private final static Logger                      logger = LoggerFactory.getLogger(GuacamoleSocketService.class);
     private final        InstanceSessionService      instanceSessionService;
     private final        CloudClient                 cloudClient;
-    private final        SignatureService            signatureService;
+    private final SignatureService signatureService;
     private final        ImageProtocolService        imageProtocolService;
     private final        VirtualDesktopConfiguration configuration;
 

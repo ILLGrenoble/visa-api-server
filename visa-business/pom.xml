@@ -17,6 +17,7 @@
         <simple-java-mail.version>6.0.3</simple-java-mail.version>
         <commons-vfs2.version>2.2</commons-vfs2.version>
         <pebble.version>3.1.2</pebble.version>
+        <bouncycastle.version>1.63</bouncycastle.version>
     </properties>
 
     <dependencies>
@@ -50,6 +51,16 @@
             <groupId>io.pebbletemplates</groupId>
             <artifactId>pebble</artifactId>
             <version>${pebble.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
         </dependency>
 
     </dependencies>

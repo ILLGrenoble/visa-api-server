@@ -56,6 +56,11 @@ public class CreateInstanceAction extends InstanceAction {
             metadata.put("instruments", String.join(",", instrumentNames));
             metadata.put("proposals", String.join(",", proposals));
 
+            String pamPublicKey = this.getSignatureService().readPublicKey();
+            if (pamPublicKey != null) {
+                metadata.put("pamPublicKey", pamPublicKey);
+            }
+
             CloudInstance cloudInstance = cloudClient.createInstance(
                 cloudClient.getServerNamePrefix() + "-" + instance.getId(),
                 image.getComputeId(),

@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.configuration;
+package eu.ill.visa.business;
 
 import javax.validation.constraints.NotNull;
 
