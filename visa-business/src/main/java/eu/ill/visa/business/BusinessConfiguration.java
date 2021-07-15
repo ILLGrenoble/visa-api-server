@@ -15,8 +15,6 @@ public class BusinessConfiguration {
 
     private InstanceConfiguration instanceConfiguration;
 
-    @NotNull
-    @Valid
     private SignatureConfiguration signatureConfiguration;
 
     private SecurityGroupServiceClientConfiguration securityGroupServiceClientConfiguration;
@@ -27,8 +25,9 @@ public class BusinessConfiguration {
 
     }
 
-    public BusinessConfiguration(InstanceConfiguration instanceConfiguration) {
-        this.instanceConfiguration = instanceConfiguration;
+    // Constructor used for tests
+    public BusinessConfiguration(SignatureConfiguration signatureConfiguration) {
+        this.signatureConfiguration = signatureConfiguration;
     }
 
     @JsonProperty
@@ -50,6 +49,8 @@ public class BusinessConfiguration {
     }
 
     @JsonProperty("signature")
+    @NotNull
+    @Valid
     public SignatureConfiguration getSignatureConfiguration() {
         return signatureConfiguration;
     }

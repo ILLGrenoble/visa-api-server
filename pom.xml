@@ -32,7 +32,7 @@
         <junit.version>5.5.2</junit.version>
         <junit-platform-launcher.version>1.5.2</junit-platform-launcher.version>
         <guava.version>21.0</guava.version>
-        <guice.version>4.1.0</guice.version>
+        <guice.version>4.2.3</guice.version>
         <commons-io.version>2.4</commons-io.version>
         <commons-lang.version>3.9</commons-lang.version>
         <joda.version>2.9.9</joda.version>

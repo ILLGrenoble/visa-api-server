@@ -5,6 +5,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import eu.ill.visa.business.BusinessConfiguration;
 import eu.ill.visa.business.BusinessModule;
+import eu.ill.visa.business.SignatureConfiguration;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.CloudModule;
 import eu.ill.visa.persistence.PersistenceModule;
@@ -43,7 +44,7 @@ public class BusinessExtension implements TestInstancePostProcessor, BeforeEachC
             @Override
             protected void configure() {
 
-                bind(BusinessConfiguration.class).toInstance(new BusinessConfiguration());
+                bind(BusinessConfiguration.class).toInstance(new BusinessConfiguration(new SignatureConfiguration()));
                 bind(CloudConfiguration.class).toInstance(new CloudConfiguration("null"));
                 install(new CloudModule());
                 install(new BusinessModule());

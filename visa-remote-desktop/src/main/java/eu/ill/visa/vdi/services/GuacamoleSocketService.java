@@ -33,7 +33,7 @@ public class GuacamoleSocketService {
     private final static Logger                      logger = LoggerFactory.getLogger(GuacamoleSocketService.class);
     private final        InstanceSessionService      instanceSessionService;
     private final        CloudClient                 cloudClient;
-    private final SignatureService signatureService;
+    private final        SignatureService            signatureService;
     private final        ImageProtocolService        imageProtocolService;
     private final        VirtualDesktopConfiguration configuration;
 
