@@ -1,3 +1,11 @@
+2.0.1 16/07/2021
+==============
+ * Upgrade to guice 4.2.3: better error handling on startup
+ * Send VISA PAM public key as metadata to instance
+ * Fix email template env vars
+ * Fix instance expiration bug: check for deleted instances correctly
+ * Fix environment variable names
+
 2.0.0 15/06/2021
 ==============
  * VISA platform open sourced and moved to GitHub
@@ -13,7 +21,7 @@
  * Convert many database booleans to timestamps (eg instance deleted_at)
  * Add summary to proposal
  * Remove dependency on Cycle in business logic (eg instrument control support user)  
- * Add start and end date to Experiment
+ * Add start and end date to ExperimentF
  * Use Security Group Service to determine instance security groups (logic removed from API Server)
  * Make user IDs strings rather than longs
 
