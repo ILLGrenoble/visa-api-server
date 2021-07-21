@@ -31,6 +31,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
     private final MutationResolver mutationResolver;
     private final InstanceResolver instanceResolver;
     private final InstanceSessionMemberResolver instanceSessionMemberResolver;
+    private final InstanceJupyterSessionResolver instanceJupyterSessionResolver;
     private final ImageResolver imageResolver;
     private final CloudImageResolver cloudImageResolver;
     private final ImageProtocolResolver imageProtocolResolver;
@@ -44,6 +45,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                              final MutationResolver mutationResolver,
                              final InstanceResolver instanceResolver,
                              final InstanceSessionMemberResolver instanceSessionMemberResolver,
+                             final InstanceJupyterSessionResolver instanceJupyterSessionResolver,
                              final UserResolver userResolver,
                              final ImageResolver imageResolver,
                              final CloudImageResolver cloudImageResolver,
@@ -55,6 +57,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         this.mutationResolver = mutationResolver;
         this.instanceResolver = instanceResolver;
         this.instanceSessionMemberResolver = instanceSessionMemberResolver;
+        this.instanceJupyterSessionResolver = instanceJupyterSessionResolver;
         this.userResolver = userResolver;
         this.imageResolver = imageResolver;
         this.cloudImageResolver = cloudImageResolver;
@@ -103,6 +106,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                 mutationResolver,
                 instanceResolver,
                 instanceSessionMemberResolver,
+                instanceJupyterSessionResolver,
                 userResolver,
                 imageResolver,
                 cloudImageResolver,

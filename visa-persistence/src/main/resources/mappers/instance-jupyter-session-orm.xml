@@ -8,6 +8,14 @@
         <query>SELECT i FROM InstanceJupyterSession i WHERE i.active = true ORDER BY i.id DESC</query>
     </named-query>
 
+    <named-query name="instanceJupyterSession.countAllInstances">
+        <query>
+            SELECT count(distinct i.instance)
+            FROM InstanceJupyterSession i
+            WHERE i.active = true
+        </query>
+    </named-query>
+
     <named-query name="instanceJupyterSession.getAllByInstance">
         <query>
             SELECT i

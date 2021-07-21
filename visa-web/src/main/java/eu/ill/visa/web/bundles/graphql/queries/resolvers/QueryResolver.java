@@ -48,6 +48,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final Mapper                       mapper;
     private final PlanService                  planService;
     private final InstanceSessionMemberService instanceSessionMemberService;
+    private final InstanceJupyterSessionService instanceJupyterSessionService;
     private final SystemNotificationService systemNotificationService;
 
 
@@ -66,6 +67,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         final CloudClient cloudClient,
         final Mapper mapper,
         final InstanceSessionMemberService instanceSessionMemberService,
+        final InstanceJupyterSessionService instanceJupyterSessionService,
         final SystemNotificationService systemNotificationService) {
         this.instrumentService = instrumentService;
         this.cycleService = cycleService;
@@ -80,6 +82,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.cloudClient = cloudClient;
         this.mapper = mapper;
         this.instanceSessionMemberService = instanceSessionMemberService;
+        this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.systemNotificationService = systemNotificationService;
     }
 
@@ -566,6 +569,39 @@ public class QueryResolver implements GraphQLQueryResolver {
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
+    }
+
+
+    /**
+     * Get a list of jupyter sessions
+     *
+     * @param filter     the given query filter
+     * @param orderBy    the ordering of results
+     * @param pagination the pagination (limit and offset)
+     * @return a list of jupyter sessions
+     * @throws DataFetchingException thrown if there was an error fetching the results
+     */
+    public Connection<InstanceJupyterSession> jupyterSessions(final QueryFilter filter, final OrderBy orderBy, Pagination pagination) throws DataFetchingException {
+        try {
+            final List<InstanceJupyterSession> results = instanceJupyterSessionService.getAll(
+                requireNonNullElseGet(filter, QueryFilter::new),
+                requireNonNullElseGet(orderBy, () -> new OrderBy("id", true)), pagination
+            );
+            final PageInfo pageInfo = new PageInfo(instanceJupyterSessionService.countAll(filter), pagination.getLimit(), pagination.getOffset());
+            return new Connection<>(pageInfo, results);
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Count all active jupyter sessions
+     *
+     * @return a count of active Jupyter sessions
+     * @throws DataFetchingException thrown if there was an error fetching the result
+     */
+    public Long countJupyterSessions() throws DataFetchingException {
+        return instanceJupyterSessionService.countAllInstances();
     }
 
     public List<NumberInstancesByFlavour> countInstancesByFlavours() throws DataFetchingException {

@@ -3,12 +3,15 @@ package eu.ill.visa.persistence.repositories;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceJupyterSession;
+import eu.ill.preql.FilterQuery;
+import eu.ill.visa.core.domain.*;
+import eu.ill.visa.persistence.providers.InstanceJupyterSessionFilterProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
+
+import static java.util.Objects.requireNonNullElseGet;
 
 @Singleton
 public class InstanceJupyterSessionRepository extends AbstractRepository<InstanceJupyterSession> {
@@ -47,5 +50,25 @@ public class InstanceJupyterSessionRepository extends AbstractRepository<Instanc
         } else {
             merge(instanceJupyterSession);
         }
+    }
+
+
+    public List<InstanceJupyterSession> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
+        final InstanceJupyterSessionFilterProvider provider = new InstanceJupyterSessionFilterProvider(getEntityManager());
+        return super.getAll(provider, filter, orderBy, pagination);
+    }
+
+    public Long countAll(QueryFilter filter) {
+        final InstanceJupyterSessionFilterProvider provider = new InstanceJupyterSessionFilterProvider(getEntityManager());
+        final FilterQuery<InstanceJupyterSession> query = createFilterQuery(provider, requireNonNullElseGet(filter, QueryFilter::new), null, null);
+        query.addExpression((criteriaBuilder, root) ->
+            criteriaBuilder.equal(root.get("active"), true)
+        );
+        return query.count();
+    }
+
+    public Long countAllInstances() {
+        final TypedQuery<Long> query = getEntityManager().createNamedQuery("instanceJupyterSession.countAllInstances", Long.class);
+        return query.getSingleResult();
     }
 }

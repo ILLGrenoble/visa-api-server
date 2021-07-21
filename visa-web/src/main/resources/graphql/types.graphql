@@ -279,6 +279,23 @@ type InstanceSessionMemberConnection {
     data: [InstanceSessionMember]
 }
 
+type InstanceJupyterSession {
+    id : Int!
+    createdAt: Date!
+    updatedAt: Date
+    instance: Instance!
+    sessionId: String!
+    kernelId: String!
+    user: User!
+    active: Boolean
+    duration: Long!
+}
+
+type InstanceJupyterSessionConnection {
+    pageInfo: PageInfo
+    data: [InstanceJupyterSession]
+}
+
 type NumberInstancesByFlavour {
     id: Int!
     name: String!

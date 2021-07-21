@@ -64,8 +64,12 @@ type Query {
     countSessions(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
     # Count all active sessions
     countActiveSessions(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
+    # Count all jupyter sessions
+    countJupyterSessions: Int!  @isAuthorised(role: "ADMIN")
     # Get all sessions
     sessions(filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!): InstanceSessionMemberConnection @isAuthorised(role: "ADMIN")
+    # Get all jupyter sessions
+    jupyterSessions(filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!): InstanceJupyterSessionConnection @isAuthorised(role: "ADMIN")
     # Count instances by flavours
     countInstancesByFlavours: [NumberInstancesByFlavour]  @isAuthorised(role: "ADMIN")
     # Count instances by images
