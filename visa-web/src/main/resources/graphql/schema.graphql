@@ -106,6 +106,8 @@ type Mutation {
     shutdownInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
     # Delete an instance
     deleteInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
+    # Update an instance termination date
+    updateInstanceTerminationDate(id: Int!, date: String!): Message! @isAuthorised(role: "ADMIN")
     # Create a role
     createRole(input: CreateRoleInput!): Role! @isAuthorised(role: "ADMIN")
     # Delete a role

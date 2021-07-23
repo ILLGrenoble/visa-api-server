@@ -18,7 +18,10 @@ import org.apache.bval.guice.Validate;
 import org.dozer.Mapper;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static eu.ill.visa.web.bundles.graphql.queries.domain.Message.createMessage;
@@ -30,6 +33,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final Mapper mapper;
     private final FlavourService flavourService;
     private final InstanceService instanceService;
+    private final InstanceExpirationService instanceExpirationService;
     private final ImageService imageService;
     private final PlanService planService;
 
@@ -43,6 +47,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     public MutationResolver(final Mapper mapper,
                             final FlavourService flavourService,
                             final InstanceService instanceService,
+                            final InstanceExpirationService instanceExpirationService,
                             final ImageService imageService,
                             final PlanService planService,
                             final InstanceActionScheduler instanceActionScheduler,
@@ -53,6 +58,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.mapper = mapper;
         this.flavourService = flavourService;
         this.instanceService = instanceService;
+        this.instanceExpirationService = instanceExpirationService;
         this.imageService = imageService;
         this.planService = planService;
         this.instanceActionScheduler = instanceActionScheduler;
@@ -369,6 +375,41 @@ public class MutationResolver implements GraphQLMutationResolver {
             this.performInstanceAction(id, InstanceCommandType.SHUTDOWN, environment);
         }
         return createMessage("Instance is scheduled for deletion");
+    }
+    /**
+     * Update an instance termination date
+     *
+     * @param id          the instance id
+     * @param date        the instance termination date
+     * @return a message
+     * @throws EntityNotFoundException thrown if the instance has not been found
+     * @throws ValidationException thrown if date can't be parsed
+     */
+    Message updateInstanceTerminationDate(Long id, String dateString) throws EntityNotFoundException, ValidationException {
+        final Instance instance = instanceService.getById(id);
+
+        if (instance == null) {
+            throw new EntityNotFoundException("Instance not found for the given id");
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+
+        try {
+            Date terminationDate = simpleDateFormat.parse(dateString);
+            instance.setTerminationDate(terminationDate);
+            this.instanceService.save(instance);
+
+            // Delete any existing expirations
+            InstanceExpiration expiration = this.instanceExpirationService.getByInstance(instance);
+            if (expiration != null) {
+                this.instanceExpirationService.delete(expiration);
+            }
+
+        } catch (ParseException e) {
+            throw new ValidationException(e);
+        }
+
+        return createMessage("Instance termination date has been updated");
     }
 
     /**
