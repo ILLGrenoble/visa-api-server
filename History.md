@@ -1,5 +1,8 @@
-2.0.1 16/07/2021
-==============
+2.0.1 26/07/2021
+================
+ * Fix bug on experiment count criteria builder
+ * Add graphql endpoint to update instance termination date
+ * Add graphql endpoints for jupyter session stats
  * Upgrade to guice 4.2.3: better error handling on startup
  * Send VISA PAM public key as metadata to instance
  * Fix email template env vars
