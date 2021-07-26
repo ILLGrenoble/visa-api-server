@@ -167,7 +167,6 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             }
         }
         cbQuery.select(cb.countDistinct(root));
-        cbQuery.from(Experiment.class);
         cbQuery.where(cb.and(predicates.toArray(new Predicate[0])));
         TypedQuery<Long> query = getEntityManager().createQuery(cbQuery);
         return query.getSingleResult();
