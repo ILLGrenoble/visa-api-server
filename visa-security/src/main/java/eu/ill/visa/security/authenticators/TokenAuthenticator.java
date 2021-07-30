@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Optional;
 
 @Singleton
@@ -54,6 +55,16 @@ public class TokenAuthenticator implements Authenticator<String, AccountToken> {
                 AccountToken account = parseJson(responseBody);
                 String userId = account.getUser().getId();
                 User user = userService.getById(userId);
+
+                // Set activated date if not already
+                if (user.getActivatedAt() == null) {
+                    user.setActivatedAt(new Date());
+                }
+
+                // Update last seen at
+                user.setLastSeenAt(new Date());
+                userService.save(user);
+
                 account.setUser(user);
                 logger.info("[Token] Successfully authenticated user: {} ({})", account.getName(), user.getId());
                 if ("0".equals(user.getId())) {

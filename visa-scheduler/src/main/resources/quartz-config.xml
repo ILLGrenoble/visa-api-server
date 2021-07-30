@@ -122,7 +122,8 @@
                 <job-name>instance_security_group_update_job</job-name>
                 <job-group>visa</job-group>
                 <!-- Run every day at 6am -->
-                <cron-expression>0 0 6 ? * *</cron-expression>
+<!--                <cron-expression>0 0 6 ? * *</cron-expression>-->
+                <cron-expression>*/15 * * ? * *</cron-expression>
             </cron>
         </trigger>
 
