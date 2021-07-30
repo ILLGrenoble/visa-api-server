@@ -1,5 +1,6 @@
-2.0.1 26/07/2021
+2.0.1 30/07/2021
 ================
+ * Set activated and update lastSeenAt when users access visa
  * Fix bug on experiment count criteria builder
  * Add graphql endpoint to update instance termination date
  * Add graphql endpoints for jupyter session stats
