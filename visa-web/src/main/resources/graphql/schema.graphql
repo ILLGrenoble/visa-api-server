@@ -118,6 +118,8 @@ type Mutation {
     updateSystemNotification(id: Int!,input: UpdateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
     # Delete a system notification
     deleteSystemNotification(id: Int!): SystemNotification! @isAuthorised(role: "ADMIN")
+    # Update a user role
+    updateUserRole(userId: String!, roleName: String!, isEnabled: Boolean!): User! @isAuthorised(role: "ADMIN")
 
 }
 

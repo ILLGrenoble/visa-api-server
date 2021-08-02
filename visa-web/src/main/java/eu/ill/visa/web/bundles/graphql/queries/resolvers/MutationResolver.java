@@ -380,7 +380,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * Update an instance termination date
      *
      * @param id          the instance id
-     * @param date        the instance termination date
+     * @param dateString        the instance termination date
      * @return a message
      * @throws EntityNotFoundException thrown if the instance has not been found
      * @throws ValidationException thrown if date can't be parsed
@@ -518,6 +518,37 @@ public class MutationResolver implements GraphQLMutationResolver {
         }
         systemNotificationService.delete(systemNotification);
         return systemNotification;
+    }
+
+    /**
+     * Updates a user's role
+     *
+     * @param userId the user ID
+     * @param roleName the role name
+     * @param isEnabled if the role is to be added or not
+     * @return the user
+     * @throws EntityNotFoundException thrown if the user or role has not been found
+     */
+    User updateUserRole(String userId, String roleName, boolean  isEnabled) throws EntityNotFoundException {
+
+        final User user = userService.getById(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found for the given user id");
+        }
+        final Role role = roleService.getByName(roleName);
+        if (role == null) {
+            throw new EntityNotFoundException("Role not found for the given role name");
+        }
+
+        if (isEnabled) {
+            user.addRole(role);
+        } else {
+            user.removeRole(role);
+        }
+
+        this.userService.save(user);
+
+        return user;
     }
 
 }

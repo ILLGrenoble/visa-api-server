@@ -8,6 +8,10 @@
         <query>SELECT i FROM Role i WHERE i.id = :id</query>
     </named-query>
 
+    <named-query name="role.getByName">
+        <query>SELECT i FROM Role i WHERE i.name = :name</query>
+    </named-query>
+
     <named-query name="role.getAll">
         <query>SELECT i FROM Role i ORDER BY i.name ASC</query>
     </named-query>

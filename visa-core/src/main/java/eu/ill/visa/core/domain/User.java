@@ -98,6 +98,18 @@ public class User implements Serializable {
         return lastSeenAt;
     }
 
+    public void addRole(Role role) {
+        if (!this.hasRole(role.getName())) {
+            this.roles.add(role);
+        }
+    }
+
+    public void removeRole(Role role) {
+        if (this.hasRole(role.getName())) {
+            this.roles.remove(role);
+        }
+    }
+
     public void setLastSeenAt(Date lastSeenAt) {
         this.lastSeenAt = lastSeenAt;
     }

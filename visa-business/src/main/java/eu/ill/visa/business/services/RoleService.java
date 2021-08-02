@@ -33,6 +33,10 @@ public class RoleService {
         return this.repository.getById(id);
     }
 
+    public Role getByName(String name) {
+        return this.repository.getByName(name);
+    }
+
     public void delete(Role role) {
         this.repository.delete(role);
     }
