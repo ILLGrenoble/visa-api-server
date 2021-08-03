@@ -97,6 +97,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             final Cycle cycle = filter.getCycle();
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
+            final List<String> proposalIdentifiers = filter.getProposalIdentifiers();
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
             }
@@ -108,6 +109,9 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             }
             if (endDate != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), endDate));
+            }
+            if (proposalIdentifiers != null) {
+                predicates.add(root.get("proposal").get("identifier").in(proposalIdentifiers));
             }
         }
 
@@ -153,6 +157,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             final Cycle cycle = filter.getCycle();
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
+            final List<String> proposalIdentifiers = filter.getProposalIdentifiers();
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
             }
@@ -164,6 +169,9 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             }
             if (endDate != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), endDate));
+            }
+            if (proposalIdentifiers != null) {
+                predicates.add(root.get("proposal").get("identifier").in(proposalIdentifiers));
             }
         }
         cbQuery.select(cb.countDistinct(root));

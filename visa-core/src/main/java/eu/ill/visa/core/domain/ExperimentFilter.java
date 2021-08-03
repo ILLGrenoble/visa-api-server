@@ -1,6 +1,7 @@
 package eu.ill.visa.core.domain;
 
 import java.util.Date;
+import java.util.List;
 
 public class ExperimentFilter {
 
@@ -8,6 +9,7 @@ public class ExperimentFilter {
     private Date startDate;
     private Date endDate;
     private Instrument instrument;
+    private List<String> proposalIdentifiers;
 
     public ExperimentFilter() {
 
@@ -26,6 +28,13 @@ public class ExperimentFilter {
         this.startDate = startDate;
         this.endDate = endDate;
         this.instrument = instrument;
+    }
+
+    public ExperimentFilter(Date startDate, Date endDate, Instrument instrument, List<String> proposalIdentifiers) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.instrument = instrument;
+        this.proposalIdentifiers = proposalIdentifiers;
     }
 
     public ExperimentFilter(Date startDate, Date endDate) {
@@ -51,5 +60,13 @@ public class ExperimentFilter {
 
     public Instrument getInstrument() {
         return instrument;
+    }
+
+    public List<String> getProposalIdentifiers() {
+        return proposalIdentifiers;
+    }
+
+    public void setProposalIdentifiers(List<String> proposalIdentifiers) {
+        this.proposalIdentifiers = proposalIdentifiers;
     }
 }

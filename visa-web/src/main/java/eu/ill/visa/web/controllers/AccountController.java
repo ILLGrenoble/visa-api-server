@@ -19,10 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static eu.ill.visa.core.domain.Role.*;
 import static eu.ill.visa.core.domain.enumerations.InstanceMemberRole.OWNER;
@@ -131,6 +128,7 @@ public class AccountController extends AbstractController {
                                 @QueryParam("instrumentId") final Long instrumentId,
                                 @QueryParam("startDate") final String startDateString,
                                 @QueryParam("endDate") final String endDateString,
+                                @QueryParam("proposals") final String proposalsString,
                                 @QueryParam("page") @DefaultValue("1") @Min(1) final Integer page,
                                 @QueryParam("limit") @DefaultValue("25") @Min(5) @Max(100) final Integer limit,
                                 @QueryParam("orderBy") @DefaultValue("date") final String orderByValue,
@@ -145,7 +143,8 @@ public class AccountController extends AbstractController {
 
             Date startDate = startDateString == null ? null : simpleDateFormat.parse(startDateString);
             Date endDate = endDateString == null ? null : simpleDateFormat.parse(endDateString);
-            final ExperimentFilter filter = cycle == null ? new ExperimentFilter(startDate, endDate, instrument) : new ExperimentFilter(cycle, instrument);
+            List<String> proposalIdentifiers = proposalsString == null ? null : Arrays.asList(proposalsString.split(","));
+            final ExperimentFilter filter = cycle == null ? new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers) : new ExperimentFilter(cycle, instrument);
 
             final List<ExperimentDto> experiments = new ArrayList<>();
             final Long total = experimentService.getAllCountForUser(user, filter);
