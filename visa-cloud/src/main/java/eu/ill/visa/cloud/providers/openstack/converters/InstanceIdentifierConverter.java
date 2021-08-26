@@ -4,7 +4,7 @@ import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 
 import javax.json.JsonObject;
 
-public class ServerIdentifierConverter {
+public class InstanceIdentifierConverter {
 
     private static final String ID                = "id";
     private static final String NAME              = "name";
@@ -14,8 +14,7 @@ public class ServerIdentifierConverter {
         final String id = json.getString(ID);
         final String name = json.getString(NAME);
 
-        CloudInstanceIdentifier cloudInstanceIdentifier = new CloudInstanceIdentifier(id, name);
-        return cloudInstanceIdentifier;
+        return new CloudInstanceIdentifier(id, name);
     }
 
 }

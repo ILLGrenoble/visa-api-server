@@ -68,6 +68,8 @@ type Query {
     cloudFlavours: [CloudFlavour] @isAuthorised(role: "ADMIN")
     # Get cloud limits
     cloudLimits: CloudLimit @isAuthorised(role: "ADMIN")
+    # Get cloud security groups
+    cloudSecurityGroups: [String] @isAuthorised(role: "ADMIN")
     # Count all sessions
     countSessions(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
     # Count all active sessions

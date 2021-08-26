@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ServerConverter {
+public class InstanceConverter {
 
     private static final String ID                = "id";
     private static final String NAME              = "name";
@@ -70,7 +70,7 @@ public class ServerConverter {
         return new CloudInstanceFault(
             fault.getString("message"),
             fault.getInt("code"),
-            fault.keySet().contains("details") ? fault.getString("details") : null,
+            fault.containsKey("details") ? fault.getString("details") : null,
             fault.getString("created"));
 
     }

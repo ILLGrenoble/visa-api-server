@@ -4,31 +4,27 @@ import java.util.Map;
 
 public class OpenStackProviderConfiguration {
 
-    private String applicationId;
-    private String applicationSecret;
+    private final String applicationId;
+    private final String applicationSecret;
 
-    private String computeEndpoint;
-    private String imageEndpoint;
-    private String identityEndpoint;
+    private final String computeEndpoint;
+    private final String imageEndpoint;
+    private final String identityEndpoint;
+    private final String networkEndpoint;
 
-    private String addressProvider;
+    private final String addressProvider;
 
-    private String addressProviderUUID;
+    private final String addressProviderUUID;
 
-    public static OpenStackProviderConfiguration buildFromMap(Map<String, String> values) {
-        final OpenStackProviderConfiguration configuration = new OpenStackProviderConfiguration();
-        configuration.setApplicationId(values.get("applicationId"));
-        configuration.setApplicationSecret(values.get("applicationSecret"));
-        configuration.setComputeEndpoint(values.get("computeEndpoint"));
-        configuration.setImageEndpoint(values.get("imageEndpoint"));
-        configuration.setIdentityEndpoint(values.get("identityEndpoint"));
-        configuration.setAddressProvider(values.get("addressProvider"));
-        configuration.setAddressProviderUUID(values.get("addressProviderUUID"));
-        return configuration;
-    }
-
-    private void setAddressProviderUUID(String addressProviderUUID) {
-        this.addressProviderUUID = addressProviderUUID;
+    public OpenStackProviderConfiguration(final Map<String, String> values) {
+        this.applicationId = values.get("applicationId");
+        this.applicationSecret = values.get("applicationSecret");
+        this.computeEndpoint = values.get("computeEndpoint");
+        this.imageEndpoint = values.get("imageEndpoint");
+        this.networkEndpoint = values.get("networkEndpoint");
+        this.identityEndpoint = values.get("identityEndpoint");
+        this.addressProvider = values.get("addressProvider");
+        this.addressProviderUUID = values.get("addressProviderUUID");
     }
 
     public String getAddressProviderUUID() {
@@ -39,49 +35,28 @@ public class OpenStackProviderConfiguration {
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
     public String getApplicationSecret() {
         return applicationSecret;
-    }
-
-    public void setApplicationSecret(String applicationSecret) {
-        this.applicationSecret = applicationSecret;
     }
 
     public String getComputeEndpoint() {
         return computeEndpoint;
     }
 
-    public void setComputeEndpoint(String computeEndpoint) {
-        this.computeEndpoint = computeEndpoint;
-    }
-
     public String getImageEndpoint() {
         return imageEndpoint;
-    }
-
-    public void setImageEndpoint(String imageEndpoint) {
-        this.imageEndpoint = imageEndpoint;
     }
 
     public String getIdentityEndpoint() {
         return identityEndpoint;
     }
 
-    public void setIdentityEndpoint(String identityEndpoint) {
-        this.identityEndpoint = identityEndpoint;
-    }
-
-
     public String getAddressProvider() {
         return addressProvider;
     }
 
-    public void setAddressProvider(String addressProvider) {
-        this.addressProvider = addressProvider;
+    public String getNetworkEndpoint() {
+        return networkEndpoint;
     }
 
 }

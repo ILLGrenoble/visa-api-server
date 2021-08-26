@@ -51,7 +51,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final PlanService                  planService;
     private final InstanceSessionMemberService instanceSessionMemberService;
     private final InstanceJupyterSessionService instanceJupyterSessionService;
-    private final SystemNotificationService systemNotificationService;
+    private final SystemNotificationService     systemNotificationService;
 
 
     @Inject
@@ -563,6 +563,24 @@ public class QueryResolver implements GraphQLQueryResolver {
         });
         return future;
     }
+
+    /**
+     * Get cloud limits from the the cloud provider
+     *
+     * @return a list of cloud limits
+     */
+    public CompletableFuture<List<String>> cloudSecurityGroups() {
+        final CompletableFuture<List<String>> future = new CompletableFuture<>();
+        runAsync(() -> {
+            try {
+                future.complete(cloudClient.securityGroups());
+            } catch (CloudException exception) {
+                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            }
+        });
+        return future;
+    }
+
 
     /**
      * Get a list of plans

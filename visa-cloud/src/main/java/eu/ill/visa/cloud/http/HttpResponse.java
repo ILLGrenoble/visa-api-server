@@ -23,6 +23,10 @@ public class HttpResponse {
         return code;
     }
 
+    public Boolean isCode(final int code) {
+        return this.code == code;
+    }
+
     public String getHeader(final String header) {
         if (headers.containsKey(header)) {
             return headers.get(header);

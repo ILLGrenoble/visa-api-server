@@ -52,6 +52,9 @@ public class CloudClient {
     }
 
     public CloudInstance instance(final String id) throws CloudException {
+        if (id == null) {
+            return null;
+        }
         logger.debug("Fetching cloud instance with id: {}", id);
         return provider.instance(id);
     }
@@ -102,4 +105,10 @@ public class CloudClient {
     public String ip(final String id) throws CloudException {
         return provider.ip(id);
     }
+
+    public List<String> securityGroups() throws CloudException {
+        logger.info("Fetching cloud security groups");
+        return provider.securityGroups();
+    }
+
 }

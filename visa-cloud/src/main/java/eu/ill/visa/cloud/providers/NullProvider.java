@@ -87,4 +87,9 @@ public class NullProvider implements CloudProvider {
         return null;
     }
 
+    @Override
+    public List<String> securityGroups() throws CloudException {
+        return null;
+    }
+
 }

@@ -86,16 +86,22 @@ security:
     accountsUrl: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
 
 cloud:
+  serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
   provider: openstack
   parameters:
     identityEndpoint: ${VISA_CLOUD_IDENTITY_ENDPOINT}
     computeEndpoint: ${VISA_CLOUD_COMPUTE_ENDPOINT}
     imageEndpoint: ${VISA_CLOUD_IMAGE_ENDPOINT}
+    networkEndpoint: ${VISA_CLOUD_NETWORK_ENDPOINT}
     applicationId: ${VISA_CLOUD_APPLICATION_ID}
     applicationSecret: ${VISA_CLOUD_APPLICATION_SECRET}
     addressProvider: ${VISA_CLOUD_ADDRESS_PROVIDER}
     addressProviderUUID: ${VISA_CLOUD_ADDRESS_PROVIDER_UUID}
-  serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
+#  provider: web
+#  parameters:
+#    url: ${VISA_CLOUD_WEB_PROVIDER_URL}
+#    authToken: ${VISA_CLOUD_WEB_PROVIDER_AUTH_TOKEN}
+
 vdi:
   host: ${VISA_VDI_HOST:-'localhost'}
   port: ${VISA_VDI_PORT:-8087}
