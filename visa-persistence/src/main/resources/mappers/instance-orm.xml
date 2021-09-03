@@ -193,12 +193,12 @@
 
     <named-native-query name="instance.countByImage" result-set-mapping="countByImageMapping">
         <query>
-            SELECT im.id as id, im.name as name, COUNT(i.id) as total
+            SELECT im.id as id, im.name as name, im.version as version, COUNT(i.id) as total
             FROM instance i
             JOIN plan p on i.plan_id = p.id
             JOIN image im on p.image_id = im.id AND i.deleted_at IS NULL
             GROUP BY im.id
-            ORDER BY im.name
+            ORDER BY im.name, im.version desc
         </query>
     </named-native-query>
 
@@ -206,6 +206,7 @@
         <constructor-result target-class="eu.ill.visa.core.domain.NumberInstancesByImage">
             <column name="id" class="java.lang.Long"/>
             <column name="name" class="java.lang.String" />
+            <column name="version" class="java.lang.String" />
             <column name="total" class="java.lang.Long"/>
         </constructor-result>
     </sql-result-set-mapping>

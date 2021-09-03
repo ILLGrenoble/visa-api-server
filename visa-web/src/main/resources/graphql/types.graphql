@@ -305,6 +305,7 @@ type NumberInstancesByFlavour {
 type NumberInstancesByImage {
     id: Int!
     name: String!
+    version: String
     total: Int!
 }
 
