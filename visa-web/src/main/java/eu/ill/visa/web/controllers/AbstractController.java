@@ -2,6 +2,7 @@ package eu.ill.visa.web.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
 
@@ -12,22 +13,27 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 abstract class AbstractController {
 
     Response createResponse(final Object entity) {
-        return createResponse(entity, Status.OK, null);
+        return createResponse(entity, Status.OK, null, null);
     }
 
     Response createResponse() {
-        return createResponse(null, Status.OK, null);
+        return createResponse(null, Status.OK, null, null);
     }
 
     Response createResponse(final Object entity, final Status status) {
-        return createResponse(entity, status, null);
+        return createResponse(entity, status, null, null);
     }
 
     Response createResponse(final Object entity, final Status status, final ImmutableMap metadata) {
+        return createResponse(entity, status, metadata, null);
+    }
+
+    Response createResponse(final Object entity, final Status status, final ImmutableMap metadata, final List<String> errors) {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX"));
         final ObjectNode json = mapper.createObjectNode();
@@ -35,7 +41,10 @@ abstract class AbstractController {
             json.putPOJO("_metadata", metadata);
         }
         json.putPOJO("data", entity);
-
+        if (errors != null) {
+            final ArrayNode errorsNode = json.putArray("errors");
+            errors.forEach(errorsNode::add);
+        }
         try {
             String jsonString = mapper.writeValueAsString(json);
             final ResponseBuilder response = Response.status(status).entity(jsonString);

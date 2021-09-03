@@ -97,7 +97,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             final Cycle cycle = filter.getCycle();
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
-            final List<String> proposalIdentifiers = filter.getProposalIdentifiers();
+            final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
             }
@@ -157,7 +157,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             final Cycle cycle = filter.getCycle();
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
-            final List<String> proposalIdentifiers = filter.getProposalIdentifiers();
+            final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
             }

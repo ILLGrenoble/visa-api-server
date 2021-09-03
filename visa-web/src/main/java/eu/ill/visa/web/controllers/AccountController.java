@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static eu.ill.visa.core.domain.Role.*;
 import static eu.ill.visa.core.domain.enumerations.InstanceMemberRole.OWNER;
@@ -143,7 +144,7 @@ public class AccountController extends AbstractController {
 
             Date startDate = startDateString == null ? null : simpleDateFormat.parse(startDateString);
             Date endDate = endDateString == null ? null : simpleDateFormat.parse(endDateString);
-            List<String> proposalIdentifiers = proposalsString == null ? null : Arrays.asList(proposalsString.split(","));
+            Set<String> proposalIdentifiers = proposalsString == null ? null : new HashSet<>(Arrays.asList(proposalsString.split(",")));
             final ExperimentFilter filter = cycle == null ? new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers) : new ExperimentFilter(cycle, instrument);
 
             final List<ExperimentDto> experiments = new ArrayList<>();
@@ -163,7 +164,19 @@ public class AccountController extends AbstractController {
                 experiments.add(mapper.map(experiment, ExperimentDto.class));
             }
 
-            return createResponse(experiments, OK, metadata);
+            // Check if proposals was specified whether all the proposals have associated experiments
+            List<String> errors = null;
+            if (proposalIdentifiers != null) {
+                Set<String> experimentProposalIdentifiers = experiments.stream().map(experiment -> experiment.getProposal().getIdentifier()).collect(Collectors.toSet());
+                Set<String> missingProposalIdentifiers = new HashSet<>(proposalIdentifiers);
+                missingProposalIdentifiers.removeAll(experimentProposalIdentifiers);
+                if (missingProposalIdentifiers.size() > 0) {
+                    String error = "Could not obtain experiments for the following proposal(s): " + String.join(", ", missingProposalIdentifiers);
+                    errors = Arrays.asList(error);
+                }
+            }
+
+            return createResponse(experiments, OK, metadata, errors);
 
         } catch (ParseException e) {
             throw new BadRequestException("Could not convert dates");
