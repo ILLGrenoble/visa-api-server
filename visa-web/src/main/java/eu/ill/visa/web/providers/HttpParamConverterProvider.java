@@ -15,7 +15,6 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
 
     private final InstrumentParamConverter instrumentParamConverter;
     private final UserParamConverter userParamConverter;
-    private final CycleParamConverter cycleParamConverter;
     private final ExperimentParamConverter experimentParamConverter;
     private final ImageParamConverter imageParamConverter;
     private final FlavourParamConverter flavourParamConverter;
@@ -26,7 +25,6 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
     @Inject
     public HttpParamConverterProvider(final InstrumentParamConverter instrumentParamConverter,
                                       final UserParamConverter userParamConverter,
-                                      final CycleParamConverter cycleParamConverter,
                                       final ExperimentParamConverter experimentParamConverter,
                                       final ImageParamConverter imageParamConverter,
                                       final FlavourParamConverter flavourParamConverter,
@@ -35,7 +33,6 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
                                       final InstanceMemberParamConverter instanceMemberParamConverter) {
         this.instrumentParamConverter = instrumentParamConverter;
         this.userParamConverter = userParamConverter;
-        this.cycleParamConverter = cycleParamConverter;
         this.experimentParamConverter = experimentParamConverter;
         this.imageParamConverter = imageParamConverter;
         this.flavourParamConverter = flavourParamConverter;
@@ -54,10 +51,6 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
 
         if (User.class.isAssignableFrom(rawType)) {
             return (ParamConverter<T>) userParamConverter;
-        }
-
-        if (Cycle.class.isAssignableFrom(rawType)) {
-            return (ParamConverter<T>) cycleParamConverter;
         }
 
         if (Experiment.class.isAssignableFrom(rawType)) {

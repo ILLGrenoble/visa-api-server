@@ -7,7 +7,6 @@ import java.util.Date;
 
 public class ExperimentDto {
     private String        id;
-    private CycleDto      cycle;
     private InstrumentDto instrument;
     private ProposalDto   proposal;
 
@@ -23,14 +22,6 @@ public class ExperimentDto {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public CycleDto getCycle() {
-        return cycle;
-    }
-
-    public void setCycle(CycleDto cycle) {
-        this.cycle = cycle;
     }
 
     public InstrumentDto getInstrument() {

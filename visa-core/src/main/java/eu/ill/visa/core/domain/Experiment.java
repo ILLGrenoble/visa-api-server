@@ -12,7 +12,6 @@ import java.util.Set;
 public class Experiment implements Serializable {
 
     private String id;
-    private Cycle cycle;
     private Instrument instrument;
     private Proposal proposal;
     private Date startDate;
@@ -26,9 +25,10 @@ public class Experiment implements Serializable {
 
     private Experiment(Builder builder) {
         this.id = builder.id;
-        this.cycle = builder.cycle;
         this.instrument = builder.instrument;
         this.proposal = builder.proposal;
+        this.startDate = builder.startDate;
+        this.endDate = builder.endDate;
     }
 
     public Experiment() {
@@ -45,14 +45,6 @@ public class Experiment implements Serializable {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public Cycle getCycle() {
-        return cycle;
-    }
-
-    public void setCycle(Cycle cycle) {
-        this.cycle = cycle;
     }
 
     public Instrument getInstrument() {
@@ -125,7 +117,6 @@ public class Experiment implements Serializable {
     public String toString() {
         return new ToStringBuilder(this)
             .append("id", id)
-            .append("cycle", cycle)
             .append("instrument", instrument)
             .append("proposal", proposal)
             .append("startDate", startDate)
@@ -136,9 +127,10 @@ public class Experiment implements Serializable {
 
     public static final class Builder {
         private String id;
-        private Cycle cycle;
         private Instrument instrument;
         private Proposal proposal;
+        private Date startDate;
+        private Date endDate;
 
         private Builder() {
         }
@@ -152,11 +144,6 @@ public class Experiment implements Serializable {
             return this;
         }
 
-        public Builder cycle(Cycle cycle) {
-            this.cycle = cycle;
-            return this;
-        }
-
         public Builder instrument(Instrument instrument) {
             this.instrument = instrument;
             return this;
@@ -164,6 +151,16 @@ public class Experiment implements Serializable {
 
         public Builder proposal(Proposal proposal) {
             this.proposal = proposal;
+            return this;
+        }
+
+        public Builder startDate(Date startDate) {
+            this.startDate = startDate;
+            return this;
+        }
+
+        public Builder endDate(Date endDate) {
+            this.endDate = endDate;
             return this;
         }
     }

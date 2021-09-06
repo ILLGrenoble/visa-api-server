@@ -208,7 +208,7 @@ public class InstanceRepository extends AbstractRepository<Instance> {
 
     /**
      * Get all active instances for instrument control support =>
-     * - has an experiment in an active cycle
+     * - has anactive  experiment
      */
     public Long countAllForInstrumentControlSupport(int windowHalfWidthInDays, InstanceFilter filter) {
         String queryString =
@@ -233,7 +233,7 @@ public class InstanceRepository extends AbstractRepository<Instance> {
 
     /**
      * Get all active instances for instrument control support =>
-     * - has an experiment in an active cycle
+     * - has an active experiment
      */
     public List<Instance> getAllForInstrumentControlSupport(int windowHalfWidthInDays, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
         String queryString =
@@ -264,7 +264,6 @@ public class InstanceRepository extends AbstractRepository<Instance> {
             "SELECT COUNT(DISTINCT i) " +
                 " FROM Instance i" +
                 " LEFT OUTER JOIN i.experiments e" +
-                " LEFT OUTER JOIN e.cycle c" +
                 " LEFT OUTER JOIN e.instrument instr" +
                 " LEFT JOIN i.members im" +
                 " LEFT JOIN im.user owner on im.role = 'OWNER'" +
@@ -292,7 +291,6 @@ public class InstanceRepository extends AbstractRepository<Instance> {
             "SELECT DISTINCT i " +
                 " FROM Instance i" +
                 " LEFT OUTER JOIN i.experiments e" +
-                " LEFT OUTER JOIN e.cycle c" +
                 " LEFT OUTER JOIN e.instrument instr" +
                 " LEFT JOIN i.members im" +
                 " LEFT JOIN im.user owner on im.role = 'OWNER'" +

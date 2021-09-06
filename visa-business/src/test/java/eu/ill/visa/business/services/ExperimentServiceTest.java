@@ -24,9 +24,6 @@ public class ExperimentServiceTest {
     private UserService userService;
 
     @Inject
-    private CycleService cycleService;
-
-    @Inject
     private InstrumentService instrumentService;
 
     @Inject
@@ -46,7 +43,6 @@ public class ExperimentServiceTest {
         Experiment experiment = experimentService.getById(id);
         assertNotNull(experiment);
         assertEquals(id, experiment.getId());
-        assertEquals("2016-1", experiment.getCycle().getName());
         assertEquals("I1", experiment.getInstrument().getName());
         assertEquals("PRO-1", experiment.getProposal().getIdentifier());
     }
@@ -110,7 +106,7 @@ public class ExperimentServiceTest {
 
 
     @Test
-    @DisplayName("Get all experiments for a given user and cycle with pagination")
+    @DisplayName("Get all experiments for a given user and experiment dates with pagination")
     void testGetAllForUserAndDatesWithPagination() {
         List<Experiment> experiments = new ArrayList<>();
         try {
@@ -124,38 +120,6 @@ public class ExperimentServiceTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        assertEquals(1, experiments.size());
-    }
-
-    @Test
-    @DisplayName("Get all experiments for a given user and cycle")
-    void testGetAllForUserAndCycle() {
-        Cycle cycle = cycleService.getById(1L);
-        User user = userService.getById("1");
-        ExperimentFilter filter = new ExperimentFilter(cycle);
-        List<Experiment> experiments = experimentService.getAllForUser(user, filter);
-        assertEquals(2, experiments.size());
-    }
-
-    @Test
-    @DisplayName("Count all experiments for a given user and cycle")
-    void testCountAllForUserAndCycle() {
-        Cycle cycle = cycleService.getById(1L);
-        User user = userService.getById("1");
-        ExperimentFilter filter = new ExperimentFilter(cycle);
-        Long experiments = experimentService.getAllCountForUser(user, filter);
-        assertEquals(2, experiments);
-    }
-
-
-    @Test
-    @DisplayName("Get all experiments for a given user and cycle with pagination")
-    void testGetAllForUserAndCycleWithPagination() {
-        Cycle cycle = cycleService.getById(1L);
-        User user = userService.getById("1");
-        ExperimentFilter filter = new ExperimentFilter(cycle);
-        Pagination pagination = new Pagination(1, 1);
-        List<Experiment> experiments = experimentService.getAllForUser(user, filter, pagination);
         assertEquals(1, experiments.size());
     }
 
@@ -188,30 +152,10 @@ public class ExperimentServiceTest {
     }
 
     @Test
-    @DisplayName("Get all experiments for a given cycle")
-    void testGetAllFilteredByCycle() {
-        Cycle cycle = cycleService.getById(1L);
-        QueryFilter filter = new QueryFilter("cycle.id = :id");
-        filter.addParameter("id", "1");
-        List<Experiment> experiments = experimentService.getAll(filter, new Pagination(50, 0));
-        assertEquals(5, experiments.size());
-    }
-
-    @Test
     @DisplayName("Get all experiments for a given instrument")
     void testGetAllFilteredByInstrument() {
         QueryFilter filter = new QueryFilter("instrument.id = :id");
         filter.addParameter("id", "1");
-        List<Experiment> experiments = experimentService.getAll(filter, new Pagination(50, 0));
-        assertEquals(2, experiments.size());
-    }
-
-    @Test
-    @DisplayName("Get all experiments for a given cycle and instrument")
-    void testGetAllFilteredByCycleAndInstrument() {
-        QueryFilter filter = new QueryFilter("instrument.id = :instrumentId AND cycle.id = :cycleId");
-        filter.addParameter("instrumentId", "2");
-        filter.addParameter("cycleId", "1");
         List<Experiment> experiments = experimentService.getAll(filter, new Pagination(50, 0));
         assertEquals(2, experiments.size());
     }

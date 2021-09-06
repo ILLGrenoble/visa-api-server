@@ -57,7 +57,7 @@
         <job>
             <name>instance_security_group_update_job</name>
             <group>visa</group>
-            <description>Updates the security groups of an instance when a cycle finishes</description>
+            <description>Updates the security groups of an instance when an experiment finishes</description>
             <job-class>
                 eu.ill.visa.scheduler.jobs.InstanceSecurityGroupUpdateJob
             </job-class>

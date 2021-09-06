@@ -140,19 +140,6 @@ VALUES (1000, '1', 1000, 'START', 'RUNNING', '', '2019-01-01', '2019-01-01');
 INSERT INTO instance_command (id, user_id, instance_id, action_type, state, message, created_at, updated_at)
 VALUES (1001, '1', 1001, 'SHUTDOWN', 'PENDING', '', '2019-01-01', '2019-01-01');
 
-INSERT INTO cycle (id, name, start_date, end_date)
-VALUES (1, '2016-1', '2016-01-01', '2016-03-01');
-INSERT INTO cycle (id, name, start_date, end_date)
-VALUES (2, '2016-2', '2016-04-01', '2016-06-01');
-INSERT INTO cycle (id, name, start_date, end_date)
-VALUES (3, '2016-3', '2016-07-01', '2016-09-01');
-INSERT INTO cycle (id, name, start_date, end_date)
-VALUES (4, '2016-4', '2016-10-01', '2016-12-01');
-INSERT INTO cycle (id, name, start_date, end_date)
-VALUES (5, '2017-1', '2017-01-01', '2017-03-01');
-INSERT INTO cycle (id, name, start_date, end_date)
-VALUES (6, 'TODAY', CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
-
 INSERT INTO instrument (id, name)
 VALUES (1, 'I1');
 INSERT INTO instrument (id, name)
@@ -176,24 +163,24 @@ VALUES (4, 'PRO-4', 'Proposal 4 title', 'Proposal 4 summary');
 INSERT INTO proposal (id, identifier, title, summary)
 VALUES (5, 'PRO-5', 'Proposal 5 title', 'Proposal 5 summary');
 
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0001-0001-000001', 1, 1, 1, '2016-01-01', '2016-01-02');
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0001-0002-000001', 1, 2, 1, '2016-01-01', '2016-01-02');
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0001-0002-000002', 1, 2, 2, '2016-01-01', '2016-01-02');
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0001-0003-000002', 1, 3, 2, '2016-01-01', '2016-03-07');
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0001-0005-000002', 1, 3, 2, '2016-01-01', '2016-03-07');
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0002-0003-000003', 2, 3, 3, '2016-04-01', '2016-04-07');
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0006-0001-000001', 6, 1, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0006-0002-000001', 6, 2, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
-INSERT INTO experiment (id, cycle_id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0006-0005-000001', 6, 5, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0001-0001-000001', 1, 1, '2016-01-01', '2016-01-02');
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0001-0002-000001', 2, 1, '2016-01-01', '2016-01-02');
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0001-0002-000002', 2, 2, '2016-01-01', '2016-01-02');
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0001-0003-000002', 3, 2, '2016-01-01', '2016-03-07');
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0001-0005-000002', 3, 2, '2016-01-01', '2016-03-07');
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0002-0003-000003', 3, 3, '2016-04-01', '2016-04-07');
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0006-0001-000001', 1, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0006-0002-000001', 2, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
+INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
+VALUES ('0006-0005-000001', 5, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
 
 INSERT INTO experiment_user (experiment_id, user_id)
 VALUES ('0001-0001-000001', '1');

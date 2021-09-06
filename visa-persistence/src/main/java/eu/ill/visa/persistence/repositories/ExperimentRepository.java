@@ -94,15 +94,11 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
 
         if (filter != null) {
             final Instrument instrument = filter.getInstrument();
-            final Cycle cycle = filter.getCycle();
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
             final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
-            }
-            if (cycle != null) {
-                predicates.add(cb.equal(root.get("cycle"), cycle));
             }
             if (startDate != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));
@@ -154,15 +150,11 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
 
         if (filter != null) {
             final Instrument instrument = filter.getInstrument();
-            final Cycle cycle = filter.getCycle();
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
             final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
-            }
-            if (cycle != null) {
-                predicates.add(cb.equal(root.get("cycle"), cycle));
             }
             if (startDate != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));

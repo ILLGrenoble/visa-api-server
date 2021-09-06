@@ -52,10 +52,6 @@
             <basic name="endDate">
                 <column name="end_date" nullable="true"/>
             </basic>
-            <many-to-one name="cycle">
-                <join-column name="cycle_id" nullable="false"/>
-                <foreign-key name="fk_cycle_id"/>
-            </many-to-one>
             <many-to-one name="instrument">
                 <join-column name="instrument_id" nullable="false"/>
                 <foreign-key name="fk_instrument_id"/>

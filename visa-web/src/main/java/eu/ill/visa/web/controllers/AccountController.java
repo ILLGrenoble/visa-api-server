@@ -38,7 +38,6 @@ public class AccountController extends AbstractController {
 
     private final UserService       userService;
     private final InstrumentService instrumentService;
-    private final CycleService      cycleService;
     private final ExperimentService experimentService;
     private final Mapper            mapper;
     private final InstanceService   instanceService;
@@ -47,14 +46,12 @@ public class AccountController extends AbstractController {
     public AccountController(final UserService userService,
                              final InstrumentService instrumentService,
                              final InstanceService instanceService,
-                             final CycleService cycleService,
                              final ExperimentService experimentService,
                              final Mapper mapper
     ) {
         this.userService = userService;
         this.instrumentService = instrumentService;
         this.instanceService = instanceService;
-        this.cycleService = cycleService;
         this.experimentService = experimentService;
         this.mapper = mapper;
     }
@@ -101,18 +98,6 @@ public class AccountController extends AbstractController {
     }
 
     @GET
-    @Path("/experiments/cycles")
-    @ApiOperation(value = "Get the logged-in users cycles")
-    public Response experimentCycles(@Auth final AccountToken accountToken) {
-        final User user = accountToken.getUser();
-        final List<CycleDto> cycles = new ArrayList<>();
-        for (final Cycle cycle : cycleService.getAllForUser(user)) {
-            cycles.add(mapper.map(cycle, CycleDto.class));
-        }
-        return createResponse(cycles, OK);
-    }
-
-    @GET
     @Path("/experiments/years")
     @ApiOperation(value = "Get the logged-in users experiment years")
     public Response experimentYears(@Auth final AccountToken accountToken) {
@@ -125,7 +110,6 @@ public class AccountController extends AbstractController {
     @Path("/experiments")
     @ApiOperation(value = "Get the logged-in users experiments")
     public Response experiments(@Auth final AccountToken accountToken,
-                                @QueryParam("cycleId") final Long cycleId,
                                 @QueryParam("instrumentId") final Long instrumentId,
                                 @QueryParam("startDate") final String startDateString,
                                 @QueryParam("endDate") final String endDateString,
@@ -136,7 +120,6 @@ public class AccountController extends AbstractController {
                                 @QueryParam("descending") @DefaultValue("false") final boolean descending) {
 
         try {
-            final Cycle cycle = cycleService.getById(cycleId);
             final Instrument instrument = instrumentService.getById(instrumentId);
             final User user = accountToken.getUser();
 
@@ -145,7 +128,7 @@ public class AccountController extends AbstractController {
             Date startDate = startDateString == null ? null : simpleDateFormat.parse(startDateString);
             Date endDate = endDateString == null ? null : simpleDateFormat.parse(endDateString);
             Set<String> proposalIdentifiers = proposalsString == null ? null : new HashSet<>(Arrays.asList(proposalsString.split(",")));
-            final ExperimentFilter filter = cycle == null ? new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers) : new ExperimentFilter(cycle, instrument);
+            final ExperimentFilter filter = new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers);
 
             final List<ExperimentDto> experiments = new ArrayList<>();
             final Long total = experimentService.getAllCountForUser(user, filter);

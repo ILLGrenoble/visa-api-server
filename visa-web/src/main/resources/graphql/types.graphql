@@ -20,13 +20,6 @@ enum SystemNotificationLevel {
     ERROR
 }
 
-type Cycle {
-    id: Int!
-    name: String!
-    startDate: String!
-    endDate: String!
-}
-
 type Instrument {
     id: Int!
     name: String!
@@ -101,7 +94,6 @@ type Experiment {
     # Experiment identifier
     id: String!
     instrument: Instrument!
-    cycle: Cycle!
     proposal: Proposal!
     startDate: String!
     endDate: String!
@@ -216,11 +208,6 @@ type ExperimentConnection {
 type FlavourConnection {
     pageInfo: PageInfo
     data: [Flavour]
-}
-
-type CycleConnection {
-    pageInfo: PageInfo
-    data: [Cycle]
 }
 
 type PlanConnection {

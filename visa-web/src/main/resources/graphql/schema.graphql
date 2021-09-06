@@ -5,12 +5,8 @@ directive @isAuthorised(
 type Query {
     # The authenticated user
     viewer: User
-    # Get all cycles
-    cycles (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : CycleConnection!
     # Get all plans
     plans (pagination: Pagination!) : PlanConnection!  @isAuthorised(role: "ADMIN")
-    # Count  cycles
-    countCycles (filter: QueryFilter) : Int!
     # Get experiments
     experiments (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : ExperimentConnection!  @isAuthorised(role: "ADMIN")
     # Count experiments

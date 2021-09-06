@@ -54,7 +54,6 @@
             SELECT DISTINCT p FROM Plan p
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
             LEFT OUTER JOIN Experiment e ON e.instrument.id = fl.objectId
-            LEFT OUTER JOIN Cycle c ON c.id = e.cycle.id
             WHERE p.image.deleted = false
             AND p.flavour.deleted = false
             AND p.image.visible = true

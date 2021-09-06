@@ -26,8 +26,6 @@ public class InstanceFilterProvider extends AbstractFilterQueryProvider<Instance
             orderableField("plan.image.name"),
             orderableField("experiments.instrument.id", "instrument.id"),
             orderableField("experiments.instrument.name", "instrument.name"),
-            orderableField("experiments.cycle.id", "cycle.id"),
-            orderableField("experiments.cycle.name", "cycle.name"),
             orderableField("members.user.id", "user.id"),
             orderableField("members.user.firstName", "user.firstName"),
             orderableField("members.user.lastName", "user.lastName"),

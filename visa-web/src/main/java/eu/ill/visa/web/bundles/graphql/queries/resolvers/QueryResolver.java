@@ -36,7 +36,6 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 public class QueryResolver implements GraphQLQueryResolver {
 
     private final InstrumentService            instrumentService;
-    private final CycleService                 cycleService;
     private final ExperimentService            experimentService;
     private final FlavourService               flavourService;
     private final ImageService                 imageService;
@@ -55,7 +54,6 @@ public class QueryResolver implements GraphQLQueryResolver {
     @Inject
     QueryResolver(
         final InstrumentService instrumentService,
-        final CycleService cycleService,
         final ExperimentService experimentService,
         final FlavourService flavourService,
         final ImageService imageService,
@@ -70,7 +68,6 @@ public class QueryResolver implements GraphQLQueryResolver {
         final InstanceJupyterSessionService instanceJupyterSessionService,
         final SystemNotificationService systemNotificationService) {
         this.instrumentService = instrumentService;
-        this.cycleService = cycleService;
         this.experimentService = experimentService;
         this.flavourService = flavourService;
         this.imageService = imageService;
@@ -84,43 +81,6 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.systemNotificationService = systemNotificationService;
-    }
-
-    /**
-     * Get a list of cycles
-     *
-     * @param filter     the given query filter
-     * @param orderBy    the ordering of results
-     * @param pagination the pagination (limit and offset)
-     * @return a list of cycles
-     * @throws DataFetchingException thrown if there was an error fetching the results
-     */
-    public Connection<Cycle> cycles(final QueryFilter filter, final OrderBy orderBy, final Pagination pagination) throws DataFetchingException {
-        try {
-            final List<Cycle> results = cycleService.getAll(
-                requireNonNullElseGet(filter, QueryFilter::new),
-                requireNonNullElseGet(orderBy, () -> new OrderBy("id", true)), pagination
-            );
-            final PageInfo pageInfo = new PageInfo(cycleService.countAll(filter), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
-    }
-
-    /**
-     * Count all cycles
-     *
-     * @param filter a filter to filter the results
-     * @return a count of cycles
-     * @throws DataFetchingException thrown if there was an error fetching the result
-     */
-    public Long countCycles(final QueryFilter filter) throws DataFetchingException {
-        try {
-            return cycleService.countAll(requireNonNullElseGet(filter, QueryFilter::new));
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
     }
 
     /**

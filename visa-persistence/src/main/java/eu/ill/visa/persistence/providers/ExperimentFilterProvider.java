@@ -11,12 +11,12 @@ public class ExperimentFilterProvider extends AbstractFilterQueryProvider<Experi
         super(Experiment.class, entityManager);
         addFields(
             orderableField("id"),
-            orderableField("cycle.id"),
-            orderableField("cycle.name"),
             orderableField("instrument.id"),
             orderableField("instrument.name"),
             orderableField("proposal.id"),
-            orderableField("proposal.identifier")
+            orderableField("proposal.identifier"),
+            orderableField("startDate"),
+            orderableField("endDate")
         );
     }
 
