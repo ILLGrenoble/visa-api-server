@@ -10,6 +10,9 @@
     <named-query name="securityGroup.getAll">
         <query>SELECT sg FROM SecurityGroup sg order by name</query>
     </named-query>
+    <named-query name="securityGroup.countAll">
+        <query>SELECT count(sg.id) FROM SecurityGroup sg</query>
+    </named-query>
 
     <named-query name="securityGroup.getDefaultSecurityGroups">
         <query>

@@ -3,10 +3,7 @@ package eu.ill.visa.business.services;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
-import eu.ill.visa.core.domain.FlavourLimit;
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.FlavourLimitRepository;
 
 import javax.validation.constraints.NotNull;
@@ -39,6 +36,10 @@ public class FlavourLimitService {
 
     public void save(@NotNull FlavourLimit flavourLimit) {
         this.repository.save(flavourLimit);
+    }
+
+    public List<FlavourLimit> getAll(Pagination pagination) {
+        return this.getAll(new QueryFilter(), null, pagination);
     }
 
     public List<FlavourLimit> getAll(OrderBy orderBy, Pagination pagination) {

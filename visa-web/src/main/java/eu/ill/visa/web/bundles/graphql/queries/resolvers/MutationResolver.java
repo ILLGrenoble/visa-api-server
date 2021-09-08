@@ -9,6 +9,7 @@ import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;
 import eu.ill.visa.web.bundles.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.bundles.graphql.exceptions.EntityNotFoundException;
+import eu.ill.visa.web.bundles.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.bundles.graphql.exceptions.ValidationException;
 import eu.ill.visa.web.bundles.graphql.queries.domain.Message;
 import eu.ill.visa.web.bundles.graphql.queries.inputs.*;
@@ -21,6 +22,7 @@ import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +38,10 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final InstanceExpirationService instanceExpirationService;
     private final ImageService imageService;
     private final PlanService planService;
+    private final FlavourLimitService flavourLimitService;
+    private final SecurityGroupService securityGroupService;
+    private final SecurityGroupFilterService securityGroupFilterService;
+    private final InstrumentService instrumentService;
 
     private final InstanceActionScheduler instanceActionScheduler;
     private final RoleService roleService;
@@ -50,6 +56,10 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final InstanceExpirationService instanceExpirationService,
                             final ImageService imageService,
                             final PlanService planService,
+                            final FlavourLimitService flavourLimitService,
+                            final SecurityGroupService securityGroupService,
+                            final SecurityGroupFilterService securityGroupFilterService,
+                            final InstrumentService instrumentService,
                             final InstanceActionScheduler instanceActionScheduler,
                             final RoleService roleService,
                             final UserService userService,
@@ -61,6 +71,10 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.instanceExpirationService = instanceExpirationService;
         this.imageService = imageService;
         this.planService = planService;
+        this.flavourLimitService = flavourLimitService;
+        this.securityGroupService = securityGroupService;
+        this.securityGroupFilterService = securityGroupFilterService;
+        this.instrumentService = instrumentService;
         this.instanceActionScheduler = instanceActionScheduler;
         this.roleService = roleService;
         this.userService = userService;
@@ -135,6 +149,23 @@ public class MutationResolver implements GraphQLMutationResolver {
     }
 
     /**
+     * Delete a image for a given id
+     *
+     * @param id the image id
+     * @return the deleted flavour
+     * @throws EntityNotFoundException thrown if the image is not found
+     */
+    Image deleteImage(Long id) throws EntityNotFoundException {
+        final Image image = imageService.getById(id);
+        if (image == null) {
+            throw new EntityNotFoundException("Image not found for the given id");
+        }
+        image.setDeleted(true);
+        imageService.save(image);
+        return image;
+    }
+
+    /**
      * Create a new flavour
      *
      * @param input the flavour properties
@@ -175,9 +206,8 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param id the flavour id
      * @return the deleted flavour
      * @throws EntityNotFoundException thrown if the flavour is not found
-     * @throws DataFetchingException   thrown if there are instances associated to the flavour
      */
-    Flavour deleteFlavour(Long id) throws EntityNotFoundException, DataFetchingException {
+    Flavour deleteFlavour(Long id) throws EntityNotFoundException {
         final Flavour flavour = flavourService.getById(id);
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour not found for the given id");
@@ -188,20 +218,191 @@ public class MutationResolver implements GraphQLMutationResolver {
     }
 
     /**
-     * Delete a image for a given id
+     * Create a new flavourLimit
      *
-     * @param id the image id
-     * @return the deleted flavour
-     * @throws EntityNotFoundException thrown if the image is not found
+     * @param input the flavourLimit properties
+     * @return the newly created flavourLimit
      */
-    Image deleteImage(Long id) throws EntityNotFoundException {
-        final Image image = imageService.getById(id);
-        if (image == null) {
-            throw new EntityNotFoundException("Image not found for the given id");
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    FlavourLimit createFlavourLimit(@Valid FlavourLimitInput input) {
+        final FlavourLimit flavourLimit = mapper.map(input, FlavourLimit.class);
+        flavourLimitService.save(flavourLimit);
+        return flavourLimit;
+    }
+
+    /**
+     * Update a flavourLimit
+     *
+     * @param id    the flavourLimit id
+     * @param input the flavourLimit properties
+     * @return the updated created flavourLimit
+     * @throws EntityNotFoundException thrown if the given the flavourLimit id was not found
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    FlavourLimit updateFlavourLimit(Long id, @Valid FlavourLimitInput input) throws EntityNotFoundException, InvalidInputException {
+        final FlavourLimit flavourLimit = this.flavourLimitService.getById(id);
+        if (flavourLimit == null) {
+            throw new EntityNotFoundException("FlavourLimit was not found for the given id");
         }
-        image.setDeleted(true);
-        imageService.save(image);
-        return image;
+
+        final Flavour flavour = this.flavourService.getById(input.getFlavourId());
+        if (flavour == null) {
+            throw new EntityNotFoundException("Flavour not found for the given id");
+        }
+
+        String objectType = input.getObjectType();
+        if (!objectType.equals("INSTRUMENT")) {
+            throw new InvalidInputException("ObjectType is not valid for FlavourLimit");
+        }
+
+        final Instrument instrument = instrumentService.getById(input.getObjectId());
+        if (instrument == null) {
+            throw new EntityNotFoundException("Instrument not found for the given id");
+        }
+
+        flavourLimit.setFlavour(flavour);
+        flavourLimit.setObjectId(input.getObjectId());
+        flavourLimit.setObjectType(input.getObjectType());
+        flavourLimitService.save(flavourLimit);
+        return flavourLimit;
+    }
+
+    /**
+     * Delete a flavourLimit for a given id
+     *
+     * @param id the flavourLimit id
+     * @return the deleted flavourLimit
+     * @throws EntityNotFoundException thrown if the flavourLimit is not found
+     */
+    FlavourLimit deleteFlavourLimit(Long id) throws EntityNotFoundException {
+        final FlavourLimit flavourLimit = flavourLimitService.getById(id);
+        if (flavourLimit == null) {
+            throw new EntityNotFoundException("FlavourLimit not found for the given id");
+        }
+        flavourLimitService.delete(flavourLimit);
+        return flavourLimit;
+    }
+
+    /**
+     * Create a new securityGroup
+     *
+     * @param input the securityGroup name
+     * @return the newly created securityGroup
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    SecurityGroup createSecurityGroup(String input) {
+        final SecurityGroup securityGroup = new SecurityGroup(input);
+        securityGroupService.save(securityGroup);
+        return securityGroup;
+    }
+
+    /**
+     * Update a securityGroup
+     *
+     * @param id    the securityGroup id
+     * @param input the securityGroup name
+     * @return the updated created securityGroup
+     * @throws EntityNotFoundException thrown if the given the securityGroup id was not found
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    SecurityGroup updateSecurityGroup(Long id, String input) throws EntityNotFoundException {
+        final SecurityGroup securityGroup = this.securityGroupService.getById(id);
+        if (securityGroup == null) {
+            throw new EntityNotFoundException("SecurityGroup was not found for the given id");
+        }
+
+        // TODO Check that security group exists
+
+        securityGroup.setName(input);
+
+        securityGroupService.save(securityGroup);
+        return securityGroup;
+    }
+
+    /**
+     * Delete a securityGroup for a given id
+     *
+     * @param id the securityGroup id
+     * @return the deleted securityGroup
+     * @throws EntityNotFoundException thrown if the securityGroup is not found
+     */
+    SecurityGroup deleteSecurityGroup(Long id) throws EntityNotFoundException {
+        final SecurityGroup securityGroup = securityGroupService.getById(id);
+        if (securityGroup == null) {
+            throw new EntityNotFoundException("SecurityGroup not found for the given id");
+        }
+        securityGroupService.delete(securityGroup);
+        return securityGroup;
+    }
+
+    /**
+     * Create a new securityGroupFilter
+     *
+     * @param input the securityGroupFilter properties
+     * @return the newly created securityGroupFilter
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) {
+        final SecurityGroupFilter securityGroupFilter = mapper.map(input, SecurityGroupFilter.class);
+        securityGroupFilterService.save(securityGroupFilter);
+        return securityGroupFilter;
+    }
+
+    /**
+     * Update a securityGroupFilter
+     *
+     * @param id    the securityGroupFilter id
+     * @param input the securityGroupFilter properties
+     * @return the updated created securityGroupFilter
+     * @throws EntityNotFoundException thrown if the given the securityGroupFilter id was not found
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    SecurityGroupFilter updateSecurityGroupFilter(Long id, @Valid SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
+        final SecurityGroupFilter securityGroupFilter = this.securityGroupFilterService.getById(id);
+        if (securityGroupFilter == null) {
+            throw new EntityNotFoundException("SecurityGroupFilter was not found for the given id");
+        }
+
+        final SecurityGroup securityGroup = this.securityGroupService.getById(input.getSecurityGroupId());
+        if (securityGroup == null) {
+            throw new EntityNotFoundException("SecurityGroup not found for the given id");
+        }
+
+        String objectType = input.getObjectType();
+        final String[] validObjectTypes = {"INSTRUMENT", "ROLE"};
+        if (!Arrays.asList(validObjectTypes).contains(objectType)) {
+            throw new InvalidInputException("ObjectType is not valid for SecurityGroupFilter");
+        }
+
+        // Check objectIds are valid
+        if (objectType.equals("INSTRUMENT") && instrumentService.getById(input.getObjectId()) == null) {
+            throw new EntityNotFoundException("Instrument not found for the given id");
+
+        } else if (objectType.equals("ROLE") && roleService.getById(input.getObjectId()) == null) {
+            throw new EntityNotFoundException("Role not found for the given id");
+        }
+
+        securityGroupFilter.setSecurityGroup(securityGroup);
+        securityGroupFilter.setObjectId(input.getObjectId());
+        securityGroupFilter.setObjectType(input.getObjectType());
+        securityGroupFilterService.save(securityGroupFilter);
+        return securityGroupFilter;
+    }
+
+    /**
+     * Delete a securityGroupFilter for a given id
+     *
+     * @param id the securityGroupFilter id
+     * @return the deleted securityGroupFilter
+     * @throws EntityNotFoundException thrown if the securityGroupFilter is not found
+     */
+    SecurityGroupFilter deleteSecurityGroupFilter(Long id) throws EntityNotFoundException {
+        final SecurityGroupFilter securityGroupFilter = securityGroupFilterService.getById(id);
+        if (securityGroupFilter == null) {
+            throw new EntityNotFoundException("SecurityGroupFilter not found for the given id");
+        }
+        securityGroupFilterService.delete(securityGroupFilter);
+        return securityGroupFilter;
     }
 
     /**

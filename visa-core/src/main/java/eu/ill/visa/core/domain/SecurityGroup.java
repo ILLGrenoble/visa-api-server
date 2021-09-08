@@ -12,6 +12,10 @@ public class SecurityGroup {
     public SecurityGroup() {
     }
 
+    public SecurityGroup(String name) {
+        this.name = name;
+    }
+
     public Long getId() {
         return id;
     }

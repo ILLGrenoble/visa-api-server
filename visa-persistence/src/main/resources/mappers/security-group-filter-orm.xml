@@ -16,6 +16,9 @@
     <named-query name="securityGroupFilter.getAll">
         <query>SELECT l FROM SecurityGroupFilter l</query>
     </named-query>
+    <named-query name="securityGroupFilter.countAll">
+        <query>SELECT count(sgf.id) FROM SecurityGroupFilter sgf</query>
+    </named-query>
 
     <entity class="eu.ill.visa.core.domain.SecurityGroupFilter">
         <table name="security_group_filter"/>

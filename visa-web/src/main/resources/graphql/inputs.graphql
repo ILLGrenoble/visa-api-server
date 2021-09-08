@@ -51,6 +51,18 @@ input UpdatePlanInput {
     preset: Boolean!
 }
 
+input FlavourLimitInput {
+    flavourId: Int!
+    objectId: Int!
+    objectType: String!
+}
+
+input SecurityGroupFilterInput {
+    securityGroupId: Int!
+    objectId: Int!
+    objectType: String!
+}
+
 input Parameter {
     name: String
     value: String

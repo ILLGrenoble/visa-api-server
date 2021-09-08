@@ -39,6 +39,9 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final ExperimentService            experimentService;
     private final FlavourService               flavourService;
     private final ImageService                 imageService;
+    private final SecurityGroupService         securityGroupService;
+    private final SecurityGroupFilterService   securityGroupFilterService;
+    private final FlavourLimitService          flavourLimitService;
     private final InstanceService              instanceService;
     private final UserService                  userService;
     private final ImageProtocolService         imageProtocolService;
@@ -57,6 +60,9 @@ public class QueryResolver implements GraphQLQueryResolver {
         final ExperimentService experimentService,
         final FlavourService flavourService,
         final ImageService imageService,
+        final SecurityGroupService securityGroupService,
+        final SecurityGroupFilterService securityGroupFilterService,
+        final FlavourLimitService flavourLimitService,
         final InstanceService instanceService,
         final UserService userService,
         final PlanService planService,
@@ -71,6 +77,9 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.experimentService = experimentService;
         this.flavourService = flavourService;
         this.imageService = imageService;
+        this.securityGroupService = securityGroupService;
+        this.securityGroupFilterService = securityGroupFilterService;
+        this.flavourLimitService = flavourLimitService;
         this.instanceService = instanceService;
         this.userService = userService;
         this.planService = planService;
@@ -150,6 +159,99 @@ public class QueryResolver implements GraphQLQueryResolver {
     public Long countImages() throws DataFetchingException {
         try {
             return imageService.countAllForAdmin();
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Get a list of flavourLimits
+     *
+     * @param pagination the pagination (limit and offset)
+     * @return a list of flavourLimits
+     * @throws DataFetchingException thrown if there was an error fetching the results
+     */
+    public Connection<FlavourLimit> flavourLimits(final Pagination pagination) throws DataFetchingException {
+        try {
+            final List<FlavourLimit> results = flavourLimitService.getAll(pagination);
+            final PageInfo pageInfo = new PageInfo(flavourLimitService.countAll(), pagination.getLimit(), pagination.getOffset());
+            return new Connection<>(pageInfo, results);
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Count all flavourLimits
+     *
+     * @return a count of flavourLimits
+     * @throws DataFetchingException thrown if there was an error fetching the result
+     */
+    public Long countFlavourLimits() throws DataFetchingException {
+        try {
+            return flavourLimitService.countAll();
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Get a list of securityGroups
+     *
+     * @param pagination the pagination (limit and offset)
+     * @return a list of securityGroups
+     * @throws DataFetchingException thrown if there was an error fetching the results
+     */
+    public Connection<SecurityGroup> securityGroups(final Pagination pagination) throws DataFetchingException {
+        try {
+            final List<SecurityGroup> results = securityGroupService.getAll(pagination);
+            final PageInfo pageInfo = new PageInfo(securityGroupService.countAll(), pagination.getLimit(), pagination.getOffset());
+            return new Connection<>(pageInfo, results);
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Count all securityGroups
+     *
+     * @return a count of securityGroups
+     * @throws DataFetchingException thrown if there was an error fetching the result
+     */
+    public Long countSecurityGroups() throws DataFetchingException {
+        try {
+            return securityGroupService.countAll();
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Get a list of securityGroupFilters
+     *
+     * @param pagination the pagination (limit and offset)
+     * @return a list of securityGroupFilters
+     * @throws DataFetchingException thrown if there was an error fetching the results
+     */
+    public Connection<SecurityGroupFilter> securityGroupFilters(final Pagination pagination) throws DataFetchingException {
+        try {
+            final List<SecurityGroupFilter> results = securityGroupFilterService.getAll(pagination);
+            final PageInfo pageInfo = new PageInfo(securityGroupFilterService.countAll(), pagination.getLimit(), pagination.getOffset());
+            return new Connection<>(pageInfo, results);
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Count all securityGroupFilters
+     *
+     * @return a count of securityGroupFilters
+     * @throws DataFetchingException thrown if there was an error fetching the result
+     */
+    public Long countSecurityGroupFilters() throws DataFetchingException {
+        try {
+            return securityGroupFilterService.countAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

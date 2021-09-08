@@ -19,9 +19,21 @@ type Query {
     images ( pagination: Pagination!) : ImageConnection!  @isAuthorised(role: "ADMIN")
     # Count all images
     countImages: Int!  @isAuthorised(role: "ADMIN")
+    # Get all flavourLimits
+    flavourLimits (pagination: Pagination!) : FlavourLimitConnection! @isAuthorised(role: "ADMIN")
+    # Count all flavourLimits
+    countFlavourLimits: Int!  @isAuthorised(role: "ADMIN")
+    # Get all securityGroups
+    securityGroups (pagination: Pagination!) : SecurityGroupConnection! @isAuthorised(role: "ADMIN")
+    # Count all securityGroups
+    countSecurityGroups: Int!  @isAuthorised(role: "ADMIN")
+    # Get all securityGroupFilters
+    securityGroupFilters (pagination: Pagination!) : SecurityGroupFilterConnection! @isAuthorised(role: "ADMIN")
+    # Count all securityGroupFilters
+    countSecurityGroupFilters: Int!  @isAuthorised(role: "ADMIN")
     # Get all instruments
     instruments: [Instrument!]
-    # Get all image protcocols
+    # Get all image protocols
     imageProtocols: [ImageProtocol]  @isAuthorised(role: "ADMIN")
     # Get all instances
     instances (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : InstanceConnection!  @isAuthorised(role: "ADMIN")
@@ -52,7 +64,7 @@ type Query {
     memory: Memory! @isAuthorised(role: "ADMIN")
     # Get images from cloud provider
     cloudImages: [CloudImage] @isAuthorised(role: "ADMIN")
-    # Get flavours from cloud prrovider
+    # Get flavours from cloud provider
     cloudFlavours: [CloudFlavour] @isAuthorised(role: "ADMIN")
     # Get cloud limits
     cloudLimits: CloudLimit @isAuthorised(role: "ADMIN")
@@ -79,15 +91,33 @@ type Mutation {
     # Create an image
     createImage(input: CreateImageInput!): Image! @isAuthorised(role: "ADMIN")
     # Update an image
-    updateImage(id: Int!,input: UpdateImageInput!): Image! @isAuthorised(role: "ADMIN")
+    updateImage(id: Int!, input: UpdateImageInput!): Image! @isAuthorised(role: "ADMIN")
     # Delete an image
     deleteImage(id: Int!) : Image! @isAuthorised(role: "ADMIN")
     # Create a flavour
     createFlavour(input: CreateFlavourInput!): Flavour!  @isAuthorised(role: "ADMIN")
     # Update an flavour
-    updateFlavour(id: Int!,input: UpdateFlavourInput!): Flavour! @isAuthorised(role: "ADMIN")
+    updateFlavour(id: Int!, input: UpdateFlavourInput!): Flavour! @isAuthorised(role: "ADMIN")
     # Delete a flavour
     deleteFlavour(id: Int!) : Flavour! @isAuthorised(role: "ADMIN")
+    # Create a flavourLimit
+    createFlavourLimit(input: FlavourLimitInput!): FlavourLimit!  @isAuthorised(role: "ADMIN")
+    # Update a flavourLimit
+    updateFlavourLimit(id: Int!, input: FlavourLimitInput!): FlavourLimit! @isAuthorised(role: "ADMIN")
+    # Delete a flavourLimit
+    deleteFlavourLimit(id: Int!) : FlavourLimit! @isAuthorised(role: "ADMIN")
+    # Create a securityGroup
+    createSecurityGroup(input: String!): SecurityGroup!  @isAuthorised(role: "ADMIN")
+    # Update a securityGroup
+    updateSecurityGroup(id: Int!, input: String!): SecurityGroup! @isAuthorised(role: "ADMIN")
+    # Delete a securityGroup
+    deleteSecurityGroup(id: Int!) : SecurityGroup! @isAuthorised(role: "ADMIN")
+    # Create a securityGroupFilter
+    createSecurityGroupFilter(input: SecurityGroupFilterInput!): SecurityGroupFilter!  @isAuthorised(role: "ADMIN")
+    # Update a securityGroupFilter
+    updateSecurityGroupFilter(id: Int!, input: SecurityGroupFilterInput!): SecurityGroupFilter! @isAuthorised(role: "ADMIN")
+    # Delete a securityGroupFilter
+    deleteSecurityGroupFilter(id: Int!) : SecurityGroupFilter! @isAuthorised(role: "ADMIN")
     # Create a plan
     createPlan(input: CreatePlanInput): Plan! @isAuthorised(role: "ADMIN")
     # Update a plan
@@ -111,7 +141,7 @@ type Mutation {
     # Create a system notification
     createSystemNotification(input: CreateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a system notification
-    updateSystemNotification(id: Int!,input: UpdateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
+    updateSystemNotification(id: Int!, input: UpdateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
     # Delete a system notification
     deleteSystemNotification(id: Int!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a user role

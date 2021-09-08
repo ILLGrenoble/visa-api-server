@@ -83,6 +83,25 @@ type Plan {
     preset: Boolean!
 }
 
+type SecurityGroup {
+    id: Int!
+    name: String!
+}
+
+type SecurityGroupFilter {
+    id: Int!
+    securityGroup: SecurityGroup!
+    objectId: Int!
+    objectType: String!
+}
+
+type FlavourLimit {
+    id: Int!
+    flavour: Flavour!
+    objectId: Int!
+    objectType: String!
+}
+
 type ImageProtocol {
     id: Int!
     name: String!
@@ -218,6 +237,21 @@ type PlanConnection {
 type ImageConnection {
     pageInfo: PageInfo
     data: [Image]
+}
+
+type SecurityGroupConnection {
+    pageInfo: PageInfo
+    data: [SecurityGroup]
+}
+
+type SecurityGroupFilterConnection {
+    pageInfo: PageInfo
+    data: [SecurityGroupFilter]
+}
+
+type FlavourLimitConnection {
+    pageInfo: PageInfo
+    data: [FlavourLimit]
 }
 
 type InstanceStateCount {

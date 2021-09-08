@@ -4,12 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.business.http.SecurityGroupServiceClient;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.Role;
-import eu.ill.visa.core.domain.SecurityGroup;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.SecurityGroupRepository;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,8 +23,28 @@ public class SecurityGroupService {
     @Inject
     private SecurityGroupServiceClient securityGroupServiceClient;
 
+    public SecurityGroup getById(Long id) {
+        return this.repository.getById(id);
+    }
+
+    public void delete(SecurityGroup securityGroup) {
+        this.repository.delete(securityGroup);
+    }
+
+    public void save(@NotNull SecurityGroup securityGroup) {
+        this.repository.save(securityGroup);
+    }
+
     public List<SecurityGroup> getAll() {
         return this.repository.getAll();
+    }
+
+    public List<SecurityGroup> getAll(Pagination pagination) {
+        return this.repository.getAll(pagination);
+    }
+
+    public Long countAll() {
+        return repository.countAll();
     }
 
     public List<SecurityGroup> getAllForInstance(final Instance instance) {
