@@ -28,7 +28,7 @@ type Query {
     # Count all securityGroups
     countSecurityGroups: Int!  @isAuthorised(role: "ADMIN")
     # Get all securityGroupFilters
-    securityGroupFilters (pagination: Pagination!) : SecurityGroupFilterConnection! @isAuthorised(role: "ADMIN")
+    securityGroupFilters: [SecurityGroupFilter] @isAuthorised(role: "ADMIN")
     # Count all securityGroupFilters
     countSecurityGroupFilters: Int!  @isAuthorised(role: "ADMIN")
     # Get all instruments

@@ -98,6 +98,7 @@ type SecurityGroupFilter {
     securityGroup: SecurityGroup!
     objectId: Int!
     objectType: String!
+    objectName: String
 }
 
 type FlavourLimit {

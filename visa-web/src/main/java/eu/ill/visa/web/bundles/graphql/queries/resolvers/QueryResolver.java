@@ -231,15 +231,12 @@ public class QueryResolver implements GraphQLQueryResolver {
     /**
      * Get a list of securityGroupFilters
      *
-     * @param pagination the pagination (limit and offset)
      * @return a list of securityGroupFilters
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public Connection<SecurityGroupFilter> securityGroupFilters(final Pagination pagination) throws DataFetchingException {
+    public List<SecurityGroupFilter> securityGroupFilters() throws DataFetchingException {
         try {
-            final List<SecurityGroupFilter> results = securityGroupFilterService.getAll(pagination);
-            final PageInfo pageInfo = new PageInfo(securityGroupFilterService.countAll(), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
+            return securityGroupFilterService.getAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
