@@ -61,6 +61,11 @@ type CloudImage {
     createdAt: String!
 }
 
+type CloudSecurityGroup {
+    name: String!
+    integration: SecurityGroup
+}
+
 type Image {
     id: Int!
     name: String!

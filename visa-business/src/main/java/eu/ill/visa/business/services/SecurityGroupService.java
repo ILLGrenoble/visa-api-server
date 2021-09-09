@@ -39,6 +39,9 @@ public class SecurityGroupService {
         return this.repository.getAll();
     }
 
+    public SecurityGroup getByName(@NotNull final String name) {
+        return this.repository.getByName(name);
+    }
     public List<SecurityGroup> getAll(Pagination pagination) {
         return this.repository.getAll(pagination);
     }

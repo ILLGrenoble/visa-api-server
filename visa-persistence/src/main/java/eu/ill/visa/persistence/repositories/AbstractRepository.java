@@ -70,8 +70,6 @@ abstract class AbstractRepository<T> {
         return query.count();
     }
 
-
-
     public List<T> getAll(AbstractFilterQueryProvider<T> provider, QueryFilter filter, OrderBy orderBy, Pagination pagination) {
         final FilterQuery<T> query = createFilterQuery(provider, requireNonNullElseGet(filter, QueryFilter::new), orderBy, pagination);
         return query.getResultList();

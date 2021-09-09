@@ -7,9 +7,15 @@
     <named-query name="securityGroup.getById">
         <query>SELECT sg FROM SecurityGroup sg WHERE sg.id = :id</query>
     </named-query>
+
     <named-query name="securityGroup.getAll">
         <query>SELECT sg FROM SecurityGroup sg order by name</query>
     </named-query>
+
+    <named-query name="securityGroup.getByName">
+        <query>SELECT sg FROM SecurityGroup sg WHERE sg.name = :name</query>
+    </named-query>
+
     <named-query name="securityGroup.countAll">
         <query>SELECT count(sg.id) FROM SecurityGroup sg</query>
     </named-query>
@@ -22,7 +28,8 @@
         </query>
     </named-query>
 
-    <named-native-query name="securityGroup.getRoleBasedSecurityGroups" result-class="eu.ill.visa.core.domain.SecurityGroup">
+    <named-native-query name="securityGroup.getRoleBasedSecurityGroups"
+                        result-class="eu.ill.visa.core.domain.SecurityGroup">
         <query>
             <![CDATA[
                 SELECT DISTINCT sg.id, sg.name
@@ -37,7 +44,8 @@
         </query>
     </named-native-query>
 
-    <named-native-query name="securityGroup.getInstrumentBasedSecurityGroups" result-class="eu.ill.visa.core.domain.SecurityGroup">
+    <named-native-query name="securityGroup.getInstrumentBasedSecurityGroups"
+                        result-class="eu.ill.visa.core.domain.SecurityGroup">
         <query>
             <![CDATA[
                 SELECT DISTINCT sg.id, sg.name
@@ -49,7 +57,8 @@
         </query>
     </named-native-query>
 
-    <named-native-query name="securityGroup.getAllInstrumentBasedSecurityGroups" result-class="eu.ill.visa.core.domain.SecurityGroup">
+    <named-native-query name="securityGroup.getAllInstrumentBasedSecurityGroups"
+                        result-class="eu.ill.visa.core.domain.SecurityGroup">
         <query>
             <![CDATA[
                 SELECT DISTINCT sg.id, sg.name

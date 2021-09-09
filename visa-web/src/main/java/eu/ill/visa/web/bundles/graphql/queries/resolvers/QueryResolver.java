@@ -15,6 +15,7 @@ import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;
 import eu.ill.visa.web.bundles.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.bundles.graphql.exceptions.EntityNotFoundException;
+import eu.ill.visa.web.bundles.graphql.queries.domain.CloudSecurityGroup;
 import eu.ill.visa.web.bundles.graphql.queries.domain.InstanceStateCount;
 import eu.ill.visa.web.bundles.graphql.relay.Connection;
 import eu.ill.visa.web.bundles.graphql.relay.PageInfo;
@@ -31,25 +32,26 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class QueryResolver implements GraphQLQueryResolver {
 
-    private final InstrumentService            instrumentService;
-    private final ExperimentService            experimentService;
-    private final FlavourService               flavourService;
-    private final ImageService                 imageService;
-    private final SecurityGroupService         securityGroupService;
-    private final SecurityGroupFilterService   securityGroupFilterService;
-    private final FlavourLimitService          flavourLimitService;
-    private final InstanceService              instanceService;
-    private final UserService                  userService;
-    private final ImageProtocolService         imageProtocolService;
-    private final RoleService                  roleService;
-    private final CloudClient                  cloudClient;
-    private final Mapper                       mapper;
-    private final PlanService                  planService;
-    private final InstanceSessionMemberService instanceSessionMemberService;
+    private final InstrumentService             instrumentService;
+    private final ExperimentService             experimentService;
+    private final FlavourService                flavourService;
+    private final ImageService                  imageService;
+    private final SecurityGroupService          securityGroupService;
+    private final SecurityGroupFilterService    securityGroupFilterService;
+    private final FlavourLimitService           flavourLimitService;
+    private final InstanceService               instanceService;
+    private final UserService                   userService;
+    private final ImageProtocolService          imageProtocolService;
+    private final RoleService                   roleService;
+    private final CloudClient                   cloudClient;
+    private final Mapper                        mapper;
+    private final PlanService                   planService;
+    private final InstanceSessionMemberService  instanceSessionMemberService;
     private final InstanceJupyterSessionService instanceJupyterSessionService;
     private final SystemNotificationService     systemNotificationService;
 
@@ -565,15 +567,18 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
-     * Get cloud limits from the the cloud provider
+     * Get cloud security groups from the the cloud provider
      *
-     * @return a list of cloud limits
+     * @return a list of security groups
      */
-    public CompletableFuture<List<String>> cloudSecurityGroups() {
-        final CompletableFuture<List<String>> future = new CompletableFuture<>();
+    public CompletableFuture<List<CloudSecurityGroup>> cloudSecurityGroups() {
+        final CompletableFuture<List<CloudSecurityGroup>> future = new CompletableFuture<>();
         runAsync(() -> {
             try {
-                future.complete(cloudClient.securityGroups());
+                final List<CloudSecurityGroup> cloudSecurityGroups = cloudClient.securityGroups().stream()
+                    .map(CloudSecurityGroup::new)
+                    .collect(toList());
+                future.complete(cloudSecurityGroups);
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }
