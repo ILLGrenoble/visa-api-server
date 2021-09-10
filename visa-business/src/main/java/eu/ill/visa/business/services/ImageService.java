@@ -57,6 +57,10 @@ public class ImageService {
         return this.repository.getAllForAdmin(pagination);
     }
 
+    public List<Image> getAllForAdmin() {
+        return this.repository.getAllForAdmin(null);
+    }
+
     public Long countAll() {
         return repository.countAll(new QueryFilter());
     }

@@ -7,7 +7,6 @@ import eu.ill.visa.scheduler.SchedulerConfiguration;
 import eu.ill.visa.security.SecurityConfiguration;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.web.bundles.graphql.GraphQLWebServletConfiguration;
-import eu.ill.visa.web.bundles.swagger.SwaggerBundleConfiguration;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 
@@ -24,10 +23,6 @@ public class WebConfiguration extends Configuration {
     @Valid
     @NotNull
     private SecurityConfiguration securityConfiguration;
-
-    @NotNull
-    @Valid
-    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @NotNull
     @Valid
@@ -64,11 +59,6 @@ public class WebConfiguration extends Configuration {
     @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory() {
         return this.dataSourceFactory;
-    }
-
-    @JsonProperty("swagger")
-    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
-        return this.swaggerBundleConfiguration;
     }
 
     @JsonProperty("cloud")

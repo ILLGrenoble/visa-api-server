@@ -230,36 +230,6 @@ type ExperimentConnection {
     data: [Experiment]
 }
 
-type FlavourConnection {
-    pageInfo: PageInfo
-    data: [Flavour]
-}
-
-type PlanConnection {
-    pageInfo: PageInfo
-    data: [Plan]
-}
-
-type ImageConnection {
-    pageInfo: PageInfo
-    data: [Image]
-}
-
-type SecurityGroupConnection {
-    pageInfo: PageInfo
-    data: [SecurityGroup]
-}
-
-type SecurityGroupFilterConnection {
-    pageInfo: PageInfo
-    data: [SecurityGroupFilter]
-}
-
-type FlavourLimitConnection {
-    pageInfo: PageInfo
-    data: [FlavourLimit]
-}
-
 type InstanceStateCount {
     state: InstanceState!
     count: Int!
@@ -272,13 +242,6 @@ type UserConnection {
 
 type Message {
     message: String!
-}
-
-type Memory {
-    total: Int!
-    max: Int!
-    free: Int!
-    used: Int!
 }
 
 type InstanceSession {

@@ -106,15 +106,12 @@ public class QueryResolver implements GraphQLQueryResolver {
     /**
      * Get a list of flavours
      *
-     * @param pagination the pagination (limit and offset)
      * @return a list of flavours
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public Connection<Flavour> flavours(final Pagination pagination) throws DataFetchingException {
+    public List<Flavour> flavours() throws DataFetchingException {
         try {
-            final List<Flavour> results = flavourService.getAll(pagination);
-            final PageInfo pageInfo = new PageInfo(flavourService.countAll(), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
+            return flavourService.getAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -137,16 +134,12 @@ public class QueryResolver implements GraphQLQueryResolver {
     /**
      * Get a list of images
      *
-     * @param pagination the pagination (limit and offset)
      * @return a list of images
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public Connection<Image> images(final Pagination pagination) throws DataFetchingException {
+    public List<Image> images() throws DataFetchingException {
         try {
-            final List<Image> results = imageService.getAllForAdmin(pagination
-            );
-            final PageInfo pageInfo = new PageInfo(imageService.countAllForAdmin(), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
+            return imageService.getAllForAdmin();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -167,17 +160,14 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
-     * Get a list of flavourLimits
+     * Get a list of flavour limits
      *
-     * @param pagination the pagination (limit and offset)
-     * @return a list of flavourLimits
+     * @return a list of flavour limits
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public Connection<FlavourLimit> flavourLimits(final Pagination pagination) throws DataFetchingException {
+    public List<FlavourLimit> flavourLimits() throws DataFetchingException {
         try {
-            final List<FlavourLimit> results = flavourLimitService.getAll(pagination);
-            final PageInfo pageInfo = new PageInfo(flavourLimitService.countAll(), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
+            return flavourLimitService.getAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -200,15 +190,12 @@ public class QueryResolver implements GraphQLQueryResolver {
     /**
      * Get a list of securityGroups
      *
-     * @param pagination the pagination (limit and offset)
      * @return a list of securityGroups
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public Connection<SecurityGroup> securityGroups(final Pagination pagination) throws DataFetchingException {
+    public List<SecurityGroup> securityGroups() throws DataFetchingException {
         try {
-            final List<SecurityGroup> results = securityGroupService.getAll(pagination);
-            final PageInfo pageInfo = new PageInfo(securityGroupService.countAll(), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
+            return securityGroupService.getAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -488,19 +475,6 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
-     * Get memory stats for the JVM
-     *
-     * @return the memory stats
-     */
-    public Memory memory() {
-        final Runtime runTime = Runtime.getRuntime();
-        final long total = runTime.totalMemory() / 1024 / 1024;
-        final long max = runTime.maxMemory() / 1024 / 1024;
-        final long free = runTime.freeMemory() / 1024 / 1024;
-        return new Memory(total, max, free);
-    }
-
-    /**
      * Get the logged in user
      *
      * @param environment the graphql environment
@@ -587,15 +561,12 @@ public class QueryResolver implements GraphQLQueryResolver {
     /**
      * Get a list of plans
      *
-     * @param pagination the pagination (limit and offset)
      * @return a list of plans
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public Connection<Plan> plans(final Pagination pagination) throws DataFetchingException {
+    public List<Plan> plans() throws DataFetchingException {
         try {
-            final List<Plan> results = planService.getAllForAdmin(pagination);
-            final PageInfo pageInfo = new PageInfo(planService.countAllForAdmin(), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
+            return planService.getAllForAdmin();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

@@ -6,28 +6,28 @@ type Query {
     # The authenticated user
     viewer: User
     # Get all plans
-    plans (pagination: Pagination!) : PlanConnection!  @isAuthorised(role: "ADMIN")
+    plans: [Plan]!  @isAuthorised(role: "ADMIN")
     # Get experiments
     experiments (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : ExperimentConnection!  @isAuthorised(role: "ADMIN")
     # Count experiments
     countExperiments (filter: QueryFilter) : Int!  @isAuthorised(role: "ADMIN")
     # Get all flavours
-    flavours (pagination: Pagination!) : FlavourConnection!  @isAuthorised(role: "ADMIN")
+    flavours : [Flavour]!  @isAuthorised(role: "ADMIN")
     # Count all flavours
     countFlavours: Int!  @isAuthorised(role: "ADMIN")
     # Get all images
-    images ( pagination: Pagination!) : ImageConnection!  @isAuthorised(role: "ADMIN")
+    images : [Image]!  @isAuthorised(role: "ADMIN")
     # Count all images
     countImages: Int!  @isAuthorised(role: "ADMIN")
-    # Get all flavourLimits
-    flavourLimits (pagination: Pagination!) : FlavourLimitConnection! @isAuthorised(role: "ADMIN")
-    # Count all flavourLimits
+    # Get all flavour Limits
+    flavourLimits: [FlavourLimit]! @isAuthorised(role: "ADMIN")
+    # Count all flavour limits
     countFlavourLimits: Int!  @isAuthorised(role: "ADMIN")
-    # Get all securityGroups
-    securityGroups (pagination: Pagination!) : SecurityGroupConnection! @isAuthorised(role: "ADMIN")
-    # Count all securityGroups
+    # Get all security groups
+    securityGroups: [SecurityGroup]! @isAuthorised(role: "ADMIN")
+    # Count all security groups
     countSecurityGroups: Int!  @isAuthorised(role: "ADMIN")
-    # Get all securityGroupFilters
+    # Get all security group filters
     securityGroupFilters: [SecurityGroupFilter] @isAuthorised(role: "ADMIN")
     # Count all securityGroupFilters
     countSecurityGroupFilters: Int!  @isAuthorised(role: "ADMIN")
@@ -60,8 +60,6 @@ type Query {
     searchForUserByLastName(lastName: String!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
     # Get all roles
     roles: [Role]  @isAuthorised(role: "ADMIN")
-    # Get memory information for the server instance
-    memory: Memory! @isAuthorised(role: "ADMIN")
     # Get images from cloud provider
     cloudImages: [CloudImage] @isAuthorised(role: "ADMIN")
     # Get flavours from cloud provider
@@ -84,9 +82,8 @@ type Query {
     countInstancesByFlavours: [NumberInstancesByFlavour]  @isAuthorised(role: "ADMIN")
     # Count instances by images
     countInstancesByImages: [NumberInstancesByImage]  @isAuthorised(role: "ADMIN")
-    # Get system notification
+    # Get system notifications
     systemNotifications: [SystemNotification] @isAuthorised(role: "ADMIN")
-
 }
 
 type Mutation {

@@ -51,6 +51,9 @@ public class ImageRepository extends AbstractRepository<Image> {
         return query.getResultList();
     }
 
+    public List<Image> getAllForAdmin() {
+       return getAllForAdmin(null);
+    }
 
 
     public Long countAll(QueryFilter filter) {

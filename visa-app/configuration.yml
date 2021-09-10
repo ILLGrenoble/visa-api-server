@@ -75,11 +75,6 @@ logging:
       stackTracePrefix: \t
       logFormat: "${VISA_LOGGING_SYSLOG_FORMAT}"
       timeZone: ${VISA_LOGGING_TIMEZONE:-'CET'}
-swagger:
-  title: ${VISA_SWAGGER_TITLE}
-  comments: ${VISA_SWAGGER_DESCRIPTION}
-  contactEmail: ${VISA_SWAGGER_CONTACT_EMAIL}
-  resourcePackage: eu.ill.visa.web.resources
 
 security:
   token:

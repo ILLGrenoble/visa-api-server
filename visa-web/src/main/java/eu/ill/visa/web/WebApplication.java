@@ -7,8 +7,6 @@ import eu.ill.visa.cloud.CloudModule;
 import eu.ill.visa.scheduler.SchedulerModule;
 import eu.ill.visa.security.SecurityModule;
 import eu.ill.visa.vdi.VirtualDesktopModule;
-import eu.ill.visa.web.bundles.swagger.SwaggerBundle;
-import eu.ill.visa.web.bundles.swagger.SwaggerBundleConfiguration;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -47,7 +45,6 @@ public class WebApplication extends Application<WebConfiguration> {
     }
 
     private void addBundles(Bootstrap<WebConfiguration> bootstrap) {
-        bootstrap.addBundle(configureSwaggerBundle());
         GuiceBundle<WebConfiguration> bundle = configureGuiceBundle();
         bootstrap.addBundle(bundle);
         bootstrap.addBundle(new MultiPartBundle());
@@ -65,15 +62,6 @@ public class WebApplication extends Application<WebConfiguration> {
             .modules(new ValidationModule())
             .useWebInstallers()
             .build();
-    }
-
-    private SwaggerBundle<WebConfiguration> configureSwaggerBundle() {
-        return new SwaggerBundle<WebConfiguration>() {
-            @Override
-            public SwaggerBundleConfiguration getSwaggerBundleConfiguration(WebConfiguration configuration) {
-                return configuration.getSwaggerBundleConfiguration();
-            }
-        };
     }
 
     private void registerCors(final WebConfiguration configuration, final Environment environment) {
