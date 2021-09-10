@@ -3,8 +3,7 @@ package eu.ill.visa.persistence.repositories;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import eu.ill.visa.core.domain.*;
-import eu.ill.visa.persistence.providers.FlavourLimitFilterProvider;
+import eu.ill.visa.core.domain.FlavourLimit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -23,25 +22,6 @@ public class FlavourLimitRepository extends AbstractRepository<FlavourLimit> {
         final TypedQuery<FlavourLimit> query = getEntityManager().createNamedQuery("flavourLimit.getAll", FlavourLimit.class);
         return query.getResultList();
     }
-
-    public List<FlavourLimit> getAll(Pagination pagination) {
-        return this.getAll(null, null, pagination);
-    }
-
-    public List<FlavourLimit> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
-        final FlavourLimitFilterProvider provider = new FlavourLimitFilterProvider(getEntityManager());
-        return super.getAll(provider, filter, orderBy, pagination);
-    }
-
-    public Long countAll() {
-        return this.countAll(null);
-    }
-
-    public Long countAll(QueryFilter filter) {
-        final FlavourLimitFilterProvider provider = new FlavourLimitFilterProvider(getEntityManager());
-        return super.countAll(provider, filter);
-    }
-
 
     public FlavourLimit getById(final Long id) {
         try {

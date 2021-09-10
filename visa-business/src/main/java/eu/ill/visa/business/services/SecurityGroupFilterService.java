@@ -3,7 +3,6 @@ package eu.ill.visa.business.services;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
-import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.SecurityGroupFilter;
 import eu.ill.visa.persistence.repositories.SecurityGroupFilterRepository;
 
@@ -31,13 +30,5 @@ public class SecurityGroupFilterService {
 
     public List<SecurityGroupFilter> getAll() {
         return this.repository.getAll();
-    }
-
-    public List<SecurityGroupFilter> getAll(Pagination pagination) {
-        return this.repository.getAll(pagination);
-    }
-
-    public Long countAll() {
-        return repository.countAll();
     }
 }

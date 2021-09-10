@@ -3,8 +3,6 @@ package eu.ill.visa.persistence.repositories;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import eu.ill.visa.core.domain.ImageProtocol;
-import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.SecurityGroup;
 import eu.ill.visa.core.domain.User;
 
@@ -25,22 +23,6 @@ public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
     public List<SecurityGroup> getAll() {
         final TypedQuery<SecurityGroup> query = getEntityManager().createNamedQuery("securityGroup.getAll", SecurityGroup.class);
         return query.getResultList();
-    }
-
-    public List<SecurityGroup> getAll(Pagination pagination) {
-        final TypedQuery<SecurityGroup> query = getEntityManager().createNamedQuery("securityGroup.getAll", SecurityGroup.class);
-        if (pagination != null) {
-            final int offset = pagination.getOffset();
-            final int limit = pagination.getLimit();
-            query.setFirstResult(offset);
-            query.setMaxResults(limit);
-        }
-        return query.getResultList();
-    }
-
-    public Long countAll() {
-        TypedQuery<Long> query = getEntityManager().createNamedQuery("securityGroup.countAll", Long.class);
-        return query.getSingleResult();
     }
 
     public SecurityGroup getById(Long id) {

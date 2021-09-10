@@ -42,13 +42,6 @@ public class SecurityGroupService {
     public SecurityGroup getByName(@NotNull final String name) {
         return this.repository.getByName(name);
     }
-    public List<SecurityGroup> getAll(Pagination pagination) {
-        return this.repository.getAll(pagination);
-    }
-
-    public Long countAll() {
-        return repository.countAll();
-    }
 
     public List<SecurityGroup> getAllForInstance(final Instance instance) {
         User owner = instance.getOwner().getUser();

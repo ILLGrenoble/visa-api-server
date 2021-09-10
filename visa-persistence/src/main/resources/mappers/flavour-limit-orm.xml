@@ -6,15 +6,29 @@
 
 
     <named-query name="flavourLimit.getById">
-        <query>SELECT l FROM FlavourLimit l WHERE l.id = :id</query>
+        <query>
+            SELECT l
+            FROM FlavourLimit l
+            WHERE l.id = :id
+            AND l.flavour.deleted = false
+        </query>
     </named-query>
 
     <named-query name="flavourLimit.getByObjectIdAndObjectType">
-        <query>SELECT l FROM FlavourLimit l WHERE l.id = :id</query>
+        <query>
+            SELECT l
+            FROM FlavourLimit l
+            WHERE l.id = :id
+            AND l.flavour.deleted = false
+        </query>
     </named-query>
 
     <named-query name="flavourLimit.getAll">
-        <query>SELECT l FROM FlavourLimit l</query>
+        <query>
+            SELECT l
+            FROM FlavourLimit l
+            WHERE l.flavour.deleted = false
+        </query>
     </named-query>
 
     <entity class="eu.ill.visa.core.domain.FlavourLimit">

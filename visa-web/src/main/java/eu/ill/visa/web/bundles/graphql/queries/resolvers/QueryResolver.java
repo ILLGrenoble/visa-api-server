@@ -174,20 +174,6 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
-     * Count all flavourLimits
-     *
-     * @return a count of flavourLimits
-     * @throws DataFetchingException thrown if there was an error fetching the result
-     */
-    public Long countFlavourLimits() throws DataFetchingException {
-        try {
-            return flavourLimitService.countAll();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
-    }
-
-    /**
      * Get a list of securityGroups
      *
      * @return a list of securityGroups
@@ -202,20 +188,6 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
-     * Count all securityGroups
-     *
-     * @return a count of securityGroups
-     * @throws DataFetchingException thrown if there was an error fetching the result
-     */
-    public Long countSecurityGroups() throws DataFetchingException {
-        try {
-            return securityGroupService.countAll();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
-    }
-
-    /**
      * Get a list of securityGroupFilters
      *
      * @return a list of securityGroupFilters
@@ -224,20 +196,6 @@ public class QueryResolver implements GraphQLQueryResolver {
     public List<SecurityGroupFilter> securityGroupFilters() throws DataFetchingException {
         try {
             return securityGroupFilterService.getAll();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
-    }
-
-    /**
-     * Count all securityGroupFilters
-     *
-     * @return a count of securityGroupFilters
-     * @throws DataFetchingException thrown if there was an error fetching the result
-     */
-    public Long countSecurityGroupFilters() throws DataFetchingException {
-        try {
-            return securityGroupFilterService.countAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

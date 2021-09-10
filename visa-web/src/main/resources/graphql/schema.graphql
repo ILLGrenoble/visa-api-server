@@ -21,16 +21,10 @@ type Query {
     countImages: Int!  @isAuthorised(role: "ADMIN")
     # Get all flavour Limits
     flavourLimits: [FlavourLimit]! @isAuthorised(role: "ADMIN")
-    # Count all flavour limits
-    countFlavourLimits: Int!  @isAuthorised(role: "ADMIN")
     # Get all security groups
     securityGroups: [SecurityGroup]! @isAuthorised(role: "ADMIN")
-    # Count all security groups
-    countSecurityGroups: Int!  @isAuthorised(role: "ADMIN")
     # Get all security group filters
     securityGroupFilters: [SecurityGroupFilter] @isAuthorised(role: "ADMIN")
-    # Count all securityGroupFilters
-    countSecurityGroupFilters: Int!  @isAuthorised(role: "ADMIN")
     # Get all instruments
     instruments: [Instrument!]
     # Get all image protocols
