@@ -1,8 +1,6 @@
 package eu.ill.visa.web.controllers;
 
 import eu.ill.visa.business.services.InstanceNameGeneratorService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +14,6 @@ import java.io.IOException;
 @Path("/helpers")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(tags = {"Helpers"})
 @PermitAll
 public class HelperController extends AbstractController {
 
@@ -31,7 +28,6 @@ public class HelperController extends AbstractController {
 
     @GET
     @Path("/random_instance_name")
-    @ApiOperation(value = "Get a random name")
     public Response get() {
         try {
             return createResponse(instanceNameGeneratorService.generate());

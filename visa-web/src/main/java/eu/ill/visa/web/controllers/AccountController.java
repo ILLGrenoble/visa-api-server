@@ -2,12 +2,17 @@ package eu.ill.visa.web.controllers;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import eu.ill.visa.business.services.*;
+import eu.ill.visa.business.services.ExperimentService;
+import eu.ill.visa.business.services.InstanceService;
+import eu.ill.visa.business.services.InstrumentService;
+import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.security.tokens.AccountToken;
-import eu.ill.visa.web.dtos.*;
+import eu.ill.visa.web.dtos.ExperimentDto;
+import eu.ill.visa.web.dtos.QuotaDto;
+import eu.ill.visa.web.dtos.UserFullDto;
+import eu.ill.visa.web.dtos.UserSimpleDto;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.*;
 import org.dozer.Mapper;
 
 import javax.annotation.security.PermitAll;
@@ -29,10 +34,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 @Path("/account")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(tags = {"Account"}, description = "Account operations about the logged-in user")
-@ApiResponses({
-    @ApiResponse(code = 401, message = "Unauthorized")
-})
 @PermitAll
 public class AccountController extends AbstractController {
 
@@ -57,7 +58,6 @@ public class AccountController extends AbstractController {
     }
 
     @GET
-    @ApiOperation(value = "Get account information for the logged-in user")
     public Response get(@Auth final AccountToken accountToken) {
         final User user = accountToken.getUser();
         final UserFullDto userDto = mapper.map(user, UserFullDto.class);
@@ -70,7 +70,6 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/experiments/instruments")
-    @ApiOperation(value = "Get the logged-in users instruments")
     public Response experimentInstruments(@Auth final AccountToken accountToken) {
         final User user = accountToken.getUser();
         final List<Instrument> instruments = instrumentService.getAllForUser(user);
@@ -79,12 +78,11 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/quotas")
-    @ApiOperation(value = "Get the logged-in users quotas")
     public Response quotas(@Auth final AccountToken accountToken) {
         final User user = accountToken.getUser();
         final QuotaDto dto = new QuotaDto();
         // the user has an invalid employee number... send defaults
-        if("0".equals(user.getId())) {
+        if ("0".equals(user.getId())) {
             dto.setTotalInstances(0L);
             dto.setAvailableInstances(0L);
             dto.setMaxInstances(0);
@@ -99,7 +97,6 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/experiments/years")
-    @ApiOperation(value = "Get the logged-in users experiment years")
     public Response experimentYears(@Auth final AccountToken accountToken) {
         final User user = accountToken.getUser();
         List<Integer> years = experimentService.getYearsForUser(user);
@@ -108,7 +105,6 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/experiments")
-    @ApiOperation(value = "Get the logged-in users experiments")
     public Response experiments(@Auth final AccountToken accountToken,
                                 @QueryParam("instrumentId") final Long instrumentId,
                                 @QueryParam("startDate") final String startDateString,
@@ -168,7 +164,6 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/experiments/_count")
-    @ApiOperation(value = "Count the logged-in users experiments")
     public Response experiments(@Auth final AccountToken accountToken) {
         final User user = accountToken.getUser();
         final Long total = experimentService.getAllCountForUser(user);
@@ -177,10 +172,6 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/users/_search")
-    @ApiOperation(value = "Search for a user by last name")
-    @ApiResponses(value = {
-        @ApiResponse(code = 400, message = "Name must be provided"),
-    })
     public Response search(@QueryParam("name") final String name) {
         final List<UserSimpleDto> users = new ArrayList<>();
         if (Objects.isNull(name) || name.length() == 0) {
@@ -194,7 +185,6 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/users/support")
-    @ApiOperation(value = "Get all scientific support users")
     public Response search() {
         final List<UserSimpleDto> users = new ArrayList<>();
         for (final User user : userService.getAllSupport()) {
@@ -205,14 +195,8 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/users/{user}")
-    @ApiOperation(value = "Get a user")
-    @ApiResponses(value = {
-        @ApiResponse(code = 400, message = "Invalid ID supplied"),
-        @ApiResponse(code = 404, message = "User not found")
-    })
     @RolesAllowed({ADMIN_ROLE, INSTRUMENT_CONTROL_ROLE, INSTRUMENT_SCIENTIST_ROLE, IT_SUPPORT_ROLE, STAFF_ROLE})
-    public Response get(@ApiParam(value = "User identifier", name = "user", required = true)
-                        @PathParam("user") final User user) {
+    public Response get(@PathParam("user") final User user) {
         return createResponse(this.mapUserSimpler(user), OK);
     }
 

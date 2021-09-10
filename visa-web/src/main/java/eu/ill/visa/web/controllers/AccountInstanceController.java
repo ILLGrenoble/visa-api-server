@@ -10,7 +10,6 @@ import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.DesktopConfiguration;
 import eu.ill.visa.web.dtos.*;
 import io.dropwizard.auth.Auth;
-import io.swagger.annotations.Api;
 import org.apache.commons.imaging.ImageFormat;
 import org.apache.commons.imaging.ImageFormats;
 import org.apache.commons.imaging.ImageReadException;
@@ -46,7 +45,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 @Path("/account/instances")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
-@Api(tags = {"Account"}, description = "Account instances operations")
 @PermitAll
 public class AccountInstanceController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(AccountInstanceController.class);
