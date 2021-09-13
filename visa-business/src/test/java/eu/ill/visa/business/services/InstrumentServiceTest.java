@@ -26,7 +26,7 @@ public class InstrumentServiceTest {
     @DisplayName("Get all instruments")
     void testGetAll() {
         List<Instrument> instruments = instrumentService.getAll();
-        assertEquals(5, instruments.size());
+        assertEquals(4, instruments.size());
     }
 
     @Test
