@@ -6,10 +6,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.persistence.RollbackException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(BusinessExtension.class)
 public class RoleServiceTest {
@@ -39,17 +39,5 @@ public class RoleServiceTest {
         List<Role> results = roleService.getAll();
         assertEquals(3, results.size());
     }
-
-    @Test
-    @DisplayName("Failed to delete a role because users are associated to it")
-    void testFailToDeleteBecauseUsersAreAssociatedToIt() {
-        assertThrows(RollbackException.class, () -> {
-            Role role = roleService.getById(1000L);
-            roleService.delete(role);
-            List<Role> results = roleService.getAll();
-            assertEquals(2, results.size());
-        });
-    }
-
 
 }

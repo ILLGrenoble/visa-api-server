@@ -9,16 +9,25 @@
     </named-query>
 
     <named-query name="instrument.getAll">
-        <query>SELECT i FROM Instrument i ORDER BY i.name ASC</query>
+        <query>
+            SELECT i
+            FROM Instrument i
+            WHERE i IN (
+                SELECT DISTINCT e.instrument FROM Experiment e
+            )
+            ORDER BY i.name ASC
+        </query>
     </named-query>
 
     <named-query name="instrument.getAllForUser">
         <query>
             SELECT i FROM Instrument i
             WHERE i IN (
-            SELECT e.instrument FROM Experiment e
-            JOIN e.users u
-            WHERE u = :user)
+                SELECT DISTINCT e.instrument
+                FROM Experiment e
+                JOIN e.users u
+                WHERE u = :user
+            )
             ORDER BY i.name ASC
         </query>
     </named-query>

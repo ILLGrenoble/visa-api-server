@@ -48,17 +48,4 @@ public class RoleRepository extends AbstractRepository<Role> {
             return null;
         }
     }
-
-
-    public void delete(final Role role) {
-        remove(role);
-    }
-
-    public void save(final Role role) {
-        if (role.getId() == null) {
-            persist(role);
-        } else {
-            merge(role);
-        }
-    }
 }

@@ -7,7 +7,6 @@ import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;
-import eu.ill.visa.web.bundles.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.bundles.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.bundles.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.bundles.graphql.exceptions.ValidationException;
@@ -17,6 +16,8 @@ import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import org.apache.bval.guice.Validate;
 import org.dozer.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
 import java.text.ParseException;
@@ -25,12 +26,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static eu.ill.visa.web.bundles.graphql.queries.domain.Message.createMessage;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 
 public class MutationResolver implements GraphQLMutationResolver {
+
+    private final static Logger logger = LoggerFactory.getLogger(MutationResolver.class);
 
     private final Mapper mapper;
     private final FlavourService flavourService;
@@ -89,7 +93,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created image
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    Image createImage(@Valid CreateImageInput input) throws EntityNotFoundException {
+    Image createImage(@Valid ImageInput input) throws EntityNotFoundException {
         final Image image = new Image();
         image.setName(input.getName());
         image.setVersion(input.getVersion());
@@ -123,7 +127,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created image
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    Image updateImage(Long id, @Valid UpdateImageInput input) throws EntityNotFoundException {
+    Image updateImage(Long id, @Valid ImageInput input) throws EntityNotFoundException {
         final Image image = imageService.getById(id);
         image.setName(input.getName());
         image.setVersion(input.getVersion());
@@ -172,9 +176,13 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created flavour
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    Flavour createFlavour(@Valid CreateFlavourInput input) {
+    Flavour createFlavour(@Valid FlavourInput input) {
         final Flavour flavour = mapper.map(input, Flavour.class);
         flavourService.create(flavour);
+
+        // Handle flavour limits
+        this.updateFlavourLimits(flavour, input);
+
         return flavour;
     }
 
@@ -187,7 +195,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the given the flavour id was not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    Flavour updateFlavour(Long id, @Valid UpdateFlavourInput input) throws EntityNotFoundException {
+    Flavour updateFlavour(Long id, @Valid FlavourInput input) throws EntityNotFoundException {
         final Flavour flavour = this.flavourService.getById(id);
         if(flavour == null) {
             throw new EntityNotFoundException("Flavour was not found for the given id");
@@ -197,7 +205,34 @@ public class MutationResolver implements GraphQLMutationResolver {
         flavour.setCpu(input.getCpu());
         flavour.setMemory(input.getMemory());
         flavourService.save(flavour);
+
+        // Handle flavour limits
+        this.updateFlavourLimits(flavour, input);
+
         return flavour;
+    }
+
+    private void updateFlavourLimits(Flavour flavour, FlavourInput input) {
+        List<FlavourLimit> currentFlavourLimits = this.flavourLimitService.getAllOfTypeForFlavour(flavour, "INSTRUMENT");
+        List<Long> currentInstrumentIds = currentFlavourLimits.stream().map(FlavourLimit::getObjectId).collect(Collectors.toList());
+        List<Long> instrumentIds = input.getInstrumentIds();
+        List<Long> allInstrumentIds = this.instrumentService.getAll().stream().map(Instrument::getId).collect(Collectors.toList());
+
+        List<FlavourLimit> flavourLimitsToDelete = currentFlavourLimits.stream().filter(flavourLimit ->
+            !instrumentIds.contains(flavourLimit.getObjectId())).collect(Collectors.toList());
+        List<Long> instrumentsToAdd = instrumentIds.stream().filter(instrumentId ->
+            !currentInstrumentIds.contains(instrumentId)).collect(Collectors.toList());
+
+        flavourLimitsToDelete.forEach(flavourLimit -> this.flavourLimitService.delete(flavourLimit));
+        instrumentsToAdd.forEach(instrumentId -> {
+            if (allInstrumentIds.contains(instrumentId)) {
+                FlavourLimit flavourLimit = new FlavourLimit(flavour, instrumentId, "INSTRUMENT");
+                this.flavourLimitService.save(flavourLimit);
+
+            } else {
+                logger.warn("Cannot create FlavourLimit with instrument Id {} for Flavour {} as it does not exist", instrumentId, flavour.getName());
+            }
+        });
     }
 
     /**
@@ -215,72 +250,6 @@ public class MutationResolver implements GraphQLMutationResolver {
         flavour.setDeleted(true);
         flavourService.save(flavour);
         return flavour;
-    }
-
-    /**
-     * Create a new flavourLimit
-     *
-     * @param input the flavourLimit properties
-     * @return the newly created flavourLimit
-     */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    FlavourLimit createFlavourLimit(@Valid FlavourLimitInput input) {
-        final FlavourLimit flavourLimit = mapper.map(input, FlavourLimit.class);
-        flavourLimitService.save(flavourLimit);
-        return flavourLimit;
-    }
-
-    /**
-     * Update a flavourLimit
-     *
-     * @param id    the flavourLimit id
-     * @param input the flavourLimit properties
-     * @return the updated created flavourLimit
-     * @throws EntityNotFoundException thrown if the given the flavourLimit id was not found
-     */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    FlavourLimit updateFlavourLimit(Long id, @Valid FlavourLimitInput input) throws EntityNotFoundException, InvalidInputException {
-        final FlavourLimit flavourLimit = this.flavourLimitService.getById(id);
-        if (flavourLimit == null) {
-            throw new EntityNotFoundException("FlavourLimit was not found for the given id");
-        }
-
-        final Flavour flavour = this.flavourService.getById(input.getFlavourId());
-        if (flavour == null) {
-            throw new EntityNotFoundException("Flavour not found for the given id");
-        }
-
-        String objectType = input.getObjectType();
-        if (!objectType.equals("INSTRUMENT")) {
-            throw new InvalidInputException("ObjectType is not valid for FlavourLimit");
-        }
-
-        final Instrument instrument = instrumentService.getById(input.getObjectId());
-        if (instrument == null) {
-            throw new EntityNotFoundException("Instrument not found for the given id");
-        }
-
-        flavourLimit.setFlavour(flavour);
-        flavourLimit.setObjectId(input.getObjectId());
-        flavourLimit.setObjectType(input.getObjectType());
-        flavourLimitService.save(flavourLimit);
-        return flavourLimit;
-    }
-
-    /**
-     * Delete a flavourLimit for a given id
-     *
-     * @param id the flavourLimit id
-     * @return the deleted flavourLimit
-     * @throws EntityNotFoundException thrown if the flavourLimit is not found
-     */
-    FlavourLimit deleteFlavourLimit(Long id) throws EntityNotFoundException {
-        final FlavourLimit flavourLimit = flavourLimitService.getById(id);
-        if (flavourLimit == null) {
-            throw new EntityNotFoundException("FlavourLimit not found for the given id");
-        }
-        flavourLimitService.delete(flavourLimit);
-        return flavourLimit;
     }
 
     /**
@@ -414,7 +383,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException   thrown if the given image is not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    Plan createPlan(@Valid CreatePlanInput input) throws EntityNotFoundException {
+    Plan createPlan(@Valid PlanInput input) throws EntityNotFoundException {
         final Flavour flavour = this.flavourService.getById(input.getFlavourId());
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour not found for the given id");
@@ -449,7 +418,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException   thrown if the given plan is not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    Plan updatePlan(Long id, @Valid UpdatePlanInput input) throws EntityNotFoundException {
+    Plan updatePlan(Long id, @Valid PlanInput input) throws EntityNotFoundException {
         final Flavour flavour = this.flavourService.getById(input.getFlavourId());
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour not found for the given id");
@@ -634,45 +603,6 @@ public class MutationResolver implements GraphQLMutationResolver {
         instanceActionScheduler.execute(instance, user, instanceCommandType);
     }
 
-
-
-
-    /**
-     * Create a new role
-     *
-     * @param input the role properties
-     * @return the newly created role
-     */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    Role createRole(@Valid CreateRoleInput input) {
-        final Role role = mapper.map(input, Role.class);
-        roleService.create(role);
-        return role;
-    }
-
-    /**
-     * Delete a role for a given id
-     *
-     * @param id the role id
-     * @return the deleted role
-     * @throws EntityNotFoundException thrown if the role is not found
-     * @throws DataFetchingException   thrown if there are users associated to the role
-     */
-    Role deleteRole(Long id) throws EntityNotFoundException, DataFetchingException {
-        final Role role = roleService.getById(id);
-        if (role == null) {
-            throw new EntityNotFoundException("Role not found for the given id");
-        }
-        final List<Parameter> parameters = singletonList(new Parameter("name", role.getName()));
-        final QueryFilter filter = new QueryFilter("role = :name", parameters);
-        final Long countUsers = userService.countAll(filter);
-        if (countUsers > 0) {
-            throw new DataFetchingException(format("Cannot delete this role because there are %d users associated to it", countUsers));
-        }
-        roleService.delete(role);
-        return role;
-    }
-
     /**
      * Create a new systemNotification
      *
@@ -680,7 +610,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created systemNotification
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    SystemNotification createSystemNotification(@Valid CreateSystemNotificationInput input){
+    SystemNotification createSystemNotification(@Valid SystemNotificationInput input){
         final SystemNotification systemNotification = mapper.map(input, SystemNotification.class);
         systemNotificationService.save(systemNotification);
         return systemNotification;
@@ -694,7 +624,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the systemNotification has not been found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    SystemNotification updateSystemNotification(Long id,@Valid UpdateSystemNotificationInput input) throws EntityNotFoundException {
+    SystemNotification updateSystemNotification(Long id,@Valid SystemNotificationInput input) throws EntityNotFoundException {
         final SystemNotification systemNotification = this.systemNotificationService.getById(id);
         if(systemNotification == null) {
             throw new EntityNotFoundException("systemNotification not found for the given id");

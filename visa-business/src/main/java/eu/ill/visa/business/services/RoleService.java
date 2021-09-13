@@ -6,7 +6,6 @@ import com.google.inject.persist.Transactional;
 import eu.ill.visa.core.domain.Role;
 import eu.ill.visa.persistence.repositories.RoleRepository;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Transactional
@@ -35,13 +34,5 @@ public class RoleService {
 
     public Role getByName(String name) {
         return this.repository.getByName(name);
-    }
-
-    public void delete(Role role) {
-        this.repository.delete(role);
-    }
-
-    public void create(@NotNull Role role) {
-        this.repository.save(role);
     }
 }

@@ -5,8 +5,9 @@ import eu.ill.visa.web.bundles.graphql.validation.Cloud;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
-public class CreateFlavourInput {
+public class FlavourInput {
 
     @NotNull
     @Size(min = 1, max = 250)
@@ -22,6 +23,8 @@ public class CreateFlavourInput {
     @Cloud(type = "flavour")
     @NotNull
     private String computeId;
+
+    private List<Long> instrumentIds;
 
     public String getName() {
         return name;
@@ -53,5 +56,13 @@ public class CreateFlavourInput {
 
     public void setComputeId(String computeId) {
         this.computeId = computeId;
+    }
+
+    public List<Long> getInstrumentIds() {
+        return instrumentIds;
+    }
+
+    public void setInstrumentIds(List<Long> instrumentIds) {
+        this.instrumentIds = instrumentIds;
     }
 }

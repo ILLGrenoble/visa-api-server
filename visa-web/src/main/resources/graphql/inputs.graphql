@@ -13,7 +13,7 @@ input CreateRoleInput {
     description: String
 }
 
-input CreateImageInput {
+input ImageInput {
     name: String!
     version: String
     description: String
@@ -26,35 +26,10 @@ input CreateImageInput {
     autologin: String
 }
 
-input UpdateImageInput {
-    name: String!
-    version: String
-    description: String
-    icon: String
-    computeId: String!
-    visible: Boolean!
-    deleted: Boolean!
-    protocolIds: [Int]
-    bootCommand: String
-    autologin: String
-}
-
-input CreatePlanInput {
+input PlanInput {
     imageId: Int!
     flavourId: Int!
     preset: Boolean!
-}
-
-input UpdatePlanInput {
-    imageId: Int!
-    flavourId: Int!
-    preset: Boolean!
-}
-
-input FlavourLimitInput {
-    flavourId: Int!
-    objectId: Int!
-    objectType: String!
 }
 
 input SecurityGroupFilterInput {
@@ -68,20 +43,13 @@ input Parameter {
     value: String
 }
 
-input CreateFlavourInput {
+input FlavourInput {
     name: String!
     description: String
     memory: Int!
     cpu: Int!
     computeId: String!
-}
-
-input UpdateFlavourInput {
-    name: String!
-    description: String
-    memory: Int!
-    cpu: Int!
-    computeId: String!
+    instrumentIds: [Int]
 }
 
 input Pagination {
@@ -89,12 +57,7 @@ input Pagination {
     limit:  Int
 }
 
-input CreateSystemNotificationInput{
-    level: String!
-    message: String!
-}
-
-input UpdateSystemNotificationInput{
+input SystemNotificationInput{
     level: String!
     message: String!
 }

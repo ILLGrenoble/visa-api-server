@@ -1,6 +1,6 @@
 package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
-public class UpdatePlanInput {
+public class PlanInput {
 
     private Long imageId;
 

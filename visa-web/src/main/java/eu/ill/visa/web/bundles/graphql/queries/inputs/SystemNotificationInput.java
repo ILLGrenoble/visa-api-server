@@ -5,7 +5,7 @@ import eu.ill.visa.core.domain.enumerations.SystemNotificationLevel;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public class CreateSystemNotificationInput {
+public class SystemNotificationInput {
 
     @NotNull
     @Size(max = 250)

@@ -3,6 +3,7 @@ package eu.ill.visa.persistence.repositories;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import eu.ill.visa.core.domain.Flavour;
 import eu.ill.visa.core.domain.FlavourLimit;
 
 import javax.persistence.EntityManager;
@@ -20,6 +21,13 @@ public class FlavourLimitRepository extends AbstractRepository<FlavourLimit> {
 
     public List<FlavourLimit> getAll() {
         final TypedQuery<FlavourLimit> query = getEntityManager().createNamedQuery("flavourLimit.getAll", FlavourLimit.class);
+        return query.getResultList();
+    }
+
+    public List<FlavourLimit> getAllOfTypeForFlavour(Flavour flavour, String type) {
+        final TypedQuery<FlavourLimit> query = getEntityManager().createNamedQuery("flavourLimit.getAllOfTypeForFlavour", FlavourLimit.class);
+        query.setParameter("flavour", flavour);
+        query.setParameter("type", type);
         return query.getResultList();
     }
 

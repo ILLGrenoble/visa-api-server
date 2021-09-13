@@ -31,6 +31,16 @@
         </query>
     </named-query>
 
+    <named-query name="flavourLimit.getAllOfTypeForFlavour">
+        <query>
+            SELECT l
+            FROM FlavourLimit l
+            WHERE l.flavour = :flavour
+            AND l.objectType = :type
+            AND l.flavour.deleted = false
+        </query>
+    </named-query>
+
     <entity class="eu.ill.visa.core.domain.FlavourLimit">
         <table name="flavour_limit"/>
         <attributes>

@@ -82,23 +82,17 @@ type Query {
 
 type Mutation {
     # Create an image
-    createImage(input: CreateImageInput!): Image! @isAuthorised(role: "ADMIN")
+    createImage(input: ImageInput!): Image! @isAuthorised(role: "ADMIN")
     # Update an image
-    updateImage(id: Int!, input: UpdateImageInput!): Image! @isAuthorised(role: "ADMIN")
+    updateImage(id: Int!, input: ImageInput!): Image! @isAuthorised(role: "ADMIN")
     # Delete an image
     deleteImage(id: Int!) : Image! @isAuthorised(role: "ADMIN")
     # Create a flavour
-    createFlavour(input: CreateFlavourInput!): Flavour!  @isAuthorised(role: "ADMIN")
+    createFlavour(input: FlavourInput!): Flavour!  @isAuthorised(role: "ADMIN")
     # Update an flavour
-    updateFlavour(id: Int!, input: UpdateFlavourInput!): Flavour! @isAuthorised(role: "ADMIN")
+    updateFlavour(id: Int!, input: FlavourInput!): Flavour! @isAuthorised(role: "ADMIN")
     # Delete a flavour
     deleteFlavour(id: Int!) : Flavour! @isAuthorised(role: "ADMIN")
-    # Create a flavourLimit
-    createFlavourLimit(input: FlavourLimitInput!): FlavourLimit!  @isAuthorised(role: "ADMIN")
-    # Update a flavourLimit
-    updateFlavourLimit(id: Int!, input: FlavourLimitInput!): FlavourLimit! @isAuthorised(role: "ADMIN")
-    # Delete a flavourLimit
-    deleteFlavourLimit(id: Int!) : FlavourLimit! @isAuthorised(role: "ADMIN")
     # Create a securityGroup
     createSecurityGroup(input: String!): SecurityGroup!  @isAuthorised(role: "ADMIN")
     # Update a securityGroup
@@ -112,9 +106,9 @@ type Mutation {
     # Delete a securityGroupFilter
     deleteSecurityGroupFilter(id: Int!) : SecurityGroupFilter! @isAuthorised(role: "ADMIN")
     # Create a plan
-    createPlan(input: CreatePlanInput): Plan! @isAuthorised(role: "ADMIN")
+    createPlan(input: PlanInput): Plan! @isAuthorised(role: "ADMIN")
     # Update a plan
-    updatePlan(id: Int!,input: UpdatePlanInput!): Plan! @isAuthorised(role: "ADMIN")
+    updatePlan(id: Int!,input: PlanInput!): Plan! @isAuthorised(role: "ADMIN")
     # Delete a plan
     deletePlan(id: Int!) : Plan! @isAuthorised(role: "ADMIN")
     # Reboot an instance
@@ -127,14 +121,10 @@ type Mutation {
     deleteInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
     # Update an instance termination date
     updateInstanceTerminationDate(id: Int!, date: String!): Message! @isAuthorised(role: "ADMIN")
-    # Create a role
-    createRole(input: CreateRoleInput!): Role! @isAuthorised(role: "ADMIN")
-    # Delete a role
-    deleteRole(id: Int!): Role! @isAuthorised(role: "ADMIN")
     # Create a system notification
-    createSystemNotification(input: CreateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
+    createSystemNotification(input: SystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a system notification
-    updateSystemNotification(id: Int!, input: UpdateSystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
+    updateSystemNotification(id: Int!, input: SystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
     # Delete a system notification
     deleteSystemNotification(id: Int!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a user role
