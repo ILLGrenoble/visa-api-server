@@ -25,8 +25,6 @@ public class ImageInput {
 
     private Boolean visible;
 
-    private Boolean deleted;
-
     private List<Long> protocolIds;
 
     @Size(max=16000)
@@ -80,14 +78,6 @@ public class ImageInput {
 
     public void setVisible(Boolean visible) {
         this.visible = visible;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
     }
 
     public List<Long> getProtocolIds() {

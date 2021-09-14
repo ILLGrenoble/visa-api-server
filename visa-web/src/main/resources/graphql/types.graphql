@@ -75,7 +75,6 @@ type Image {
     computeId: String!
     cloudImage: CloudImage
     visible: Boolean!
-    deleted: Boolean!
     protocols: [ImageProtocol]
     bootCommand: String
     autologin: String

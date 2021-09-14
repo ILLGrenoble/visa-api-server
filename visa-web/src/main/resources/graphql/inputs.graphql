@@ -20,7 +20,6 @@ input ImageInput {
     icon: String
     computeId: String!
     visible: Boolean!
-    deleted: Boolean!
     protocolIds: [Int]
     bootCommand: String
     autologin: String

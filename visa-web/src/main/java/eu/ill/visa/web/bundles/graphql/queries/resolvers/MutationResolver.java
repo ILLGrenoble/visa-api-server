@@ -101,7 +101,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         image.setIcon(input.getIcon());
         image.setComputeId(input.getComputeId());
         image.setVisible(input.getVisible());
-        image.setDeleted(input.getDeleted());
+        image.setDeleted(false);
         image.setBootCommand(input.getBootCommand());
         image.setAutologin(input.getAutologin());
         final List<Long> protocolsId = input.getProtocolIds();
@@ -135,7 +135,6 @@ public class MutationResolver implements GraphQLMutationResolver {
         image.setIcon(input.getIcon());
         image.setComputeId(input.getComputeId());
         image.setVisible(input.getVisible());
-        image.setDeleted(input.getDeleted());
         image.setBootCommand(input.getBootCommand());
         image.setAutologin(input.getAutologin());
         final List<Long> protocolsId = input.getProtocolIds();
