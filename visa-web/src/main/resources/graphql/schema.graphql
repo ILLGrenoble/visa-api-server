@@ -26,7 +26,7 @@ type Query {
     # Get all security group filters
     securityGroupFilters: [SecurityGroupFilter] @isAuthorised(role: "ADMIN")
     # Get a security group filter for an object id and type
-    securityGroupFilterByObjectIdAndType(objectId: Int!, objectType: String!) : SecurityGroupFilter  @isAuthorised(role: "ADMIN")
+    securityGroupFilterBySecurityIdAndObjectIdAndType(securityGroupId: Int!, objectId: Int!, objectType: String!) : SecurityGroupFilter  @isAuthorised(role: "ADMIN")
     # Get all instruments
     instruments: [Instrument!]
     # Get all image protocols

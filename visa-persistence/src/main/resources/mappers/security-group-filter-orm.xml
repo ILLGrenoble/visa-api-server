@@ -9,8 +9,12 @@
         <query>SELECT l FROM SecurityGroupFilter l WHERE l.id = :id</query>
     </named-query>
 
-    <named-query name="securityGroupFilter.getByObjectIdAndType">
-        <query>SELECT l FROM SecurityGroupFilter l WHERE l.objectId = :objectId AND l.objectType = :objectType</query>
+    <named-query name="securityGroupFilter.securityGroupFilterBySecurityIdAndObjectIdAndType">
+        <query>
+               SELECT l FROM SecurityGroupFilter l
+               JOIN l.securityGroup sg
+               WHERE sg.id = :securityGroupId AND l.objectId = :objectId AND l.objectType = :objectType
+        </query>
     </named-query>
 
     <named-query name="securityGroupFilter.getByObjectIdAndObjectType">

@@ -45,9 +45,10 @@ public class SecurityGroupFilterRepository extends AbstractRepository<SecurityGr
         }
     }
 
-    public SecurityGroupFilter getByObjectIdAndType(Long objectId, String objectType) {
+    public SecurityGroupFilter securityGroupFilterBySecurityIdAndObjectIdAndType(Long securityGroupId, Long objectId, String objectType) {
         try {
-            TypedQuery<SecurityGroupFilter> query = getEntityManager().createNamedQuery("securityGroupFilter.getByObjectIdAndType", SecurityGroupFilter.class);
+            TypedQuery<SecurityGroupFilter> query = getEntityManager().createNamedQuery("securityGroupFilter.securityGroupFilterBySecurityIdAndObjectIdAndType", SecurityGroupFilter.class);
+            query.setParameter("securityGroupId", securityGroupId);
             query.setParameter("objectId", objectId);
             query.setParameter("objectType", objectType);
             return query.getSingleResult();

@@ -28,8 +28,8 @@ public class SecurityGroupFilterService {
         this.repository.save(securityGroupFilter);
     }
 
-    public SecurityGroupFilter getByObjectIdAndType(@NotNull final Long objectId, @NotNull final String objectType) {
-        return this.repository.getByObjectIdAndType(objectId, objectType);
+    public SecurityGroupFilter securityGroupFilterBySecurityIdAndObjectIdAndType(@NotNull final Long securityGroupId, @NotNull final Long objectId, @NotNull final String objectType) {
+        return this.repository.securityGroupFilterBySecurityIdAndObjectIdAndType(securityGroupId, objectId, objectType);
     }
 
     public List<SecurityGroupFilter> getAll() {

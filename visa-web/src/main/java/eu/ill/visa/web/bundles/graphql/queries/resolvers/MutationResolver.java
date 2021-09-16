@@ -311,7 +311,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) throws InvalidInputException {
-        if (securityGroupFilterService.getByObjectIdAndType(input.getObjectId(), input.getObjectType()) == null) {
+        if (securityGroupFilterService.securityGroupFilterBySecurityIdAndObjectIdAndType(input.getSecurityGroupId(), input.getObjectId(), input.getObjectType()) == null) {
             final SecurityGroup securityGroup = securityGroupService.getById(input.getSecurityGroupId());
             if(securityGroup == null) {
                 throw new InvalidInputException("Security group does not exist");
