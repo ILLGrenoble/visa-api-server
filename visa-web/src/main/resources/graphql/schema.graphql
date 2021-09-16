@@ -25,6 +25,8 @@ type Query {
     securityGroups: [SecurityGroup]! @isAuthorised(role: "ADMIN")
     # Get all security group filters
     securityGroupFilters: [SecurityGroupFilter] @isAuthorised(role: "ADMIN")
+    # Get a security group filter for an object id and type
+    securityGroupFilterByObjectIdAndType(objectId: Int!, objectType: String!) : SecurityGroupFilter  @isAuthorised(role: "ADMIN")
     # Get all instruments
     instruments: [Instrument!]
     # Get all image protocols
@@ -33,8 +35,8 @@ type Query {
     instances (filter: QueryFilter, orderBy: OrderBy, pagination: Pagination!) : InstanceConnection!  @isAuthorised(role: "ADMIN")
     # Count all instances
     countInstances(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
-    # Get instance by their identifier
-    instance (id: Int!) : Instance!  @isAuthorised(role: "ADMIN")
+    # Get instance by an identifier
+    instance (id: Int!) : Instance  @isAuthorised(role: "ADMIN")
     # Get recently created instances
     recentInstances(pagination: Pagination!): InstanceConnection!  @isAuthorised(role: "ADMIN")
     # Count all instances for a given state

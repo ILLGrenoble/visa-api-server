@@ -1,9 +1,19 @@
 package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 public class SecurityGroupFilterInput {
 
+    @NotNull
     private Long securityGroupId;
+
+    @NotNull
     private Long objectId;
+
+    @NotNull
+    @Pattern(regexp = "INSTRUMENT|ROLE")
+
     private String objectType;
 
     public Long getSecurityGroupId() {

@@ -190,12 +190,25 @@ public class QueryResolver implements GraphQLQueryResolver {
     /**
      * Get a list of securityGroupFilters
      *
-     * @return a list of securityGroupFilters
+     * @return a list of security group filters
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     public List<SecurityGroupFilter> securityGroupFilters() throws DataFetchingException {
         try {
             return securityGroupFilterService.getAll();
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Get a security group filter by objectId and objectType
+     * @return a security group filter, otherwise null
+     * @throws DataFetchingException thrown if there was an error fetching the result
+     */
+    public SecurityGroupFilter securityGroupFilterByObjectIdAndType(final Long objectId, final String objectType) throws DataFetchingException {
+        try {
+            return securityGroupFilterService.getByObjectIdAndType(objectId, objectType);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

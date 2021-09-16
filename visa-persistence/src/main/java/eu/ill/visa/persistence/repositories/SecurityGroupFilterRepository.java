@@ -28,8 +28,7 @@ public class SecurityGroupFilterRepository extends AbstractRepository<SecurityGr
             TypedQuery<SecurityGroupFilter> query = getEntityManager().createNamedQuery("securityGroupFilter.getById", SecurityGroupFilter.class);
             query.setParameter("id", id);
             return query.getSingleResult();
-        } catch (
-            NoResultException exception) {
+        } catch (NoResultException exception) {
             return null;
         }
     }
@@ -43,6 +42,17 @@ public class SecurityGroupFilterRepository extends AbstractRepository<SecurityGr
             persist(securityGroupFilter);
         } else {
             merge(securityGroupFilter);
+        }
+    }
+
+    public SecurityGroupFilter getByObjectIdAndType(Long objectId, String objectType) {
+        try {
+            TypedQuery<SecurityGroupFilter> query = getEntityManager().createNamedQuery("securityGroupFilter.getByObjectIdAndType", SecurityGroupFilter.class);
+            query.setParameter("objectId", objectId);
+            query.setParameter("objectType", objectType);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
         }
     }
 }

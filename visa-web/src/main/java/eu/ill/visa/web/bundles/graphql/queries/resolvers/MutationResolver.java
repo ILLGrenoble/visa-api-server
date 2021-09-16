@@ -310,10 +310,17 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created securityGroupFilter
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) {
-        final SecurityGroupFilter securityGroupFilter = mapper.map(input, SecurityGroupFilter.class);
-        securityGroupFilterService.save(securityGroupFilter);
-        return securityGroupFilter;
+    SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) throws InvalidInputException {
+        if (securityGroupFilterService.getByObjectIdAndType(input.getObjectId(), input.getObjectType()) == null) {
+            final SecurityGroup securityGroup = securityGroupService.getById(input.getSecurityGroupId());
+            if(securityGroup == null) {
+                throw new InvalidInputException("Security group does not exist");
+            }
+            final SecurityGroupFilter securityGroupFilter = new SecurityGroupFilter(securityGroup, input.getObjectId(), input.getObjectType());
+            securityGroupFilterService.save(securityGroupFilter);
+            return securityGroupFilter;
+        }
+        throw new InvalidInputException("A security group filter for the given object id and type already exists");
     }
 
     /**
