@@ -44,32 +44,6 @@
         </query>
     </named-native-query>
 
-    <named-native-query name="securityGroup.getInstrumentBasedSecurityGroups"
-                        result-class="eu.ill.visa.core.domain.SecurityGroup">
-        <query>
-            <![CDATA[
-                SELECT DISTINCT sg.id, sg.name
-                FROM security_group sg
-                LEFT JOIN security_group_filter sgf ON sg.id = sgf.security_group_id
-                WHERE sgf.object_type = 'INSTRUMENT'
-                AND sgf.object_id in :instrumentIds
-            ]]>
-        </query>
-    </named-native-query>
-
-    <named-native-query name="securityGroup.getAllInstrumentBasedSecurityGroups"
-                        result-class="eu.ill.visa.core.domain.SecurityGroup">
-        <query>
-            <![CDATA[
-                SELECT DISTINCT sg.id, sg.name
-                FROM security_group sg
-                LEFT OUTER JOIN security_group_filter sgf ON sg.id = sgf.security_group_id
-                WHERE sgf.object_type = 'INSTRUMENT'
-            ]]>
-        </query>
-    </named-native-query>
-
-
     <entity class="eu.ill.visa.core.domain.SecurityGroup">
         <table name="security_group"/>
         <attributes>
