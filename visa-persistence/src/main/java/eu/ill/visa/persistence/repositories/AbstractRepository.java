@@ -75,6 +75,11 @@ abstract class AbstractRepository<T> {
         return query.getResultList();
     }
 
+    public List<T> getAll(AbstractFilterQueryProvider<T> provider, QueryFilter filter, OrderBy orderBy) {
+        final FilterQuery<T> query = createFilterQuery(provider, requireNonNullElseGet(filter, QueryFilter::new), orderBy, null);
+        return query.getResultList();
+    }
+
     public void initialiseData(String filename) {
         final String sql = getFileAsString(filename);
 

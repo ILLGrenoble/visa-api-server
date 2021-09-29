@@ -70,6 +70,10 @@ public class SecurityGroupService {
 
     }
 
+    public List<SecurityGroup> getAll(QueryFilter filter, OrderBy orderBy) {
+        return repository.getAll(filter, orderBy);
+    }
+
     public List<SecurityGroup> getDefaultSecurityGroups() {
         return repository.getDefaultSecurityGroups();
     }

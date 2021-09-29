@@ -3,8 +3,9 @@ package eu.ill.visa.persistence.repositories;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import eu.ill.visa.core.domain.SecurityGroup;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.domain.*;
+import eu.ill.visa.persistence.providers.FlavourFilterProvider;
+import eu.ill.visa.persistence.providers.SecurityGroupFilterProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -23,6 +24,11 @@ public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
     public List<SecurityGroup> getAll() {
         final TypedQuery<SecurityGroup> query = getEntityManager().createNamedQuery("securityGroup.getAll", SecurityGroup.class);
         return query.getResultList();
+    }
+
+    public List<SecurityGroup> getAll(QueryFilter filter,  OrderBy orderBy) {
+        final SecurityGroupFilterProvider provider = new SecurityGroupFilterProvider(getEntityManager());
+        return super.getAll(provider, filter, orderBy);
     }
 
     public SecurityGroup getById(Long id) {

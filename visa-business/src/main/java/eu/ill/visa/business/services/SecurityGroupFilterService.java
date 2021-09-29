@@ -3,6 +3,8 @@ package eu.ill.visa.business.services;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.domain.SecurityGroupFilter;
 import eu.ill.visa.persistence.repositories.SecurityGroupFilterRepository;
 
@@ -18,6 +20,10 @@ public class SecurityGroupFilterService {
 
     public SecurityGroupFilter getById(Long id) {
         return this.repository.getById(id);
+    }
+
+    public List<SecurityGroupFilter> getAll(QueryFilter filter, OrderBy orderBy) {
+        return this.repository.getAll(filter, orderBy);
     }
 
     public void delete(SecurityGroupFilter securityGroupFilter) {

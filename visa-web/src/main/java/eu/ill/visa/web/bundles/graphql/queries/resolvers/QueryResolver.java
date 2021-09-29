@@ -49,12 +49,10 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final ImageProtocolService          imageProtocolService;
     private final RoleService                   roleService;
     private final CloudClient                   cloudClient;
-    private final Mapper                        mapper;
     private final PlanService                   planService;
     private final InstanceSessionMemberService  instanceSessionMemberService;
     private final InstanceJupyterSessionService instanceJupyterSessionService;
     private final SystemNotificationService     systemNotificationService;
-
 
     @Inject
     QueryResolver(
@@ -71,7 +69,6 @@ public class QueryResolver implements GraphQLQueryResolver {
         final ImageProtocolService imageProtocolService,
         final RoleService roleService,
         final CloudClient cloudClient,
-        final Mapper mapper,
         final InstanceSessionMemberService instanceSessionMemberService,
         final InstanceJupyterSessionService instanceJupyterSessionService,
         final SystemNotificationService systemNotificationService) {
@@ -88,7 +85,6 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.imageProtocolService = imageProtocolService;
         this.roleService = roleService;
         this.cloudClient = cloudClient;
-        this.mapper = mapper;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.systemNotificationService = systemNotificationService;
@@ -179,9 +175,11 @@ public class QueryResolver implements GraphQLQueryResolver {
      * @return a list of securityGroups
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public List<SecurityGroup> securityGroups() throws DataFetchingException {
+    public List<SecurityGroup> securityGroups(QueryFilter filter) throws DataFetchingException {
         try {
-            return securityGroupService.getAll();
+            return securityGroupService.getAll(
+                requireNonNullElseGet(filter, QueryFilter::new), new OrderBy("name", true)
+            );
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -193,24 +191,11 @@ public class QueryResolver implements GraphQLQueryResolver {
      * @return a list of security group filters
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
-    public List<SecurityGroupFilter> securityGroupFilters() throws DataFetchingException {
+    public List<SecurityGroupFilter> securityGroupFilters(QueryFilter filter) throws DataFetchingException {
         try {
-            return securityGroupFilterService.getAll();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
-    }
-
-    /**
-     * Get a security group filter by objectId and objectType
-     * @return a security group filter, otherwise null
-     * @throws DataFetchingException thrown if there was an error fetching the result
-     */
-    public SecurityGroupFilter securityGroupFilterBySecurityIdAndObjectIdAndType(final Long securityGroupId,
-                                                                    final Long objectId,
-                                                                    final String objectType) throws DataFetchingException {
-        try {
-            return securityGroupFilterService.securityGroupFilterBySecurityIdAndObjectIdAndType(securityGroupId, objectId, objectType);
+            return securityGroupFilterService.getAll(
+                requireNonNullElseGet(filter, QueryFilter::new), new OrderBy("objectType", true)
+            );
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

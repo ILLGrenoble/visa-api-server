@@ -36,21 +36,21 @@ public class MutationResolver implements GraphQLMutationResolver {
 
     private final static Logger logger = LoggerFactory.getLogger(MutationResolver.class);
 
-    private final Mapper mapper;
-    private final FlavourService flavourService;
-    private final InstanceService instanceService;
-    private final InstanceExpirationService instanceExpirationService;
-    private final ImageService imageService;
-    private final PlanService planService;
-    private final FlavourLimitService flavourLimitService;
-    private final SecurityGroupService securityGroupService;
+    private final Mapper                     mapper;
+    private final FlavourService             flavourService;
+    private final InstanceService            instanceService;
+    private final InstanceExpirationService  instanceExpirationService;
+    private final ImageService               imageService;
+    private final PlanService                planService;
+    private final FlavourLimitService        flavourLimitService;
+    private final SecurityGroupService       securityGroupService;
     private final SecurityGroupFilterService securityGroupFilterService;
-    private final InstrumentService instrumentService;
+    private final InstrumentService          instrumentService;
 
-    private final InstanceActionScheduler instanceActionScheduler;
-    private final RoleService roleService;
-    private final UserService userService;
-    private final ImageProtocolService imageProtocolService;
+    private final InstanceActionScheduler   instanceActionScheduler;
+    private final RoleService               roleService;
+    private final UserService               userService;
+    private final ImageProtocolService      imageProtocolService;
     private final SystemNotificationService systemNotificationService;
 
     @Inject
@@ -196,7 +196,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     Flavour updateFlavour(Long id, @Valid FlavourInput input) throws EntityNotFoundException {
         final Flavour flavour = this.flavourService.getById(id);
-        if(flavour == null) {
+        if (flavour == null) {
             throw new EntityNotFoundException("Flavour was not found for the given id");
         }
         flavour.setName(input.getName());
@@ -288,17 +288,21 @@ public class MutationResolver implements GraphQLMutationResolver {
     }
 
     /**
-     * Delete a securityGroup for a given id
+     * Delete a security group for a given id
      *
-     * @param id the securityGroup id
-     * @return the deleted securityGroup
-     * @throws EntityNotFoundException thrown if the securityGroup is not found
+     * @param id the security group id
+     * @return the deleted security group
+     * @throws EntityNotFoundException thrown if the security group is not found
      */
     SecurityGroup deleteSecurityGroup(Long id) throws EntityNotFoundException {
         final SecurityGroup securityGroup = securityGroupService.getById(id);
         if (securityGroup == null) {
-            throw new EntityNotFoundException("SecurityGroup not found for the given id");
+            throw new EntityNotFoundException("Security group not found for the given id");
         }
+        securityGroupFilterService.getAll()
+            .stream()
+            .filter(filter -> filter.getSecurityGroup().getId().equals(id))
+            .forEach(securityGroupFilterService::delete);
         securityGroupService.delete(securityGroup);
         return securityGroup;
     }
@@ -313,7 +317,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) throws InvalidInputException {
         if (securityGroupFilterService.securityGroupFilterBySecurityIdAndObjectIdAndType(input.getSecurityGroupId(), input.getObjectId(), input.getObjectType()) == null) {
             final SecurityGroup securityGroup = securityGroupService.getById(input.getSecurityGroupId());
-            if(securityGroup == null) {
+            if (securityGroup == null) {
                 throw new InvalidInputException("Security group does not exist");
             }
             final SecurityGroupFilter securityGroupFilter = new SecurityGroupFilter(securityGroup, input.getObjectId(), input.getObjectType());
@@ -385,8 +389,8 @@ public class MutationResolver implements GraphQLMutationResolver {
      *
      * @param input the plan properties
      * @return the newly created plan
-     * @throws EntityNotFoundException   thrown if the given flavour is not found
-     * @throws EntityNotFoundException   thrown if the given image is not found
+     * @throws EntityNotFoundException thrown if the given flavour is not found
+     * @throws EntityNotFoundException thrown if the given image is not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     Plan createPlan(@Valid PlanInput input) throws EntityNotFoundException {
@@ -419,9 +423,9 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param id    the plan id
      * @param input the plan properties
      * @return the updated plan
-     * @throws EntityNotFoundException   thrown if the given flavour is not found
-     * @throws EntityNotFoundException   thrown if the given image is not found
-     * @throws EntityNotFoundException   thrown if the given plan is not found
+     * @throws EntityNotFoundException thrown if the given flavour is not found
+     * @throws EntityNotFoundException thrown if the given image is not found
+     * @throws EntityNotFoundException thrown if the given plan is not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     Plan updatePlan(Long id, @Valid PlanInput input) throws EntityNotFoundException {
@@ -458,8 +462,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param id the plan id
      * @return the deleted plan
      * @throws EntityNotFoundException thrown if the plan is not found
-     * @throws EntityNotFoundException   thrown if there are instances associated to the plan
-     *
+     * @throws EntityNotFoundException thrown if there are instances associated to the plan
      */
     Plan deletePlan(Long id) throws EntityNotFoundException {
         final Plan plan = planService.getById(id);
@@ -552,14 +555,15 @@ public class MutationResolver implements GraphQLMutationResolver {
         }
         return createMessage("Instance is scheduled for deletion");
     }
+
     /**
      * Update an instance termination date
      *
-     * @param id          the instance id
-     * @param dateString        the instance termination date
+     * @param id         the instance id
+     * @param dateString the instance termination date
      * @return a message
      * @throws EntityNotFoundException thrown if the instance has not been found
-     * @throws ValidationException thrown if date can't be parsed
+     * @throws ValidationException     thrown if date can't be parsed
      */
     Message updateInstanceTerminationDate(Long id, String dateString) throws EntityNotFoundException, ValidationException {
         final Instance instance = instanceService.getById(id);
@@ -616,7 +620,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created systemNotification
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    SystemNotification createSystemNotification(@Valid SystemNotificationInput input){
+    SystemNotification createSystemNotification(@Valid SystemNotificationInput input) {
         final SystemNotification systemNotification = mapper.map(input, SystemNotification.class);
         systemNotificationService.save(systemNotification);
         return systemNotification;
@@ -630,9 +634,9 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the systemNotification has not been found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    SystemNotification updateSystemNotification(Long id,@Valid SystemNotificationInput input) throws EntityNotFoundException {
+    SystemNotification updateSystemNotification(Long id, @Valid SystemNotificationInput input) throws EntityNotFoundException {
         final SystemNotification systemNotification = this.systemNotificationService.getById(id);
-        if(systemNotification == null) {
+        if (systemNotification == null) {
             throw new EntityNotFoundException("systemNotification not found for the given id");
         }
         systemNotification.setLevel(input.getLevel());
@@ -660,13 +664,13 @@ public class MutationResolver implements GraphQLMutationResolver {
     /**
      * Updates a user's role
      *
-     * @param userId the user ID
-     * @param roleName the role name
+     * @param userId    the user ID
+     * @param roleName  the role name
      * @param isEnabled if the role is to be added or not
      * @return the user
      * @throws EntityNotFoundException thrown if the user or role has not been found
      */
-    User updateUserRole(String userId, String roleName, boolean  isEnabled) throws EntityNotFoundException {
+    User updateUserRole(String userId, String roleName, boolean isEnabled) throws EntityNotFoundException {
 
         final User user = userService.getById(userId);
         if (user == null) {

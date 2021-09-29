@@ -22,11 +22,9 @@ type Query {
     # Get all flavour Limits
     flavourLimits: [FlavourLimit]! @isAuthorised(role: "ADMIN")
     # Get all security groups
-    securityGroups: [SecurityGroup]! @isAuthorised(role: "ADMIN")
+    securityGroups(filter: QueryFilter): [SecurityGroup]! @isAuthorised(role: "ADMIN")
     # Get all security group filters
-    securityGroupFilters: [SecurityGroupFilter] @isAuthorised(role: "ADMIN")
-    # Get a security group filter for an object id and type
-    securityGroupFilterBySecurityIdAndObjectIdAndType(securityGroupId: Int!, objectId: Int!, objectType: String!) : SecurityGroupFilter  @isAuthorised(role: "ADMIN")
+    securityGroupFilters(filter: QueryFilter): [SecurityGroupFilter] @isAuthorised(role: "ADMIN")
     # Get all instruments
     instruments: [Instrument!]
     # Get all image protocols
