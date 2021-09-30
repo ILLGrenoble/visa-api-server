@@ -1,3 +1,12 @@
+2.0.2 30/09/2021
+================
+ * Add Web Cloud Provider (cloud instances managed through a middleware)
+ * Add graphQL endpoints for security group, security group filters and flavour limit management
+ * Remove Cycle table and all references
+ * Add errors to payload of paginated responses
+ * Allow for searching of experiments by proposal Id
+ * Add user role management admin UI
+
 2.0.1 30/07/2021
 ================
  * Set activated and update lastSeenAt when users access visa
