@@ -9,7 +9,6 @@ import eu.ill.visa.core.domain.User;
 import eu.ill.visa.security.configuration.TokenConfiguration;
 import eu.ill.visa.security.tokens.AccountToken;
 import io.dropwizard.auth.Authenticator;
-import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Request.Builder;
@@ -20,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
+
+import static java.util.Objects.requireNonNullElse;
 
 @Singleton
 public class TokenAuthenticator implements Authenticator<String, AccountToken> {
@@ -35,46 +36,106 @@ public class TokenAuthenticator implements Authenticator<String, AccountToken> {
         this.url = configuration.getAccountsUrl();
     }
 
+    private User createUserFromData(final String id,
+                                      final String firstName,
+                                      final String lastName,
+                                      final String email) {
+        final User.Builder builder = new User.Builder();
+
+        return builder
+            .id(id)
+            .email(email)
+            .firstName(firstName)
+            .lastName(lastName)
+            .activatedAt(new Date())
+            .lastSeenAt(new Date())
+            .build();
+    }
+
+    private User getOrCreateUser(User user) {
+        final String id = user.getId();
+        final String firstName = user.getFirstName();
+        final String lastName = user.getLastName();
+        final String email = user.getEmail();
+
+        if ("0".equals(id)) {
+            return createUserFromData("0", firstName, lastName, email);
+        }
+
+        // Generate a persisted version of the User object
+        user = requireNonNullElse(userService.getById(id), createUserFromData(id, firstName, lastName, email));
+
+        // Set activated date if not already
+        if (user.getActivatedAt() == null) {
+            user.setActivatedAt(new Date());
+        }
+
+        user.setLastSeenAt(new Date());
+        userService.save(user);
+        return user;
+    }
+
     private AccountToken parseJson(String response) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper.readValue(response, AccountToken.class);
     }
 
-    @Override
-    public Optional<AccountToken> authenticate(final String token) {
+    private AccountToken getAccountToken(final String token) {
         try {
-            logger.debug("[Token] Authenticating token");
-            Builder builder = new Builder()
-                .url(this.url);
-            builder.addHeader("access_token", token);
-            Request request = builder.build();
-            Call call = this.client.newCall(request);
-            try (Response response = call.execute()) {
+            final Request request = new Builder()
+                .url(this.url)
+                .addHeader("x-access-token", token)
+                .build();
+
+            // Call web service
+            final Response response = this.client.newCall(request).execute();
+
+            if (response.code() == 200 && response.body() != null) {
                 String responseBody = response.body().string();
+                response.body().close();
+
                 AccountToken account = parseJson(responseBody);
-                String userId = account.getUser().getId();
-                User user = userService.getById(userId);
 
-                // Set activated date if not already
-                if (user.getActivatedAt() == null) {
-                    user.setActivatedAt(new Date());
-                }
+                return account;
 
-                // Update last seen at
-                user.setLastSeenAt(new Date());
-                userService.save(user);
-
-                account.setUser(user);
-                logger.info("[Token] Successfully authenticated user: {} ({})", account.getName(), user.getId());
-                if ("0".equals(user.getId())) {
-                    logger.error("User {} with login {} has an invalid user id (0)", user.getFullName(), account.getName());
-                }
-                return Optional.of(account);
+            } else {
+                logger.error("[Token] Caught HTTP error ({}: {}) authenticating user access token", response.code(), response.message());
             }
 
         } catch (IOException e) {
-            return Optional.empty();
+            logger.error("[Token] Error obtaining account from access token: {}", e.getMessage());
         }
+
+        return null;
+    }
+
+    @Override
+    public Optional<AccountToken> authenticate(final String token) {
+        logger.debug("[Token] Authenticating token");
+
+        final AccountToken accountToken = this.getAccountToken(token);
+
+        if (accountToken != null) {
+            if (accountToken.getUser() != null) {
+                // Convert basic JSON user into a persisted one
+                final User user = getOrCreateUser(accountToken.getUser());
+                accountToken.setUser(user);
+
+                if ("0".equals(user.getId())) {
+                    logger.warn("[Token] User {} with login {} has an invalid user id (0)", user.getFullName(), accountToken.getName());
+
+                } else {
+                    logger.info("[Token] Successfully authenticated user: {} ({})", accountToken.getName(), user.getId());
+                }
+
+                return Optional.of(accountToken);
+
+            } else {
+                logger.error("[Token] Did not obtain a valid user from the Account Service for username {}", accountToken.getName());
+            }
+        }
+
+        return Optional.empty();
     }
 }

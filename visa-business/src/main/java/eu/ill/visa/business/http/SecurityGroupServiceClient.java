@@ -50,14 +50,10 @@ public class SecurityGroupServiceClient {
 
             logger.info("Requesting security groups for instance {} from {}...", instance.getId(), this.configuration.getUrl());
 
-            Headers.Builder headersBuilder = new Headers.Builder();
-            headersBuilder.add("x-auth-token", this.configuration.getAuthToken());
-            Headers headers = headersBuilder.build();
-
             final RequestBody body = RequestBody.create(JSON_CONTENT_TYPE, json);
             final Request request = new Request.Builder()
                 .url(this.configuration.getUrl())
-                .headers(headers)
+                .addHeader("x-auth-token", this.configuration.getAuthToken())
                 .post(body)
                 .build();
 
@@ -66,6 +62,8 @@ public class SecurityGroupServiceClient {
 
             if (response.code() == 200 && response.body() != null) {
                 String jsonString = response.body().string();
+                response.body().close();
+
                 securityGroups = this.objectMapper.readValue(jsonString,  new TypeReference<List<SecurityGroup>>(){});
 
                 List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());

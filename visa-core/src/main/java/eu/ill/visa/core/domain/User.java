@@ -12,6 +12,8 @@ import java.util.List;
 
 public class User implements Serializable {
 
+    private static int DEFAULT_INSTANCE_QUOTA = 2;
+
     private String id;
 
     private String firstName;
@@ -179,7 +181,7 @@ public class User implements Serializable {
         private String  email;
         private Date    activatedAt;
         private Date    lastSeenAt;
-        private Integer instanceQuota;
+        private Integer instanceQuota = DEFAULT_INSTANCE_QUOTA;
 
         public Builder() {
         }
