@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
-                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
-                 version="2.1">
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
 
     <named-query name="instanceCommand.getById">
         <query>SELECT a FROM InstanceCommand a WHERE a.id = :id</query>
     </named-query>
+
     <named-query name="instanceCommand.getAll">
         <query>SELECT a FROM InstanceCommand a order by a.id</query>
     </named-query>
+
     <named-query name="instanceCommand.getAllActive">
         <query>SELECT a FROM InstanceCommand a where a.state in ('PENDING', 'QUEUED', 'RUNNING') order by a.id</query>
     </named-query>
+
     <named-query name="instanceCommand.getAllPending">
         <query>SELECT a FROM InstanceCommand a where a.state = 'PENDING' order by a.id</query>
     </named-query>
+
     <named-query name="instanceCommand.getAllForUser">
         <query>SELECT a FROM InstanceCommand a where a.user = :user order by a.id</query>
     </named-query>
+
     <named-query name="instanceCommand.getAllForInstance">
         <query>SELECT a FROM InstanceCommand a where a.instance = :instance order by a.id</query>
     </named-query>

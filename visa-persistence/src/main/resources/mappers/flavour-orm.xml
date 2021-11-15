@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
-                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
-                 version="2.1">
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
 
     <named-query name="flavour.getById">
         <query>
@@ -12,6 +12,7 @@
             AND f.deleted = false
         </query>
     </named-query>
+
     <named-query name="flavour.getAll">
         <query>
             SELECT f
@@ -50,7 +51,7 @@
                 <column name="compute_id" length="250" nullable="false"/>
             </basic>
             <basic name="deleted">
-                <column name="deleted" nullable="false" column-definition="" default="false"/>
+                <column name="deleted" nullable="false" column-definition=""/>
             </basic>
         </attributes>
     </entity>

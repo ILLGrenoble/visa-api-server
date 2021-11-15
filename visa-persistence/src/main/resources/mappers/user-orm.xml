@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
-                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
-                 version="2.1">
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
 
     <named-query name="user.getById">
         <query>SELECT u FROM User u WHERE u.id = :id</query>
@@ -50,19 +50,6 @@
         </query>
     </named-query>
 
-    <named-native-query name="user.getExperimentalTeamForInstance" result-class="eu.ill.visa.core.domain.User">
-        <query>
-            SELECT DISTINCT u.id, u.affiliation_id, u.email, u.first_name, u.last_name, u.activated_at, u.last_seen_at, u.instance_quota
-            FROM users u
-            LEFT JOIN experiment_user eu ON eu.user_id = u.id
-            WHERE eu.experiment_id IN (
-            SELECT i.experiment_id
-            FROM instance_experiment i
-            WHERE i.instance_id = ?1
-            )
-            ORDER BY u.last_name
-        </query>
-    </named-native-query>
 
     <named-query name="user.getAllStaff">
         <query>
@@ -89,6 +76,20 @@
             WHERE u.activatedAt IS NOT NULL
         </query>
     </named-query>
+
+    <named-native-query name="user.getExperimentalTeamForInstance" result-class="eu.ill.visa.core.domain.User">
+        <query>
+            SELECT DISTINCT u.id, u.affiliation_id, u.email, u.first_name, u.last_name, u.activated_at, u.last_seen_at, u.instance_quota
+            FROM users u
+            LEFT JOIN experiment_user eu ON eu.user_id = u.id
+            WHERE eu.experiment_id IN (
+            SELECT i.experiment_id
+            FROM instance_experiment i
+            WHERE i.instance_id = ?1
+            )
+            ORDER BY u.last_name
+        </query>
+    </named-native-query>
 
     <entity class="eu.ill.visa.core.domain.User">
         <table name="users"/>

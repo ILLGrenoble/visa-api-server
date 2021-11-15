@@ -7,7 +7,7 @@ public class InstanceJupyterSession extends Timestampable {
     private User user;
     private String kernelId;
     private String sessionId;
-    private boolean active;
+    private boolean active = false;
 
     public InstanceJupyterSession() {
     }

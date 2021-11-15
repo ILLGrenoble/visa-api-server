@@ -12,9 +12,9 @@
     <artifactId>visa-persistence</artifactId>
     <properties>
         <javax.persistence-api.version>2.2</javax.persistence-api.version>
-        <guice-persist.version>4.2.2</guice-persist.version>
-        <hibernate-core.version>5.4.5.Final</hibernate-core.version>
-        <hibernate-hikari.version>5.4.5.Final</hibernate-hikari.version>
+        <guice-persist.version>4.2.3</guice-persist.version>
+        <hibernate-core.version>5.6.1.Final</hibernate-core.version>
+        <hibernate-hikari.version>5.6.1.Final</hibernate-hikari.version>
     </properties>
 
     <dependencies>

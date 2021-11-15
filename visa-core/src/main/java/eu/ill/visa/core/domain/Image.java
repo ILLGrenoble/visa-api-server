@@ -24,7 +24,7 @@ public class Image extends Timestampable {
 
     private boolean deleted = false;
 
-    private boolean visible;
+    private boolean visible = false;
 
     private String bootCommand;
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
-                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
-                 version="2.1">
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
 
     <named-query name="instanceJupyterSession.getAll">
         <query>SELECT i FROM InstanceJupyterSession i WHERE i.active = true ORDER BY i.id DESC</query>
@@ -38,7 +38,6 @@
         </query>
     </named-query>
 
-
     <entity class="eu.ill.visa.core.domain.InstanceJupyterSession">
         <table name="instance_jupyter_session"/>
         <attributes>
@@ -53,7 +52,7 @@
                 <column name="session_id" nullable="false" length="150"/>
             </basic>
             <basic name="active">
-                <column name="active" nullable="false" default="false"/>
+                <column name="active" nullable="false" />
             </basic>
             <many-to-one name="instance" optional="false">
                 <join-column name="instance_id" nullable="false"/>

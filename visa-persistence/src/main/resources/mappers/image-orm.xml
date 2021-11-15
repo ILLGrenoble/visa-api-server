@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
-                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd"
-                 version="2.1">
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
 
     <named-query name="image.getById">
         <query>
@@ -61,16 +61,16 @@
                 <column name="version" length="100" nullable="true"/>
             </basic>
             <basic name="deleted">
-                <column name="deleted" nullable="false" column-definition="" default="false"/>
+                <column name="deleted" nullable="false" column-definition=""/>
             </basic>
             <basic name="visible">
-                <column name="visible" nullable="false" column-definition="" default="false"/>
+                <column name="visible" nullable="false" column-definition=""/>
             </basic>
             <basic name="bootCommand">
-                <column name="boot_command" column-definition="TEXT" nullable="true" />
+                <column name="boot_command" column-definition="TEXT" nullable="true"/>
             </basic>
             <basic name="autologin">
-                <column name="autologin" nullable="true" />
+                <column name="autologin" nullable="true"/>
             </basic>
             <many-to-many name="protocols" target-entity="eu.ill.visa.core.domain.ImageProtocol">
                 <join-table name="image_protocol">

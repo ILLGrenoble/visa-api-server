@@ -9,7 +9,6 @@ public class Flavour extends Timestampable {
 
     private String name;
 
-
     private Integer memory;
 
     private Float cpu;

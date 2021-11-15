@@ -41,13 +41,7 @@ public class PersistenceModule extends AbstractModule {
     private static class DatabaseInitializer {
         @Inject
         public DatabaseInitializer(final PersistService service) {
-            try {
-                service.start();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw e;
-            }
+            service.start();
         }
     }
 
