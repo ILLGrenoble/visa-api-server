@@ -104,7 +104,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));
             }
             if (endDate != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), endDate));
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), endDate));
             }
             if (proposalIdentifiers != null) {
                 predicates.add(root.get("proposal").get("identifier").in(proposalIdentifiers));

@@ -32,25 +32,15 @@ public class AccountToken implements Principal {
 
     public User getUser() {
         return user;
-
-    }
-
-    public Map<String, String> getAccountParameters() {
-        return accountParameters;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setUser(User user) {
         this.user = user;
     }
 
-    public void setAccountParameters(Map<String, String> accountParameters) {
-        this.accountParameters = accountParameters;
+    public Map<String, String> getAccountParameters() {
+        return accountParameters;
     }
-
 
 }
 
