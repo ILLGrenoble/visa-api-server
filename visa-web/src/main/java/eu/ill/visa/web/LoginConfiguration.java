@@ -5,24 +5,37 @@ import javax.validation.constraints.NotNull;
 public class LoginConfiguration {
 
     @NotNull
-    private String realm;
+    private String scope;
 
     @NotNull
-    private String url;
+    private boolean showDebugInformation;
+
+    @NotNull
+    private boolean sessionChecksEnabled;
+
+    @NotNull
+    private String issuer;
 
     @NotNull
     private String clientId;
 
-
-    public String getRealm() {
-        return realm;
-    }
-
-    public String getUrl() {
-        return url;
+    public String getIssuer() {
+        return issuer;
     }
 
     public String getClientId() {
         return clientId;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public boolean isShowDebugInformation() {
+        return showDebugInformation;
+    }
+
+    public boolean isSessionChecksEnabled() {
+        return sessionChecksEnabled;
     }
 }

@@ -161,9 +161,11 @@ graphql:
 
 client:
   login:
-    realm: ${VISA_CLIENT_CONFIG_LOGIN_REALM}
-    url: ${VISA_CLIENT_CONFIG_LOGIN_URL}
+    issuer: ${VISA_CLIENT_CONFIG_LOGIN_ISSUER}
     clientId: ${VISA_CLIENT_CONFIG_LOGIN_CLIENT_ID}
+    scope: ${VISA_CLIENT_CONFIG_LOGIN_SCOPE:-'openid offline_access'}
+    showDebugInformation: ${VISA_CLIENT_CONFIG_LOGIN_SHOW_DEBUG_INFORMATION:-false}
+    sessionChecksEnabled: ${VISA_CLIENT_CONFIG_LOGIN_SESSION_CHECKS_ENABLED:-true}
   analytics:
     enabled: ${VISA_CLIENT_CONFIG_ANALYTICS_ENABLED:-false}
     url: ${VISA_CLIENT_CONFIG_ANALYTICS_URL:-null}
