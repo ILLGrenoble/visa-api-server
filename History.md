@@ -1,3 +1,12 @@
+2.1.0 17/11/2021
+================
+ * Update configuration for openid connect
+ * Fix issue with log level set to debug
+ * Filter experiments by start date only
+ * Create users automatically if they do not exist in the database 
+ * Allow for empty analytics configuration
+ * Update persistence XML files to conform to JPA schema 2.2
+
 2.0.2 30/09/2021
 ================
  * Add Web Cloud Provider (cloud instances managed through a middleware)
