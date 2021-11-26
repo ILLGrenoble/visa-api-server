@@ -91,13 +91,19 @@ public class TokenAuthenticator implements Authenticator<String, AccountToken> {
             // Call web service
             final Response response = this.client.newCall(request).execute();
 
-            if (response.code() == 200 && response.body() != null) {
-                String responseBody = response.body().string();
+            String responseBody = null;
+            if (response.body() != null) {
+                responseBody = response.body().string();
                 response.body().close();
+            }
 
+            if (response.code() == 200 && response.body() != null) {
                 AccountToken account = parseJson(responseBody);
 
                 return account;
+
+            } else if (response.code() == 401) {
+                logger.info("[Token] Caught unauthenticated access to VISA: {}", responseBody == null ? response.message(): responseBody);
 
             } else {
                 logger.error("[Token] Caught HTTP error ({}: {}) authenticating user access token", response.code(), response.message());
