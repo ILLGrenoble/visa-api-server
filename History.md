@@ -1,3 +1,7 @@
+2.1.1 26/11/2021
+================
+ *  Catch 401 errors from the account service and log accordingly (don't log as an error).
+
 2.1.0 17/11/2021
 ================
  * Update configuration for openid connect
