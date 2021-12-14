@@ -82,28 +82,25 @@ public class TokenAuthenticator implements Authenticator<String, AccountToken> {
     }
 
     private AccountToken getAccountToken(final String token) {
-        try {
-            final Request request = new Builder()
-                .url(this.url)
-                .addHeader("x-access-token", token)
-                .build();
+        final Request request = new Builder()
+            .url(this.url)
+            .addHeader("x-access-token", token)
+            .build();
 
-            // Call web service
-            final Response response = this.client.newCall(request).execute();
+        try (final Response response = this.client.newCall(request).execute()) {
 
-            String responseBody = null;
-            if (response.body() != null) {
-                responseBody = response.body().string();
-                response.body().close();
+            if (response.body() == null) {
+                return null;
             }
 
-            if (response.code() == 200 && response.body() != null) {
+            String responseBody = response.body().string();
+            if (response.code() == 200) {
                 AccountToken account = parseJson(responseBody);
 
                 return account;
 
             } else if (response.code() == 401) {
-                logger.info("[Token] Caught unauthenticated access to VISA: {}", responseBody == null ? response.message(): responseBody);
+                logger.info("[Token] Caught unauthenticated access to VISA: {}", responseBody);
 
             } else {
                 logger.error("[Token] Caught HTTP error ({}: {}) authenticating user access token", response.code(), response.message());

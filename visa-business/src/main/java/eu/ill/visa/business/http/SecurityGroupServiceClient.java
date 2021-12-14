@@ -36,6 +36,36 @@ public class SecurityGroupServiceClient {
         this.objectWriter = this.objectMapper.writer().withDefaultPrettyPrinter();
     }
 
+    public String requestSecurityGroups(Long instanceId, String instanceAsJson) {
+        final RequestBody body = RequestBody.create(JSON_CONTENT_TYPE, instanceAsJson);
+
+        final Request request = new Request.Builder()
+            .url(this.configuration.getUrl())
+            .addHeader("x-auth-token", this.configuration.getAuthToken())
+            .post(body)
+            .build();
+
+        logger.info("Requesting security groups for instance {} from {}...", instanceId, this.configuration.getUrl());
+        try (final Response response = this.securityGroupServiceClient.newCall(request).execute()) {
+            if (response.body() == null) {
+                logger.warn("Received empty response for security groups for instance {}", instanceId);
+                return null;
+            }
+
+            if (response.code() == 200) {
+                return response.body().string();
+
+            } else {
+                logger.warn("Caught HTTP error ({}) getting security groups for instance {}: {} ", response.code(), instanceId, response.body().string());
+            }
+
+        } catch (IOException e) {
+            logger.error("[Token] Error obtaining account from access token: {}", e.getMessage());
+        }
+
+        return null;
+    }
+
     public List<SecurityGroup> getSecurityGroups(final Instance instance) {
         List<SecurityGroup> securityGroups = new ArrayList<>();
 
@@ -48,29 +78,13 @@ public class SecurityGroupServiceClient {
             // Convert instance to json string
             String json = this.objectWriter.writeValueAsString(instance);
 
-            logger.info("Requesting security groups for instance {} from {}...", instance.getId(), this.configuration.getUrl());
-
-            final RequestBody body = RequestBody.create(JSON_CONTENT_TYPE, json);
-            final Request request = new Request.Builder()
-                .url(this.configuration.getUrl())
-                .addHeader("x-auth-token", this.configuration.getAuthToken())
-                .post(body)
-                .build();
-
-            // Call web service
-            final Response response = this.securityGroupServiceClient.newCall(request).execute();
-
-            if (response.code() == 200 && response.body() != null) {
-                String jsonString = response.body().string();
-                response.body().close();
-
+            // Perform request
+            String jsonString = this.requestSecurityGroups(instance.getId(), json);
+            if (jsonString != null) {
                 securityGroups = this.objectMapper.readValue(jsonString,  new TypeReference<List<SecurityGroup>>(){});
 
                 List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
                 logger.info("... got security groups [{}] for instance {}", String.join(", ", securityGroupNames), instance.getId());
-
-            } else {
-                logger.warn("Caught HTTP error ({}) getting security groups for instance {}: {} ", response.code(), instance.getId(), (response.body() == null ? "(no message)" : response.body().string()));
             }
 
         } catch (IOException e) {
