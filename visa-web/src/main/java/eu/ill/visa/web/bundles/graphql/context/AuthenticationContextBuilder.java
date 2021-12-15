@@ -13,8 +13,6 @@ import javax.websocket.Session;
 import javax.websocket.server.HandshakeRequest;
 import java.util.Optional;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.AUTHORIZATION;
-
 public class AuthenticationContextBuilder extends DefaultGraphQLServletContextBuilder {
 
     private final TokenAuthenticator authenticator;
@@ -51,7 +49,7 @@ public class AuthenticationContextBuilder extends DefaultGraphQLServletContextBu
 
     @Override
     public GraphQLContext build(HttpServletRequest request, HttpServletResponse response) {
-        return getAuthenticationContext(request.getHeader(AUTHORIZATION));
+        return getAuthenticationContext(request.getHeader("Authorization"));
     }
 
     @Override

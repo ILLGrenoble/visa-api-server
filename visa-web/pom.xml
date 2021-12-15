@@ -12,19 +12,16 @@
     <artifactId>visa-web</artifactId>
     <properties>
         <!-- Dependencies versions -->
-        <dropwizard-redirect-bundle.version>1.0.5</dropwizard-redirect-bundle.version>
-        <dropwizard-guicey.version>4.1.0</dropwizard-guicey.version>
+        <dropwizard-guicey.version>5.4.0</dropwizard-guicey.version>
         <dozer.version>5.5.1</dozer.version>
-        <mockito.version>1.10.19</mockito.version>
-        <jersey-container-servlet-core.version>2.25.1</jersey-container-servlet-core.version>
         <!-- End dependency versions -->
-        <junit-platform-runner.version>1.0.0</junit-platform-runner.version>
-        <jersey-test-framework-provider-grizzly2.version>2.25.1</jersey-test-framework-provider-grizzly2.version>
         <graphql-java-servlet.version>9.0.1</graphql-java-servlet.version>
         <graphql-java-tools.version>6.0.0</graphql-java-tools.version>
         <bval-guice.version>0.5</bval-guice.version>
-        <maven-model.version>3.3.9</maven-model.version>
+        <maven-model.version>3.8.4</maven-model.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>eu.ill.visa</groupId>
@@ -48,17 +45,7 @@
         </dependency>
         <!-- Dropwizard dependencies -->
         <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-core</artifactId>
-            <version>${dropwizard.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-testing</artifactId>
-            <version>${dropwizard.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard</groupId>
+            <groupId>io.dropwizard.modules</groupId>
             <artifactId>dropwizard-jdbi</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
@@ -66,11 +53,6 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-forms</artifactId>
             <version>${dropwizard.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard-bundles</groupId>
-            <artifactId>dropwizard-redirect-bundle</artifactId>
-            <version>${dropwizard-redirect-bundle.version}</version>
         </dependency>
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -115,10 +97,9 @@
             <version>${bval-guice.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>${commons-beanutils.version}</version>
         </dependency>
         <dependency>
             <groupId>net.sf.dozer</groupId>
@@ -137,35 +118,12 @@
                     <groupId>org.apache.commons</groupId>
                     <artifactId>commons-lang3</artifactId>
                 </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-            <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-            <version>${jersey-test-framework-provider-grizzly2.version}</version>
-            <exclusions>
                 <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet-core</artifactId>
-            <version>${jersey-container-servlet-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-runner</artifactId>
-            <version>${junit-platform-runner.version}</version>
-            <scope>test</scope>
-        </dependency>
-
 
         <!-- End misc dependencies -->
     </dependencies>

@@ -45,12 +45,12 @@ public class WebApplication extends Application<WebConfiguration> {
     }
 
     private void addBundles(Bootstrap<WebConfiguration> bootstrap) {
-        GuiceBundle<WebConfiguration> bundle = configureGuiceBundle();
+        GuiceBundle bundle = configureGuiceBundle();
         bootstrap.addBundle(bundle);
         bootstrap.addBundle(new MultiPartBundle());
     }
 
-    private GuiceBundle<WebConfiguration> configureGuiceBundle() {
+    private GuiceBundle configureGuiceBundle() {
         return GuiceBundle.<WebConfiguration>builder()
             .enableAutoConfig(BASE_PACKAGES)
             .modules(new CloudModule())
@@ -60,7 +60,6 @@ public class WebApplication extends Application<WebConfiguration> {
             .modules(new WebModule())
             .modules(new BusinessModule())
             .modules(new ValidationModule())
-            .useWebInstallers()
             .build();
     }
 

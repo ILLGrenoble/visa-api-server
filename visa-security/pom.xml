@@ -11,7 +11,6 @@
     <artifactId>visa-security</artifactId>
 
     <properties>
-        <nimbus-jose-jwt.version>6.0</nimbus-jose-jwt.version>
     </properties>
 
     <dependencies>
@@ -25,11 +24,6 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-auth</artifactId>
             <version>${dropwizard.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-            <version>${nimbus-jose-jwt.version}</version>
         </dependency>
 
 
