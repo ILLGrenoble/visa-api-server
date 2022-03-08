@@ -153,6 +153,7 @@ type InstanceAttribute {
 
 type Instance {
     id: Int!
+    uid: String!
     name: String!
     comments: String
     state: InstanceState!

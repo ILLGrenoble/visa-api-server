@@ -14,6 +14,7 @@ import java.util.List;
 public class Instance extends Timestampable {
 
     private Long id;
+    private String uid;
     private String computeId;
     private String name;
     private String comments;
@@ -39,6 +40,7 @@ public class Instance extends Timestampable {
 
     public Instance(Builder builder) {
         this.id = builder.id;
+        this.uid = builder.uid;
         this.computeId = builder.computeId;
         this.name = builder.name;
         this.comments = builder.comments;
@@ -64,6 +66,14 @@ public class Instance extends Timestampable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getComputeId() {
@@ -335,6 +345,7 @@ public class Instance extends Timestampable {
     public String toString() {
         return new ToStringBuilder(this)
             .append("id", id)
+            .append("uid", uid)
             .append("computeId", computeId)
             .append("name", name)
             .append("comments", comments)
@@ -385,6 +396,7 @@ public class Instance extends Timestampable {
 
     public static final class Builder {
         private Long id;
+        private String uid;
         private String computeId;
         private String name;
         private String comments;
@@ -408,6 +420,11 @@ public class Instance extends Timestampable {
 
         public Builder id(Long id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder uid(String uid) {
+            this.uid = uid;
             return this;
         }
 

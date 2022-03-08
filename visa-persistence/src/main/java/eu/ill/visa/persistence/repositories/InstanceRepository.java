@@ -70,6 +70,16 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         }
     }
 
+    public Instance getByUID(final String uid) {
+        try {
+            final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getByUID", Instance.class);
+            query.setParameter("uid", uid);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
     public void save(Instance instance) {
         if (instance.getId() == null) {
             persist(instance);

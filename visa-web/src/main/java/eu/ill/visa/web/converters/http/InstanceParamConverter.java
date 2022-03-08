@@ -27,6 +27,13 @@ public class InstanceParamConverter implements ParamConverter<Instance> {
                 throw new NotFoundException("Instance not found");
             }
             return instance;
+
+        } else if (value.matches("[a-zA-Z0-9]+")) {
+            final Instance instance = instanceService.getByUID(value);
+            if (instance == null) {
+                throw new NotFoundException("Instance not found");
+            }
+            return instance;
         }
         throw new NotFoundException("Instance not found");
     }
