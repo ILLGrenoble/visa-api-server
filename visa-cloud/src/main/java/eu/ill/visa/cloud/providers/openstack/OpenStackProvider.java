@@ -11,12 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.json.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static eu.ill.visa.cloud.helpers.JsonHelper.parseObject;
 import static eu.ill.visa.cloud.http.HttpMethod.*;
 import static java.lang.String.format;
-import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -40,7 +38,7 @@ public class OpenStackProvider implements CloudProvider {
         final String url = format("%s/v3/auth/tokens", configuration.getIdentityEndpoint());
         final HttpResponse response = httpClient.sendRequest(url, POST, null, data);
         if (response.isSuccessful()) {
-            return response.getHeader(HEADER_X_SUBJECT_TOKEN);
+            return response.getHeaderIgnoreCase(HEADER_X_SUBJECT_TOKEN);
         }
         throw new CloudException("Error authenticating to openstack");
     }
