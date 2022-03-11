@@ -32,7 +32,7 @@ public class NotificationController extends AbstractController {
 
     @GET
     public Response getNotifications() {
-        List<SystemNotificationDto> notifications = this.systemNotificationService.getAll()
+        List<SystemNotificationDto> notifications = this.systemNotificationService.getAllActive()
             .stream()
             .map(systemNotification -> mapper.map(systemNotification, SystemNotificationDto.class))
             .collect(Collectors.toUnmodifiableList());

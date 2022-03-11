@@ -298,9 +298,11 @@ type NumberInstancesByImage {
     total: Int!
 }
 
-type SystemNotification{
+type SystemNotification {
     id: Int!
+    uid: Int!
     level: SystemNotificationLevel!
     message: String!
+    activatedAt: String
 }
 

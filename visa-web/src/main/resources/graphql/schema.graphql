@@ -122,9 +122,9 @@ type Mutation {
     # Update an instance termination date
     updateInstanceTerminationDate(id: Int!, date: String!): Message! @isAuthorised(role: "ADMIN")
     # Create a system notification
-    createSystemNotification(input: SystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
+    createSystemNotification(input: SystemNotificationInput!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a system notification
-    updateSystemNotification(id: Int!, input: SystemNotificationInput): SystemNotification! @isAuthorised(role: "ADMIN")
+    updateSystemNotification(id: Int!, input: SystemNotificationInput!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Delete a system notification
     deleteSystemNotification(id: Int!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a user role
