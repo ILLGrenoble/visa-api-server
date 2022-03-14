@@ -8,11 +8,6 @@ input OrderBy {
     ascending: Boolean = true
 }
 
-input CreateRoleInput {
-    name: String!
-    description: String
-}
-
 input ImageInput {
     name: String!
     version: String
@@ -56,7 +51,8 @@ input Pagination {
     limit:  Int
 }
 
-input SystemNotificationInput{
+input SystemNotificationInput {
     level: String!
     message: String!
+    activatedAt: String
 }

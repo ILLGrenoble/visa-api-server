@@ -3,7 +3,6 @@ package eu.ill.visa.persistence.repositories;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import eu.ill.visa.core.domain.Flavour;
 import eu.ill.visa.core.domain.SystemNotification;
 
 import javax.persistence.EntityManager;
@@ -22,6 +21,11 @@ public class SystemNotificationRepository extends AbstractRepository<SystemNotif
 
     public List<SystemNotification> getAll() {
         final TypedQuery<SystemNotification> query = getEntityManager().createNamedQuery("systemNotification.getAll", SystemNotification.class);
+        return query.getResultList();
+    }
+
+    public List<SystemNotification> getAllActive() {
+        final TypedQuery<SystemNotification> query = getEntityManager().createNamedQuery("systemNotification.getAllActive", SystemNotification.class);
         return query.getResultList();
     }
 
