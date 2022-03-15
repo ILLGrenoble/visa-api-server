@@ -13,6 +13,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -265,9 +267,16 @@ public class InstanceService {
     }
 
     public String getUID() {
+        String regex = "^.*[a-zA-Z]+.*";
+        Pattern pattern = Pattern.compile(regex);
+
         do {
             String uid = RandomStringUtils.randomAlphanumeric(8);
-            if (this.repository.getByUID(uid) == null) {
+
+            // Ensure UID has at least one character to make it distinguishable from a valid ID
+            Matcher matcher = pattern.matcher(uid);
+
+            if (matcher.matches() && this.repository.getByUID(uid) == null) {
                 return uid;
             }
         } while (true);

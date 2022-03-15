@@ -229,7 +229,7 @@
                 <generated-value strategy="IDENTITY"/>
             </id>
             <basic name="uid">
-                <column name="uid" length="16" nullable="true"/>
+                <column name="uid" length="16" nullable="false"/>
             </basic>
             <basic name="computeId">
                 <column name="compute_id" length="250" nullable="true"/>
