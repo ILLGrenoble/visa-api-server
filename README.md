@@ -74,7 +74,7 @@ It is important to run the database migrations when deploying a new version of V
 To update the database to the latest version you should run the following command:
 
 ```bash
-dbmate -u "postgresql://<db_user>>:<db_password>@<db_host>:<db_port>/<db_name>?search_path=<db_schema>" up
+dbmate -u "postgresql://<db_user>>:<db_password>@<db_host>:<db_port>/<db_name>?search_path=<db_schema>" --no-dump-schema up
 ```
 
 This will apply all the necessary patches to the database.

@@ -17,7 +17,7 @@ public class ProposalService {
     private final ProposalRepository repository;
 
     @Inject
-    ProposalService(final ProposalRepository repository) {
+    public ProposalService(final ProposalRepository repository) {
         this.repository = repository;
     }
 
