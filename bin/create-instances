@@ -45,6 +45,7 @@ for n in range(count):
                                 "keyboardLayout": keyboard_layout,
                                 "acceptedTerms": 'true'
                             },
+                            verify=False,
                             headers={
                                 'Authorization': 'bearer %s' % (token),
                                 'Content-type': 'application/json',
