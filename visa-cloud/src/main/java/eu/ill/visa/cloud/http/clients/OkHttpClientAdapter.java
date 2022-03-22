@@ -99,7 +99,7 @@ public class OkHttpClientAdapter implements HttpClient {
     public HttpResponse sendRequest(final String url,
                                     final HttpMethod method,
                                     final Map<String, String> headers) throws CloudException {
-        return sendRequest(url, method, headers, null);
+        return sendRequest(url, method, headers, "{}");
     }
 
     @Override
