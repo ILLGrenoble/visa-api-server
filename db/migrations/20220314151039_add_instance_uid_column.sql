@@ -1,6 +1,6 @@
 -- migrate:up
 
-ALTER TABLE instance ADD uid VARCHAR(16);
+ALTER TABLE instance ADD COLUMN IF NOT EXISTS uid VARCHAR(16);
 UPDATE instance SET uid = id WHERE uid IS NULL;
 ALTER TABLE instance ALTER COLUMN uid SET NOT NULL;
 

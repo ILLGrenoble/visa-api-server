@@ -685,7 +685,9 @@ CREATE TABLE visa.system_notification (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     level character varying(50) NOT NULL,
-    message character varying(4096) NOT NULL
+    message character varying(4096) NOT NULL,
+    activated_at timestamp without time zone,
+    deleted_at timestamp without time zone
 );
 
 
@@ -1320,4 +1322,5 @@ ALTER TABLE ONLY visa.user_role
 --
 
 INSERT INTO visa.schema_migrations (version) VALUES
-    ('20220314151039');
+    ('20220314151039'),
+    ('20220324082055');
