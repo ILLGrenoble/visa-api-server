@@ -19,6 +19,7 @@ WORKDIR /app
 # copy built application
 COPY --from=builder /usr/src/app/visa-app/configuration.yml /app
 COPY --from=builder /usr/src/app/visa-app/target/visa-app.jar /app
+COPY --from=builder /usr/src/app/db /app/db
 
 CMD java -jar /app/visa-app.jar server /app/configuration.yml
 

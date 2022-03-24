@@ -34,6 +34,15 @@ public class HttpResponse {
         return null;
     }
 
+    public String getHeaderIgnoreCase(final String header) {
+        for (String aHeader : headers.keySet()) {
+            if (aHeader.equalsIgnoreCase(header)) {
+                return headers.get(aHeader);
+            }
+        }
+        return null;
+    }
+
     public boolean isSuccessful() {
         return this.code >= 200 && this.code < 300;
     }

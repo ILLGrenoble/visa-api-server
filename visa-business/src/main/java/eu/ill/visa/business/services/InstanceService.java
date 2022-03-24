@@ -8,10 +8,13 @@ import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceRepository;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -64,8 +67,13 @@ public class InstanceService {
         return this.repository.getById(id);
     }
 
+    public Instance getByUID(String uid) {
+        return this.repository.getByUID(uid);
+    }
+
     public Instance create(Instance.Builder instanceBuilder) {
         Instance instance = instanceBuilder
+            .uid(this.getUID())
             .state(InstanceState.BUILDING)
             .lastSeenAt(new Date())
             .build();
@@ -256,5 +264,21 @@ public class InstanceService {
 
     public InstanceThumbnail getThumbnailForInstance(Instance instance) {
         return repository.getThumbnailForInstance(instance);
+    }
+
+    public String getUID() {
+        String regex = "^.*[a-zA-Z]+.*";
+        Pattern pattern = Pattern.compile(regex);
+
+        do {
+            String uid = RandomStringUtils.randomAlphanumeric(8);
+
+            // Ensure UID has at least one character to make it distinguishable from a valid ID
+            Matcher matcher = pattern.matcher(uid);
+
+            if (matcher.matches() && this.repository.getByUID(uid) == null) {
+                return uid;
+            }
+        } while (true);
     }
 }

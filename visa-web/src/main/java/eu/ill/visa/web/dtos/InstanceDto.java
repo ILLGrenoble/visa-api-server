@@ -9,6 +9,7 @@ import java.util.List;
 public class InstanceDto {
 
     private Long id;
+    private String uid;
     private String computeId;
     private String ipAddress;
     private String name;
@@ -36,6 +37,14 @@ public class InstanceDto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getComputeId() {

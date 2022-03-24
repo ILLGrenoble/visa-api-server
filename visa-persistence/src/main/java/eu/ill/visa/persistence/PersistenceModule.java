@@ -44,6 +44,4 @@ public class PersistenceModule extends AbstractModule {
             service.start();
         }
     }
-
-
 }

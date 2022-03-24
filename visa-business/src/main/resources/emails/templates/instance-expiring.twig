@@ -5,7 +5,7 @@
     <p>
         The <a href="{{  rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
         compute instance <b>{{ instance.name }}</b> that you created on
-        <b>{{ instance.createdAt | date("dd MMMM yyyy") }}</b> for analysing your scientific data will deleted on <b>{{ expirationDate | date("dd MMMM yyyy 'at' HH:mm z") }}</b> due to inactivity.
+        <b>{{ instance.createdAt | date("dd MMMM yyyy") }}</b> for analysing your scientific data will be deleted on <b>{{ expirationDate | date("dd MMMM yyyy 'at' HH:mm z") }}</b> due to inactivity.
     </p>
     <p>
         If you wish to continue using your instance then please connect
@@ -14,7 +14,7 @@
     <p>
         You can access your
         instance at this address: <a style="color:#3777b0;text-decoration:none;"
-                                     href="{{ rootURL }}/instances/{{ instance.id }}">{{ rootURL }}/instances/{{ instance.id }}</a>
+                                     href="{{ rootURL }}/instances/{{ instance.uid }}">{{ rootURL }}/instances/{{ instance.uid }}</a>
 
     </p>
     <p>

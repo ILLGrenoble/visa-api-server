@@ -57,6 +57,28 @@ Portal users who have specific support roles can also request access to remote d
 
 Session data is also maintained by the service to provide usage statistics and real-time analysis of connected users.
 
+## VISA Database management
+
+The VISA database schema is created automatically when running the VISA API Server, it can however be created independently which can be useful when developing the ETL process before deploying VISA. VISA supports deploying the database to a PostgreSQL server, although in theory other databases are valid.
+
+The schema is stored in a file within this project: `db/schema.sql` and can be used to populate the database as follows:
+
+```bash
+psql -h <server_host> -p <server_port> -U <db_user> -f db/schema.sql
+```
+
+### Database migrations
+
+It is important to run the database migrations when deploying a new version of VISA. We use [dbmate](https://github.com/amacneil/dbmate) to manage the incremental database updates.
+
+To update the database to the latest version you should run the following command:
+
+```bash
+dbmate -u "postgresql://<db_user>>:<db_password>@<db_host>:<db_port>/<db_name>?search_path=<db_schema>" --no-dump-schema up
+```
+
+This will apply all the necessary patches to the database.
+
 ## Acknowledgements
 
 <img src="https://github.com/panosc-eu/panosc/raw/master/Work%20Packages/WP9%20Outreach%20and%20communication/PaNOSC%20logo/PaNOSClogo_web_RGB.jpg" width="200px"/> 

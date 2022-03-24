@@ -5,11 +5,15 @@
                  version="2.2">
 
     <named-query name="systemNotification.getById">
-        <query>SELECT s FROM SystemNotification s WHERE s.id = :id</query>
+        <query>SELECT s FROM SystemNotification s WHERE s.id = :id AND s.deletedAt IS NULL</query>
     </named-query>
 
     <named-query name="systemNotification.getAll">
-        <query>SELECT s FROM SystemNotification s ORDER BY s.id DESC</query>
+        <query>SELECT s FROM SystemNotification s WHERE s.deletedAt IS NULL ORDER BY s.id</query>
+    </named-query>
+
+    <named-query name="systemNotification.getAllActive">
+        <query>SELECT s FROM SystemNotification s WHERE s.deletedAt IS NULL AND s.activatedAt IS NOT NULL ORDER BY s.id DESC</query>
     </named-query>
 
     <entity class="eu.ill.visa.core.domain.SystemNotification">
@@ -25,6 +29,12 @@
             <basic name="level">
                 <column name="level" length="50" nullable="false"/>
                 <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="activatedAt">
+                <column name="activated_at" nullable="true"/>
+            </basic>
+            <basic name="deletedAt">
+                <column name="deleted_at" nullable="true"/>
             </basic>
         </attributes>
     </entity>

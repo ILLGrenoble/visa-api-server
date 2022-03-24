@@ -1,3 +1,14 @@
+2.2.0 23/03/2022
+================
+* Update the instance creation and deletion scripts (used for testing cloud providers)
+* Add database migration scripts for use with dbmate (include in Docker container too)
+* Fix some OpenStack issues by accepting case-insensitive headers
+* Modify system notifications to allow them to be re-used (activate/deactivate) and soft delete
+* Add UID to Instance model to be used in client routes and server REST API
+* Update library dependencies
+* Fix email template typo
+* Ensure HTTP client requests and responses are closed correctly
+
 2.1.1 26/11/2021
 ================
  *  Catch 401 errors from the account service and log accordingly (don't log as an error).

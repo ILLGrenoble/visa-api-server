@@ -153,6 +153,7 @@ type InstanceAttribute {
 
 type Instance {
     id: Int!
+    uid: String!
     name: String!
     comments: String
     state: InstanceState!
@@ -298,9 +299,11 @@ type NumberInstancesByImage {
     total: Int!
 }
 
-type SystemNotification{
+type SystemNotification {
     id: Int!
+    uid: Int!
     level: SystemNotificationLevel!
     message: String!
+    activatedAt: String
 }
 

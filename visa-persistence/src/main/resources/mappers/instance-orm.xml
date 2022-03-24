@@ -12,6 +12,14 @@
             AND i.deletedAt IS NULL
         </query>
     </named-query>
+    <named-query name="instance.getByUID">
+        <query>
+            SELECT i FROM Instance i
+            LEFT JOIN i.members m
+            WHERE i.uid = :uid
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
     <named-query name="instance.getAll">
         <query>
             SELECT DISTINCT i FROM Instance i
@@ -220,6 +228,9 @@
                 <column name="id" nullable="false"/>
                 <generated-value strategy="IDENTITY"/>
             </id>
+            <basic name="uid">
+                <column name="uid" length="16" nullable="false"/>
+            </basic>
             <basic name="computeId">
                 <column name="compute_id" length="250" nullable="true"/>
             </basic>

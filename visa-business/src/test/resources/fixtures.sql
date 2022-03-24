@@ -27,41 +27,41 @@ VALUES (1003, 1000, 1000, '2019-01-01', '2019-01-01', false);
 INSERT INTO protocol (id, name, port) VALUES (1000, 'GUACD', 4822);
 INSERT INTO protocol (id, name, port) VALUES (1001, 'RDP', 3389);
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1000, '24e7437a-eae5-48c4-923e-778c42a6acf8', 'Instance 1', 'This is an instance', 1001, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', '2019-01-01', '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1000, '1000abcd', '24e7437a-eae5-48c4-923e-778c42a6acf8', 'Instance 1', 'This is an instance', 1001, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', '2019-01-01', '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1001, '24e7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 2', 'This is another instance', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', '2019-01-01', '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1001, '1001abcd', '24e7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 2', 'This is another instance', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', '2019-01-01', '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1002, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 3', 'This is an instance unlinked to any actionType', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1002, '1002abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 3', 'This is an instance unlinked to any actionType', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1003, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 3', 'This is an instance unlinked to any actionType', 1000, 1280, 1024, 'DELETED', '2019-01-01', '2019-01-01', '2019-01-01', '2019-01-01', '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1003, '1003abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 3', 'This is an instance unlinked to any actionType', 1000, 1280, 1024, 'DELETED', '2019-01-01', '2019-01-01', '2019-01-01', '2019-01-01', '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1004, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 4', 'Instance 4', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1004, '1004abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 4', 'Instance 4', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1005, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 5', 'Instance 5', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1005, '1005abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 5', 'Instance 5', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1006, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 6', 'Instance 6', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1006, '1006abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 6', 'Instance 6', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1007, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 1', 'Instance 7', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1007, '1007abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 1', 'Instance 7', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1008, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 8', 'Instance 8', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1008, '1008abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 8', 'Instance 8', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1009, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 9', 'Instance 9', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1009, '1009abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 9', 'Instance 9', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1010, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 10', 'Instance 10', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1010, '1010abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 10', 'Instance 10', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
-INSERT INTO instance (id, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
-VALUES (1011, '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 11', 'Instance 11', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
+INSERT INTO instance (id, uid, compute_id, name, comments, plan_id, screen_width, screen_height, state, deleted_at, created_at, updated_at, last_seen_at, termination_date, delete_requested, keyboard_layout)
+VALUES (1011, '1011abcd', '34f7437a-eae5-48c4-923e-778c42a6acf9', 'Instance 11', 'Instance 11', 1000, 1280, 1024, 'ACTIVE', null, '2019-01-01', '2019-01-01', now(), '2099-01-01', false, 'en-gb-qwerty');
 
 INSERT INTO employer (id, name, town, country_code)
 VALUES (1001, 'Company 1', 'Grenoble', 'FR');
