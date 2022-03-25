@@ -17,13 +17,21 @@ import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.internal.inject.AbstractBinder;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.glassfish.jersey.server.model.AnnotatedMethod;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 import java.security.Principal;
 
 @Singleton
 @Provider
 public class AuthenticationProvider extends PolymorphicAuthDynamicFeature<Principal> {
+
+    private static TokenAuthenticationFilter<AccountToken> tokenTokenAuthenticationFilter;
 
     @Inject
     AuthenticationProvider(final TokenAuthenticator tokenAuthenticator,
@@ -43,27 +51,46 @@ public class AuthenticationProvider extends PolymorphicAuthDynamicFeature<Princi
             )
         );
 
-        environment.jersey().register(binder);
-
         environment.jersey().register(RolesAllowedDynamicFeature.class);
+        environment.jersey().register(binder);
     }
 
-    private static TokenAuthenticationFilter<AccountToken> createAccountAuthenticationFilter(final TokenAuthenticator tokenAuthenticator,
+    private synchronized static TokenAuthenticationFilter<AccountToken> createAccountAuthenticationFilter(final TokenAuthenticator tokenAuthenticator,
                                                                                              final ApplicationAuthorizer authorizer,
                                                                                              final TokenConfiguration configuration) {
 
-        return new TokenAuthenticationFilter.Builder<AccountToken>()
-            .setPrefix(configuration.getPrefix())
-            .setAuthorizer(authorizer)
-            .setAuthenticator(tokenAuthenticator)
-            .buildAuthFilter();
+        if (AuthenticationProvider.tokenTokenAuthenticationFilter == null) {
+            AuthenticationProvider.tokenTokenAuthenticationFilter = new TokenAuthenticationFilter.Builder<AccountToken>()
+                .setPrefix(configuration.getPrefix())
+                .setAuthorizer(authorizer)
+                .setAuthenticator(tokenAuthenticator)
+                .buildAuthFilter();
+        }
+
+        return AuthenticationProvider.tokenTokenAuthenticationFilter;
     }
 
     private static BasicCredentialAuthFilter<ApplicationToken> createBasicAuthenticationFilter(final ApplicationCredentialAuthenticator applicationCredentialAuthenticator) {
 
         return new BasicCredentialAuthFilter.Builder<ApplicationToken>()
-            .setPrefix("Basic")
             .setAuthenticator(applicationCredentialAuthenticator)
             .buildAuthFilter();
+    }
+
+    public void configure(ResourceInfo resourceInfo, FeatureContext context) {
+        // Do configuration checking for @Auth parameters
+        int instanceCountBefore =  context.getConfiguration().getInstances().size();
+        super.configure(resourceInfo, context);
+        int instanceCountAfter =  context.getConfiguration().getInstances().size();
+
+        // If the context hasn't been modified then check for PermitAll on the class annotation
+        if (instanceCountAfter == instanceCountBefore) {
+            final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
+            boolean annotationOnClass = resourceInfo.getResourceClass().getAnnotation(RolesAllowed.class) != null || resourceInfo.getResourceClass().getAnnotation(PermitAll.class) != null;
+            boolean annotationOnMethod = am.isAnnotationPresent(RolesAllowed.class) || am.isAnnotationPresent(DenyAll.class) || am.isAnnotationPresent(PermitAll.class);
+            if (annotationOnClass || annotationOnMethod) {
+                context.register(AuthenticationProvider.tokenTokenAuthenticationFilter);
+            }
+        }
     }
 }
