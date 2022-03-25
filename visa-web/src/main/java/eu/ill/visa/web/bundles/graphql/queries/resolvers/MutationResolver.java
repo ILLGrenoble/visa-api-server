@@ -703,6 +703,25 @@ public class MutationResolver implements GraphQLMutationResolver {
     }
 
     /**
+     * Update an application credential
+     *
+     * @param input the application credential properties
+     * @return the updated application credential
+     * @throws EntityNotFoundException thrown if the applicationCredential has not been found
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    public ApplicationCredentialDetail updateApplicationCredential(Long id, @Valid ApplicationCredentialInput input) throws EntityNotFoundException {
+        final ApplicationCredential applicationCredential = this.applicationCredentialService.getById(id);
+        if (applicationCredential == null) {
+            throw new EntityNotFoundException("application credential not found for the given id");
+        }
+        applicationCredential.setName(input.getName());
+
+        applicationCredentialService.save(applicationCredential);
+        return new ApplicationCredentialDetail(applicationCredential);
+    }
+
+    /**
      * Delete an application credential
      *
      * @param id of the application credential

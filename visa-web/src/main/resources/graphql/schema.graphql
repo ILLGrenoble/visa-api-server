@@ -133,6 +133,8 @@ type Mutation {
     updateUserRole(userId: String!, roleName: String!, isEnabled: Boolean!): User! @isAuthorised(role: "ADMIN")
     # Create an application credential
     createApplicationCredential(input: ApplicationCredentialInput!): ApplicationCredential! @isAuthorised(role: "ADMIN")
+    # Update an application credential
+    updateApplicationCredential(id: Int!, input: ApplicationCredentialInput!): ApplicationCredentialDetail! @isAuthorised(role: "ADMIN")
     # Delete an application credential
     deleteApplicationCredential(id: Int!): ApplicationCredentialDetail! @isAuthorised(role: "ADMIN")
 }
