@@ -27,6 +27,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/jupyter/instances")
 @Produces(APPLICATION_JSON)
 @Consumes(APPLICATION_JSON)
+@PermitAll
 public class JupyterController extends AbstractController {
 
     private static final Logger logger = LoggerFactory.getLogger(JupyterController.class);
@@ -69,7 +70,6 @@ public class JupyterController extends AbstractController {
     }
 
     @POST
-    @PermitAll
     @Path("/{instance}/notebook/open")
     public Response jupyterSessionOpen(@Auth final AccountToken accountToken, @PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionDto jupyterNotebookSessionDto) {
         final User user = accountToken.getUser();

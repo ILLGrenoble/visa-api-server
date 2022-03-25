@@ -7,6 +7,7 @@
     <persistence-unit name="visa" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <mapping-file>mappers/orm.xml</mapping-file>
+        <mapping-file>mappers/application-credential-orm.xml</mapping-file>
         <mapping-file>mappers/configuration-orm.xml</mapping-file>
         <mapping-file>mappers/experiment-orm.xml</mapping-file>
         <mapping-file>mappers/flavour-orm.xml</mapping-file>
@@ -34,6 +35,7 @@
         <mapping-file>mappers/system-notification-orm.xml</mapping-file>
         <mapping-file>mappers/instrument-scientist-orm.xml</mapping-file>
 
+        <class>eu.ill.visa.core.domain.ApplicationCredential</class>
         <class>eu.ill.visa.core.domain.Configuration</class>
         <class>eu.ill.visa.core.domain.Experiment</class>
         <class>eu.ill.visa.core.domain.Flavour</class>

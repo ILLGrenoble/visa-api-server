@@ -15,13 +15,13 @@ import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;
 import eu.ill.visa.web.bundles.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.bundles.graphql.exceptions.EntityNotFoundException;
+import eu.ill.visa.web.bundles.graphql.queries.domain.ApplicationCredentialDetail;
 import eu.ill.visa.web.bundles.graphql.queries.domain.CloudSecurityGroup;
 import eu.ill.visa.web.bundles.graphql.queries.domain.InstanceStateCount;
 import eu.ill.visa.web.bundles.graphql.relay.Connection;
 import eu.ill.visa.web.bundles.graphql.relay.PageInfo;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
-import org.dozer.Mapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +53,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final InstanceSessionMemberService  instanceSessionMemberService;
     private final InstanceJupyterSessionService instanceJupyterSessionService;
     private final SystemNotificationService     systemNotificationService;
+    private final ApplicationCredentialService  applicationCredentialService;
 
     @Inject
     QueryResolver(
@@ -71,7 +72,8 @@ public class QueryResolver implements GraphQLQueryResolver {
         final CloudClient cloudClient,
         final InstanceSessionMemberService instanceSessionMemberService,
         final InstanceJupyterSessionService instanceJupyterSessionService,
-        final SystemNotificationService systemNotificationService) {
+        final SystemNotificationService systemNotificationService,
+        final ApplicationCredentialService applicationCredentialService) {
         this.instrumentService = instrumentService;
         this.experimentService = experimentService;
         this.flavourService = flavourService;
@@ -88,6 +90,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.systemNotificationService = systemNotificationService;
+        this.applicationCredentialService = applicationCredentialService;
     }
 
     /**
@@ -634,6 +637,16 @@ public class QueryResolver implements GraphQLQueryResolver {
     public List<SystemNotification> systemNotifications() throws DataFetchingException {
         try {
             return systemNotificationService.getAll();
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    public List<ApplicationCredentialDetail> applicationCredentials() throws DataFetchingException {
+        try {
+            return applicationCredentialService.getAll().stream()
+                .map(ApplicationCredentialDetail::new)
+                .collect(toList());
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

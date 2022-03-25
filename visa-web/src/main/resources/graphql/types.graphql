@@ -307,3 +307,16 @@ type SystemNotification {
     activatedAt: String
 }
 
+type ApplicationCredentialDetail {
+    id: Int!
+    name: String!
+    applicationId: String!
+}
+
+type ApplicationCredential {
+    id: Int!
+    name: String!
+    applicationId: String!
+    applicationSecret: String!
+}
+

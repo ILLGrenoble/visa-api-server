@@ -56,3 +56,7 @@ input SystemNotificationInput {
     message: String!
     activatedAt: String
 }
+
+input ApplicationCredentialInput {
+    name: String!
+}

@@ -66,7 +66,7 @@ public class TokenAuthenticationFilter<P extends Principal> extends AuthFilter<S
                 }
             }
         } catch (AuthenticationException exception) {
-            logger.error("[Token] Error authenticating credentials", exception.getMessage());
+            logger.error("[Token] Error authenticating credentials: {}", exception.getMessage());
             throw new InternalServerErrorException();
         }
         throw new WebApplicationException(unauthorizedHandler.buildResponse(prefix, realm));

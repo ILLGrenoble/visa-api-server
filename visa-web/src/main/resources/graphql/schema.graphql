@@ -78,6 +78,8 @@ type Query {
     countInstancesByImages: [NumberInstancesByImage]  @isAuthorised(role: "ADMIN")
     # Get system notifications
     systemNotifications: [SystemNotification] @isAuthorised(role: "ADMIN")
+    # Get application credentials
+    applicationCredentials: [ApplicationCredentialDetail] @isAuthorised(role: "ADMIN")
 }
 
 type Mutation {
@@ -129,7 +131,10 @@ type Mutation {
     deleteSystemNotification(id: Int!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a user role
     updateUserRole(userId: String!, roleName: String!, isEnabled: Boolean!): User! @isAuthorised(role: "ADMIN")
-
+    # Create an application credential
+    createApplicationCredential(input: ApplicationCredentialInput!): ApplicationCredential! @isAuthorised(role: "ADMIN")
+    # Delete an application credential
+    deleteApplicationCredential(id: Int!): ApplicationCredentialDetail! @isAuthorised(role: "ADMIN")
 }
 
 schema {

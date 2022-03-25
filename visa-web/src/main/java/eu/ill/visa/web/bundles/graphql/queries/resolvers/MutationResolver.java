@@ -10,6 +10,7 @@ import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;
 import eu.ill.visa.web.bundles.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.bundles.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.bundles.graphql.exceptions.ValidationException;
+import eu.ill.visa.web.bundles.graphql.queries.domain.ApplicationCredentialDetail;
 import eu.ill.visa.web.bundles.graphql.queries.domain.Message;
 import eu.ill.visa.web.bundles.graphql.queries.inputs.*;
 import graphql.kickstart.tools.GraphQLMutationResolver;
@@ -36,22 +37,23 @@ public class MutationResolver implements GraphQLMutationResolver {
 
     private final static Logger logger = LoggerFactory.getLogger(MutationResolver.class);
 
-    private final Mapper                     mapper;
-    private final FlavourService             flavourService;
-    private final InstanceService            instanceService;
-    private final InstanceExpirationService  instanceExpirationService;
-    private final ImageService               imageService;
-    private final PlanService                planService;
-    private final FlavourLimitService        flavourLimitService;
-    private final SecurityGroupService       securityGroupService;
-    private final SecurityGroupFilterService securityGroupFilterService;
-    private final InstrumentService          instrumentService;
+    private final Mapper                        mapper;
+    private final FlavourService                flavourService;
+    private final InstanceService               instanceService;
+    private final InstanceExpirationService     instanceExpirationService;
+    private final ImageService                  imageService;
+    private final PlanService                   planService;
+    private final FlavourLimitService           flavourLimitService;
+    private final SecurityGroupService          securityGroupService;
+    private final SecurityGroupFilterService    securityGroupFilterService;
+    private final InstrumentService             instrumentService;
 
-    private final InstanceActionScheduler   instanceActionScheduler;
-    private final RoleService               roleService;
-    private final UserService               userService;
-    private final ImageProtocolService      imageProtocolService;
-    private final SystemNotificationService systemNotificationService;
+    private final InstanceActionScheduler      instanceActionScheduler;
+    private final RoleService                  roleService;
+    private final UserService                  userService;
+    private final ImageProtocolService         imageProtocolService;
+    private final SystemNotificationService    systemNotificationService;
+    private final ApplicationCredentialService applicationCredentialService;
 
     @Inject
     public MutationResolver(final Mapper mapper,
@@ -68,7 +70,8 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final RoleService roleService,
                             final UserService userService,
                             final ImageProtocolService imageProtocolService,
-                            final SystemNotificationService systemNotificationService) {
+                            final SystemNotificationService systemNotificationService,
+                            final ApplicationCredentialService applicationCredentialService) {
         this.mapper = mapper;
         this.flavourService = flavourService;
         this.instanceService = instanceService;
@@ -84,6 +87,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.userService = userService;
         this.imageProtocolService = imageProtocolService;
         this.systemNotificationService = systemNotificationService;
+        this.applicationCredentialService = applicationCredentialService;
     }
 
     /**
@@ -684,6 +688,34 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.userService.save(user);
 
         return user;
+    }
+
+    /**
+     * Create a new application credential
+     *
+     * @param input the application credential properties
+     * @return the newly created appication credential
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    public ApplicationCredential createApplicationCredential(@Valid ApplicationCredentialInput input) {
+        final ApplicationCredential applicationCredential = applicationCredentialService.create(input.getName());
+        return applicationCredential;
+    }
+
+    /**
+     * Delete an application credential
+     *
+     * @param id of the application credential
+     * @return the deleted application credential
+     * @throws EntityNotFoundException thrown if the application credential has not been found
+     */
+    public ApplicationCredentialDetail deleteApplicationCredential(Long id) throws EntityNotFoundException {
+        final ApplicationCredential applicationCredential = applicationCredentialService.getById(id);
+        if (applicationCredential == null) {
+            throw new EntityNotFoundException("applicationCredential not found for the given id");
+        }
+        applicationCredentialService.delete(applicationCredential);
+        return new ApplicationCredentialDetail(applicationCredential);
     }
 
 }
