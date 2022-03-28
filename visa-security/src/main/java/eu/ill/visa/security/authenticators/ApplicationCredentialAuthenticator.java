@@ -11,6 +11,7 @@ import io.dropwizard.auth.basic.BasicCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Singleton
@@ -35,6 +36,10 @@ public class ApplicationCredentialAuthenticator implements Authenticator<BasicCr
         ApplicationCredential applicationCredential = this.applicationCredentialService.getByApplicationIdAndApplicationSecret(applicationId, applicationSecret);
 
         if (applicationCredential != null) {
+            applicationCredential.setLastUsedAt(new Date());
+            this.applicationCredentialService.save(applicationCredential);
+            logger.info("[ApplicationCredentials] Successfully authenticated application: {}", applicationCredential.getName());
+
             ApplicationToken applicationToken = new ApplicationToken(applicationCredential);
 
             return Optional.of(applicationToken);

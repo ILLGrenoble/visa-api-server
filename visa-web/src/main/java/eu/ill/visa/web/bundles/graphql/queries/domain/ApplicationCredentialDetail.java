@@ -2,16 +2,20 @@ package eu.ill.visa.web.bundles.graphql.queries.domain;
 
 import eu.ill.visa.core.domain.ApplicationCredential;
 
+import java.util.Date;
+
 public class ApplicationCredentialDetail {
 
     private Long id;
     private String name;
     private String applicationId;
+    private Date lastUsedAt;
 
     public ApplicationCredentialDetail(ApplicationCredential applicationCredential) {
         this.id = applicationCredential.getId();
         this.name = applicationCredential.getName();
         this.applicationId = applicationCredential.getApplicationId();
+        this.lastUsedAt = applicationCredential.getLastUsedAt();
     }
 
     public Long getId() {
@@ -36,5 +40,13 @@ public class ApplicationCredentialDetail {
 
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
+    }
+
+    public Date getLastUsedAt() {
+        return lastUsedAt;
+    }
+
+    public void setLastUsedAt(Date lastUsedAt) {
+        this.lastUsedAt = lastUsedAt;
     }
 }

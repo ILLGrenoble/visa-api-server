@@ -311,6 +311,7 @@ type ApplicationCredentialDetail {
     id: Int!
     name: String!
     applicationId: String!
+    lastUsedAt: String
 }
 
 type ApplicationCredential {

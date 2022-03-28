@@ -9,6 +9,7 @@ public class ApplicationCredential {
     private String salt;
     private String applicationId;
     private String applicationSecret;
+    private Date lastUsedAt;
     private Date deletedAt;
 
     public ApplicationCredential() {
@@ -65,6 +66,14 @@ public class ApplicationCredential {
 
     public void setApplicationSecret(String applicationSecret) {
         this.applicationSecret = applicationSecret;
+    }
+
+    public Date getLastUsedAt() {
+        return lastUsedAt;
+    }
+
+    public void setLastUsedAt(Date lastUsedAt) {
+        this.lastUsedAt = lastUsedAt;
     }
 
     public Date getDeletedAt() {
