@@ -1,7 +1,9 @@
-package eu.ill.visa.web.controllers;
+package eu.ill.visa.web.controllers.acm;
 
 import com.google.inject.Inject;
+import eu.ill.visa.business.services.HealthService;
 import eu.ill.visa.security.tokens.ApplicationToken;
+import eu.ill.visa.web.controllers.AbstractController;
 import io.dropwizard.auth.Auth;
 
 import javax.annotation.security.PermitAll;
@@ -14,20 +16,22 @@ import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.Response.Status.OK;
 
-@Path("/app")
+@Path("/acm/health")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @PermitAll
 public class ApplicationController extends AbstractController {
 
+    private final HealthService healthService;
+
     @Inject
-    public ApplicationController() {
+    public ApplicationController(final HealthService healthService) {
+        this.healthService = healthService;
     }
 
     @GET
-    @Path("/health")
     public Response health(@Auth final ApplicationToken applicationToken) {
-        return createResponse(applicationToken.getName(), OK);
+        return createResponse(this.healthService.getHealthReport(), OK);
     }
 
 }

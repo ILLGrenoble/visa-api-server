@@ -15,25 +15,25 @@ import javax.ws.rs.core.Response.Status;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-abstract class AbstractController {
+public abstract class AbstractController {
 
-    Response createResponse(final Object entity) {
+    protected Response createResponse(final Object entity) {
         return createResponse(entity, Status.OK, null, null);
     }
 
-    Response createResponse() {
+    protected Response createResponse() {
         return createResponse(null, Status.OK, null, null);
     }
 
-    Response createResponse(final Object entity, final Status status) {
+    protected Response createResponse(final Object entity, final Status status) {
         return createResponse(entity, status, null, null);
     }
 
-    Response createResponse(final Object entity, final Status status, final ImmutableMap metadata) {
+    protected Response createResponse(final Object entity, final Status status, final ImmutableMap metadata) {
         return createResponse(entity, status, metadata, null);
     }
 
-    Response createResponse(final Object entity, final Status status, final ImmutableMap metadata, final List<String> errors) {
+    protected Response createResponse(final Object entity, final Status status, final ImmutableMap metadata, final List<String> errors) {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX"));
         final ObjectNode json = mapper.createObjectNode();
@@ -57,16 +57,16 @@ abstract class AbstractController {
     }
 
 
-    JsonObjectBuilder createObjectBuilder() {
+    protected JsonObjectBuilder createObjectBuilder() {
         return JsonProvider.provider().createObjectBuilder();
     }
 
-    ObjectNode createObjectNode() {
+    protected ObjectNode createObjectNode() {
         final ObjectMapper mapper = new ObjectMapper();
         return mapper.createObjectNode();
     }
 
-    void checkNotNull(Object object, String message) {
+    protected void checkNotNull(Object object, String message) {
         if (object == null) {
             throw new BadRequestException(message);
         }
