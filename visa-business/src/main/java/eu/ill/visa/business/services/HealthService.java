@@ -7,6 +7,7 @@ import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.HealthReport;
+import eu.ill.visa.core.domain.HealthState;
 import eu.ill.visa.core.domain.Image;
 import eu.ill.visa.core.domain.enumerations.HealthStatus;
 
@@ -27,29 +28,49 @@ public class HealthService {
     }
 
     public HealthReport getHealthReport() {
-        HealthStatus cloudStatus = this.getCloudHealthStatus();
-        HealthStatus databaseStatus = this.getDatabaseHealthStatus();
+        HealthState cloudState = this.getCloudHealthStatus();
+        HealthState databaseState = this.getDatabaseHealthStatus();
 
-        HealthStatus globalStatus = cloudStatus.equals(HealthStatus.OK) && databaseStatus.equals(HealthStatus.OK) ? HealthStatus.OK : HealthStatus.NOT_OK;
+        HealthState globalState;
+        if (cloudState.isOk() && databaseState.isOk()) {
+            globalState = new HealthState(HealthStatus.OK);
 
-        return new HealthReport(globalStatus, cloudStatus, databaseStatus);
+        } else if (cloudState.isOk() && !databaseState.isOk()) {
+            globalState = new HealthState(HealthStatus.NOT_OK, "Database connection error");
+
+        } else if (!cloudState.isOk() && databaseState.isOk()) {
+            globalState = new HealthState(HealthStatus.NOT_OK, "Cloud connection error");
+
+        } else {
+            globalState = new HealthState(HealthStatus.NOT_OK, "Cloud and database connection errors");
+        }
+
+        return new HealthReport(globalState, cloudState, databaseState);
     }
 
-    private HealthStatus getCloudHealthStatus() {
+    private HealthState getCloudHealthStatus() {
         try {
             CloudLimit cloudLimit = cloudClient.limits();
-            return cloudLimit == null ? HealthStatus.NOT_OK : HealthStatus.OK;
+            if (cloudLimit == null) {
+                return new HealthState(HealthStatus.NOT_OK, "Unable to obtain Cloud status");
+            }
+            return new HealthState(HealthStatus.OK);
+
         } catch (CloudException e) {
-            return HealthStatus.NOT_OK;
+            return new HealthState(HealthStatus.NOT_OK, e.getMessage());
         }
     }
 
-    private HealthStatus getDatabaseHealthStatus() {
+    private HealthState getDatabaseHealthStatus() {
         try {
             List<Image> images = imageService.getAll();
-            return images == null ? HealthStatus.NOT_OK : HealthStatus.OK;
+            if (images == null) {
+                return new HealthState(HealthStatus.NOT_OK, "Unable to obtain database status");
+            }
+            return new HealthState(HealthStatus.OK);
+
         } catch (Exception e) {
-            return HealthStatus.NOT_OK;
+            return new HealthState(HealthStatus.NOT_OK, e.getMessage());
         }
     }
 

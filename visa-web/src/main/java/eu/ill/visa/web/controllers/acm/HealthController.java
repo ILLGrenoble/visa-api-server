@@ -20,12 +20,12 @@ import static javax.ws.rs.core.Response.Status.OK;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @PermitAll
-public class ApplicationController extends AbstractController {
+public class HealthController extends AbstractController {
 
     private final HealthService healthService;
 
     @Inject
-    public ApplicationController(final HealthService healthService) {
+    public HealthController(final HealthService healthService) {
         this.healthService = healthService;
     }
 

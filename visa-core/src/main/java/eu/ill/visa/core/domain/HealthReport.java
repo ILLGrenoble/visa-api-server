@@ -1,40 +1,38 @@
 package eu.ill.visa.core.domain;
 
-import eu.ill.visa.core.domain.enumerations.HealthStatus;
-
 public class HealthReport {
 
-    private HealthStatus globalStatus;
-    private HealthStatus cloudStatus;
-    private HealthStatus databaseStatus;
+    private HealthState globalState;
+    private HealthState cloudState;
+    private HealthState databaseState;
 
-    public HealthReport(HealthStatus globalStatus, HealthStatus cloudStatus, HealthStatus databaseStatus) {
-        this.globalStatus = globalStatus;
-        this.cloudStatus = cloudStatus;
-        this.databaseStatus = databaseStatus;
+    public HealthReport(HealthState globalState, HealthState cloudState, HealthState databaseState) {
+        this.globalState = globalState;
+        this.cloudState = cloudState;
+        this.databaseState = databaseState;
     }
 
-    public HealthStatus getGlobalStatus() {
-        return globalStatus;
+    public HealthState getGlobalState() {
+        return globalState;
     }
 
-    public void setGlobalStatus(HealthStatus globalStatus) {
-        this.globalStatus = globalStatus;
+    public void setGlobalState(HealthState globalState) {
+        this.globalState = globalState;
     }
 
-    public HealthStatus getCloudStatus() {
-        return cloudStatus;
+    public HealthState getCloudState() {
+        return cloudState;
     }
 
-    public void setCloudStatus(HealthStatus cloudStatus) {
-        this.cloudStatus = cloudStatus;
+    public void setCloudState(HealthState cloudState) {
+        this.cloudState = cloudState;
     }
 
-    public HealthStatus getDatabaseStatus() {
-        return databaseStatus;
+    public HealthState getDatabaseState() {
+        return databaseState;
     }
 
-    public void setDatabaseStatus(HealthStatus databaseStatus) {
-        this.databaseStatus = databaseStatus;
+    public void setDatabaseState(HealthState databaseState) {
+        this.databaseState = databaseState;
     }
 }
