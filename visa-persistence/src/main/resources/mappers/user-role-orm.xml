@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
+
+    <entity class="eu.ill.visa.core.domain.UserRole">
+        <table name="user_role"/>
+        <attributes>
+            <embedded-id name="id"/>
+            <basic name="expiresAt">
+                <column name="expires_at" nullable="true"/>
+            </basic>
+            <many-to-one name="user" optional="false" maps-id="userId">
+                <join-column name="user_id"/>
+                <foreign-key name="fk_users_id"/>
+            </many-to-one>
+            <many-to-one name="role" optional="false" maps-id="roleId">
+                <join-column name="role_id"/>
+                <foreign-key name="fk_role_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>

@@ -5,10 +5,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class User implements Serializable {
 
@@ -25,7 +27,7 @@ public class User implements Serializable {
 
     private Employer affiliation;
 
-    private List<Role> roles = new ArrayList<>();
+    private List<UserRole> userRoles = new ArrayList<>();
 
     private Date lastSeenAt;
 
@@ -88,41 +90,63 @@ public class User implements Serializable {
         this.activatedAt = activatedAt;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public List<UserRole> getUserRoles() {
+        return userRoles;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public void setUserRoles(List<UserRole> userRoles) {
+        this.userRoles = userRoles;
+    }
+
+    @Transient
+    public List<Role> getRoles() {
+        long currentTime = new Date().getTime();
+        return this.userRoles.stream()
+            .filter(userRole -> userRole.getExpiresAt() == null || userRole.getExpiresAt().getTime() > currentTime)
+            .map(UserRole::getRole).collect(Collectors.toList());
     }
 
     public Date getLastSeenAt() {
         return lastSeenAt;
     }
 
-    public void addRole(Role role) {
-        if (!this.hasRole(role.getName())) {
-            this.roles.add(role);
-        }
-    }
-
-    public void removeRole(Role role) {
-        if (this.hasRole(role.getName())) {
-            this.roles.remove(role);
-        }
-    }
-
     public void setLastSeenAt(Date lastSeenAt) {
         this.lastSeenAt = lastSeenAt;
     }
 
+    public void addRole(Role role) {
+        UserRole userRole = this.findRole(role.getName());
+        if (userRole != null) {
+            userRole.setExpiresAt(null);
+
+        } else {
+            this.userRoles.add(new UserRole(role));
+        }
+    }
+
+    public void removeRole(Role role) {
+        UserRole userRole = this.findRole(role.getName());
+        if (userRole != null) {
+            this.userRoles.remove(userRole);
+        }
+    }
+
     public boolean hasRole(String targetRole) {
-        for (final Role role : roles) {
+        for (final Role role : this.getRoles()) {
             if (role.getName().equals(targetRole)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public UserRole findRole(String targetRole) {
+        for (final UserRole userRole : userRoles) {
+            if (userRole.getRole().getName().equals(targetRole)) {
+                return userRole;
+            }
+        }
+        return null;
     }
 
     public boolean hasAnyRole(List<String> targetRoles) {

@@ -14,12 +14,14 @@ public class Role implements Serializable {
     public static final String INSTRUMENT_SCIENTIST_ROLE = "INSTRUMENT_SCIENTIST";
     public static final String IT_SUPPORT_ROLE           = "IT_SUPPORT";
     public static final String SCIENTIFIC_COMPUTING_ROLE = "SCIENTIFIC_COMPUTING";
+    public static final String GUEST_ROLE = "GUEST";
 
     private Long id;
 
     private String name;
 
     private String description;
+
 
 
     Role() {

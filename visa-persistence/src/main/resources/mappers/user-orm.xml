@@ -30,7 +30,8 @@
     <named-query name="user.countAllUsersForRole">
         <query>
             SELECT COUNT(u) FROM User u
-            JOIN u.roles r
+            JOIN u.userRoles ur
+            JOIN ur.role r
             WHERE r.name = :role
         </query>
     </named-query>
@@ -54,7 +55,8 @@
     <named-query name="user.getAllStaff">
         <query>
             SELECT DISTINCT u FROM User u
-            JOIN u.roles r
+            JOIN u.userRoles ur
+            JOIN ur.role r
             WHERE r.name = 'STAFF'
             ORDER BY u.lastName
         </query>
@@ -63,7 +65,8 @@
     <named-query name="user.getAllSupport">
         <query>
             SELECT DISTINCT u FROM User u
-            JOIN u.roles r
+            JOIN u.userRoles ur
+            JOIN ur.role r
             WHERE r.name in ('INSTRUMENT_SCIENTIST', 'INSTRUMENT_CONTROL', 'IT_SUPPORT', 'SCIENTIFIC_COMPUTING')
             ORDER BY u.lastName
         </query>
@@ -119,14 +122,16 @@
                 <join-column name="affiliation_id" nullable="true"/>
                 <foreign-key name="fk_employer_id"/>
             </many-to-one>
-            <many-to-many name="roles" target-entity="eu.ill.visa.core.domain.Role">
-                <join-table name="user_role">
-                    <join-column name="user_id"/>
-                    <foreign-key name="fk_users_id"/>
-                    <inverse-join-column name="role_id"/>
-                    <inverse-foreign-key name="fk_role_id"/>
-                </join-table>
-            </many-to-many>
+            <one-to-many name="userRoles" orphan-removal="true">
+                <join-column name="user_id" nullable="false" insertable="false" updatable="false"/>
+                <foreign-key name="fk_users_id"/>
+                <cascade>
+                    <cascade-persist/>
+                    <cascade-merge/>
+                    <cascade-remove/>
+                    <cascade-refresh/>
+                </cascade>
+            </one-to-many>
             <transient name="fullName"/>
         </attributes>
     </entity>
