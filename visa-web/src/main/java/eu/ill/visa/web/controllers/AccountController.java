@@ -8,10 +8,7 @@ import eu.ill.visa.business.services.InstrumentService;
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.security.tokens.AccountToken;
-import eu.ill.visa.web.dtos.ExperimentDto;
-import eu.ill.visa.web.dtos.QuotaDto;
-import eu.ill.visa.web.dtos.UserFullDto;
-import eu.ill.visa.web.dtos.UserSimpleDto;
+import eu.ill.visa.web.dtos.*;
 import io.dropwizard.auth.Auth;
 import org.dozer.Mapper;
 
@@ -61,8 +58,8 @@ public class AccountController extends AbstractController {
     public Response get(@Auth final AccountToken accountToken) {
         final User user = accountToken.getUser();
         final UserFullDto userDto = mapper.map(user, UserFullDto.class);
-        for (Role role : user.getRoles()) {
-            userDto.addRole(role.getName());
+        for (UserRole userRole : user.getActiveUserRoles()) {
+            userDto.addUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
         }
 
         return createResponse(userDto, OK);
@@ -202,8 +199,8 @@ public class AccountController extends AbstractController {
 
     private UserSimpleDto mapUserSimpler(User user) {
         UserSimpleDto userSimpleDto = mapper.map(user, UserSimpleDto.class);
-        for (Role role : user.getRoles()) {
-            userSimpleDto.addRole(role.getName());
+        for (UserRole userRole : user.getActiveUserRoles()) {
+            userSimpleDto.addUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
         }
         return userSimpleDto;
     }

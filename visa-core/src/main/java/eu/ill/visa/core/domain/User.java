@@ -99,11 +99,16 @@ public class User implements Serializable {
     }
 
     @Transient
-    public List<Role> getRoles() {
+    public List<UserRole> getActiveUserRoles() {
         long currentTime = new Date().getTime();
         return this.userRoles.stream()
             .filter(userRole -> userRole.getExpiresAt() == null || userRole.getExpiresAt().getTime() > currentTime)
-            .map(UserRole::getRole).collect(Collectors.toList());
+            .collect(Collectors.toList());
+    }
+
+    @Transient
+    public List<Role> getRoles() {
+        return this.getActiveUserRoles().stream().map(UserRole::getRole).collect(Collectors.toList());
     }
 
     public Date getLastSeenAt() {

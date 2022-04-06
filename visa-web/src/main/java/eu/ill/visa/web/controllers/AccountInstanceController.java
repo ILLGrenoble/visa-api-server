@@ -555,8 +555,8 @@ public class AccountInstanceController extends AbstractController {
 
     private UserSimpleDto mapUserSimpler(User user) {
         UserSimpleDto userSimpleDto = mapper.map(user, UserSimpleDto.class);
-        for (Role role : user.getRoles()) {
-            userSimpleDto.addRole(role.getName());
+        for (UserRole userRole : user.getActiveUserRoles()) {
+            userSimpleDto.addUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
         }
         return userSimpleDto;
     }
