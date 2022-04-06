@@ -19,6 +19,40 @@ CREATE SCHEMA visa;
 SET default_tablespace = '';
 
 --
+-- Name: application_credential; Type: TABLE; Schema: visa; Owner: -
+--
+
+CREATE TABLE visa.application_credential (
+    id bigint NOT NULL,
+    application_id character varying(255) NOT NULL,
+    application_secret character varying(255) NOT NULL,
+    deleted_at timestamp without time zone,
+    last_used_at timestamp without time zone,
+    name character varying(250) NOT NULL,
+    salt character varying(255) NOT NULL
+);
+
+
+--
+-- Name: application_credential_id_seq; Type: SEQUENCE; Schema: visa; Owner: -
+--
+
+CREATE SEQUENCE visa.application_credential_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: application_credential_id_seq; Type: SEQUENCE OWNED BY; Schema: visa; Owner: -
+--
+
+ALTER SEQUENCE visa.application_credential_id_seq OWNED BY visa.application_credential.id;
+
+
+--
 -- Name: configuration; Type: TABLE; Schema: visa; Owner: -
 --
 
@@ -716,7 +750,8 @@ ALTER SEQUENCE visa.system_notification_id_seq OWNED BY visa.system_notification
 
 CREATE TABLE visa.user_role (
     user_id character varying(250) NOT NULL,
-    role_id bigint NOT NULL
+    role_id bigint NOT NULL,
+    expires_at timestamp without time zone
 );
 
 
@@ -735,6 +770,13 @@ CREATE TABLE visa.users (
     affiliation_id bigint,
     activated_at timestamp without time zone
 );
+
+
+--
+-- Name: application_credential id; Type: DEFAULT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.application_credential ALTER COLUMN id SET DEFAULT nextval('visa.application_credential_id_seq'::regclass);
 
 
 --
@@ -798,6 +840,14 @@ ALTER TABLE ONLY visa.security_group_filter ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY visa.system_notification ALTER COLUMN id SET DEFAULT nextval('visa.system_notification_id_seq'::regclass);
+
+
+--
+-- Name: application_credential application_credential_pkey; Type: CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.application_credential
+    ADD CONSTRAINT application_credential_pkey PRIMARY KEY (id);
 
 
 --
@@ -1323,4 +1373,5 @@ ALTER TABLE ONLY visa.user_role
 
 INSERT INTO visa.schema_migrations (version) VALUES
     ('20220314151039'),
-    ('20220324082055');
+    ('20220324082055'),
+    ('20220406071949');

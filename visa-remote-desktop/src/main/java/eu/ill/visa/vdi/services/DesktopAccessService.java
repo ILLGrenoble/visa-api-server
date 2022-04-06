@@ -191,8 +191,8 @@ public class DesktopAccessService {
     private Role convertAccessReplyRole(Role replyRole, Instance instance, User user) {
         if (replyRole.equals(Role.SUPPORT)) {
             InstanceMember owner = instance.getOwner();
-            boolean ownerIsStandardUser = owner.getUser().getRoles().size() == 0;
-            if (ownerIsStandardUser) {
+            boolean ownerIsExternalUser = !owner.getUser().hasRole(eu.ill.visa.core.domain.Role.STAFF_ROLE);
+            if (ownerIsExternalUser) {
                 // See if user has right to access instance when owner away (support role, otherwise user role)
                 if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
                     // SUPPORT role if user can connect while owner away

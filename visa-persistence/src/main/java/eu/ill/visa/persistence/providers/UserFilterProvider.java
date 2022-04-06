@@ -14,7 +14,7 @@ public class UserFilterProvider extends AbstractFilterQueryProvider<User> {
             orderableField("firstName"),
             orderableField("lastName"),
             orderableField("email"),
-            orderableField("roles.name", "role"),
+            orderableField("userRoles.role.name", "role"),
             orderableField("lastSeenAt"),
             orderableField("activatedAt")
         );

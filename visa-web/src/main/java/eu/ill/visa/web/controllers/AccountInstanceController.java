@@ -268,7 +268,7 @@ public class AccountInstanceController extends AbstractController {
 
         } else if (experiments.size() == 0) {
             // Validate no experiments valid for user (only admin and scientific support)
-            if (!user.hasAnyRole(List.of(Role.ADMIN_ROLE, Role.STAFF_ROLE))) {
+            if (!user.hasAnyRole(List.of(Role.ADMIN_ROLE, Role.STAFF_ROLE, Role.GUEST_ROLE))) {
                 throw new NotAuthorizedException("Not authorized to create an instance without any associated experiments");
             }
             List<Plan> plansForInstruments = this.planService.getAllForUserAndAllInstruments(user);
