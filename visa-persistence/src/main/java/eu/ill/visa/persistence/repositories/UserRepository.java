@@ -39,12 +39,14 @@ public class UserRepository extends AbstractRepository<User> {
         }
     }
 
-    public List<User> getAllLikeLastName(String lastName) {
-        return getAllLikeLastName(lastName, null);
+    public List<User> getAllLikeLastName(String lastName, boolean onlyActivatedUsers) {
+        return getAllLikeLastName(lastName, onlyActivatedUsers, null);
     }
 
-    public List<User> getAllLikeLastName(String lastName, Pagination pagination) {
-        final TypedQuery<User> query = getEntityManager().createNamedQuery("user.getAllLikeLastName", User.class);
+    public List<User> getAllLikeLastName(String lastName, boolean onlyActivatedUsers, Pagination pagination) {
+        final TypedQuery<User> query = onlyActivatedUsers
+            ? getEntityManager().createNamedQuery("user.getAllActivatedLikeLastName", User.class)
+            : getEntityManager().createNamedQuery("user.getAllLikeLastName", User.class);
         query.setParameter("lastName", lastName);
         if (pagination != null) {
             query.setFirstResult(pagination.getOffset());
@@ -53,9 +55,11 @@ public class UserRepository extends AbstractRepository<User> {
         return query.getResultList();
     }
 
-    public Long  countAllLikeLastName(String lastName) {
+    public Long  countAllLikeLastName(String lastName, boolean onlyActivatedUsers) {
         try {
-            final TypedQuery<Long> query = getEntityManager().createNamedQuery("user.countAllLikeLastName", Long.class);
+            final TypedQuery<Long> query = onlyActivatedUsers
+                ? getEntityManager().createNamedQuery("user.countAllLikeLastName", Long.class)
+                : getEntityManager().createNamedQuery("user.countAllActivatedLikeLastName", Long.class);
             query.setParameter("lastName", lastName);
             return query.getSingleResult();
         } catch (NoResultException exception) {

@@ -38,7 +38,16 @@
 
     <named-query name="user.getAllLikeLastName">
         <query>
-            SELECT DISTINCT(u) FROM User u WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            SELECT DISTINCT(u) FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            ORDER BY u.lastName, u.firstName ASC
+        </query>
+    </named-query>
+
+    <named-query name="user.getAllActivatedLikeLastName">
+        <query>
+            SELECT DISTINCT(u) FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
             AND u.activatedAt IS NOT NULL
             ORDER BY u.lastName, u.firstName ASC
         </query>
@@ -46,7 +55,15 @@
 
     <named-query name="user.countAllLikeLastName">
         <query>
-            SELECT COUNT(u) FROM User u WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            SELECT COUNT(u) FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+        </query>
+    </named-query>
+
+    <named-query name="user.countAllActivatedLikeLastName">
+        <query>
+            SELECT COUNT(u) FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
             AND u.activatedAt IS NOT NULL
         </query>
     </named-query>

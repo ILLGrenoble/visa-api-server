@@ -32,7 +32,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("Get all users that match a last name wildcard")
     void testGetAllLikeLastName() {
-        List<User> users = userService.getAllLikeLastName("cla");
+        List<User> users = userService.getAllLikeLastName("cla", true);
         assertEquals(2, users.size());
     }
 
@@ -55,7 +55,7 @@ public class UserServiceTest {
     @DisplayName("Get all users that match a last name wildcard with pagination")
     void testGetAllLikeLastNameWithPagination() {
         final Pagination pagination = new Pagination(1, 1);
-        List<User> users = userService.getAllLikeLastName("cla", pagination);
+        List<User> users = userService.getAllLikeLastName("cla", true, pagination);
         assertEquals(1, users.size());
     }
 

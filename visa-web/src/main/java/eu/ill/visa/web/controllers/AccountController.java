@@ -177,7 +177,7 @@ public class AccountController extends AbstractController {
         if (Objects.isNull(name) || name.length() == 0) {
             return createResponse(users);
         }
-        for (final User user : userService.getAllLikeLastName(name, new Pagination(250, 0))) {
+        for (final User user : userService.getAllLikeLastName(name, true, new Pagination(250, 0))) {
             users.add(this.mapUserSimpler(user));
         }
         return createResponse(users, OK);

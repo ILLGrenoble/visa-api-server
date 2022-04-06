@@ -51,7 +51,7 @@ type Query {
     # Get user by their identifier
     user(id: Int!): User!  @isAuthorised(role: "ADMIN")
     # Find a user by their last name
-    searchForUserByLastName(lastName: String!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
+    searchForUserByLastName(lastName: String!, onlyActivatedUsers: Boolean!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
     # Get all roles
     roles: [Role]  @isAuthorised(role: "ADMIN")
     # Get images from cloud provider

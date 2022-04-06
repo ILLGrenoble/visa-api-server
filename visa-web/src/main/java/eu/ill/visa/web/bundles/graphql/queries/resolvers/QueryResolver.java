@@ -352,7 +352,7 @@ public class QueryResolver implements GraphQLQueryResolver {
             }
             final List<User> results = userService.getAll(
                 requireNonNullElseGet(filter, QueryFilter::new),
-                requireNonNullElseGet(orderBy, () -> new OrderBy("lastName", true)), pagination
+                requireNonNullElseGet(orderBy, () -> new OrderBy("activatedAt", false)), pagination
             );
             final PageInfo pageInfo = new PageInfo(userService.countAll(filter), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
@@ -373,13 +373,13 @@ public class QueryResolver implements GraphQLQueryResolver {
         return users(filter, new OrderBy("lastSeenAt", false), pagination);
     }
 
-    public Connection<User> searchForUserByLastName(final String lastName, final Pagination pagination) throws DataFetchingException {
+    public Connection<User> searchForUserByLastName(final String lastName, boolean onlyActivatedUsers, final Pagination pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 200)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
             }
-            final List<User> results = userService.getAllLikeLastName(lastName, pagination);
-            final PageInfo pageInfo = new PageInfo(userService.countAllLikeLastName(lastName), pagination.getLimit(), pagination.getOffset());
+            final List<User> results = userService.getAllLikeLastName(lastName, onlyActivatedUsers, pagination);
+            final PageInfo pageInfo = new PageInfo(userService.countAllLikeLastName(lastName, onlyActivatedUsers), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());

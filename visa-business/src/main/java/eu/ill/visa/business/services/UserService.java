@@ -43,16 +43,16 @@ public class UserService {
         return repository.getAllActivated();
     }
 
-    public List<User> getAllLikeLastName(@NotNull final String lastName) {
-        return repository.getAllLikeLastName(lastName);
+    public List<User> getAllLikeLastName(@NotNull final String lastName, boolean onlyActivatedUsers) {
+        return repository.getAllLikeLastName(lastName, onlyActivatedUsers);
     }
 
-    public List<User> getAllLikeLastName(@NotNull final String lastName, @NotNull final Pagination pagination) {
-        return repository.getAllLikeLastName(lastName, pagination);
+    public List<User> getAllLikeLastName(@NotNull final String lastName, boolean onlyActivatedUsers, @NotNull final Pagination pagination) {
+        return repository.getAllLikeLastName(lastName, onlyActivatedUsers, pagination);
     }
 
-    public Long countAllLikeLastName(@NotNull final String lastName) {
-        return repository.countAllLikeLastName(lastName);
+    public Long countAllLikeLastName(@NotNull final String lastName, boolean onlyActivatedUsers) {
+        return repository.countAllLikeLastName(lastName, onlyActivatedUsers);
     }
 
     public List<User> getAllStaff() {
