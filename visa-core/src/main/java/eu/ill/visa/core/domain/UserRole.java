@@ -16,13 +16,17 @@ public class UserRole {
     public UserRole() {
     }
 
-    public UserRole(Role role) {
+    public UserRole(User user, Role role) {
+        this.user = user;
         this.role = role;
+        this.id = new UserRoleKey(user.getId(), role.getId());
     }
 
-    public UserRole(Role role, Date expiresAt) {
+    public UserRole(User user, Role role, Date expiresAt) {
+        this.user = user;
         this.role = role;
         this.expiresAt = expiresAt;
+        this.id = new UserRoleKey(user.getId(), role.getId());
     }
 
     public UserRoleKey getId() {
@@ -64,7 +68,7 @@ public class UserRole {
         public UserRoleKey() {
         }
 
-        public UserRoleKey(Long roleId, String userId) {
+        public UserRoleKey(String userId, Long roleId) {
             this.roleId = roleId;
             this.userId = userId;
         }

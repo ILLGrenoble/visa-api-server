@@ -125,7 +125,7 @@ public class User implements Serializable {
             userRole.setExpiresAt(null);
 
         } else {
-            this.userRoles.add(new UserRole(role));
+            this.userRoles.add(new UserRole(this, role));
         }
     }
 
