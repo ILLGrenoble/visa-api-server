@@ -6,7 +6,6 @@ import eu.ill.visa.business.services.InstanceJupyterSessionService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceMember;
-import eu.ill.visa.core.domain.Role;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
 import eu.ill.visa.security.tokens.AccountToken;
@@ -22,8 +21,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-
-import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -97,36 +94,11 @@ public class JupyterController extends AbstractController {
 
     public boolean isAuthorisedForJupyter(User user, Instance instance) {
         final InstanceMember member = instance.getMember(user);
-//        if (member == null) {
-//            return false;
-//        }
-//
-//        return member.isRole(InstanceMemberRole.OWNER);
         if (member == null) {
-            if (!user.hasAnyRole(List.of(Role.ADMIN_ROLE, Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
-                return false;
-            }
-
-            if (!user.hasRole(Role.ADMIN_ROLE)) {
-                // Check specific instances for the different support roles
-                if (user.hasRole(Role.IT_SUPPORT_ROLE)) {
-                    Instance instanceForITSupport = this.instanceService.getByIdForITSupport(instance.getId());
-                    return (instanceForITSupport != null);
-
-                } else if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
-                    Instance instanceForInstrumentControl = this.instanceService.getByIdForInstrumentControlSupport(instance.getId());
-                    return (instanceForInstrumentControl != null);
-
-                } else if (user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE)) {
-                    Instance instanceForInstrumentScientist = this.instanceService.getByIdForInstrumentScientist(user, instance.getId());
-                    return (instanceForInstrumentScientist != null);
-                }
-            }
-
             return false;
         }
 
-        return member.isRole(InstanceMemberRole.OWNER) || member.isRole(InstanceMemberRole.USER);
+        return member.isRole(InstanceMemberRole.OWNER);
     }
 
 }
