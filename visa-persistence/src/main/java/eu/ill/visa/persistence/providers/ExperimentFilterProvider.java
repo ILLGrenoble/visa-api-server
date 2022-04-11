@@ -15,9 +15,11 @@ public class ExperimentFilterProvider extends AbstractFilterQueryProvider<Experi
             orderableField("instrument.name"),
             orderableField("proposal.id"),
             orderableField("proposal.identifier"),
+            orderableField("users.id"),
             orderableField("startDate"),
             orderableField("endDate")
         );
     }
 
 }
+

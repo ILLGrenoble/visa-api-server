@@ -412,7 +412,6 @@ public class QueryResolver implements GraphQLQueryResolver {
 
     /**
      * Get a user by a given user identifier
-     * This is the logged in user
      *
      * @param id the user id
      * @return the user

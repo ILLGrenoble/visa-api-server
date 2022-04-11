@@ -46,6 +46,11 @@ input FlavourInput {
     instrumentIds: [Int]
 }
 
+input UserInput {
+    instanceQuota: Int!
+    admin: Boolean!
+}
+
 input Pagination {
     offset: Int!
     limit:  Int

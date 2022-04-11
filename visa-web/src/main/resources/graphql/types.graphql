@@ -53,7 +53,6 @@ type CloudFlavour {
     ram: Int!
 }
 
-
 type CloudImage {
     id: String!
     name: String!
@@ -205,6 +204,7 @@ type User {
     affiliation: Employer
     instances: [Instance]
     experiments: [Experiment]
+    instanceQuota: Int!
     roles: [Role]
     lastSeenAt: Date
     activatedAt: Date

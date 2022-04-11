@@ -37,16 +37,16 @@ public class MutationResolver implements GraphQLMutationResolver {
 
     private final static Logger logger = LoggerFactory.getLogger(MutationResolver.class);
 
-    private final Mapper                        mapper;
-    private final FlavourService                flavourService;
-    private final InstanceService               instanceService;
-    private final InstanceExpirationService     instanceExpirationService;
-    private final ImageService                  imageService;
-    private final PlanService                   planService;
-    private final FlavourLimitService           flavourLimitService;
-    private final SecurityGroupService          securityGroupService;
-    private final SecurityGroupFilterService    securityGroupFilterService;
-    private final InstrumentService             instrumentService;
+    private final Mapper                     mapper;
+    private final FlavourService             flavourService;
+    private final InstanceService            instanceService;
+    private final InstanceExpirationService  instanceExpirationService;
+    private final ImageService               imageService;
+    private final PlanService                planService;
+    private final FlavourLimitService        flavourLimitService;
+    private final SecurityGroupService       securityGroupService;
+    private final SecurityGroupFilterService securityGroupFilterService;
+    private final InstrumentService          instrumentService;
 
     private final InstanceActionScheduler      instanceActionScheduler;
     private final RoleService                  roleService;
@@ -694,7 +694,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * Create a new application credential
      *
      * @param input the application credential properties
-     * @return the newly created appication credential
+     * @return the newly created application credential
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public ApplicationCredential createApplicationCredential(@Valid ApplicationCredentialInput input) {
@@ -736,5 +736,34 @@ public class MutationResolver implements GraphQLMutationResolver {
         applicationCredentialService.delete(applicationCredential);
         return new ApplicationCredentialDetail(applicationCredential);
     }
+
+    /**
+     * Update a user
+     *
+     * @param id the user id to update
+     * @param input the user properties to update
+     * @return the updated user
+     * @throws EntityNotFoundException thrown if the applicationCredential has not been found
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    public User updateUser(String id, @Valid UserInput input) throws EntityNotFoundException {
+        final User user = userService.getById(id);
+        if (user == null) {
+            throw new EntityNotFoundException("User not found for the given user id");
+        }
+
+        final Role role = roleService.getByName("ADMIN");
+
+        if (input.getAdmin()) {
+            user.addRole(role);
+        } else {
+            user.removeRole(role);
+        }
+
+        user.setInstanceQuota(input.getInstanceQuota());
+        this.userService.save(user);
+        return user;
+    }
+
 
 }

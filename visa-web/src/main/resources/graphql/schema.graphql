@@ -49,7 +49,9 @@ type Query {
     countActivatedUsers: Int!  @isAuthorised(role: "ADMIN")
     recentActiveUsers(pagination: Pagination!): UserConnection!  @isAuthorised(role: "ADMIN")
     # Get user by their identifier
-    user(id: Int!): User!  @isAuthorised(role: "ADMIN")
+    user(id: String!): User!  @isAuthorised(role: "ADMIN")
+    # Get the experiments for a given user
+#    experimentsForUser(id: String!): [Experiment] @isAuthorised(role: "ADMIN")
     # Find a user by their last name
     searchForUserByLastName(lastName: String!, onlyActivatedUsers: Boolean!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
     # Get all roles
@@ -137,6 +139,9 @@ type Mutation {
     updateApplicationCredential(id: Int!, input: ApplicationCredentialInput!): ApplicationCredentialDetail! @isAuthorised(role: "ADMIN")
     # Delete an application credential
     deleteApplicationCredential(id: Int!): ApplicationCredentialDetail! @isAuthorised(role: "ADMIN")
+    # Update a user
+    updateUser(id: Int!, input: UserInput!): User! @isAuthorised(role: "ADMIN")
+
 }
 
 schema {

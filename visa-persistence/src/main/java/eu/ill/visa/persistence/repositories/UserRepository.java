@@ -88,7 +88,6 @@ public class UserRepository extends AbstractRepository<User> {
     public void save(User user) {
         if (user.getId() == null) {
             persist(user);
-
         } else {
             merge(user);
         }
