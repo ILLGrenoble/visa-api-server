@@ -49,6 +49,8 @@ input FlavourInput {
 input UserInput {
     instanceQuota: Int!
     admin: Boolean!
+    guest: Boolean!
+    guestExpiresAt: String
 }
 
 input Pagination {

@@ -120,12 +120,16 @@ public class User implements Serializable {
     }
 
     public void addRole(Role role) {
+        this.addRole(role, null);
+    }
+
+    public void addRole(Role role, Date expiresAt) {
         UserRole userRole = this.findRole(role.getName());
         if (userRole != null) {
-            userRole.setExpiresAt(null);
+            userRole.setExpiresAt(expiresAt);
 
         } else {
-            this.userRoles.add(new UserRole(this, role));
+            this.userRoles.add(new UserRole(this, role, expiresAt));
         }
     }
 

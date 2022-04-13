@@ -2,8 +2,12 @@ package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 public class UserInput {
+
+    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     @NotNull
     @Min(0)
@@ -11,6 +15,11 @@ public class UserInput {
 
     @NotNull
     private Boolean admin;
+
+    @NotNull
+    private Boolean guest;
+
+    private String guestExpiresAt;
 
     public Integer getInstanceQuota() {
         return instanceQuota;
@@ -30,5 +39,25 @@ public class UserInput {
 
     public void setAdmin(Boolean admin) {
         this.admin = admin;
+    }
+
+    public Boolean getGuest() {
+        return guest;
+    }
+
+    public Boolean isGuest() {
+        return guest;
+    }
+
+    public void setGuest(Boolean guest) {
+        this.guest = guest;
+    }
+
+    public String getGuestExpiresAt() {
+        return guestExpiresAt;
+    }
+
+    public void setGuestExpiresAt(String guestExpiresAt) {
+        this.guestExpiresAt = guestExpiresAt;
     }
 }

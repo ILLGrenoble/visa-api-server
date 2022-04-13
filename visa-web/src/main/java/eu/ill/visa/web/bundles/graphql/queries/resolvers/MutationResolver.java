@@ -752,17 +752,30 @@ public class MutationResolver implements GraphQLMutationResolver {
             throw new EntityNotFoundException("User not found for the given user id");
         }
 
-        final Role role = roleService.getByName("ADMIN");
+        final Role adminRole = roleService.getByName("ADMIN");
+        final Role guestRole = roleService.getByName("GUEST");
 
-        if (input.getAdmin()) {
-            user.addRole(role);
-        } else {
-            user.removeRole(role);
+        try {
+            if (input.getAdmin()) {
+                user.addRole(adminRole);
+            } else {
+                user.removeRole(adminRole);
+            }
+
+            if (input.getGuest()) {
+                Date guestExpiresAt = input.getGuestExpiresAt() == null ? null : UserInput.DATE_FORMAT.parse(input.getGuestExpiresAt());
+                user.addRole(guestRole, guestExpiresAt);
+            } else {
+                user.removeRole(guestRole);
+            }
+
+            user.setInstanceQuota(input.getInstanceQuota());
+            this.userService.save(user);
+            return user;
+
+        } catch (ParseException e) {
+            throw new ValidationException(e);
         }
-
-        user.setInstanceQuota(input.getInstanceQuota());
-        this.userService.save(user);
-        return user;
     }
 
 
