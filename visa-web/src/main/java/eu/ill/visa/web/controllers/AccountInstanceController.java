@@ -53,6 +53,7 @@ public class AccountInstanceController extends AbstractController {
     private final InstanceSessionService instanceSessionService;
     private final InstanceCommandService instanceCommandService;
     private final InstanceExpirationService instanceExpirationService;
+    private final InstanceExtensionRequestService instanceExtensionRequestService;
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
     private final PlanService planService;
     private final UserService userService;
@@ -68,6 +69,7 @@ public class AccountInstanceController extends AbstractController {
                                      final InstanceSessionService instanceSessionService,
                                      final InstanceCommandService instanceCommandService,
                                      final InstanceExpirationService instanceExpirationService,
+                                     final InstanceExtensionRequestService instanceExtensionRequestService,
                                      final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
                                      final PlanService planService,
                                      final ExperimentService experimentService,
@@ -80,6 +82,7 @@ public class AccountInstanceController extends AbstractController {
         this.instanceSessionService = instanceSessionService;
         this.instanceCommandService = instanceCommandService;
         this.instanceExpirationService = instanceExpirationService;
+        this.instanceExtensionRequestService = instanceExtensionRequestService;
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
         this.planService = planService;
         this.experimentService = experimentService;
@@ -601,15 +604,43 @@ public class AccountInstanceController extends AbstractController {
         return response.build();
     }
 
+    @GET
+    @Path("/{instance}/extension")
+    public Response getInstanceExtensionRequest(@Auth final AccountToken accountToken,
+                              @PathParam("instance") final Instance instance) {
+        final User user = accountToken.getUser();
+        if (this.instanceService.isAuthorisedForInstance(user, instance)) {
+            InstanceExtensionRequest request = this.instanceExtensionRequestService.getForInstance(instance);
+            final ResponseBuilder response;
+            if (request != null) {
+                InstanceExtensionRequestDto requestDto = mapper.map(request, InstanceExtensionRequestDto.class);
+                response = Response.ok(requestDto);
+
+            } else {
+                response = Response.ok();
+            }
+            return response.build();
+
+        } else{
+            throw new NotAuthorizedException("Not authorized to perform this action");
+        }
+    }
+
     @POST
     @Path("/{instance}/extension")
-    public Response addMember(@Auth final AccountToken accountToken,
+    public Response createInstanceExtensionRequest(@Auth final AccountToken accountToken,
                               @PathParam("instance") final Instance instance,
                               @Valid @NotNull final InstanceExtensionRequestDto instanceExtensionRequestDto) {
         final User user = accountToken.getUser();
         if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
 
-            final ResponseBuilder response = Response.ok();
+            // Check an existing request hasn't already been made
+            InstanceExtensionRequest request = this.instanceExtensionRequestService.getForInstance(instance);
+            if (request == null) {
+                request = this.instanceExtensionRequestService.create(instance, instanceExtensionRequestDto.getComments());
+            }
+            InstanceExtensionRequestDto requestDto = mapper.map(request, InstanceExtensionRequestDto.class);
+            final ResponseBuilder response = Response.ok(requestDto);
             return response.build();
 
         } else{

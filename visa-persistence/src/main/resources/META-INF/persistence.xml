@@ -30,6 +30,7 @@
         <mapping-file>mappers/instance-member-orm.xml</mapping-file>
         <mapping-file>mappers/instance-authentication-token-orm.xml</mapping-file>
         <mapping-file>mappers/instance-thumbnail-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-extension-request-orm.xml</mapping-file>
         <mapping-file>mappers/security-group-orm.xml</mapping-file>
         <mapping-file>mappers/security-group-filter-orm.xml</mapping-file>
         <mapping-file>mappers/system-notification-orm.xml</mapping-file>

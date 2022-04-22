@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
+
+
+    <named-query name="instanceExtensionRequest.getAll">
+        <query>
+            SELECT r
+            FROM InstanceExtensionRequest r
+            WHERE r.state = 'PENDING'
+            ORDER BY r.id
+        </query>
+    </named-query>
+
+    <named-query name="instanceExtensionRequest.getForInstance">
+        <query>
+            SELECT r
+            FROM InstanceExtensionRequest r
+            WHERE r.state = 'PENDING'
+            AND r.instance = :instance
+        </query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.InstanceExtensionRequest">
+
+        <table name="instance_extension_request"/>
+
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+
+            <basic name="comments">
+                <column name="comments" nullable="true" length="4000"/>
+            </basic>
+
+            <basic name="handledOn">
+                <column name="handled_on" nullable="true"/>
+            </basic>
+
+            <basic name="state">
+                <column name="state" length="50" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+
+            <many-to-one name="instance" optional="false">
+                <join-column name="instance_id" nullable="false"/>
+                <foreign-key name="fk_instance_id"/>
+            </many-to-one>
+
+            <many-to-one name="handler" optional="true">
+                <join-column name="handler_id" nullable="true"/>
+                <foreign-key name="fk_users_id"/>
+            </many-to-one>
+
+        </attributes>
+    </entity>
+
+</entity-mappings>
