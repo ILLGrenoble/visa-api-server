@@ -600,4 +600,20 @@ public class AccountInstanceController extends AbstractController {
         final ResponseBuilder response = Response.ok(data);
         return response.build();
     }
+
+    @POST
+    @Path("/{instance}/extension")
+    public Response addMember(@Auth final AccountToken accountToken,
+                              @PathParam("instance") final Instance instance,
+                              @Valid @NotNull final InstanceExtensionRequestDto instanceExtensionRequestDto) {
+        final User user = accountToken.getUser();
+        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+
+            final ResponseBuilder response = Response.ok();
+            return response.build();
+
+        } else{
+            throw new NotAuthorizedException("Not authorized to perform this action");
+        }
+    }
 }
