@@ -37,43 +37,44 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class QueryResolver implements GraphQLQueryResolver {
 
-    private final InstrumentService             instrumentService;
-    private final ExperimentService             experimentService;
-    private final FlavourService                flavourService;
-    private final ImageService                  imageService;
-    private final SecurityGroupService          securityGroupService;
-    private final SecurityGroupFilterService    securityGroupFilterService;
-    private final FlavourLimitService           flavourLimitService;
-    private final InstanceService               instanceService;
-    private final UserService                   userService;
-    private final ImageProtocolService          imageProtocolService;
-    private final RoleService                   roleService;
-    private final CloudClient                   cloudClient;
-    private final PlanService                   planService;
-    private final InstanceSessionMemberService  instanceSessionMemberService;
-    private final InstanceJupyterSessionService instanceJupyterSessionService;
-    private final SystemNotificationService     systemNotificationService;
-    private final ApplicationCredentialService  applicationCredentialService;
+    private final InstrumentService                 instrumentService;
+    private final ExperimentService                 experimentService;
+    private final FlavourService                    flavourService;
+    private final ImageService                      imageService;
+    private final SecurityGroupService              securityGroupService;
+    private final SecurityGroupFilterService        securityGroupFilterService;
+    private final FlavourLimitService               flavourLimitService;
+    private final InstanceService                   instanceService;
+    private final UserService                       userService;
+    private final ImageProtocolService              imageProtocolService;
+    private final RoleService                       roleService;
+    private final CloudClient                       cloudClient;
+    private final PlanService                       planService;
+    private final InstanceSessionMemberService      instanceSessionMemberService;
+    private final InstanceJupyterSessionService     instanceJupyterSessionService;
+    private final SystemNotificationService         systemNotificationService;
+    private final ApplicationCredentialService      applicationCredentialService;
+    private final InstanceExtensionRequestService   instanceExtensionRequestService;
 
     @Inject
-    QueryResolver(
-        final InstrumentService instrumentService,
-        final ExperimentService experimentService,
-        final FlavourService flavourService,
-        final ImageService imageService,
-        final SecurityGroupService securityGroupService,
-        final SecurityGroupFilterService securityGroupFilterService,
-        final FlavourLimitService flavourLimitService,
-        final InstanceService instanceService,
-        final UserService userService,
-        final PlanService planService,
-        final ImageProtocolService imageProtocolService,
-        final RoleService roleService,
-        final CloudClient cloudClient,
-        final InstanceSessionMemberService instanceSessionMemberService,
-        final InstanceJupyterSessionService instanceJupyterSessionService,
-        final SystemNotificationService systemNotificationService,
-        final ApplicationCredentialService applicationCredentialService) {
+    QueryResolver(final InstrumentService instrumentService,
+                  final ExperimentService experimentService,
+                  final FlavourService flavourService,
+                  final ImageService imageService,
+                  final SecurityGroupService securityGroupService,
+                  final SecurityGroupFilterService securityGroupFilterService,
+                  final FlavourLimitService flavourLimitService,
+                  final InstanceService instanceService,
+                  final UserService userService,
+                  final PlanService planService,
+                  final ImageProtocolService imageProtocolService,
+                  final RoleService roleService,
+                  final CloudClient cloudClient,
+                  final InstanceSessionMemberService instanceSessionMemberService,
+                  final InstanceJupyterSessionService instanceJupyterSessionService,
+                  final SystemNotificationService systemNotificationService,
+                  final ApplicationCredentialService applicationCredentialService,
+                  final InstanceExtensionRequestService instanceExtensionRequestService) {
         this.instrumentService = instrumentService;
         this.experimentService = experimentService;
         this.flavourService = flavourService;
@@ -91,6 +92,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.systemNotificationService = systemNotificationService;
         this.applicationCredentialService = applicationCredentialService;
+        this.instanceExtensionRequestService = instanceExtensionRequestService;
     }
 
     /**
@@ -646,6 +648,14 @@ public class QueryResolver implements GraphQLQueryResolver {
             return applicationCredentialService.getAll().stream()
                 .map(ApplicationCredentialDetail::new)
                 .collect(toList());
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    public List<InstanceExtensionRequest> instanceExtensionRequests() throws DataFetchingException {
+        try {
+            return this.instanceExtensionRequestService.getAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

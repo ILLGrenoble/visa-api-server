@@ -82,6 +82,8 @@ type Query {
     systemNotifications: [SystemNotification] @isAuthorised(role: "ADMIN")
     # Get application credentials
     applicationCredentials: [ApplicationCredentialDetail] @isAuthorised(role: "ADMIN")
+    # Get instance extension requests
+    instanceExtensionRequests: [InstanceExtensionRequest] @isAuthorised(role: "ADMIN")
 }
 
 type Mutation {

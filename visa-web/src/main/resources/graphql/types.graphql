@@ -326,3 +326,10 @@ type ApplicationCredential {
     applicationSecret: String!
 }
 
+type InstanceExtensionRequest {
+    id: Int!
+    comments: String!
+    createdAt: String!
+    instance: Instance!
+}
+
