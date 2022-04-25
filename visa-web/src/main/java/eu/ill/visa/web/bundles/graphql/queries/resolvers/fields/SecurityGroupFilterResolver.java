@@ -21,7 +21,7 @@ public class SecurityGroupFilterResolver implements GraphQLResolver<SecurityGrou
         this.roleService = roleService;
     }
 
-    String objectName(SecurityGroupFilter securityGroupFilter) {
+    public String objectName(SecurityGroupFilter securityGroupFilter) {
         final String objectType = securityGroupFilter.getObjectType();
         final Long objectId = securityGroupFilter.getObjectId();
         if ("INSTRUMENT".equals(objectType)) {
