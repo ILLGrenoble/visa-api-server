@@ -67,3 +67,10 @@ input SystemNotificationInput {
 input ApplicationCredentialInput {
     name: String!
 }
+
+input InstanceExtensionResponseInput {
+    handlerId: String!
+    handlerComments: String
+    accepted: Boolean!
+    terminationDate: String!
+}

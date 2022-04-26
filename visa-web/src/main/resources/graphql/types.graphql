@@ -331,5 +331,6 @@ type InstanceExtensionRequest {
     comments: String!
     createdAt: String!
     instance: Instance!
+    state: String!
 }
 

@@ -25,6 +25,10 @@ public class InstanceExtensionRequestService {
         this.repository = repository;
     }
 
+    public InstanceExtensionRequest getById(Long id) {
+        return this.repository.getById(id);
+    }
+
     public List<InstanceExtensionRequest> getAll() {
         return this.repository.getAll();
     }

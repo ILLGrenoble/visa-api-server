@@ -16,6 +16,12 @@ public class InstanceExtensionRequest extends Timestampable {
 
     private Date handledOn;
 
+    private String handlerComments;
+
+    private Date originalTerminationDate;
+
+    private Date extensionDate;
+
     private InstanceExtensionRequestState state;
 
     public InstanceExtensionRequest() {
@@ -25,6 +31,7 @@ public class InstanceExtensionRequest extends Timestampable {
         this.instance = instance;
         this.comments = comments;
         this.state = InstanceExtensionRequestState.PENDING;
+        this.originalTerminationDate = instance.getTerminationDate();
     }
 
     public Long getId() {
@@ -68,11 +75,35 @@ public class InstanceExtensionRequest extends Timestampable {
         this.handledOn = handledOn;
     }
 
+    public String getHandlerComments() {
+        return handlerComments;
+    }
+
+    public void setHandlerComments(String handlerComments) {
+        this.handlerComments = handlerComments;
+    }
+
     public InstanceExtensionRequestState getState() {
         return state;
     }
 
     public void setState(InstanceExtensionRequestState state) {
         this.state = state;
+    }
+
+    public Date getOriginalTerminationDate() {
+        return originalTerminationDate;
+    }
+
+    public void setOriginalTerminationDate(Date originalTerminationDate) {
+        this.originalTerminationDate = originalTerminationDate;
+    }
+
+    public Date getExtensionDate() {
+        return extensionDate;
+    }
+
+    public void setExtensionDate(Date extensionDate) {
+        this.extensionDate = extensionDate;
     }
 }

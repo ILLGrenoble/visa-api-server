@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
+import eu.ill.visa.core.domain.enumerations.InstanceExtensionRequestState;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;
@@ -55,6 +56,9 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final SystemNotificationService    systemNotificationService;
     private final ApplicationCredentialService applicationCredentialService;
 
+    private final InstanceExtensionRequestService   instanceExtensionRequestService;
+
+
     @Inject
     public MutationResolver(final Mapper mapper,
                             final FlavourService flavourService,
@@ -71,7 +75,8 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final UserService userService,
                             final ImageProtocolService imageProtocolService,
                             final SystemNotificationService systemNotificationService,
-                            final ApplicationCredentialService applicationCredentialService) {
+                            final ApplicationCredentialService applicationCredentialService,
+                            final InstanceExtensionRequestService instanceExtensionRequestService) {
         this.mapper = mapper;
         this.flavourService = flavourService;
         this.instanceService = instanceService;
@@ -88,6 +93,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.imageProtocolService = imageProtocolService;
         this.systemNotificationService = systemNotificationService;
         this.applicationCredentialService = applicationCredentialService;
+        this.instanceExtensionRequestService = instanceExtensionRequestService;
     }
 
     /**
@@ -776,6 +782,51 @@ public class MutationResolver implements GraphQLMutationResolver {
         } catch (ParseException e) {
             throw new ValidationException(e);
         }
+    }
+
+    public InstanceExtensionRequest handleInstanceExtensionRequest(Long requestId, @Valid InstanceExtensionResponseInput response) throws EntityNotFoundException {
+        InstanceExtensionRequest request = this.instanceExtensionRequestService.getById(requestId);
+        if (request == null) {
+            throw new EntityNotFoundException("Extension request not found for the given id");
+        }
+        User user = this.userService.getById(response.getHandlerId());
+        if (user == null) {
+            throw new EntityNotFoundException("The user who handled the request could not be found");
+        }
+
+        try {
+            request.setState(response.getAccepted() ? InstanceExtensionRequestState.ACCEPTED : InstanceExtensionRequestState.REFUSED);
+            request.setHandledOn(new Date());
+            request.setHandler(user);
+            request.setHandlerComments(response.getHandlerComments());
+            if (response.getAccepted()) {
+                Date terminationDate = InstanceExtensionResponseInput.DATE_FORMAT.parse(response.getTerminationDate());
+                request.setExtensionDate(terminationDate);
+
+                Instance instance = request.getInstance();
+                instance.setTerminationDate(terminationDate);
+
+                // Update the instance
+                this.instanceService.save(instance);
+
+                // Delete any existing expirations
+                InstanceExpiration expiration = this.instanceExpirationService.getByInstance(instance);
+                if (expiration != null) {
+                    this.instanceExpirationService.delete(expiration);
+                }
+            }
+
+            // Update the request
+            this.instanceExtensionRequestService.save(request);
+
+            // TODO Send an email
+
+            return request;
+
+        } catch (ParseException e) {
+            throw new ValidationException(e);
+        }
+
     }
 
 

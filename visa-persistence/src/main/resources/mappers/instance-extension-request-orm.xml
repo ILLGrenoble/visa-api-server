@@ -10,7 +10,18 @@
             SELECT r
             FROM InstanceExtensionRequest r
             WHERE r.state = 'PENDING'
+            AND r.instance.state != 'DELETED'
             ORDER BY r.id
+        </query>
+    </named-query>
+
+    <named-query name="instanceExtensionRequest.getById">
+        <query>
+            SELECT r
+            FROM InstanceExtensionRequest r
+            WHERE r.state = 'PENDING'
+            AND r.instance.state != 'DELETED'
+            AND r.id = :id
         </query>
     </named-query>
 
@@ -41,9 +52,21 @@
                 <column name="handled_on" nullable="true"/>
             </basic>
 
+            <basic name="handlerComments">
+                <column name="handler_comments" nullable="true" length="4000"/>
+            </basic>
+
             <basic name="state">
                 <column name="state" length="50" nullable="false"/>
                 <enumerated>STRING</enumerated>
+            </basic>
+
+            <basic name="originalTerminationDate">
+                <column name="original_termination_date" nullable="false"/>
+            </basic>
+
+            <basic name="extensionDate">
+                <column name="extension_date" nullable="true"/>
             </basic>
 
             <many-to-one name="instance" optional="false">

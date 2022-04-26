@@ -24,6 +24,15 @@ public class InstanceExtensionRequestRepository extends AbstractRepository<Insta
         return query.getResultList();
     }
 
+    public InstanceExtensionRequest getById(Long id) {
+        try {
+            TypedQuery<InstanceExtensionRequest> query = getEntityManager().createNamedQuery("instanceExtensionRequest.getById", InstanceExtensionRequest.class);
+            query.setParameter("id", id);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
 
     public InstanceExtensionRequest getForInstance(Instance instance) {
         try {
