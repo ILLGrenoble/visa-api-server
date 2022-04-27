@@ -41,7 +41,6 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final Mapper                     mapper;
     private final FlavourService             flavourService;
     private final InstanceService            instanceService;
-    private final InstanceExpirationService  instanceExpirationService;
     private final ImageService               imageService;
     private final PlanService                planService;
     private final FlavourLimitService        flavourLimitService;
@@ -63,7 +62,6 @@ public class MutationResolver implements GraphQLMutationResolver {
     public MutationResolver(final Mapper mapper,
                             final FlavourService flavourService,
                             final InstanceService instanceService,
-                            final InstanceExpirationService instanceExpirationService,
                             final ImageService imageService,
                             final PlanService planService,
                             final FlavourLimitService flavourLimitService,
@@ -80,7 +78,6 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.mapper = mapper;
         this.flavourService = flavourService;
         this.instanceService = instanceService;
-        this.instanceExpirationService = instanceExpirationService;
         this.imageService = imageService;
         this.planService = planService;
         this.flavourLimitService = flavourLimitService;
@@ -574,14 +571,8 @@ public class MutationResolver implements GraphQLMutationResolver {
 
         try {
             Date terminationDate = simpleDateFormat.parse(dateString);
-            instance.setTerminationDate(terminationDate);
-            this.instanceService.save(instance);
 
-            // Delete any existing expirations
-            InstanceExpiration expiration = this.instanceExpirationService.getByInstance(instance);
-            if (expiration != null) {
-                this.instanceExpirationService.delete(expiration);
-            }
+            this.instanceExtensionRequestService.grantExtension(instance, terminationDate, null);
 
         } catch (ParseException e) {
             throw new ValidationException(e);
@@ -803,23 +794,11 @@ public class MutationResolver implements GraphQLMutationResolver {
                 Date terminationDate = InstanceExtensionResponseInput.DATE_FORMAT.parse(response.getTerminationDate());
                 request.setExtensionDate(terminationDate);
 
-                Instance instance = request.getInstance();
-                instance.setTerminationDate(terminationDate);
-
-                // Update the instance
-                this.instanceService.save(instance);
-
-                // Delete any existing expirations
-                InstanceExpiration expiration = this.instanceExpirationService.getByInstance(instance);
-                if (expiration != null) {
-                    this.instanceExpirationService.delete(expiration);
-                }
+                this.instanceExtensionRequestService.grantExtension(request.getInstance(), terminationDate, response.getHandlerComments());
             }
 
             // Update the request
             this.instanceExtensionRequestService.save(request);
-
-            // TODO Send an email
 
             return request;
 

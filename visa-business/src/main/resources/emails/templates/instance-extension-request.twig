@@ -1,0 +1,56 @@
+{% extends "emails/templates/base-admin.twig" %}
+{% block title %} [VISA] An extension request has been made {% endblock %}
+{% block content %}
+    <p>
+        An extension request has been made for the following instance:
+    </p>
+    <table>
+        <tbody>
+        <tr>
+            <td style="padding: 4px 8px"><b>Name / ID / UID</b></td>
+            <td style="padding: 4px 8px">{{ instance.name }} / {{ instance.id }} / {{ instance.uid }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Owner</b></td>
+            <td style="padding: 4px 8px">{{ owner.fullName }} ({{ owner.id}}, <a href="mailto:{{ owner.email }}">{{ owner.email }}</a>)</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Employer</b></td>
+            <td style="padding: 4px 8px">{{ owner.affiliation.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Creation date</b></td>
+            <td style="padding: 4px 8px">{{ instance.createdAt | date("dd MMMM yyyy 'at' HH:mm z") }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Termination date</b></td>
+            <td style="padding: 4px 8px">{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z") }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Flavour</b></td>
+            <td style="padding: 4px 8px">{{ instance.plan.flavour.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Image</b></td>
+            <td style="padding: 4px 8px">{{ instance.plan.image.name }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <p>
+        The owner has provided the following message to indicate why they would like the instance lifetime to be extended:
+    </p>
+    <div style="border: solid 1px #ddd; padding: 0 12px; background-color: #fafafa;">
+        <p style="font-weight: 400;">
+            {{ comments }}
+        </p>
+    </div>
+    <p>
+        You can review all pending extension requests and validate them using the following link: <a style="color:#3777b0;text-decoration:none;"
+                      href="{{ rootURL }}/admin/compute/extension_requests">{{ rootURL }}/admin/compute/extension_requests</a>
+    </p>
+
+
+
+{% endblock %}
+
+

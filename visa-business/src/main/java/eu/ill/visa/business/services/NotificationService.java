@@ -61,4 +61,13 @@ public class NotificationService {
         });
     }
 
+    public void sendInstanceExtensionRequestNotification(Instance instance, String comments) {
+        adapters.forEach(adapter -> {
+            adapter.sendInstanceExtensionRequestNotification(
+                requireNonNull(instance, "instance cannot be null"),
+                requireNonNull(comments, "comments cannot be null")
+            );
+        });
+    }
+
 }

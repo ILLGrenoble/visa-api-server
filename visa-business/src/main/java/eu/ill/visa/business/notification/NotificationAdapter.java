@@ -16,4 +16,6 @@ public interface NotificationAdapter {
     void sendInstanceLifetimeNotification(Instance instance);
 
     void sendInstanceMemberAddedNotification(Instance instance, InstanceMember member);
+
+    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments);
 }

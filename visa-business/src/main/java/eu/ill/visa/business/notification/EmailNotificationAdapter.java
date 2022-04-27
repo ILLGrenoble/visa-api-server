@@ -1,10 +1,7 @@
 package eu.ill.visa.business.notification;
 
 import eu.ill.visa.business.NotificationRendererException;
-import eu.ill.visa.business.notification.renderers.email.InstanceDeletedEmailRenderer;
-import eu.ill.visa.business.notification.renderers.email.InstanceExpiringEmailRenderer;
-import eu.ill.visa.business.notification.renderers.email.InstanceLifetimeEmailRenderer;
-import eu.ill.visa.business.notification.renderers.email.InstanceMemberAddedRenderer;
+import eu.ill.visa.business.notification.renderers.email.*;
 import eu.ill.visa.core.domain.*;
 import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
@@ -203,6 +200,35 @@ public class EmailNotificationAdapter implements NotificationAdapter {
                 }
             } catch (MailException exception) {
                 logger.error("Error sending email: {}", exception.getMessage());
+            }
+        } else {
+            logger.warn("Unable to send instance created email, $VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS is not configured");
+        }
+    }
+
+    @Override
+    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments) {
+        if (!adminEmailAddress.isEmpty()) {
+            try {
+                final Optional<InstanceMember> member = instance.getMembers().stream()
+                    .filter(object -> object.isRole(OWNER))
+                    .findFirst();
+                if (member.isPresent()) {
+                    final User owner = member.get().getUser();
+
+                    final String subject = "[VISA] An instance extension request has been made";
+                    final NotificationRenderer renderer = new InstanceExtensionRequestRenderer(instance, emailTemplatesDirectory, owner, comments, rootURL);
+                    final Email email = buildEmail(adminEmailAddress, subject, renderer.render());
+                    mailer.sendMail(email);
+
+                } else {
+                    logger.error("Unable to find owner for instance: {}", instance.getId());
+                }
+            } catch (MailException exception) {
+                logger.error("Error sending email: {}", exception.getMessage());
+
+            } catch (NotificationRendererException exception) {
+                logger.error("Error rendering email : {}", exception.getMessage());
             }
         } else {
             logger.warn("Unable to send instance created email, $VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS is not configured");
