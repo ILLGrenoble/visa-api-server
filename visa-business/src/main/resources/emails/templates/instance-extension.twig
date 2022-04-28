@@ -11,7 +11,6 @@
             We are happy to inform you that the <a href="{{  rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
             compute instance <b>{{ instance.name }}</b> has been granted an extension of its lifetime and is now scheduled to be deleted at <b>{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z")}}</b>.
         </p>
-        <p>Please keep in mind that if the instance does not have any active connections for {{ maxInactivityDurationDays }} days it will be automatically deleted.</p>
 
     {% else %}
         <p>
@@ -38,8 +37,8 @@
         <p>
             You can access your instance at this address: <a style="color:#3777b0;text-decoration:none;"
                                          href="{{ rootURL }}/instances/{{ instance.uid }}">{{ rootURL }}/instances/{{ instance.uid }}</a>
-
         </p>
+        <p>Please keep in mind that if the instance does not have any active connections for {{ maxInactivityDurationDays }} days it will be automatically deleted.</p>
     {% endif %}
     {% if adminEmailAddress %}
         <p>

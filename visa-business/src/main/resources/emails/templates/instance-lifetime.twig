@@ -6,7 +6,7 @@
         The <a href="{{  rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
         compute instance <b>{{ instance.name }}</b> that you created on
         <b>{{ instance.createdAt | date("dd MMMM yyyy") }}</b>
-            for analysing your scientific data is scheduled to be deleted at <b>{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z")  }}</b> due to reaching its maximum
+            for analysing your scientific data is scheduled to be deleted on <b>{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z")  }}</b> due to reaching its maximum
             lifetime.
     </p>
     <p>
@@ -19,7 +19,15 @@
         Instances {{ isStaff ? 'created by staff' : '' }} have a maximum lifetime of {{ maxLifetimeDurationDays }} days, after which the
         instance will be automatically deleted to free up resources on
         our infrastructure. Similarly, if the instance has not had any active connections for {{ maxInactivityDurationDays }} days it will be automatically
-        deleted.</p>
+        deleted.
+    </p>
+    <p>
+        If it is important that this instance lifetime is extended (for example if it has active, long duration data analysis procedures) then you can request an extension from the
+        <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> home page.
+    </p>
+    <p>
+        Please remember you can always create a new instance which will give you access to your scientific data and analysis software.
+    </p>
     {% if adminEmailAddress %}
         <p>
             Please do not hesitate to send an email to <a href="mailto:{{ adminEmailAddress }}" style="color:#3777b0;text-decoration:none;">{{ adminEmailAddress }}</a> if you have any questions.

@@ -25,7 +25,8 @@ import java.util.stream.Stream;
 @Singleton
 public class InstanceExpirationService {
 
-    public static final  int                          HOURS_BEFORE_EXPIRATION = 24;
+    public static final  int                          HOURS_BEFORE_EXPIRATION_INACTIVITY = 24;
+    public static final  int                          HOURS_BEFORE_EXPIRATION_LIFETIME = 48;
     private static final Logger                       logger                  = LoggerFactory.getLogger(InstanceExpirationService.class);
     private              InstanceExpirationRepository repository;
     private              InstanceService              instanceService;
@@ -144,8 +145,8 @@ public class InstanceExpirationService {
     }
 
     public void createExpirationForAllInactiveInstances() {
-        Integer userInactivityDurationHours = this.configuration.getUserMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION;
-        Integer staffInactivityDurationHours = this.configuration.getStaffMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION;
+        Integer userInactivityDurationHours = this.configuration.getUserMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION_INACTIVITY;
+        Integer staffInactivityDurationHours = this.configuration.getStaffMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION_INACTIVITY;
 
         var userInstancesStream = this.instanceService.getAllNewInactive(userInactivityDurationHours).stream()
             .filter(instance -> !instance.getOwner().getUser().hasRole(Role.STAFF_ROLE));
@@ -167,7 +168,7 @@ public class InstanceExpirationService {
     }
 
     public void createExpirationForAllTerminatingInstances() {
-        var instances = this.instanceService.getAllNewTerminations(HOURS_BEFORE_EXPIRATION);
+        var instances = this.instanceService.getAllNewTerminations(HOURS_BEFORE_EXPIRATION_LIFETIME);
         for (var instance : instances) {
             if (instance.getTerminationDate() != null) {
                 this.create(instance, instance.getTerminationDate());

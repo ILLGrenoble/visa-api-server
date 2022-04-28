@@ -162,7 +162,7 @@ public class InstanceExpirationServiceTest {
         instanceExpirationService.createExpirationForAllTerminatingInstances();
         assertEquals(initialExpirations.size(), instanceExpirationService.getAll().size());
 
-        Date terminationDate = DateUtils.addHours(new Date(), InstanceExpirationService.HOURS_BEFORE_EXPIRATION);
+        Date terminationDate = DateUtils.addHours(new Date(), InstanceExpirationService.HOURS_BEFORE_EXPIRATION_LIFETIME);
         Instance instance = instanceService.getById(1002L);
         instance.setTerminationDate(terminationDate);
         instanceService.save(instance);
@@ -187,7 +187,7 @@ public class InstanceExpirationServiceTest {
         instanceExpirationService.createExpirationForAllInactiveInstances();
         assertEquals(initialExpirations.size(), instanceExpirationService.getAll().size());
 
-        Date lastActiveTime = DateUtils.addHours(new Date(), -this.instanceConfiguration.getUserMaxInactivityDurationHours() + InstanceExpirationService.HOURS_BEFORE_EXPIRATION);
+        Date lastActiveTime = DateUtils.addHours(new Date(), -this.instanceConfiguration.getUserMaxInactivityDurationHours() + InstanceExpirationService.HOURS_BEFORE_EXPIRATION_INACTIVITY);
         Instance instance = instanceService.getById(1002L);
         instance.setLastSeenAt(lastActiveTime);
         instance.setTerminationDate(null);

@@ -245,7 +245,7 @@ public class InstanceServiceTest {
     @Test
     @DisplayName("Get all inactive instances")
     public void inactiveInstances() {
-        List<Instance> instances = instanceService.getAllInactive(InstanceExpirationService.HOURS_BEFORE_EXPIRATION);
+        List<Instance> instances = instanceService.getAllInactive(InstanceExpirationService.HOURS_BEFORE_EXPIRATION_INACTIVITY);
         assertEquals(2, instances.size());
     }
 
