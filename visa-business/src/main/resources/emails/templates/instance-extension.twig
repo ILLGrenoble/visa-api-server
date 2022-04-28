@@ -9,13 +9,13 @@
     {% if accepted %}
         <p>
             We are happy to inform you that the <a href="{{  rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
-            compute instance <b>{{ instance.name }}</b> has been granted an extension of its lifetime and is now scheduled to be deleted at <b>{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z")}}</b>.
+            compute instance <b>{{ instance.name }}</b> has been granted an extension of its lifetime and is now scheduled to be deleted on <b>{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z")}}</b>.
         </p>
 
     {% else %}
         <p>
             We are sorry to inform you that your request to extend the lifetime of the <a href="{{  rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
-            compute instance <b>{{ instance.name }}</b> has been refused and will be deleted at <b>{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z")}}</b>.
+            compute instance <b>{{ instance.name }}</b> has been refused and will be deleted on <b>{{ instance.terminationDate | date("dd MMMM yyyy 'at' HH:mm z")}}</b>.
         </p>
         <p>
             Please remember that you can still create another compute instance and continue performing data analysis using the VISA platform.
