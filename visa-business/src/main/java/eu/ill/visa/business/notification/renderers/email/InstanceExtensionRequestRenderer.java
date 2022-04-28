@@ -44,7 +44,7 @@ public class InstanceExtensionRequestRenderer implements NotificationRenderer {
             final Map<String, Object> variables = new HashMap<>();
             variables.put("instance", instance);
             variables.put("owner", owner);
-            variables.put("comments", comments);
+            variables.put("comments", comments.replaceAll("\n", "<br>"));
             variables.put("rootURL", rootURL);
             compiledTemplate.evaluate(writer, variables);
             return writer.toString();

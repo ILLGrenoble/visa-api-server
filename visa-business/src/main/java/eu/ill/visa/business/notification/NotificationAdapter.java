@@ -17,5 +17,7 @@ public interface NotificationAdapter {
 
     void sendInstanceMemberAddedNotification(Instance instance, InstanceMember member);
 
-    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments);
+    void sendInstanceExtensionRequestNotification(final Instance instance, final String comments);
+
+    void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments);
 }

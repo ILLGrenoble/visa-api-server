@@ -24,6 +24,7 @@ public class InstanceDeletedEmailRenderer implements NotificationRenderer {
     private final User               user;
     private final String emailTemplatesDirectory;
     private final String             rootURL;
+    private final String             adminEmailAddress;
     private final Long               userMaxInactivityDurationDays;
     private final Long               staffMaxInactivityDurationDays;
     private final Long               userMaxLifetimeDurationDays;
@@ -35,14 +36,15 @@ public class InstanceDeletedEmailRenderer implements NotificationRenderer {
                                         final User user,
                                         final String emailTemplatesDirectory,
                                         final String rootURL,
+                                        final String adminEmailAddress,
                                         final Integer userMaxInactivityDurationHours,
                                         final Integer staffMaxInactivityDurationHours,
                                         final Integer userMaxLifetimeDurationHours,
-                                        final Integer staffMaxLifetimeDurationHours
-    ) {
+                                        final Integer staffMaxLifetimeDurationHours) {
         this.instance = instance;
         this.instanceExpiration = instanceExpiration;
         this.user = user;
+        this.adminEmailAddress = adminEmailAddress;
         this.emailTemplatesDirectory = emailTemplatesDirectory;
         this.rootURL = rootURL;
         this.userMaxInactivityDurationDays = TimeUnit.HOURS.toDays(userMaxInactivityDurationHours);
@@ -73,6 +75,7 @@ public class InstanceDeletedEmailRenderer implements NotificationRenderer {
                 variables.put("reachedMaxLifetime", true);
             }
             variables.put("rootURL", rootURL);
+            variables.put("adminEmailAddress", adminEmailAddress);
             compiledTemplate.evaluate(writer, variables);
             return writer.toString();
         } catch (IOException exception) {

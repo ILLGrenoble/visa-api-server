@@ -22,18 +22,20 @@ public class InstanceMemberAddedRenderer implements NotificationRenderer {
     private final User owner;
     private final InstanceMember member;
     private final String rootURL;
+    private final String adminEmailAddress;
     private final String emailTemplatesDirectory;
 
     public InstanceMemberAddedRenderer(final Instance instance,
                                        final String emailTemplatesDirectory,
                                        final User owner,
                                        final InstanceMember member,
-                                       final String rootURL
-    ) {
+                                       final String rootURL,
+                                       final String adminEmailAddress) {
         this.instance = instance;
         this.owner = owner;
         this.member = member;
         this.rootURL = rootURL;
+        this.adminEmailAddress = adminEmailAddress;
         this.emailTemplatesDirectory = emailTemplatesDirectory;
     }
 
@@ -48,6 +50,7 @@ public class InstanceMemberAddedRenderer implements NotificationRenderer {
             variables.put("owner", owner);
             variables.put("member", member);
             variables.put("rootURL", rootURL);
+            variables.put("adminEmailAddress", adminEmailAddress);
             compiledTemplate.evaluate(writer, variables);
             return writer.toString();
         } catch (IOException exception) {

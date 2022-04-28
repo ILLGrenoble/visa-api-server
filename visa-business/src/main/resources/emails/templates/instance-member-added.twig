@@ -10,7 +10,10 @@
         instance at this address: <a style="color:#3777b0;text-decoration:none;"
                                      href="{{ rootURL }}/instances/{{ instance.uid }}">{{ rootURL }}/instances/{{ instance.uid }}</a>
     </p>
+    {% if adminEmailAddress %}
+        <p>
+            Please do not hesitate to send an email to <a href="mailto:{{ adminEmailAddress }}" style="color:#3777b0;text-decoration:none;">{{ adminEmailAddress }}</a> if you have any questions.
+        </p>
+    {% endif %}
     <p>Thank you for using VISA.</p>
 {% endblock %}
-
-

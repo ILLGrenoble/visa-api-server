@@ -70,4 +70,14 @@ public class NotificationService {
         });
     }
 
+    public void sendInstanceExtensionNotification(Instance instance, boolean extensionGranted, String handlerComments) {
+        adapters.forEach(adapter -> {
+            adapter.sendInstanceExtensionNotification(
+                requireNonNull(instance, "instance cannot be null"),
+                extensionGranted,
+                handlerComments
+            );
+        });
+    }
+
 }

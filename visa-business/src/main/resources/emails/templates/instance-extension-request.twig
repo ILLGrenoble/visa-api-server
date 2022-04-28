@@ -41,7 +41,7 @@
     </p>
     <div style="border: solid 1px #ddd; padding: 0 12px; background-color: #fafafa;">
         <p style="font-weight: 400;">
-            {{ comments }}
+            {{ comments | raw }}
         </p>
     </div>
     <p>
@@ -49,8 +49,4 @@
                       href="{{ rootURL }}/admin/compute/extension_requests">{{ rootURL }}/admin/compute/extension_requests</a>
     </p>
 
-
-
 {% endblock %}
-
-

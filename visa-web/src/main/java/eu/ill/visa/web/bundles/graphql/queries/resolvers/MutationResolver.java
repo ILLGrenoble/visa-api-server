@@ -795,6 +795,9 @@ public class MutationResolver implements GraphQLMutationResolver {
                 request.setExtensionDate(terminationDate);
 
                 this.instanceExtensionRequestService.grantExtension(request.getInstance(), terminationDate, response.getHandlerComments());
+
+            } else {
+                this.instanceExtensionRequestService.refuseExtension(request.getInstance(), response.getHandlerComments());
             }
 
             // Update the request

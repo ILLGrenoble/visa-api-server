@@ -74,7 +74,12 @@ public class InstanceExtensionRequestService {
             this.instanceExpirationService.delete(expiration);
         }
 
-        // TODO Email owner
+        // Email owner
+        this.notificationService.sendInstanceExtensionNotification(instance, true, handlerComments);
     }
 
+    public void refuseExtension(Instance instance, String handlerComments) {
+        // Email owner
+        this.notificationService.sendInstanceExtensionNotification(instance, false, handlerComments);
+    }
 }

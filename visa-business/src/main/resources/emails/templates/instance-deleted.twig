@@ -3,7 +3,7 @@
 {% block content %}
     <p>Hi {{ user.firstName }},</p>
     <p>
-        The <a href="{{  rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
+        The <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a>
         compute instance <b>{{ instance.name }}</b> that you created on
         <b>{{ instance.createdAt | date("dd MMMM yyyy") }}</b>
         {% if reachedMaxLifetime %}
@@ -18,7 +18,10 @@
         instance will be automatically deleted to free up resources on
         our infrastructure. Similarly, if the instance has not had any active connections for {{ maxInactivityDurationDays }} days it will be automatically
         deleted.</p>
+    {% if adminEmailAddress %}
+        <p>
+            Please do not hesitate to send an email to <a href="mailto:{{ adminEmailAddress }}" style="color:#3777b0;text-decoration:none;">{{ adminEmailAddress }}</a> if you have any questions.
+        </p>
+    {% endif %}
     <p>Thank you for using VISA.</p>
 {% endblock %}
-
-

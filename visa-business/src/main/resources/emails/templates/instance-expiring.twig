@@ -23,7 +23,10 @@
         our infrastructure. Similarly, if the instance has not had any active connections for {{ maxInactivityDurationDays }}
         days it will be automatically
         deleted.</p>
+    {% if adminEmailAddress %}
+        <p>
+            Please do not hesitate to send an email to <a href="mailto:{{ adminEmailAddress }}" style="color:#3777b0;text-decoration:none;">{{ adminEmailAddress }}</a> if you have any questions.
+        </p>
+    {% endif %}
     <p>Thank you for using VISA.</p>
 {% endblock %}
-
-

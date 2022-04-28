@@ -23,6 +23,7 @@ public class InstanceLifetimeEmailRenderer implements NotificationRenderer {
     private final User               user;
     private final String             emailTemplatesDirectory;
     private final String             rootURL;
+    private final String             adminEmailAddress;
     private final Long               userMaxInactivityDurationDays;
     private final Long               staffMaxInactivityDurationDays;
     private final Long               userMaxLifetimeDurationDays;
@@ -32,6 +33,7 @@ public class InstanceLifetimeEmailRenderer implements NotificationRenderer {
                                          final User user,
                                          final String emailTemplatesDirectory,
                                          final String rootURL,
+                                         final String adminEmailAddress,
                                          final Integer userMaxInactivityDurationHours,
                                          final Integer staffMaxInactivityDurationHours,
                                          final Integer userMaxLifetimeDurationHours,
@@ -41,6 +43,7 @@ public class InstanceLifetimeEmailRenderer implements NotificationRenderer {
         this.user = user;
         this.emailTemplatesDirectory = emailTemplatesDirectory;
         this.rootURL = rootURL;
+        this.adminEmailAddress = adminEmailAddress;
         this.userMaxInactivityDurationDays = TimeUnit.HOURS.toDays(userMaxInactivityDurationHours);
         this.staffMaxInactivityDurationDays = TimeUnit.HOURS.toDays(staffMaxInactivityDurationHours);
         this.userMaxLifetimeDurationDays = TimeUnit.HOURS.toDays(userMaxLifetimeDurationHours);
@@ -62,6 +65,7 @@ public class InstanceLifetimeEmailRenderer implements NotificationRenderer {
             variables.put("maxInactivityDurationDays", maxInactivityDurationDays);
             variables.put("maxLifetimeDurationDays", maxLifetimeDurationDays);
             variables.put("rootURL", rootURL);
+            variables.put("adminEmailAddress", adminEmailAddress);
             compiledTemplate.evaluate(writer, variables);
             return writer.toString();
         } catch (IOException exception) {

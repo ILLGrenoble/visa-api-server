@@ -91,7 +91,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = "[VISA] Your instance will soon expire due to inactivity";
-                final NotificationRenderer renderer = new InstanceExpiringEmailRenderer(instance, expirationDate, user, emailTemplatesDirectory, rootURL, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
+                final NotificationRenderer renderer = new InstanceExpiringEmailRenderer(instance, expirationDate, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
                 final Email email = buildEmail(user.getEmail(), subject, renderer.render());
                 mailer.sendMail(email);
             } else {
@@ -113,7 +113,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = "[VISA] Your instance has been deleted";
-                final NotificationRenderer renderer = new InstanceDeletedEmailRenderer(instance, instanceExpiration, user, emailTemplatesDirectory, rootURL, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
+                final NotificationRenderer renderer = new InstanceDeletedEmailRenderer(instance, instanceExpiration, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
                 final Email email = buildEmail(user.getEmail(), subject, renderer.render());
                 mailer.sendMail(email);
             } else {
@@ -135,7 +135,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = "[VISA] Your instance will soon be deleted due to reaching its maximum lifetime";
-                final NotificationRenderer renderer = new InstanceLifetimeEmailRenderer(instance, user, emailTemplatesDirectory, rootURL, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
+                final NotificationRenderer renderer = new InstanceLifetimeEmailRenderer(instance, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
                 final Email email = buildEmail(user.getEmail(), subject, renderer.render());
                 mailer.sendMail(email);
             } else {
@@ -157,7 +157,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
                     .findFirst();
                 if (owner.isPresent()) {
                     final String subject = "[VISA] You have been added as a member to an instance";
-                    final NotificationRenderer renderer = new InstanceMemberAddedRenderer(instance, emailTemplatesDirectory, owner.get().getUser(), member, rootURL);
+                    final NotificationRenderer renderer = new InstanceMemberAddedRenderer(instance, emailTemplatesDirectory, owner.get().getUser(), member, rootURL, adminEmailAddress);
                     final Email email = buildEmail(member.getUser().getEmail(), subject, renderer.render());
                     mailer.sendMail(email);
                 } else {
@@ -232,6 +232,28 @@ public class EmailNotificationAdapter implements NotificationAdapter {
             }
         } else {
             logger.warn("Unable to send instance created email, $VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS is not configured");
+        }
+    }
+
+    @Override
+    public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {
+        try {
+            final Optional<InstanceMember> member = instance.getMembers().stream()
+                .filter(object -> object.isRole(OWNER))
+                .findFirst();
+            if (member.isPresent()) {
+                final User user = member.get().getUser();
+                final String subject = extensionGranted ? "[VISA] Your instance has been granted an extended lifetime" : "[VISA] Your instance has been refused an extended lifetime";
+                final NotificationRenderer renderer = new InstanceExtensionRenderer(instance, extensionGranted, handlerComments, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours);
+                final Email email = buildEmail(user.getEmail(), subject, renderer.render());
+                mailer.sendMail(email);
+            } else {
+                logger.error("Unable to find owner for instance: {}", instance.getId());
+            }
+        } catch (NotificationRendererException exception) {
+            logger.error("Error rendering email : {}", exception.getMessage());
+        } catch (MailException exception) {
+            logger.error("Error sending email: {}", exception.getMessage());
         }
     }
 
