@@ -52,7 +52,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final PlanService                       planService;
     private final InstanceSessionMemberService      instanceSessionMemberService;
     private final InstanceJupyterSessionService     instanceJupyterSessionService;
-    private final SystemNotificationService         systemNotificationService;
+    private final ClientNotificationService         clientNotificationService;
     private final ApplicationCredentialService      applicationCredentialService;
     private final InstanceExtensionRequestService   instanceExtensionRequestService;
 
@@ -72,7 +72,7 @@ public class QueryResolver implements GraphQLQueryResolver {
                   final CloudClient cloudClient,
                   final InstanceSessionMemberService instanceSessionMemberService,
                   final InstanceJupyterSessionService instanceJupyterSessionService,
-                  final SystemNotificationService systemNotificationService,
+                  final ClientNotificationService clientNotificationService,
                   final ApplicationCredentialService applicationCredentialService,
                   final InstanceExtensionRequestService instanceExtensionRequestService) {
         this.instrumentService = instrumentService;
@@ -90,7 +90,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.cloudClient = cloudClient;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
-        this.systemNotificationService = systemNotificationService;
+        this.clientNotificationService = clientNotificationService;
         this.applicationCredentialService = applicationCredentialService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
     }
@@ -637,7 +637,7 @@ public class QueryResolver implements GraphQLQueryResolver {
 
     public List<SystemNotification> systemNotifications() throws DataFetchingException {
         try {
-            return systemNotificationService.getAll();
+            return clientNotificationService.getAllSystemNotifications();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

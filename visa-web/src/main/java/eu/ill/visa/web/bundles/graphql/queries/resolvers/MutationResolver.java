@@ -52,7 +52,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final RoleService                  roleService;
     private final UserService                  userService;
     private final ImageProtocolService         imageProtocolService;
-    private final SystemNotificationService    systemNotificationService;
+    private final ClientNotificationService    clientNotificationService;
     private final ApplicationCredentialService applicationCredentialService;
 
     private final InstanceExtensionRequestService   instanceExtensionRequestService;
@@ -72,7 +72,7 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final RoleService roleService,
                             final UserService userService,
                             final ImageProtocolService imageProtocolService,
-                            final SystemNotificationService systemNotificationService,
+                            final ClientNotificationService clientNotificationService,
                             final ApplicationCredentialService applicationCredentialService,
                             final InstanceExtensionRequestService instanceExtensionRequestService) {
         this.mapper = mapper;
@@ -88,7 +88,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.roleService = roleService;
         this.userService = userService;
         this.imageProtocolService = imageProtocolService;
-        this.systemNotificationService = systemNotificationService;
+        this.clientNotificationService = clientNotificationService;
         this.applicationCredentialService = applicationCredentialService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
     }
@@ -611,7 +611,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SystemNotification createSystemNotification(@Valid SystemNotificationInput input) {
         final SystemNotification systemNotification = mapper.map(input, SystemNotification.class);
-        systemNotificationService.save(systemNotification);
+        clientNotificationService.saveSystemNotification(systemNotification);
         return systemNotification;
     }
 
@@ -624,7 +624,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SystemNotification updateSystemNotification(Long id, @Valid SystemNotificationInput input) throws EntityNotFoundException, InvalidInputException {
-        final SystemNotification systemNotification = this.systemNotificationService.getById(id);
+        final SystemNotification systemNotification = this.clientNotificationService.getSystemNotificationById(id);
         if (systemNotification == null) {
             throw new EntityNotFoundException("systemNotification not found for the given id");
         }
@@ -636,7 +636,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         } catch (ParseException e) {
             throw new InvalidInputException("The activation date does not have a coherent format");
         }
-        systemNotificationService.save(systemNotification);
+        clientNotificationService.saveSystemNotification(systemNotification);
         return systemNotification;
     }
 
@@ -648,11 +648,11 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the instance has not been found
      */
     public SystemNotification deleteSystemNotification(Long id) throws EntityNotFoundException {
-        final SystemNotification systemNotification = systemNotificationService.getById(id);
+        final SystemNotification systemNotification = clientNotificationService.getSystemNotificationById(id);
         if (systemNotification == null) {
             throw new EntityNotFoundException("systemNotification not found for the given id");
         }
-        systemNotificationService.delete(systemNotification);
+        clientNotificationService.deleteSystemNotification(systemNotification);
         return systemNotification;
     }
 
