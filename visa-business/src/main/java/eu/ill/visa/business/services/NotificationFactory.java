@@ -27,7 +27,10 @@ public class NotificationFactory {
                                                       final String rootURL) {
         final List<NotificationAdapter> adapters = new ArrayList<>();
         for (NotificationConfiguration config : configuration) {
-            adapters.add(createAdapter(config, instanceConfiguration, rootURL));
+            NotificationAdapter adapter = createAdapter(config, instanceConfiguration, rootURL);
+            if (adapter != null) {
+                adapters.add(adapter);
+            }
         }
         return new NotificationService(adapters);
     }

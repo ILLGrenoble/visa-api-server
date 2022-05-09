@@ -1,3 +1,7 @@
+2.2.1 09/05/2022
+================
+ * Fix bug on notification service throwing an error when an adapter is not enabled
+
 2.2.0 23/03/2022
 ================
  * Update the instance creation and deletion scripts (used for testing cloud providers)
