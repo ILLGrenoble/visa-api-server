@@ -1,5 +1,6 @@
 package eu.ill.visa.core.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -37,6 +38,7 @@ public class UserRole {
         this.id = id;
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }
