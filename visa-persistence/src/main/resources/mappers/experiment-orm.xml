@@ -5,11 +5,23 @@
                  version="2.2">
 
     <named-query name="experiment.getById">
-        <query>SELECT e FROM Experiment e WHERE e.id = :id</query>
+        <query>
+            SELECT e
+            FROM Experiment e
+            WHERE e.id = :id
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+        </query>
     </named-query>
 
     <named-query name="experiment.getAll">
-        <query>SELECT e FROM Experiment e ORDER BY e.id ASC</query>
+        <query>
+            SELECT e
+            FROM Experiment e
+            WHERE e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+            ORDER BY e.id ASC
+        </query>
     </named-query>
 
     <named-query name="experiment.getYearsForUser">
@@ -18,24 +30,32 @@
             FROM Experiment e
             JOIN e.users u
             WHERE u = :user
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
         </query>
     </named-query>
 
     <named-query name="experiment.getByIdAndUser">
         <query>
-            SELECT e FROM Experiment e
+            SELECT e
+            FROM Experiment e
             JOIN e.users u
             WHERE u = :user
             AND e.id = :id
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
         </query>
     </named-query>
 
     <named-query name="experiment.getAllForInstance">
         <query>
-            SELECT e FROM Experiment e
+            SELECT e
+            FROM Experiment e
             JOIN e.instances i
             WHERE i = :instance
             AND i.deletedAt IS NULL
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
         </query>
     </named-query>
 

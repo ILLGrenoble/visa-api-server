@@ -12,7 +12,10 @@
             SELECT i
             FROM Instrument i
             WHERE i IN (
-                SELECT DISTINCT e.instrument FROM Experiment e
+                SELECT DISTINCT e.instrument
+                FROM Experiment e
+                WHERE e.startDate IS NOT NULL
+                AND e.endDate IS NOT NULL
             )
             ORDER BY i.name ASC
         </query>
@@ -26,6 +29,8 @@
                 FROM Experiment e
                 JOIN e.users u
                 WHERE u = :user
+                AND e.startDate IS NOT NULL
+                AND e.endDate IS NOT NULL
             )
             ORDER BY i.name ASC
         </query>
