@@ -47,6 +47,7 @@ type Flavour {
     name: String!
     memory: Int!
     cpu: Int!
+    credits: Int!
     computeId: String!
 }
 

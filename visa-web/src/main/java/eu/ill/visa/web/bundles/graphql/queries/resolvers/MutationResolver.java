@@ -210,6 +210,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         flavour.setComputeId(input.getComputeId());
         flavour.setCpu(input.getCpu());
         flavour.setMemory(input.getMemory());
+        flavour.setCredits(input.getCredits());
         flavourService.save(flavour);
 
         // Handle flavour limits
@@ -229,7 +230,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         List<Long> instrumentsToAdd = instrumentIds.stream().filter(instrumentId ->
             !currentInstrumentIds.contains(instrumentId)).collect(Collectors.toList());
 
-        flavourLimitsToDelete.forEach(flavourLimit -> this.flavourLimitService.delete(flavourLimit));
+        flavourLimitsToDelete.forEach(this.flavourLimitService::delete);
         instrumentsToAdd.forEach(instrumentId -> {
             if (allInstrumentIds.contains(instrumentId)) {
                 FlavourLimit flavourLimit = new FlavourLimit(flavour, instrumentId, "INSTRUMENT");

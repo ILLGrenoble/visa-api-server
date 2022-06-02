@@ -53,6 +53,9 @@
             <basic name="deleted">
                 <column name="deleted" nullable="false" column-definition=""/>
             </basic>
+            <basic name="credits">
+                <column name="credits" nullable="false"/>
+            </basic>
         </attributes>
     </entity>
 

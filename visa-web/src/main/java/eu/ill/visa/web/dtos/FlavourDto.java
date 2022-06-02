@@ -20,6 +20,10 @@ public class FlavourDto {
     @NotNull
     private Float cpu;
 
+    @NotNull
+    @Min(1)
+    private Integer credits;
+
     public FlavourDto() {
     }
 
@@ -53,5 +57,13 @@ public class FlavourDto {
 
     public void setCpu(Float cpu) {
         this.cpu = cpu;
+    }
+
+    public Integer getCredits() {
+        return credits;
+    }
+
+    public void setCredits(Integer credits) {
+        this.credits = credits;
     }
 }

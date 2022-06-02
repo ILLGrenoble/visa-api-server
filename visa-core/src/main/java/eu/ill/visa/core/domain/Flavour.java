@@ -17,6 +17,8 @@ public class Flavour extends Timestampable {
 
     private Boolean deleted = false;
 
+    private Integer credits;
+
     public Long getId() {
         return id;
     }
@@ -65,6 +67,14 @@ public class Flavour extends Timestampable {
         this.deleted = deleted;
     }
 
+    public Integer getCredits() {
+        return credits;
+    }
+
+    public void setCredits(Integer credits) {
+        this.credits = credits;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,52 +93,5 @@ public class Flavour extends Timestampable {
         return new HashCodeBuilder(17, 37)
             .append(id)
             .toHashCode();
-    }
-
-
-    public static final class Builder {
-        private Long id;
-        private String name;
-        private Integer memory;
-        private Float cpu;
-        private String computeId;
-
-        public Builder() {
-        }
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder memory(Integer memory) {
-            this.memory = memory;
-            return this;
-        }
-
-        public Builder cpu(Float cpu) {
-            this.cpu = cpu;
-            return this;
-        }
-
-        public Builder computeId(String computeId) {
-            this.computeId = computeId;
-            return this;
-        }
-
-        public Flavour build() {
-            Flavour flavour = new Flavour();
-            flavour.setId(id);
-            flavour.setName(name);
-            flavour.setMemory(memory);
-            flavour.setCpu(cpu);
-            flavour.setComputeId(computeId);
-            return flavour;
-        }
     }
 }

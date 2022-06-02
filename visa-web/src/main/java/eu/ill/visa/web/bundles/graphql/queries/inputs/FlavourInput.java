@@ -20,6 +20,10 @@ public class FlavourInput {
     @NotNull
     private Float cpu;
 
+    @NotNull
+    @Min(1)
+    private Integer credits;
+
     @Cloud(type = "flavour")
     @NotNull
     private String computeId;
@@ -48,6 +52,14 @@ public class FlavourInput {
 
     public void setCpu(Float cpu) {
         this.cpu = cpu;
+    }
+
+    public Integer getCredits() {
+        return credits;
+    }
+
+    public void setCredits(Integer credits) {
+        this.credits = credits;
     }
 
     public String getComputeId() {

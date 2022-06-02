@@ -27,9 +27,10 @@ CREATE TABLE visa.application_credential (
     application_id character varying(255) NOT NULL,
     application_secret character varying(255) NOT NULL,
     deleted_at timestamp without time zone,
-    last_used_at timestamp without time zone,
     name character varying(250) NOT NULL,
-    salt character varying(255) NOT NULL
+    salt character varying(255) NOT NULL,
+    last_used timestamp without time zone,
+    last_used_at timestamp without time zone
 );
 
 
@@ -83,6 +84,18 @@ ALTER SEQUENCE visa.configuration_id_seq OWNED BY visa.configuration.id;
 
 
 --
+-- Name: cycle; Type: TABLE; Schema: visa; Owner: -
+--
+
+CREATE TABLE visa.cycle (
+    id bigint NOT NULL,
+    end_date timestamp without time zone NOT NULL,
+    name character varying(100) NOT NULL,
+    start_date timestamp without time zone NOT NULL
+);
+
+
+--
 -- Name: employer; Type: TABLE; Schema: visa; Owner: -
 --
 
@@ -102,8 +115,8 @@ CREATE TABLE visa.experiment (
     id character varying(32) NOT NULL,
     instrument_id bigint NOT NULL,
     proposal_id bigint NOT NULL,
-    start_date timestamp without time zone,
-    end_date timestamp without time zone
+    end_date timestamp without time zone,
+    start_date timestamp without time zone
 );
 
 
@@ -141,7 +154,8 @@ CREATE TABLE visa.flavour (
     cpu real NOT NULL,
     memory integer NOT NULL,
     name character varying(250) NOT NULL,
-    deleted boolean DEFAULT false NOT NULL
+    deleted boolean DEFAULT false NOT NULL,
+    credits integer DEFAULT 1
 );
 
 
@@ -197,8 +211,38 @@ CREATE TABLE visa.image (
     visible boolean DEFAULT false NOT NULL,
     version character varying(100),
     boot_command text,
-    autologin character varying
+    autologin character varying(255)
 );
+
+
+--
+-- Name: image_network; Type: TABLE; Schema: visa; Owner: -
+--
+
+CREATE TABLE visa.image_network (
+    id bigint NOT NULL,
+    network_id character varying(250) NOT NULL,
+    image_id bigint NOT NULL
+);
+
+
+--
+-- Name: image_network_id_seq; Type: SEQUENCE; Schema: visa; Owner: -
+--
+
+CREATE SEQUENCE visa.image_network_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: image_network_id_seq; Type: SEQUENCE OWNED BY; Schema: visa; Owner: -
+--
+
+ALTER SEQUENCE visa.image_network_id_seq OWNED BY visa.image_network.id;
 
 
 --
@@ -237,14 +281,16 @@ CREATE TABLE visa.instance (
     screen_height integer NOT NULL,
     screen_width integer NOT NULL,
     state character varying(50) NOT NULL,
+    flavour_id bigint,
+    image_id bigint,
+    plan_id bigint,
     last_seen_at timestamp without time zone,
     termination_date timestamp without time zone,
-    plan_id bigint,
     username character varying(100),
     delete_requested boolean DEFAULT false NOT NULL,
     last_interaction_at timestamp without time zone,
     ip_address character varying(255),
-    keyboard_layout character varying(100) DEFAULT 'en-gb-qwerty'::character varying NOT NULL,
+    keyboard_layout character varying(100) DEFAULT 'en-gb-qwerty'::character varying,
     deleted_at timestamp without time zone,
     security_groups text,
     uid character varying(16) NOT NULL
@@ -336,8 +382,8 @@ CREATE TABLE visa.instance_command (
 --
 
 CREATE TABLE visa.instance_experiment (
-    experiment_id character varying(32) NOT NULL,
-    instance_id bigint NOT NULL
+    instance_id bigint NOT NULL,
+    experiment_id character varying(32) NOT NULL
 );
 
 
@@ -371,6 +417,44 @@ CREATE SEQUENCE visa.instance_expiration_id_seq
 --
 
 ALTER SEQUENCE visa.instance_expiration_id_seq OWNED BY visa.instance_expiration.id;
+
+
+--
+-- Name: instance_extension_request; Type: TABLE; Schema: visa; Owner: -
+--
+
+CREATE TABLE visa.instance_extension_request (
+    id bigint NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    comments character varying(4000),
+    extension_date timestamp without time zone,
+    handled_on timestamp without time zone,
+    handler_comments character varying(4000),
+    original_termination_date timestamp without time zone NOT NULL,
+    state character varying(50) NOT NULL,
+    handler_id character varying(255),
+    instance_id bigint NOT NULL
+);
+
+
+--
+-- Name: instance_extension_request_id_seq; Type: SEQUENCE; Schema: visa; Owner: -
+--
+
+CREATE SEQUENCE visa.instance_extension_request_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: instance_extension_request_id_seq; Type: SEQUENCE OWNED BY; Schema: visa; Owner: -
+--
+
+ALTER SEQUENCE visa.instance_extension_request_id_seq OWNED BY visa.instance_extension_request.id;
 
 
 --
@@ -454,7 +538,9 @@ CREATE TABLE visa.instance_session (
     id bigint DEFAULT nextval('visa.instance_session_id_seq'::regclass) NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
+    client_count bigint,
     connection_id character varying(150) NOT NULL,
+    last_seen_at timestamp without time zone,
     instance_id bigint NOT NULL,
     current boolean NOT NULL
 );
@@ -545,21 +631,7 @@ CREATE TABLE visa.instrument (
 
 CREATE TABLE visa.instrument_scientist (
     instrument_id bigint NOT NULL,
-    user_id character varying(250) NOT NULL
-);
-
-
---
--- Name: plan; Type: TABLE; Schema: visa; Owner: -
---
-
-CREATE TABLE visa.plan (
-    id bigint NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    flavour_id bigint,
-    image_id bigint,
-    preset boolean DEFAULT false NOT NULL
+    user_id character varying(255) NOT NULL
 );
 
 
@@ -576,10 +648,17 @@ CREATE SEQUENCE visa.plan_id_seq
 
 
 --
--- Name: plan_id_seq; Type: SEQUENCE OWNED BY; Schema: visa; Owner: -
+-- Name: plan; Type: TABLE; Schema: visa; Owner: -
 --
 
-ALTER SEQUENCE visa.plan_id_seq OWNED BY visa.plan.id;
+CREATE TABLE visa.plan (
+    id bigint DEFAULT nextval('visa.plan_id_seq'::regclass) NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    flavour_id bigint,
+    image_id bigint,
+    preset boolean DEFAULT false NOT NULL
+);
 
 
 --
@@ -787,10 +866,24 @@ ALTER TABLE ONLY visa.configuration ALTER COLUMN id SET DEFAULT nextval('visa.co
 
 
 --
+-- Name: image_network id; Type: DEFAULT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.image_network ALTER COLUMN id SET DEFAULT nextval('visa.image_network_id_seq'::regclass);
+
+
+--
 -- Name: instance_expiration id; Type: DEFAULT; Schema: visa; Owner: -
 --
 
 ALTER TABLE ONLY visa.instance_expiration ALTER COLUMN id SET DEFAULT nextval('visa.instance_expiration_id_seq'::regclass);
+
+
+--
+-- Name: instance_extension_request id; Type: DEFAULT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance_extension_request ALTER COLUMN id SET DEFAULT nextval('visa.instance_extension_request_id_seq'::regclass);
 
 
 --
@@ -812,13 +905,6 @@ ALTER TABLE ONLY visa.instance_session_member ALTER COLUMN id SET DEFAULT nextva
 --
 
 ALTER TABLE ONLY visa.instance_thumbnail ALTER COLUMN id SET DEFAULT nextval('visa.instance_thumbnail_id_seq'::regclass);
-
-
---
--- Name: plan id; Type: DEFAULT; Schema: visa; Owner: -
---
-
-ALTER TABLE ONLY visa.plan ALTER COLUMN id SET DEFAULT nextval('visa.plan_id_seq'::regclass);
 
 
 --
@@ -859,6 +945,14 @@ ALTER TABLE ONLY visa.configuration
 
 
 --
+-- Name: cycle cycle_pkey; Type: CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.cycle
+    ADD CONSTRAINT cycle_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: employer employer_pkey; Type: CONSTRAINT; Schema: visa; Owner: -
 --
 
@@ -896,6 +990,14 @@ ALTER TABLE ONLY visa.flavour_limit
 
 ALTER TABLE ONLY visa.flavour
     ADD CONSTRAINT flavour_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: image_network image_network_pkey; Type: CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.image_network
+    ADD CONSTRAINT image_network_pkey PRIMARY KEY (id);
 
 
 --
@@ -944,6 +1046,14 @@ ALTER TABLE ONLY visa.instance_experiment
 
 ALTER TABLE ONLY visa.instance_expiration
     ADD CONSTRAINT instance_expiration_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: instance_extension_request instance_extension_request_pkey; Type: CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance_extension_request
+    ADD CONSTRAINT instance_extension_request_pkey PRIMARY KEY (id);
 
 
 --
@@ -1003,11 +1113,11 @@ ALTER TABLE ONLY visa.instrument
 
 
 --
--- Name: instrument_scientist instrument_responsible_pkey; Type: CONSTRAINT; Schema: visa; Owner: -
+-- Name: instrument_scientist instrument_scientist_pkey; Type: CONSTRAINT; Schema: visa; Owner: -
 --
 
 ALTER TABLE ONLY visa.instrument_scientist
-    ADD CONSTRAINT instrument_responsible_pkey PRIMARY KEY (instrument_id, user_id);
+    ADD CONSTRAINT instrument_scientist_pkey PRIMARY KEY (instrument_id, user_id);
 
 
 --
@@ -1107,6 +1217,30 @@ ALTER TABLE ONLY visa.users
 
 
 --
+-- Name: instance fk1u3me76x48mgsy0jo0wrvq0k; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance
+    ADD CONSTRAINT fk1u3me76x48mgsy0jo0wrvq0k FOREIGN KEY (flavour_id) REFERENCES visa.flavour(id);
+
+
+--
+-- Name: instrument_scientist fk4ysk12q3cwd2b7jwaea1kmvbb; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instrument_scientist
+    ADD CONSTRAINT fk4ysk12q3cwd2b7jwaea1kmvbb FOREIGN KEY (user_id) REFERENCES visa.users(id);
+
+
+--
+-- Name: instance fk93v7noolejd8itl8633rx63u9; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance
+    ADD CONSTRAINT fk93v7noolejd8itl8633rx63u9 FOREIGN KEY (image_id) REFERENCES visa.image(id);
+
+
+--
 -- Name: users fk_employer_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
 --
 
@@ -1131,14 +1265,6 @@ ALTER TABLE ONLY visa.instance_experiment
 
 
 --
--- Name: flavour_limit fk_flavour_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
---
-
-ALTER TABLE ONLY visa.flavour_limit
-    ADD CONSTRAINT fk_flavour_id FOREIGN KEY (flavour_id) REFERENCES visa.flavour(id);
-
-
---
 -- Name: plan fk_flavour_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
 --
 
@@ -1147,11 +1273,11 @@ ALTER TABLE ONLY visa.plan
 
 
 --
--- Name: plan fk_image_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
+-- Name: flavour_limit fk_flavour_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
 --
 
-ALTER TABLE ONLY visa.plan
-    ADD CONSTRAINT fk_image_id FOREIGN KEY (image_id) REFERENCES visa.image(id);
+ALTER TABLE ONLY visa.flavour_limit
+    ADD CONSTRAINT fk_flavour_id FOREIGN KEY (flavour_id) REFERENCES visa.flavour(id);
 
 
 --
@@ -1163,26 +1289,18 @@ ALTER TABLE ONLY visa.image_protocol
 
 
 --
+-- Name: plan fk_image_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.plan
+    ADD CONSTRAINT fk_image_id FOREIGN KEY (image_id) REFERENCES visa.image(id);
+
+
+--
 -- Name: instance_command fk_instance_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
 --
 
 ALTER TABLE ONLY visa.instance_command
-    ADD CONSTRAINT fk_instance_id FOREIGN KEY (instance_id) REFERENCES visa.instance(id);
-
-
---
--- Name: instance_expiration fk_instance_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
---
-
-ALTER TABLE ONLY visa.instance_expiration
-    ADD CONSTRAINT fk_instance_id FOREIGN KEY (instance_id) REFERENCES visa.instance(id);
-
-
---
--- Name: instance_thumbnail fk_instance_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
---
-
-ALTER TABLE ONLY visa.instance_thumbnail
     ADD CONSTRAINT fk_instance_id FOREIGN KEY (instance_id) REFERENCES visa.instance(id);
 
 
@@ -1219,6 +1337,22 @@ ALTER TABLE ONLY visa.instance_session
 
 
 --
+-- Name: instance_expiration fk_instance_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance_expiration
+    ADD CONSTRAINT fk_instance_id FOREIGN KEY (instance_id) REFERENCES visa.instance(id);
+
+
+--
+-- Name: instance_thumbnail fk_instance_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance_thumbnail
+    ADD CONSTRAINT fk_instance_id FOREIGN KEY (instance_id) REFERENCES visa.instance(id);
+
+
+--
 -- Name: instance_jupyter_session fk_instance_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
 --
 
@@ -1243,18 +1377,18 @@ ALTER TABLE ONLY visa.instance_session_member
 
 
 --
--- Name: instrument_scientist fk_instrument_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
---
-
-ALTER TABLE ONLY visa.instrument_scientist
-    ADD CONSTRAINT fk_instrument_id FOREIGN KEY (instrument_id) REFERENCES visa.instrument(id);
-
-
---
 -- Name: experiment fk_instrument_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
 --
 
 ALTER TABLE ONLY visa.experiment
+    ADD CONSTRAINT fk_instrument_id FOREIGN KEY (instrument_id) REFERENCES visa.instrument(id);
+
+
+--
+-- Name: instrument_scientist fk_instrument_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instrument_scientist
     ADD CONSTRAINT fk_instrument_id FOREIGN KEY (instrument_id) REFERENCES visa.instrument(id);
 
 
@@ -1347,19 +1481,35 @@ ALTER TABLE ONLY visa.instance_session_member
 
 
 --
--- Name: instrument_scientist fk_users_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
---
-
-ALTER TABLE ONLY visa.instrument_scientist
-    ADD CONSTRAINT fk_users_id FOREIGN KEY (user_id) REFERENCES visa.users(id);
-
-
---
 -- Name: user_role fk_users_id; Type: FK CONSTRAINT; Schema: visa; Owner: -
 --
 
 ALTER TABLE ONLY visa.user_role
     ADD CONSTRAINT fk_users_id FOREIGN KEY (user_id) REFERENCES visa.users(id);
+
+
+--
+-- Name: instance_extension_request fkim81ok55k4s80g0vms3aiyf03; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance_extension_request
+    ADD CONSTRAINT fkim81ok55k4s80g0vms3aiyf03 FOREIGN KEY (instance_id) REFERENCES visa.instance(id);
+
+
+--
+-- Name: instance_extension_request fkk8ybx3qlootemnkmu1jmk34m1; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.instance_extension_request
+    ADD CONSTRAINT fkk8ybx3qlootemnkmu1jmk34m1 FOREIGN KEY (handler_id) REFERENCES visa.users(id);
+
+
+--
+-- Name: image_network fkm959lwiys12sf3i5k25jvayrh; Type: FK CONSTRAINT; Schema: visa; Owner: -
+--
+
+ALTER TABLE ONLY visa.image_network
+    ADD CONSTRAINT fkm959lwiys12sf3i5k25jvayrh FOREIGN KEY (image_id) REFERENCES visa.image(id);
 
 
 --
@@ -1374,4 +1524,5 @@ ALTER TABLE ONLY visa.user_role
 INSERT INTO visa.schema_migrations (version) VALUES
     ('20220314151039'),
     ('20220324082055'),
-    ('20220406071949');
+    ('20220406071949'),
+    ('20220601141717');

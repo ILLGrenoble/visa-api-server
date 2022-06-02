@@ -42,6 +42,7 @@ input FlavourInput {
     description: String
     memory: Int!
     cpu: Int!
+    credits: Int!
     computeId: String!
     instrumentIds: [Int]
 }

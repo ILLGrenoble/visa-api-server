@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.persistence.RollbackException;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,20 +56,5 @@ public class FlavourServiceTest {
             flavourService.delete(flavour);
         });
     }
-    @Test
-    @DisplayName("Create a flavour")
-    void testCreate() {
-        Flavour.Builder builder = new Flavour.Builder();
-        builder
-            .name("My test flavour")
-            .computeId(UUID.randomUUID().toString())
-            .cpu(0.5f)
-            .memory(2048);
-
-        Flavour flavour = builder.build();
-        flavourService.create(flavour);
-        assertEquals(4, flavourService.getAll().size());
-    }
-
 
 }
