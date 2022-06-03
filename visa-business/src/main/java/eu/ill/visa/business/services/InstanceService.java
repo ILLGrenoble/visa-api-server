@@ -248,8 +248,12 @@ public class InstanceService {
         return repository.getAllForUserAndRole(user, role);
     }
 
-    public Long countAllForUserAndRole(User user, InstanceMemberRole role) {
+    public Integer countAllForUserAndRole(User user, InstanceMemberRole role) {
         return repository.countAllForUserAndRole(user, role);
+    }
+
+    public Integer countCreditsUsedForUserAndRole(User user, InstanceMemberRole role) {
+        return repository.countCreditsUsedForUserAndRole(user, role);
     }
 
     public InstanceThumbnail createOrUpdateThumbnail(Instance instance, byte[] data) {

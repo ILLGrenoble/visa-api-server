@@ -15,7 +15,6 @@ public class UserFullDto {
     private DateTime createdAt;
     private String   lastSignInIp;
     private Integer  signInCount;
-    private Integer  machineQuotaLimit;
     private EmployerDto affiliation;
     private List<RoleDto> userRoles = new ArrayList<>();
 
@@ -93,16 +92,8 @@ public class UserFullDto {
         this.signInCount = signInCount;
     }
 
-    public Integer getMachineQuotaLimit() {
-        return machineQuotaLimit;
-    }
-
     public void setAffiliation(EmployerDto affiliation) {
         this.affiliation = affiliation;
-    }
-
-    public void setMachineQuotaLimit(Integer machineQuotaLimit) {
-        this.machineQuotaLimit = machineQuotaLimit;
     }
 
     public EmployerDto getAffiliation() {

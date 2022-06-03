@@ -117,6 +117,19 @@
         </query>
     </named-query>
 
+    <named-query name="instance.countCreditsUsedForUserAndRole">
+        <query>
+            SELECT SUM(f.credits)
+            FROM Instance i
+            JOIN i.plan p
+            JOIN p.flavour f
+            JOIN i.members m
+            WHERE m.user = :user
+            AND m.role = :role
+            AND i.deletedAt IS NULL
+        </query>
+    </named-query>
+
     <named-query name="instance.getAllWithStates">
         <query>
             SELECT i FROM Instance i

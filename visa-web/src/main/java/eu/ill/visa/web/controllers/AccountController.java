@@ -80,15 +80,15 @@ public class AccountController extends AbstractController {
         final QuotaDto dto = new QuotaDto();
         // the user has an invalid employee number... send defaults
         if ("0".equals(user.getId())) {
-            dto.setTotalInstances(0L);
-            dto.setAvailableInstances(0L);
-            dto.setMaxInstances(0);
+            dto.setCreditsQuota(0);
+            dto.setCreditsAvailable(0);
+            dto.setCreditsUsed(0);
             return createResponse(dto, OK);
         }
-        final Long totalInstances = instanceService.countAllForUserAndRole(user, OWNER);
-        dto.setTotalInstances(totalInstances);
-        dto.setAvailableInstances(user.getInstanceQuota() - totalInstances);
-        dto.setMaxInstances(user.getInstanceQuota());
+        final Integer creditsUsed = instanceService.countCreditsUsedForUserAndRole(user, OWNER);
+        dto.setCreditsUsed(creditsUsed);
+        dto.setCreditsAvailable(user.getInstanceQuota() - creditsUsed);
+        dto.setCreditsQuota(user.getInstanceQuota());
         return createResponse(dto, OK);
     }
 

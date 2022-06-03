@@ -236,9 +236,9 @@ public class AccountInstanceController extends AbstractController {
     public Response create(@Auth final AccountToken accountToken, @NotNull @Valid final InstanceCreatorDto dto) {
         final User user = accountToken.getUser();
         if (user.getInstanceQuota() != -1) {
-            if (instanceService.countAllForUserAndRole(user, OWNER) >= user.getInstanceQuota()) {
-                logger.info("User {} ({}) has exceeded their quota of {} instances", user.getFullName(), user.getId(), user.getInstanceQuota());
-                throw new BadRequestException("Instance quota exceeded");
+            if (instanceService.countCreditsUsedForUserAndRole(user, OWNER) >= user.getInstanceQuota()) {
+                logger.info("User {} ({}) has exceeded their quota of {} instance credits", user.getFullName(), user.getId(), user.getInstanceQuota());
+                throw new BadRequestException("Instance credits quota exceeded");
             }
         }
 

@@ -432,12 +432,23 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         return query.getResultList();
     }
 
-    public Long countAllForUserAndRole(User user, InstanceMemberRole role) {
+    public Integer countAllForUserAndRole(User user, InstanceMemberRole role) {
         try {
-            final TypedQuery<Long> query = getEntityManager().createNamedQuery("instance.countAllForUserAndRole", Long.class);
+            final TypedQuery<Integer> query = getEntityManager().createNamedQuery("instance.countAllForUserAndRole", Integer.class);
             query.setParameter("user", user)
                 .setParameter("role", role);
             return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
+    public Integer countCreditsUsedForUserAndRole(User user, InstanceMemberRole role) {
+        try {
+            final TypedQuery<Long> query = getEntityManager().createNamedQuery("instance.countCreditsUsedForUserAndRole", Long.class);
+            query.setParameter("user", user)
+                .setParameter("role", role);
+            return (query.getSingleResult()).intValue();
         } catch (NoResultException exception) {
             return null;
         }

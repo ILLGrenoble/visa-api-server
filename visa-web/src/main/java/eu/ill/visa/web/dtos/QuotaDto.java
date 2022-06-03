@@ -2,33 +2,31 @@ package eu.ill.visa.web.dtos;
 
 public class QuotaDto {
 
-    private Integer maxInstances;
-    private Long totalInstances;
-    private Long availableInstances;
+    private Integer creditsQuota;
+    private Integer creditsUsed;
+    private Integer creditsAvailable;
 
-    public Integer getMaxInstances() {
-        return maxInstances;
+    public Integer getCreditsQuota() {
+        return creditsQuota;
     }
 
-    public void setMaxInstances(Integer maxInstances) {
-        this.maxInstances = maxInstances;
+    public void setCreditsQuota(Integer creditsQuota) {
+        this.creditsQuota = creditsQuota;
     }
 
-    public Long getTotalInstances() {
-        return totalInstances;
+    public Integer getCreditsUsed() {
+        return creditsUsed;
     }
 
-    public void setTotalInstances(Long totalInstances) {
-        this.totalInstances = totalInstances;
+    public void setCreditsUsed(Integer creditsUsed) {
+        this.creditsUsed = creditsUsed;
     }
 
-    public Long getAvailableInstances() {
-        return availableInstances;
+    public Integer getCreditsAvailable() {
+        return this.creditsAvailable;
     }
 
-    public void setAvailableInstances(Long availableInstances) {
-        this.availableInstances = availableInstances;
+    public void setCreditsAvailable(Integer creditsAvailable) {
+        this.creditsAvailable = creditsAvailable;
     }
-
-
 }
