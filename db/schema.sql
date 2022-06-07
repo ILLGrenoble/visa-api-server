@@ -142,7 +142,7 @@ CREATE TABLE visa.flavour (
     memory integer NOT NULL,
     name character varying(250) NOT NULL,
     deleted boolean DEFAULT false NOT NULL,
-    credits integer DEFAULT 1
+    credits integer DEFAULT 1 NOT NULL
 );
 
 
