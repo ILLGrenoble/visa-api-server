@@ -61,7 +61,6 @@ public class CloudClientFactory {
         requireNonNull(parameters.get("applicationId"), "applicationId must be set");
         requireNonNull(parameters.get("applicationSecret"), "applicationSecret must be set");
         requireNonNull(parameters.get("addressProvider"), "addressProvider must be set");
-        requireNonNull(parameters.get("addressProviderUUID"), "addressProviderUUID must be set");
 
         final OpenStackProviderConfiguration configuration = new OpenStackProviderConfiguration(parameters);
         final HttpClient httpClient = new OkHttpClientAdapter();

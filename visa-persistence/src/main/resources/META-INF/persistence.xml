@@ -21,6 +21,7 @@
         <mapping-file>mappers/employer-orm.xml</mapping-file>
         <mapping-file>mappers/role-orm.xml</mapping-file>
         <mapping-file>mappers/image-protocol-orm.xml</mapping-file>
+        <mapping-file>mappers/image-network-orm.xml</mapping-file>
         <mapping-file>mappers/instance-command-orm.xml</mapping-file>
         <mapping-file>mappers/instance-attribute-orm.xml</mapping-file>
         <mapping-file>mappers/instance-session-orm.xml</mapping-file>
@@ -42,6 +43,7 @@
         <class>eu.ill.visa.core.domain.Experiment</class>
         <class>eu.ill.visa.core.domain.Flavour</class>
         <class>eu.ill.visa.core.domain.FlavourLimit</class>
+        <class>eu.ill.visa.core.domain.ImageNetwork</class>
         <class>eu.ill.visa.core.domain.Image</class>
         <class>eu.ill.visa.core.domain.Plan</class>
         <class>eu.ill.visa.core.domain.ImageProtocol</class>

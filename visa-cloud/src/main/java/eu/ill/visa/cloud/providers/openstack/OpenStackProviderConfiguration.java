@@ -11,10 +11,8 @@ public class OpenStackProviderConfiguration {
     private final String imageEndpoint;
     private final String identityEndpoint;
     private final String networkEndpoint;
-
     private final String addressProvider;
 
-    private final String addressProviderUUID;
 
     public OpenStackProviderConfiguration(final Map<String, String> values) {
         this.applicationId = values.get("applicationId");
@@ -24,11 +22,6 @@ public class OpenStackProviderConfiguration {
         this.networkEndpoint = values.get("networkEndpoint");
         this.identityEndpoint = values.get("identityEndpoint");
         this.addressProvider = values.get("addressProvider");
-        this.addressProviderUUID = values.get("addressProviderUUID");
-    }
-
-    public String getAddressProviderUUID() {
-        return addressProviderUUID;
     }
 
     public String getApplicationId() {

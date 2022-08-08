@@ -16,6 +16,7 @@ input ImageInput {
     computeId: String!
     visible: Boolean!
     protocolIds: [Int]
+    networkIds: [String]
     bootCommand: String
     autologin: String
 }

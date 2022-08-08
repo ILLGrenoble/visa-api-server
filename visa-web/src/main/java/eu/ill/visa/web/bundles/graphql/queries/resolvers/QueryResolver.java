@@ -7,6 +7,7 @@ import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.domain.CloudLimit;
+import eu.ill.visa.cloud.domain.CloudNetwork;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.*;
@@ -37,24 +38,24 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class QueryResolver implements GraphQLQueryResolver {
 
-    private final InstrumentService                 instrumentService;
-    private final ExperimentService                 experimentService;
-    private final FlavourService                    flavourService;
-    private final ImageService                      imageService;
-    private final SecurityGroupService              securityGroupService;
-    private final SecurityGroupFilterService        securityGroupFilterService;
-    private final FlavourLimitService               flavourLimitService;
-    private final InstanceService                   instanceService;
-    private final UserService                       userService;
-    private final ImageProtocolService              imageProtocolService;
-    private final RoleService                       roleService;
-    private final CloudClient                       cloudClient;
-    private final PlanService                       planService;
-    private final InstanceSessionMemberService      instanceSessionMemberService;
-    private final InstanceJupyterSessionService     instanceJupyterSessionService;
-    private final ClientNotificationService         clientNotificationService;
-    private final ApplicationCredentialService      applicationCredentialService;
-    private final InstanceExtensionRequestService   instanceExtensionRequestService;
+    private final InstrumentService               instrumentService;
+    private final ExperimentService               experimentService;
+    private final FlavourService                  flavourService;
+    private final ImageService                    imageService;
+    private final SecurityGroupService            securityGroupService;
+    private final SecurityGroupFilterService      securityGroupFilterService;
+    private final FlavourLimitService             flavourLimitService;
+    private final InstanceService                 instanceService;
+    private final UserService                     userService;
+    private final ImageProtocolService            imageProtocolService;
+    private final RoleService                     roleService;
+    private final CloudClient                     cloudClient;
+    private final PlanService                     planService;
+    private final InstanceSessionMemberService    instanceSessionMemberService;
+    private final InstanceJupyterSessionService   instanceJupyterSessionService;
+    private final ClientNotificationService        clientNotificationService;
+    private final ApplicationCredentialService    applicationCredentialService;
+    private final InstanceExtensionRequestService instanceExtensionRequestService;
 
     @Inject
     QueryResolver(final InstrumentService instrumentService,
@@ -500,7 +501,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
-     * Get cloud security groups from the the cloud provider
+     * Get cloud security groups from the cloud provider
      *
      * @return a list of security groups
      */
@@ -512,6 +513,25 @@ public class QueryResolver implements GraphQLQueryResolver {
                     .map(CloudSecurityGroup::new)
                     .collect(toList());
                 future.complete(cloudSecurityGroups);
+            } catch (CloudException exception) {
+                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            }
+        });
+        return future;
+    }
+
+
+    /**
+     * Get cloud networks from the cloud provider
+     *
+     * @return a list of networks
+     */
+    public CompletableFuture<List<CloudNetwork>> cloudNetworks() {
+        final CompletableFuture<List<CloudNetwork>> future = new CompletableFuture<>();
+        runAsync(() -> {
+            try {
+                final List<CloudNetwork> cloudNetworks = cloudClient.networks();
+                future.complete(cloudNetworks);
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }

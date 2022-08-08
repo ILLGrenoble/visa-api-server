@@ -266,7 +266,8 @@ public class OpenStackProvider implements CloudProvider {
                                         final String flavorId,
                                         final List<String> securityGroupNames,
                                         final CloudInstanceMetadata metadata,
-                                        final String bootCommand) throws CloudException {
+                                        final String bootCommand,
+                                        final List<String> networkProviders) throws CloudException {
 
         final List<JsonObject> securityGroupObjects = securityGroupNames.stream().map(securityGroupName ->
             createObjectBuilder().add("name", securityGroupName).build()).collect(toUnmodifiableList());
@@ -275,9 +276,10 @@ public class OpenStackProvider implements CloudProvider {
         securityGroupObjects.forEach(securityGroupsBuilder::add);
         final JsonArray securityGroups = securityGroupsBuilder.build();
 
-        final JsonObject network = createObjectBuilder().add("uuid", configuration.getAddressProviderUUID()).build();
-        final JsonArray networks = createArrayBuilder().add(network).build();
-
+        final JsonArrayBuilder networks = createArrayBuilder();
+        for (final String networkProvider: networkProviders) {
+            networks.add(networkProvider);
+        }
         final JsonObjectBuilder metadataNodes = createObjectBuilder();
         for (Map.Entry<String, String> entry : metadata.entrySet()) {
             metadataNodes.add(entry.getKey(), entry.getValue());
@@ -346,6 +348,44 @@ public class OpenStackProvider implements CloudProvider {
         return currentSecurityGroups.stream().map(jsonValue -> jsonValue.asJsonObject().getString("name"))
             .sorted(String::compareToIgnoreCase)
             .collect(toUnmodifiableList());
+    }
+
+    @Override
+    public List<CloudNetwork> networks() throws CloudException {
+        final String url = format("%s/v2.0/networks", configuration.getNetworkEndpoint());
+        final String authToken = authenticate();
+        final Map<String, String> headers = buildDefaultHeaders(authToken);
+        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
+        if (!response.isSuccessful()) {
+            logger.warn("Could not get networks: {}", response.getBody());
+            return new ArrayList<>();
+        }
+        final JsonArray networks = parseObject(response.getBody()).getJsonArray("networks");
+        return networks.stream()
+            .map(value -> {
+                final JsonObject object = value.asJsonObject();
+                final String id = object.getString("id");
+                final String name = object.getString("name");
+                return new CloudNetwork(id, name);
+            })
+            .collect(toUnmodifiableList());
+    }
+
+    @Override
+    public CloudNetwork network(String id) throws CloudException {
+        final String url = format("%s/v2.0/networks/%s", configuration.getNetworkEndpoint(), id);
+        final String authToken = authenticate();
+        final Map<String, String> headers = buildDefaultHeaders(authToken);
+        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
+        if (!response.isSuccessful()) {
+            logger.warn("Could not get network: {}", response.getBody());
+            return null;
+        }
+        final JsonObject network = parseObject(response.getBody()).getJsonObject("network");
+        return new CloudNetwork(
+            network.getString("id"),
+            network.getString("name")
+        );
     }
 
 }

@@ -72,6 +72,16 @@
             <basic name="autologin">
                 <column name="autologin" nullable="true"/>
             </basic>
+            <one-to-many name="networks" orphan-removal="true" target-entity="eu.ill.visa.core.domain.ImageNetwork">
+                <join-column name="image_id" nullable="false"/>
+                <foreign-key name="fk_image_network_id"/>
+                <cascade>
+                    <cascade-persist/>
+                    <cascade-merge/>
+                    <cascade-remove/>
+                    <cascade-refresh/>
+                </cascade>
+            </one-to-many>
             <many-to-many name="protocols" target-entity="eu.ill.visa.core.domain.ImageProtocol">
                 <join-table name="image_protocol">
                     <join-column name="image_id"/>
@@ -80,6 +90,7 @@
                     <inverse-foreign-key name="fk_protocol_id"/>
                 </join-table>
             </many-to-many>
+
         </attributes>
 
 

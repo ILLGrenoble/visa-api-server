@@ -13,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static java.util.stream.Collectors.toList;
+
 public class CreateInstanceAction extends InstanceAction {
 
     private final static Logger logger = LoggerFactory.getLogger(CreateInstanceAction.class);
@@ -38,7 +42,7 @@ public class CreateInstanceAction extends InstanceAction {
             // Get security groups for instance
             List<SecurityGroup> securityGroups = this.getSecurityGroupService().getAllForInstance(instance);
             List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
-            logger.info("Adding security groups [{}] to instance {}", String.join(", ", securityGroupNames), instance.getId());
+            logger.info("Adding security groups [{}] to instance {}", join(", ", securityGroupNames), instance.getId());
 
             instance.setSecurityGroups(securityGroupNames);
 
@@ -53,21 +57,24 @@ public class CreateInstanceAction extends InstanceAction {
             instance.getAttributes().forEach(attribute -> metadata.put(attribute.getName(), attribute.getValue()));
             metadata.put("id", instance.getId());
             metadata.put("owner", instance.getUsername());
-            metadata.put("instruments", String.join(",", instrumentNames));
-            metadata.put("proposals", String.join(",", proposals));
+            metadata.put("instruments", join(",", instrumentNames));
+            metadata.put("proposals", join(",", proposals));
 
             String pamPublicKey = this.getSignatureService().readPublicKey();
             if (pamPublicKey != null) {
                 metadata.put("pamPublicKey", pamPublicKey);
             }
 
+            final List<String> networks = image.getNetworks().stream().map(ImageNetwork::getNetworkId).collect(toList());
+            final String prefix = format("%s-%s", cloudClient.getServerNamePrefix(), instance.getId());
             CloudInstance cloudInstance = cloudClient.createInstance(
-                cloudClient.getServerNamePrefix() + "-" + instance.getId(),
+                prefix,
                 image.getComputeId(),
                 flavour.getComputeId(),
                 securityGroupNames,
                 metadata,
-                image.getBootCommand()
+                image.getBootCommand(),
+                networks
             );
 
             instance.setComputeId(cloudInstance.getId());

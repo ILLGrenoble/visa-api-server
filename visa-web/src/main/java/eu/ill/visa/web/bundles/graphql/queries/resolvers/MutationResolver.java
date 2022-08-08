@@ -2,6 +2,9 @@ package eu.ill.visa.web.bundles.graphql.queries.resolvers;
 
 import com.google.inject.Inject;
 import eu.ill.visa.business.services.*;
+import eu.ill.visa.cloud.domain.CloudNetwork;
+import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceExtensionRequestState;
@@ -38,16 +41,15 @@ public class MutationResolver implements GraphQLMutationResolver {
 
     private final static Logger logger = LoggerFactory.getLogger(MutationResolver.class);
 
-    private final Mapper                     mapper;
-    private final FlavourService             flavourService;
-    private final InstanceService            instanceService;
-    private final ImageService               imageService;
-    private final PlanService                planService;
-    private final FlavourLimitService        flavourLimitService;
-    private final SecurityGroupService       securityGroupService;
-    private final SecurityGroupFilterService securityGroupFilterService;
-    private final InstrumentService          instrumentService;
-
+    private final Mapper                       mapper;
+    private final FlavourService               flavourService;
+    private final InstanceService              instanceService;
+    private final ImageService                 imageService;
+    private final PlanService                  planService;
+    private final FlavourLimitService          flavourLimitService;
+    private final SecurityGroupService         securityGroupService;
+    private final SecurityGroupFilterService   securityGroupFilterService;
+    private final InstrumentService            instrumentService;
     private final InstanceActionScheduler      instanceActionScheduler;
     private final RoleService                  roleService;
     private final UserService                  userService;
@@ -55,7 +57,8 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final ClientNotificationService    clientNotificationService;
     private final ApplicationCredentialService applicationCredentialService;
 
-    private final InstanceExtensionRequestService   instanceExtensionRequestService;
+    private final InstanceExtensionRequestService instanceExtensionRequestService;
+    private final CloudClient                     cloudClient;
 
 
     @Inject
@@ -74,7 +77,8 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final ImageProtocolService imageProtocolService,
                             final ClientNotificationService clientNotificationService,
                             final ApplicationCredentialService applicationCredentialService,
-                            final InstanceExtensionRequestService instanceExtensionRequestService) {
+                            final InstanceExtensionRequestService instanceExtensionRequestService,
+                            final CloudClient cloudClient) {
         this.mapper = mapper;
         this.flavourService = flavourService;
         this.instanceService = instanceService;
@@ -91,6 +95,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.clientNotificationService = clientNotificationService;
         this.applicationCredentialService = applicationCredentialService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
+        this.cloudClient = cloudClient;
     }
 
     /**
@@ -100,7 +105,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created image
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Image createImage(@Valid ImageInput input) throws EntityNotFoundException {
+    public Image createImage(@Valid ImageInput input) throws EntityNotFoundException, CloudException {
         final Image image = new Image();
         image.setName(input.getName());
         image.setVersion(input.getVersion());
@@ -121,6 +126,14 @@ public class MutationResolver implements GraphQLMutationResolver {
             protocols.add(protocol);
         }
         image.setProtocols(protocols);
+
+        for (String networkId : input.getNetworkIds()) {
+            final CloudNetwork cloudNetwork = cloudClient.network(networkId);
+            if (cloudNetwork == null) {
+                throw new EntityNotFoundException("Network not found");
+            }
+            image.addNetwork(new ImageNetwork(networkId));
+        }
         // final Image image = mapper.map(input, Image.class);
         imageService.save(image);
         return image;
@@ -737,7 +750,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     /**
      * Update a user
      *
-     * @param id the user id to update
+     * @param id    the user id to update
      * @param input the user properties to update
      * @return the updated user
      * @throws EntityNotFoundException thrown if the applicationCredential has not been found

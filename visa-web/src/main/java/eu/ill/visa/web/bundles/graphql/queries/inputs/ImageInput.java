@@ -2,6 +2,7 @@ package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
 import eu.ill.visa.web.bundles.graphql.validation.Cloud;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -26,6 +27,11 @@ public class ImageInput {
     private Boolean visible;
 
     private List<Long> protocolIds;
+
+    @Size(min = 1)
+    @NotNull
+    private List<String> networkIds;
+
 
     @Size(max=16000)
     private String bootCommand;
@@ -104,4 +110,11 @@ public class ImageInput {
         this.autologin = autologin;
     }
 
+    public List<String> getNetworkIds() {
+        return networkIds;
+    }
+
+    public void setNetworkIds(List<String> networkIds) {
+        this.networkIds = networkIds;
+    }
 }

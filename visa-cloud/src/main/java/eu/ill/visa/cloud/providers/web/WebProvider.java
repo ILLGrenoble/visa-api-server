@@ -31,10 +31,9 @@ import static javax.json.Json.createObjectBuilder;
 public class WebProvider implements CloudProvider {
 
     private static final String HEADER_X_AUTH_TOKEN = "X-Auth-Token";
-
+    private static final Logger                   logger = LoggerFactory.getLogger(WebProvider.class);
     private final        HttpClient               httpClient;
     private final        WebProviderConfiguration configuration;
-    private static final Logger                   logger = LoggerFactory.getLogger(WebProvider.class);
 
     public WebProvider(final HttpClient httpClient,
                        final WebProviderConfiguration configuration) {
@@ -158,7 +157,8 @@ public class WebProvider implements CloudProvider {
                                         final String flavorId,
                                         final List<String> securityGroupNames,
                                         final CloudInstanceMetadata metadata,
-                                        final String bootCommand) throws CloudException {
+                                        final String bootCommand,
+                                        final List<String> networkProviders) throws CloudException {
         final String url = format("%s/api/instances", configuration.getUrl());
         final Map<String, String> headers = new HashMap<>() {{
             put(HEADER_X_AUTH_TOKEN, configuration.getAuthToken());
@@ -168,6 +168,7 @@ public class WebProvider implements CloudProvider {
             .add("imageId", imageId)
             .add("flavourId", flavorId)
             .add("bootCommand", bootCommand)
+            .add("networks", toJsonArray(networkProviders))
             .add("securityGroups", toJsonArray(securityGroupNames))
             // remove all empty metadata values
             .add("metadata", toJsonObject(
@@ -343,5 +344,46 @@ public class WebProvider implements CloudProvider {
         return IntStream.range(0, currentSecurityGroups.size())
             .mapToObj(currentSecurityGroups::getString)
             .collect(toUnmodifiableList());
+    }
+
+    @Override
+    public List<CloudNetwork> networks() throws CloudException {
+        final String url = format("%s/api/networks", configuration.getUrl());
+        final Map<String, String> headers = new HashMap<>() {{
+            put(HEADER_X_AUTH_TOKEN, configuration.getAuthToken());
+        }};
+        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
+        if (!response.isSuccessful()) {
+            logger.warn("Could not get networks: {}", response.getBody());
+            return new ArrayList<>();
+        }
+        final JsonArray networks = parseArray(response.getBody());
+
+        return networks.stream().map(value -> {
+            final JsonObject object = value.asJsonObject();
+            final String id = object.getString("id");
+            final String name = object.getString("name");
+            return new CloudNetwork(id, name);
+        }).collect(toUnmodifiableList());
+
+    }
+
+    @Override
+    public CloudNetwork network(String id) throws CloudException {
+        final String url = format("%s/api/networks/%s", configuration.getUrl(), id);
+        final Map<String, String> headers = new HashMap<>() {{
+            put(HEADER_X_AUTH_TOKEN, configuration.getAuthToken());
+        }};
+        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
+        if (!response.isSuccessful()) {
+            logger.warn("Could not get network: {}", response.getBody());
+            return null;
+        }
+        final JsonObject network = parseObject(response.getBody());
+
+        return new CloudNetwork(
+            network.getString("id"),
+            network.getString("name")
+        );
     }
 }

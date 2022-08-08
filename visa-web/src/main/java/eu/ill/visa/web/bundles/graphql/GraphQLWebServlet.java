@@ -40,6 +40,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
     private final RoleDirective                  roleDirective;
     private final AuthenticationContextBuilder   authenticationContext;
     private final SecurityGroupFilterResolver    securityGroupFilterResolver;
+    private final ImageNetworkResolver           imageNetworkResolver;
 
     @Inject
     public GraphQLWebServlet(final GraphQLWebServletConfiguration configuration,
@@ -50,6 +51,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                              final InstanceJupyterSessionResolver instanceJupyterSessionResolver,
                              final UserResolver userResolver,
                              final ImageResolver imageResolver,
+                             final ImageNetworkResolver imageNetworkResolver,
                              final CloudImageResolver cloudImageResolver,
                              final CloudSecurityGroupResolver cloudSecurityGroupResolver,
                              final ImageProtocolResolver imageProtocolResolver,
@@ -63,6 +65,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         this.instanceSessionMemberResolver = instanceSessionMemberResolver;
         this.instanceJupyterSessionResolver = instanceJupyterSessionResolver;
         this.userResolver = userResolver;
+        this.imageNetworkResolver = imageNetworkResolver;
         this.imageResolver = imageResolver;
         this.cloudSecurityGroupResolver = cloudSecurityGroupResolver;
         this.cloudImageResolver = cloudImageResolver;
@@ -114,6 +117,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                 instanceSessionMemberResolver,
                 instanceJupyterSessionResolver,
                 userResolver,
+                imageNetworkResolver,
                 imageResolver,
                 cloudImageResolver,
                 cloudSecurityGroupResolver,

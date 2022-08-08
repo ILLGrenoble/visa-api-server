@@ -73,7 +73,8 @@ public class NullProvider implements CloudProvider {
                                         String flavorId,
                                         List<String> securityGroupNames,
                                         CloudInstanceMetadata metadata,
-                                        String bootCommand) {
+                                        String bootCommand,
+                                        List<String> networkProviders) {
         return null;
     }
 
@@ -89,6 +90,16 @@ public class NullProvider implements CloudProvider {
 
     @Override
     public List<String> securityGroups() throws CloudException {
+        return null;
+    }
+
+    @Override
+    public List<CloudNetwork> networks() throws CloudException {
+        return null;
+    }
+
+    @Override
+    public CloudNetwork network(String id) throws CloudException {
         return null;
     }
 

@@ -16,3 +16,4 @@ public class UserFilterInput {
         this.role = role;
     }
 }
+

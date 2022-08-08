@@ -32,6 +32,8 @@ public class Image extends Timestampable {
 
     private List<ImageProtocol> protocols = new ArrayList<>();
 
+    private List<ImageNetwork> networks = new ArrayList<>();
+
     public Image() {
     }
 
@@ -157,16 +159,28 @@ public class Image extends Timestampable {
         this.autologin = autologin;
     }
 
+    public List<ImageNetwork> getNetworks() {
+        return networks;
+    }
+
+    public void setNetworks(List<ImageNetwork> networks) {
+        this.networks = networks;
+    }
+
+    public void addNetwork(ImageNetwork network) {
+        this.networks.add(network);
+    }
+
     public static final class Builder {
-        private Long id;
-        private String name;
-        private String description;
-        private String icon;
-        private String computeId;
-        private String version;
+        private Long    id;
+        private String  name;
+        private String  description;
+        private String  icon;
+        private String  computeId;
+        private String  version;
         private boolean visible = false;
-        private String bootCommand;
-        private String autologin;
+        private String  bootCommand;
+        private String  autologin;
 
         public Builder() {
         }

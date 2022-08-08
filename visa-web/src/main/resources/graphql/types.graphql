@@ -70,6 +70,11 @@ type CloudSecurityGroup {
     integration: SecurityGroup
 }
 
+type CloudNetwork {
+    id: String!
+    name: String!
+}
+
 type Image {
     id: Int!
     name: String!
@@ -80,6 +85,7 @@ type Image {
     cloudImage: CloudImage
     visible: Boolean!
     protocols: [ImageProtocol]
+    networks: [ImageNetwork]
     bootCommand: String
     autologin: String
 }
@@ -116,6 +122,12 @@ type ImageProtocol {
     name: String!
     port: Int!
     isUp: Boolean!
+}
+
+type    ImageNetwork {
+    id: Int!
+    networkId: String!
+    cloudNetwork: CloudNetwork
 }
 
 type Experiment {

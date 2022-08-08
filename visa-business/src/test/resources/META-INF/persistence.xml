@@ -15,6 +15,7 @@
         <mapping-file>mappers/flavour-limit-orm.xml</mapping-file>
         <mapping-file>mappers/image-orm.xml</mapping-file>
         <mapping-file>mappers/image-protocol-orm.xml</mapping-file>
+        <mapping-file>mappers/image-network-orm.xml</mapping-file>
         <mapping-file>mappers/plan-orm.xml</mapping-file>
         <mapping-file>mappers/instrument-orm.xml</mapping-file>
         <mapping-file>mappers/proposal-orm.xml</mapping-file>
@@ -43,6 +44,7 @@
         <class>eu.ill.visa.core.domain.Experiment</class>
         <class>eu.ill.visa.core.domain.Flavour</class>
         <class>eu.ill.visa.core.domain.FlavourLimit</class>
+        <class>eu.ill.visa.core.domain.ImageNetwork</class>
         <class>eu.ill.visa.core.domain.Image</class>
         <class>eu.ill.visa.core.domain.ImageProtocol</class>
         <class>eu.ill.visa.core.domain.Plan</class>
@@ -68,7 +70,7 @@
 
         <properties>
             <property name="hibernate.connection.url" value="jdbc:hsqldb:mem:foobar;sql.syntax_pgs=true"/>
-            <property name="hibernate.dialect" value=" org.hibernate.dialect.HSQLDialect"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.archive.autodetection" value="class, hbm"/>

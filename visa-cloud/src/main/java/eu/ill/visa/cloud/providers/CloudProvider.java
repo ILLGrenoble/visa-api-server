@@ -125,7 +125,8 @@ public interface CloudProvider {
                                  String flavorId,
                                  List<String> securityGroupNames,
                                  CloudInstanceMetadata metadata,
-                                 String bootCommand) throws CloudException;
+                                 String bootCommand,
+                                 List<String> networkProviders) throws CloudException;
 
     /**
      * Delete an instance for a given instance identifier
@@ -144,4 +145,9 @@ public interface CloudProvider {
     CloudLimit limits() throws CloudException;
 
     List<String> securityGroups() throws CloudException;
+
+    List<CloudNetwork> networks() throws CloudException;
+
+    CloudNetwork network(String id) throws CloudException;
+
 }

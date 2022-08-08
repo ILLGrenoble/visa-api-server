@@ -91,7 +91,6 @@ cloud:
     applicationId: ${VISA_CLOUD_APPLICATION_ID}
     applicationSecret: ${VISA_CLOUD_APPLICATION_SECRET}
     addressProvider: ${VISA_CLOUD_ADDRESS_PROVIDER}
-    addressProviderUUID: ${VISA_CLOUD_ADDRESS_PROVIDER_UUID}
 #  provider: web
 #  parameters:
 #    url: ${VISA_CLOUD_WEB_PROVIDER_URL}
