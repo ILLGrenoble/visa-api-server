@@ -1,3 +1,12 @@
+2.3.0 01/09/2022
+================
+ * Filtering of experiments that don't have valid start or end dates
+ * Add admin notifications (currently for instances in error and instance extension requests) shown in admin UI
+ * Add endpoints to handle instance lifetime extension requests and email templates for the extension request workflow
+ * Add GUEST role and expiration date to role (provides time limited access to VISA to users that aren't associated to proposals)
+ * Add health check endpoint for use by application credentials
+ * Authentication via application credentials - can access specific API endpoints using basic auth. Endpoint to manage app credentials.
+
 2.2.1 09/05/2022
 ================
  * Fix bug on notification service throwing an error when an adapter is not enabled
