@@ -1,3 +1,7 @@
+2.3.1 08/09/2022
+================
+ * Use a separate email address for the instance creation emails (env var VISA_NOTIFICATION_EMAIL_ADAPTER_DEV_EMAIL_ADDRESS) 
+ 
 2.3.0 01/09/2022
 ================
  * Filtering of experiments that don't have valid start or end dates
