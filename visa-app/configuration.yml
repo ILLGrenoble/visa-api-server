@@ -142,6 +142,7 @@ business:
         port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}
         fromEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_FROM_EMAIL_ADDRESS}
         bccEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_BCC_EMAIL_ADDRESS:-null}
+        devEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_DEV_EMAIL_ADDRESS:-""}
         adminEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS:-""}
         emailTemplatesDirectory: ${VISA_NOTIFICATION_EMAIL_ADAPTER_TEMPLATES_DIRECTORY:-"emails/templates/"}
   signature:

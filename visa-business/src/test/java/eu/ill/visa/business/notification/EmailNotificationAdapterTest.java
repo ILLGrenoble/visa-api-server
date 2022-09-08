@@ -33,6 +33,7 @@ class EmailNotificationAdapterTest {
         final String port = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_PORT");
         final String fromEmailAddress = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_FROM_EMAIL_ADDRESS");
         final String adminEmailAddress = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS");
+        final String devEmailAddress = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS");
         final String userMaxInactivityDurationHours = getenv("VISA_INSTANCE_USER_MAX_INACTIVITY_DURATION_HOURS");
         final String staffMaxInactivityDurationHours = getenv("VISA_INSTANCE_STAFF_MAX_INACTIVITY_DURATION_HOURS");
         final String userMaxLifetimeDurationHours = getenv("VISA_INSTANCE_USER_MAX_LIFETIME_DURATION_HOURS");
@@ -40,7 +41,7 @@ class EmailNotificationAdapterTest {
         final String emailTemplatesDirectory = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_TEMPLATES_DIRECTORY");
         final String rootURL = getenv("VISA_ROOT_URL");
         if (host != null && port != null && fromEmailAddress != null && adminEmailAddress != null && userMaxInactivityDurationHours != null && staffMaxInactivityDurationHours != null && userMaxLifetimeDurationHours != null  && staffMaxLifetimeDurationHours != null && rootURL != null) {
-            this.emailNotificationAdapter = new EmailNotificationAdapter(host, parseInt(port), fromEmailAddress, null, adminEmailAddress, emailTemplatesDirectory,rootURL, parseInt(userMaxInactivityDurationHours), parseInt(staffMaxInactivityDurationHours), parseInt(userMaxLifetimeDurationHours), parseInt(staffMaxLifetimeDurationHours));
+            this.emailNotificationAdapter = new EmailNotificationAdapter(host, parseInt(port), fromEmailAddress, null, adminEmailAddress, devEmailAddress, emailTemplatesDirectory,rootURL, parseInt(userMaxInactivityDurationHours), parseInt(staffMaxInactivityDurationHours), parseInt(userMaxLifetimeDurationHours), parseInt(staffMaxLifetimeDurationHours));
         }
     }
 

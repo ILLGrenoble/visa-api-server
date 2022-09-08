@@ -60,6 +60,7 @@ public class NotificationFactory {
         final String fromEmailAddress = notNull(parameters.get("fromEmailAddress"), "fromEmailAddress must be set");
         final String bccEmailAddress = parameters.get("bccEmailAddress");
         final String adminEmailAddress = notNull(parameters.get("adminEmailAddress"), "adminEmailAddress must be set");
+        final String devEmailAddress = parameters.get("devEmailAddress");
         String emailTemplatesDirectory = notNull(parameters.get("emailTemplatesDirectory"), "emailTemplatesDirectory must be set");
 
         // Ensure email templates directory has a trailing /
@@ -72,6 +73,7 @@ public class NotificationFactory {
             fromEmailAddress,
             bccEmailAddress,
             adminEmailAddress,
+            devEmailAddress,
             emailTemplatesDirectory,
             rootURL,
             userMaxInactivityDurationHours,

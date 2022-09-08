@@ -28,6 +28,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
     private final String fromEmailAddress;
     private final String bccEmailAddress;
     private final String adminEmailAddress;
+    private final String devEmailAddress;
     private final String emailTemplatesDirectory;
     private final String rootURL;
     private final Integer userMaxInactivityDurationHours;
@@ -40,6 +41,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
                                     final String fromEmailAddress,
                                     final String bccEmailAddress,
                                     final String adminEmailAddress,
+                                    final String devEmailAddress,
                                     final String emailTemplatesDirectory,
                                     final String rootURL,
                                     final Integer userMaxInactivityDurationHours,
@@ -51,6 +53,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
         this.fromEmailAddress = fromEmailAddress;
         this.bccEmailAddress = bccEmailAddress;
         this.adminEmailAddress = adminEmailAddress;
+        this.devEmailAddress = devEmailAddress;
         this.emailTemplatesDirectory = emailTemplatesDirectory;
         this.rootURL = rootURL;
         this.userMaxInactivityDurationHours = userMaxInactivityDurationHours;
@@ -173,7 +176,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
 
     @Override
     public void sendInstanceCreatedNotification(final Instance instance) {
-        if (!adminEmailAddress.isEmpty()) {
+        if (!devEmailAddress.isEmpty()) {
             try {
                 final Optional<InstanceMember> member = instance.getMembers().stream()
                     .filter(object -> object.isRole(OWNER))
@@ -190,7 +193,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
                     );
                     final Email email = EmailBuilder.startingBlank()
                         .from(fromEmailAddress)
-                        .to(adminEmailAddress)
+                        .to(devEmailAddress)
                         .withSubject("[VISA] A new instance has been created")
                         .withPlainText(text)
                         .buildEmail();
