@@ -14,6 +14,7 @@ public class Experiment implements Serializable {
     private String id;
     private Instrument instrument;
     private Proposal proposal;
+    private String title;
     private Date startDate;
     private Date endDate;
 
@@ -27,6 +28,7 @@ public class Experiment implements Serializable {
         this.id = builder.id;
         this.instrument = builder.instrument;
         this.proposal = builder.proposal;
+        this.title = builder.title;
         this.startDate = builder.startDate;
         this.endDate = builder.endDate;
     }
@@ -79,6 +81,14 @@ public class Experiment implements Serializable {
         this.instances = instances;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public Date getStartDate() {
         return startDate;
     }
@@ -119,6 +129,7 @@ public class Experiment implements Serializable {
             .append("id", id)
             .append("instrument", instrument)
             .append("proposal", proposal)
+            .append("title", title)
             .append("startDate", startDate)
             .append("endDate", endDate)
             .toString();
@@ -129,6 +140,7 @@ public class Experiment implements Serializable {
         private String id;
         private Instrument instrument;
         private Proposal proposal;
+        private String title;
         private Date startDate;
         private Date endDate;
 
@@ -151,6 +163,11 @@ public class Experiment implements Serializable {
 
         public Builder proposal(Proposal proposal) {
             this.proposal = proposal;
+            return this;
+        }
+
+        public Builder title(String title) {
+            this.title = title;
             return this;
         }
 

@@ -65,6 +65,9 @@
             <id name="id">
                 <column name="id" nullable="false" length="32"/>
             </id>
+            <basic name="title">
+                <column name="title" nullable="true" length="2000"/>
+            </basic>
             <basic name="startDate">
                 <column name="start_date" nullable="true" />
             </basic>

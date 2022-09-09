@@ -9,6 +9,7 @@ public class ExperimentDto {
     private String        id;
     private InstrumentDto instrument;
     private ProposalDto   proposal;
+    private String        title;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date startDate;
@@ -38,6 +39,14 @@ public class ExperimentDto {
 
     public void setProposal(ProposalDto proposal) {
         this.proposal = proposal;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public Date getStartDate() {

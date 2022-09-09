@@ -123,6 +123,7 @@ type Experiment {
     id: String!
     instrument: Instrument!
     proposal: Proposal!
+    title: String
     startDate: String!
     endDate: String!
 }
