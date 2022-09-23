@@ -132,6 +132,7 @@ public class InstanceSessionService {
         // Allow INSTRUMENT_SCIENTIST user to connect to standard user instances (if IR is responsible for instrument associated to experiments of the instance)
         boolean ownerIsExternalUser = !owner.getUser().hasRole(Role.STAFF_ROLE);
         boolean userIsInstrumentScientist = user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE);
+        boolean userIsMember = instance.isMember(user);
         if (ownerIsExternalUser && userIsInstrumentScientist) {
             // Get IRs for the instance experiments
             List<String> instrumentScientistIds = instance.getExperiments().stream()
@@ -143,6 +144,19 @@ public class InstanceSessionService {
 
             // Return true if the user is an instrument scientist for the associated instruments of the instance
             return instrumentScientistIds.contains(user.getId());
+
+        } else if (!ownerIsExternalUser && userIsInstrumentScientist) {
+            // If owner is staff then the instrument scientist can only connect if there is an active experiment
+            List<Experiment> activeExperiments = instance.getActiveExperiments();
+            List<String> activeExperimentInstrumentScientistIds = activeExperiments.stream()
+                .map(experiment -> experiment.getInstrument().getScientists())
+                .flatMap(List::stream)
+                .map(User::getId)
+                .distinct()
+                .collect(Collectors.toList());
+
+            // Return true if the user is an instrument scientist for the associated instruments of the instance
+            return activeExperimentInstrumentScientistIds.contains(user.getId());
         }
 
         // Allow ADMIN user to connect to any standard user instances

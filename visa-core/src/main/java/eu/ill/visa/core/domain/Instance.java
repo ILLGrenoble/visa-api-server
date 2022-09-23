@@ -10,6 +10,7 @@ import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Instance extends Timestampable {
 
@@ -392,6 +393,12 @@ public class Instance extends Timestampable {
         this.addMember(instanceMember);
 
         return instanceMember;
+    }
+
+    public List<Experiment> getActiveExperiments() {
+        Date now = new Date();
+        return this.experiments.stream()
+            .filter(experiment -> experiment.getStartDate().before(now) && experiment.getEndDate().after(now)).collect(Collectors.toList());
     }
 
     public static final class Builder {
