@@ -1,5 +1,7 @@
 package eu.ill.visa.cloud.services;
 
+import eu.ill.visa.cloud.CloudConfiguration;
+import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.http.HttpClient;
 import eu.ill.visa.cloud.http.clients.OkHttpClientAdapter;
@@ -25,21 +27,22 @@ public class CloudClientFactory {
     /**
      * Create a new client for the given provider
      *
-     * @param provider         the cloud provider to be used
-     * @param parameters       the configuration parameters
-     * @param serverNamePrefix the server name prefix
      * @return a new cloud client
      * @throws CloudException if the provider is not found
      */
-    public CloudClient getClient(final String provider,
-                                 final Map<String, String> parameters,
-                                 final String serverNamePrefix) throws CloudException {
+    public CloudClient getClient(final CloudConfiguration configuration) throws CloudException {
+        final String provider = configuration.getProvider();
+        final ProviderConfiguration providerConfiguration = configuration.getProviderConfiguration(provider);
+        final String serverNamePrefix = configuration.getServerNamePrefix();
+
         if (NULL.equals(provider)) {
             return createNullProvider(serverNamePrefix);
+
         } else if (OPENSTACK.equals(provider)) {
-            return createOpenStackProvider(parameters, serverNamePrefix);
+            return createOpenStackProvider(providerConfiguration.getParameters(), serverNamePrefix);
+
         } else if (WEB.equals(provider)) {
-            return createWebProvider(parameters, serverNamePrefix);
+            return createWebProvider(providerConfiguration.getParameters(), serverNamePrefix);
         }
         throw new CloudException(format("Unsupported provider provided: %s", provider));
     }

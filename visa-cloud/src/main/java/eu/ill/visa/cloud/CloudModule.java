@@ -15,10 +15,7 @@ public class CloudModule extends AbstractModule {
     @Provides
     public CloudClient providesCloudClient(final CloudConfiguration configuration) throws CloudException {
         final CloudClientFactory factory = new CloudClientFactory();
-        return factory.getClient(
-            configuration.getProvider(),
-            configuration.getParameters(),
-            configuration.getServerNamePrefix());
+        return factory.getClient(configuration);
     }
 
 }
