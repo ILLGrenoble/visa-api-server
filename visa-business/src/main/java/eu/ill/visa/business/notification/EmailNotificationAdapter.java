@@ -85,6 +85,20 @@ public class EmailNotificationAdapter implements NotificationAdapter {
         return emailBuilder.buildEmail();
     }
 
+    private Email buildEmail(final String recipient, final String cc, final String subject, final String html) {
+        final EmailPopulatingBuilder emailBuilder = EmailBuilder.startingBlank()
+            .from(fromEmailAddress)
+            .to(recipient)
+            .cc(cc)
+            .withSubject(subject)
+            .withHTMLText(html);
+
+        if (this.bccEmailAddress != null) {
+            emailBuilder.bcc(this.bccEmailAddress);
+        }
+        return emailBuilder.buildEmail();
+    }
+
     @Override
     public void sendInstanceExpiringNotification(final Instance instance, final Date expirationDate) {
         try {
@@ -248,7 +262,7 @@ public class EmailNotificationAdapter implements NotificationAdapter {
                 final User user = member.get().getUser();
                 final String subject = extensionGranted ? "[VISA] Your instance has been granted an extended lifetime" : "[VISA] Your instance has been refused an extended lifetime";
                 final NotificationRenderer renderer = new InstanceExtensionRenderer(instance, extensionGranted, handlerComments, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours);
-                final Email email = buildEmail(user.getEmail(), subject, renderer.render());
+                final Email email = buildEmail(user.getEmail(), adminEmailAddress, subject, renderer.render());
                 mailer.sendMail(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
