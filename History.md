@@ -1,3 +1,8 @@
+2.3.2 23/09/2022
+================
+ * CC the admins in the email sent when replying to instance extension requests (keep all team informed)
+ * Allow experiments to have specific titles (different to proposal titles): use proposal title by default
+ 
 2.3.1 08/09/2022
 ================
  * Use a separate email address for the instance creation emails (env var VISA_NOTIFICATION_EMAIL_ADAPTER_DEV_EMAIL_ADDRESS) 
