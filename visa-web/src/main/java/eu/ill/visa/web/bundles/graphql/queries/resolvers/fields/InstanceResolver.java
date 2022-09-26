@@ -3,11 +3,11 @@ package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import eu.ill.preql.exception.InvalidQueryException;
-import eu.ill.visa.business.services.InstanceSessionMemberService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientService;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.web.bundles.graphql.exceptions.DataFetchingException;
 import graphql.kickstart.tools.GraphQLResolver;
@@ -26,21 +26,21 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 @Singleton
 public class InstanceResolver implements GraphQLResolver<Instance> {
 
-    private final CloudClient                  client;
-    private final InstanceSessionMemberService instanceSessionMemberService;
-    private final InstanceSessionService       instanceSessionService;
+    private final CloudClientService cloudClientService;
+    private final InstanceSessionService instanceSessionService;
 
     @Inject
-    public InstanceResolver(final CloudClient client,
-                            final InstanceSessionMemberService instanceSessionMemberService,
+    public InstanceResolver(final CloudClientService cloudClientService,
                             final InstanceSessionService instanceSessionService) {
-        this.client = client;
-        this.instanceSessionMemberService = instanceSessionMemberService;
+        this.cloudClientService = cloudClientService;
         this.instanceSessionService = instanceSessionService;
     }
 
     public CompletableFuture<List<ProtocolStatus>> protocols(Instance instance) {
         final CompletableFuture<List<ProtocolStatus>> future = new CompletableFuture<>();
+        // TODO CloudClient: select specific cloud client
+        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
+
         runAsync(() -> {
             try {
                 final Plan plan = instance.getPlan();
@@ -48,7 +48,7 @@ public class InstanceResolver implements GraphQLResolver<Instance> {
                 final List<ProtocolStatus> results = new ArrayList<>();
                 final List<ImageProtocol> protocols = requireNonNullElseGet(image.getProtocols(), ArrayList::new);
                 if (protocols.size() > 0) {
-                    final CloudInstance cloudInstance = client.instance(instance.getComputeId());
+                    final CloudInstance cloudInstance = cloudClient.instance(instance.getComputeId());
                     for (final ImageProtocol protocol : protocols) {
                         final String address = cloudInstance.getAddress();
                         final int port = protocol.getPort();
@@ -72,9 +72,11 @@ public class InstanceResolver implements GraphQLResolver<Instance> {
      */
     public CompletableFuture<CloudInstance> cloudInstance(Instance instance) {
         final CompletableFuture<CloudInstance> future = new CompletableFuture<>();
+        // TODO CloudClient: select specific cloud client
+        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
         runAsync(() -> {
             try {
-                future.complete(client.instance(instance.getComputeId()));
+                future.complete(cloudClient.instance(instance.getComputeId()));
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }

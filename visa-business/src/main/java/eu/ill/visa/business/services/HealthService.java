@@ -6,6 +6,7 @@ import com.google.inject.persist.Transactional;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientService;
 import eu.ill.visa.core.domain.HealthReport;
 import eu.ill.visa.core.domain.HealthState;
 import eu.ill.visa.core.domain.Image;
@@ -17,13 +18,13 @@ import java.util.List;
 @Singleton
 public class HealthService {
 
-    private final CloudClient cloudClient;
+    private final CloudClientService cloudClientService;
     private final ImageService imageService;
 
     @Inject
-    public HealthService(final CloudClient cloudClient,
+    public HealthService(final CloudClientService cloudClientService,
                          final ImageService imageService) {
-        this.cloudClient = cloudClient;
+        this.cloudClientService = cloudClientService;
         this.imageService = imageService;
     }
 
@@ -50,6 +51,8 @@ public class HealthService {
 
     private HealthState getCloudHealthStatus() {
         try {
+            // TODO CloudClient: select specific cloud client
+            CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
             CloudLimit cloudLimit = cloudClient.limits();
             if (cloudLimit == null) {
                 return new HealthState(HealthStatus.NOT_OK, "Unable to obtain Cloud status");

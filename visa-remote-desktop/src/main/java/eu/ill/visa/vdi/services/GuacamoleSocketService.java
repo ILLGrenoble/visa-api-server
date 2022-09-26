@@ -6,6 +6,7 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientService;
 import eu.ill.visa.core.domain.ImageProtocol;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceSession;
@@ -32,19 +33,19 @@ public class GuacamoleSocketService {
 
     private final static Logger                      logger = LoggerFactory.getLogger(GuacamoleSocketService.class);
     private final        InstanceSessionService      instanceSessionService;
-    private final        CloudClient                 cloudClient;
+    private final        CloudClientService          cloudClientService;
     private final        SignatureService            signatureService;
     private final        ImageProtocolService        imageProtocolService;
     private final        VirtualDesktopConfiguration configuration;
 
     @Inject
     GuacamoleSocketService(final InstanceSessionService instanceSessionService,
-                           final CloudClient cloudClient,
+                           final CloudClientService cloudClientService,
                            final SignatureService signatureService,
                            final ImageProtocolService imageProtocolService,
                            final VirtualDesktopConfiguration configuration) {
         this.instanceSessionService = instanceSessionService;
-        this.cloudClient = cloudClient;
+        this.cloudClientService = cloudClientService;
         this.signatureService = signatureService;
         this.imageProtocolService = imageProtocolService;
         this.configuration = configuration;
@@ -102,6 +103,8 @@ public class GuacamoleSocketService {
 
     private String getIpAddressForInstance(Instance instance) throws CloudException {
         if (instance.getIpAddress() == null) {
+            // TODO CloudClient: select specific cloud client
+            CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
             return cloudClient.ip(instance.getComputeId());
         }
         return instance.getIpAddress();

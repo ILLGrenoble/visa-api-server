@@ -9,6 +9,7 @@ import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientService;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
@@ -48,7 +49,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final UserService                       userService;
     private final ImageProtocolService              imageProtocolService;
     private final RoleService                       roleService;
-    private final CloudClient                       cloudClient;
+    private final CloudClientService                cloudClientService;
     private final PlanService                       planService;
     private final InstanceSessionMemberService      instanceSessionMemberService;
     private final InstanceJupyterSessionService     instanceJupyterSessionService;
@@ -69,7 +70,7 @@ public class QueryResolver implements GraphQLQueryResolver {
                   final PlanService planService,
                   final ImageProtocolService imageProtocolService,
                   final RoleService roleService,
-                  final CloudClient cloudClient,
+                  final CloudClientService cloudClientService,
                   final InstanceSessionMemberService instanceSessionMemberService,
                   final InstanceJupyterSessionService instanceJupyterSessionService,
                   final ClientNotificationService clientNotificationService,
@@ -87,7 +88,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.planService = planService;
         this.imageProtocolService = imageProtocolService;
         this.roleService = roleService;
-        this.cloudClient = cloudClient;
+        this.cloudClientService = cloudClientService;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.clientNotificationService = clientNotificationService;
@@ -455,6 +456,7 @@ public class QueryResolver implements GraphQLQueryResolver {
      */
     public CompletableFuture<List<CloudImage>> cloudImages() {
         final CompletableFuture<List<CloudImage>> future = new CompletableFuture<>();
+        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
                 future.complete(cloudClient.images());
@@ -472,6 +474,7 @@ public class QueryResolver implements GraphQLQueryResolver {
      */
     public CompletableFuture<List<CloudFlavour>> cloudFlavours() {
         final CompletableFuture<List<CloudFlavour>> future = new CompletableFuture<>();
+        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
                 future.complete(cloudClient.flavours());
@@ -489,6 +492,7 @@ public class QueryResolver implements GraphQLQueryResolver {
      */
     public CompletableFuture<CloudLimit> cloudLimits() {
         final CompletableFuture<CloudLimit> future = new CompletableFuture<>();
+        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
                 future.complete(cloudClient.limits());
@@ -506,6 +510,7 @@ public class QueryResolver implements GraphQLQueryResolver {
      */
     public CompletableFuture<List<CloudSecurityGroup>> cloudSecurityGroups() {
         final CompletableFuture<List<CloudSecurityGroup>> future = new CompletableFuture<>();
+        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
                 final List<CloudSecurityGroup> cloudSecurityGroups = cloudClient.securityGroups().stream()
@@ -659,5 +664,12 @@ public class QueryResolver implements GraphQLQueryResolver {
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
+    }
+
+    private CloudClient getCloudClient() {
+        // TODO CloudClient: select specific cloud client
+        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
+
+        return cloudClient;
     }
 }

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientService;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceSession;
 import eu.ill.visa.core.domain.InstanceSessionMember;
@@ -13,33 +14,33 @@ import java.util.List;
 @Singleton
 public class InstanceActionServiceProvider {
 
-    private NotificationService notificationService;
-    private InstanceService          instanceService;
+    private final NotificationService notificationService;
+    private final InstanceService instanceService;
 
-    private InstanceSessionService instanceSessionService;
-    private InstanceCommandService instanceCommandService;
-    private SecurityGroupService securityGroupService;
-    private InstrumentService instrumentService;
-    private SignatureService signatureService;
+    private final InstanceSessionService instanceSessionService;
+    private final InstanceCommandService instanceCommandService;
+    private final SecurityGroupService securityGroupService;
+    private final InstrumentService instrumentService;
+    private final SignatureService signatureService;
 
-    private CloudClient cloudClient;
+    private final CloudClientService cloudClientService;
 
 
     @Inject
-    public InstanceActionServiceProvider(InstanceService instanceService,
-                                         InstanceSessionService instanceSessionService,
-                                         InstanceCommandService instanceCommandService,
-                                         SecurityGroupService securityGroupService,
-                                         InstrumentService instrumentService,
-                                         CloudClient cloudClient,
-                                         NotificationService notificationService,
-                                         SignatureService signatureService) {
+    public InstanceActionServiceProvider(final InstanceService instanceService,
+                                         final InstanceSessionService instanceSessionService,
+                                         final InstanceCommandService instanceCommandService,
+                                         final SecurityGroupService securityGroupService,
+                                         final InstrumentService instrumentService,
+                                         final CloudClientService cloudClientService,
+                                         final NotificationService notificationService,
+                                         final SignatureService signatureService) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceCommandService = instanceCommandService;
         this.securityGroupService = securityGroupService;
         this.instrumentService = instrumentService;
-        this.cloudClient = cloudClient;
+        this.cloudClientService = cloudClientService;
         this.notificationService = notificationService;
         this.signatureService = signatureService;
     }
@@ -80,6 +81,8 @@ public class InstanceActionServiceProvider {
     }
 
     public CloudClient getCloudClient() {
+        // TODO CloudClient: select specific cloud client
+        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
         return cloudClient;
     }
 

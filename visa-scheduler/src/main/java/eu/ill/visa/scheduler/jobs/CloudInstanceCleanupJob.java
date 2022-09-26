@@ -5,6 +5,7 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientService;
 import eu.ill.visa.core.domain.Instance;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -20,13 +21,13 @@ public class CloudInstanceCleanupJob implements Job {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudInstanceCleanupJob.class);
 
-    private InstanceService instanceService;
-    private CloudClient cloudClient;
+    private final InstanceService instanceService;
+    private final CloudClientService cloudClientService;
 
     @Inject
-    public CloudInstanceCleanupJob(InstanceService instanceService, CloudClient cloudClient) {
+    public CloudInstanceCleanupJob(final InstanceService instanceService, final CloudClientService cloudClientService) {
         this.instanceService = instanceService;
-        this.cloudClient = cloudClient;
+        this.cloudClientService = cloudClientService;
     }
 
     @Override
@@ -35,9 +36,12 @@ public class CloudInstanceCleanupJob implements Job {
 
         try {
             List<Instance> instances = this.instanceService.getAll();
-            List<CloudInstanceIdentifier> cloudInstances = this.cloudClient.instanceIdentifiers();
+            // TODO CloudClient: select specific cloud client
+            CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
 
-            String serverNamePrefix = this.cloudClient.getServerNamePrefix();
+            List<CloudInstanceIdentifier> cloudInstances = cloudClient.instanceIdentifiers();
+
+            String serverNamePrefix = cloudClient.getServerNamePrefix();
 
             List<CloudInstanceIdentifier> zombieCloudInstances = cloudInstances.stream().filter(cloudInstance -> {
                 boolean instanceNotExists = instances.stream().noneMatch(instance -> cloudInstance.getId().equals(instance.getComputeId()));
