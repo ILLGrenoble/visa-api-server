@@ -7,7 +7,7 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientService;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.web.bundles.graphql.exceptions.DataFetchingException;
 import graphql.kickstart.tools.GraphQLResolver;
@@ -26,20 +26,20 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 @Singleton
 public class InstanceResolver implements GraphQLResolver<Instance> {
 
-    private final CloudClientService cloudClientService;
+    private final CloudClientGateway cloudClientGateway;
     private final InstanceSessionService instanceSessionService;
 
     @Inject
-    public InstanceResolver(final CloudClientService cloudClientService,
+    public InstanceResolver(final CloudClientGateway cloudClientGateway,
                             final InstanceSessionService instanceSessionService) {
-        this.cloudClientService = cloudClientService;
+        this.cloudClientGateway = cloudClientGateway;
         this.instanceSessionService = instanceSessionService;
     }
 
     public CompletableFuture<List<ProtocolStatus>> protocols(Instance instance) {
         final CompletableFuture<List<ProtocolStatus>> future = new CompletableFuture<>();
         // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
+        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
 
         runAsync(() -> {
             try {
@@ -73,7 +73,7 @@ public class InstanceResolver implements GraphQLResolver<Instance> {
     public CompletableFuture<CloudInstance> cloudInstance(Instance instance) {
         final CompletableFuture<CloudInstance> future = new CompletableFuture<>();
         // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
+        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
         runAsync(() -> {
             try {
                 future.complete(cloudClient.instance(instance.getComputeId()));

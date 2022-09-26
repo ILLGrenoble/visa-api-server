@@ -5,7 +5,7 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientService;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.Instance;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -22,12 +22,12 @@ public class CloudInstanceCleanupJob implements Job {
     private static final Logger logger = LoggerFactory.getLogger(CloudInstanceCleanupJob.class);
 
     private final InstanceService instanceService;
-    private final CloudClientService cloudClientService;
+    private final CloudClientGateway cloudClientGateway;
 
     @Inject
-    public CloudInstanceCleanupJob(final InstanceService instanceService, final CloudClientService cloudClientService) {
+    public CloudInstanceCleanupJob(final InstanceService instanceService, final CloudClientGateway cloudClientGateway) {
         this.instanceService = instanceService;
-        this.cloudClientService = cloudClientService;
+        this.cloudClientGateway = cloudClientGateway;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class CloudInstanceCleanupJob implements Job {
         try {
             List<Instance> instances = this.instanceService.getAll();
             // TODO CloudClient: select specific cloud client
-            CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
+            CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
 
             List<CloudInstanceIdentifier> cloudInstances = cloudClient.instanceIdentifiers();
 

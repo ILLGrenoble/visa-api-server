@@ -3,7 +3,7 @@ package eu.ill.visa.cloud;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.services.CloudClientService;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 
 public class CloudModule extends AbstractModule {
     @Override
@@ -12,8 +12,8 @@ public class CloudModule extends AbstractModule {
     }
 
     @Provides
-    public CloudClientService providesCloudClientService(final CloudConfiguration configuration) throws CloudException {
-        return new CloudClientService(configuration);
+    public CloudClientGateway providesCloudClientGateway(final CloudConfiguration configuration) throws CloudException {
+        return new CloudClientGateway(configuration);
     }
 
 }

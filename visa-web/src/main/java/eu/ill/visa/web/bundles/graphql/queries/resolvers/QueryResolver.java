@@ -9,7 +9,7 @@ import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientService;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
@@ -49,7 +49,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final UserService                       userService;
     private final ImageProtocolService              imageProtocolService;
     private final RoleService                       roleService;
-    private final CloudClientService                cloudClientService;
+    private final CloudClientGateway cloudClientGateway;
     private final PlanService                       planService;
     private final InstanceSessionMemberService      instanceSessionMemberService;
     private final InstanceJupyterSessionService     instanceJupyterSessionService;
@@ -70,7 +70,7 @@ public class QueryResolver implements GraphQLQueryResolver {
                   final PlanService planService,
                   final ImageProtocolService imageProtocolService,
                   final RoleService roleService,
-                  final CloudClientService cloudClientService,
+                  final CloudClientGateway cloudClientGateway,
                   final InstanceSessionMemberService instanceSessionMemberService,
                   final InstanceJupyterSessionService instanceJupyterSessionService,
                   final ClientNotificationService clientNotificationService,
@@ -88,7 +88,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.planService = planService;
         this.imageProtocolService = imageProtocolService;
         this.roleService = roleService;
-        this.cloudClientService = cloudClientService;
+        this.cloudClientGateway = cloudClientGateway;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.clientNotificationService = clientNotificationService;
@@ -668,7 +668,7 @@ public class QueryResolver implements GraphQLQueryResolver {
 
     private CloudClient getCloudClient() {
         // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
+        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
 
         return cloudClient;
     }

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientService;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceSession;
 import eu.ill.visa.core.domain.InstanceSessionMember;
@@ -23,7 +23,7 @@ public class InstanceActionServiceProvider {
     private final InstrumentService instrumentService;
     private final SignatureService signatureService;
 
-    private final CloudClientService cloudClientService;
+    private final CloudClientGateway cloudClientGateway;
 
 
     @Inject
@@ -32,7 +32,7 @@ public class InstanceActionServiceProvider {
                                          final InstanceCommandService instanceCommandService,
                                          final SecurityGroupService securityGroupService,
                                          final InstrumentService instrumentService,
-                                         final CloudClientService cloudClientService,
+                                         final CloudClientGateway cloudClientGateway,
                                          final NotificationService notificationService,
                                          final SignatureService signatureService) {
         this.instanceService = instanceService;
@@ -40,7 +40,7 @@ public class InstanceActionServiceProvider {
         this.instanceCommandService = instanceCommandService;
         this.securityGroupService = securityGroupService;
         this.instrumentService = instrumentService;
-        this.cloudClientService = cloudClientService;
+        this.cloudClientGateway = cloudClientGateway;
         this.notificationService = notificationService;
         this.signatureService = signatureService;
     }
@@ -82,7 +82,7 @@ public class InstanceActionServiceProvider {
 
     public CloudClient getCloudClient() {
         // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientService.getDefaultCloudClient();
+        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
         return cloudClient;
     }
 

@@ -5,12 +5,12 @@ import eu.ill.visa.cloud.exceptions.CloudException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CloudClientService {
-    private static final Logger logger = LoggerFactory.getLogger(CloudClientService.class);
+public class CloudClientGateway {
+    private static final Logger logger = LoggerFactory.getLogger(CloudClientGateway.class);
 
     private CloudClient defaultCloudClient;
 
-    public CloudClientService(final CloudConfiguration configuration) {
+    public CloudClientGateway(final CloudConfiguration configuration) {
         final CloudClientFactory factory = new CloudClientFactory();
         try {
             this.defaultCloudClient = factory.getClient(configuration);
