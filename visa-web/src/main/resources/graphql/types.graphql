@@ -42,12 +42,18 @@ type Proposal {
     summary: String
 }
 
+type CloudClient {
+    id: Int!
+    name: String!
+}
+
 type Flavour {
     id: Int!
     name: String!
     memory: Int!
     cpu: Int!
     computeId: String!
+    cloudClient: CloudClient!
 }
 
 type CloudFlavour {
@@ -82,6 +88,7 @@ type Image {
     protocols: [ImageProtocol]
     bootCommand: String
     autologin: String
+    cloudClient: CloudClient!
 }
 
 type Plan {
@@ -177,6 +184,7 @@ type Instance {
     username: String!
     keyboardLayout: String!
     attributes: [InstanceAttribute]
+    cloudClient: CloudClient!
 }
 
 type CloudLimit {

@@ -20,7 +20,11 @@ public class ImageResolver implements GraphQLResolver<Image> {
         this.cloudClientGateway = cloudClientGateway;
     }
 
-    CloudImage cloudImage(Image image) {
+    public CloudClient cloudClient(Image image) {
+        return this.cloudClientGateway.getCloudClient(image.getCloudId());
+    }
+
+    public CloudImage cloudImage(Image image) {
         try {
             CloudClient cloudClient = this.cloudClientGateway.getCloudClient(image.getCloudId());
             if (cloudClient != null) {

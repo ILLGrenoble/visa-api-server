@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public class CloudConfiguration {
 
-    private String provider;
+    private String providerType;
+
+    private String providerName = "Default";
 
     private List<ProviderConfiguration> providers;
 
@@ -18,25 +20,31 @@ public class CloudConfiguration {
     public CloudConfiguration() {
     }
 
-    public CloudConfiguration(String provider) {
-        this.provider = provider;
+    public CloudConfiguration(String providerType) {
+        this.providerType = providerType;
     }
 
     @JsonProperty
-    public String getProvider() {
-        return provider;
+    @NotNull
+    @Valid
+    public String getProviderType() {
+        return providerType;
     }
 
     @JsonProperty
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public void setProviderType(String providerType) {
+        this.providerType = providerType;
     }
 
-    public ProviderConfiguration getProviderConfiguration(String provider) {
-        Optional<ProviderConfiguration> configuration = providers.stream()
-            .filter(providerConfiguration -> providerConfiguration.getName().equals(provider))
-            .findFirst();
-        return configuration.orElse(null);
+    @JsonProperty
+    @NotNull
+    @Valid
+    public String getProviderName() {
+        return providerName;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
     }
 
     @JsonProperty
@@ -54,5 +62,12 @@ public class CloudConfiguration {
     @JsonProperty
     public void setProviders(List<ProviderConfiguration> providers) {
         this.providers = providers;
+    }
+
+    public ProviderConfiguration getProviderConfiguration(String provider) {
+        Optional<ProviderConfiguration> configuration = providers.stream()
+            .filter(providerConfiguration -> providerConfiguration.getName().equals(provider))
+            .findFirst();
+        return configuration.orElse(null);
     }
 }

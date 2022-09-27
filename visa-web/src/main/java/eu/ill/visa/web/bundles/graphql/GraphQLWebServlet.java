@@ -33,6 +33,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
     private final InstanceSessionMemberResolver  instanceSessionMemberResolver;
     private final InstanceJupyterSessionResolver instanceJupyterSessionResolver;
     private final ImageResolver                  imageResolver;
+    private final FlavourResolver                flavourResolver;
     private final CloudImageResolver             cloudImageResolver;
     private final CloudSecurityGroupResolver     cloudSecurityGroupResolver;
     private final ImageProtocolResolver          imageProtocolResolver;
@@ -50,6 +51,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                              final InstanceJupyterSessionResolver instanceJupyterSessionResolver,
                              final UserResolver userResolver,
                              final ImageResolver imageResolver,
+                             final FlavourResolver flavourResolver,
                              final CloudImageResolver cloudImageResolver,
                              final CloudSecurityGroupResolver cloudSecurityGroupResolver,
                              final ImageProtocolResolver imageProtocolResolver,
@@ -64,6 +66,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         this.instanceJupyterSessionResolver = instanceJupyterSessionResolver;
         this.userResolver = userResolver;
         this.imageResolver = imageResolver;
+        this.flavourResolver = flavourResolver;
         this.cloudSecurityGroupResolver = cloudSecurityGroupResolver;
         this.cloudImageResolver = cloudImageResolver;
         this.imageProtocolResolver = imageProtocolResolver;
@@ -115,6 +118,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                 instanceJupyterSessionResolver,
                 userResolver,
                 imageResolver,
+                flavourResolver,
                 cloudImageResolver,
                 cloudSecurityGroupResolver,
                 imageProtocolResolver,

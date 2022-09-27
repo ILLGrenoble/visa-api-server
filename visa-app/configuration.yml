@@ -82,7 +82,8 @@ security:
 
 cloud:
   serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
-  provider: ${VISA_DEFAULT_CLOUD_PROVIDER:-'openstack'}
+  providerType: ${VISA_DEFAULT_CLOUD_PROVIDER_TYPE:-'openstack'}
+  providerName: ${VISA_DEFAULT_CLOUD_PROVIDER_NAME:-'Default'}
   providers:
     - name: openstack
       parameters:

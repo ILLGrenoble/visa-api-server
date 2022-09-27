@@ -31,11 +31,11 @@ public class CloudClientFactory {
      * @throws CloudException if the provider is not found
      */
     public CloudClient getClient(final CloudConfiguration configuration) throws CloudException {
-        final String provider = configuration.getProvider();
+        final String provider = configuration.getProviderType();
         final ProviderConfiguration providerConfiguration = configuration.getProviderConfiguration(provider);
         final String serverNamePrefix = configuration.getServerNamePrefix();
 
-        return this.getClient(-1L, "Default", providerConfiguration, serverNamePrefix);
+        return this.getClient(-1L, configuration.getProviderName(), providerConfiguration, serverNamePrefix);
     }
 
     public CloudClient getClient(Long id, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix) throws CloudException {

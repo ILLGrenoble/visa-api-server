@@ -116,5 +116,10 @@ public class InstanceResolver implements GraphQLResolver<Instance> {
             throw new DataFetchingException(exception.getMessage());
         }
     }
+
+    public CloudClient cloudClient(final Instance instance) {
+        return this.cloudClientGateway.getCloudClient(instance.getCloudId());
+    }
+
 }
 
