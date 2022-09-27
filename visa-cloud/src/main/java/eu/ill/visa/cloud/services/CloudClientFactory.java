@@ -35,25 +35,25 @@ public class CloudClientFactory {
         final ProviderConfiguration providerConfiguration = configuration.getProviderConfiguration(provider);
         final String serverNamePrefix = configuration.getServerNamePrefix();
 
-        return this.getClient(providerConfiguration, serverNamePrefix);
+        return this.getClient(-1L, "Default", providerConfiguration, serverNamePrefix);
     }
 
-    public CloudClient getClient(ProviderConfiguration providerConfiguration, String serverNamePrefix) throws CloudException {
+    public CloudClient getClient(Long id, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix) throws CloudException {
         String provider = providerConfiguration.getName();
         if (NULL.equals(provider)) {
-            return createNullProvider(serverNamePrefix);
+            return createNullProvider(id, name, serverNamePrefix);
 
         } else if (OPENSTACK.equals(provider)) {
-            return createOpenStackProvider(providerConfiguration.getParameters(), serverNamePrefix);
+            return createOpenStackProvider(id, name, providerConfiguration.getParameters(), serverNamePrefix);
 
         } else if (WEB.equals(provider)) {
-            return createWebProvider(providerConfiguration.getParameters(), serverNamePrefix);
+            return createWebProvider(id, name, providerConfiguration.getParameters(), serverNamePrefix);
         }
         throw new CloudException(format("Unsupported provider provided: %s", provider));
     }
 
-    private CloudClient createNullProvider(@NotNull @Valid String serverNamePrefix) {
-        return new CloudClient(new NullProvider(), serverNamePrefix);
+    private CloudClient createNullProvider(@NotNull Long id, @NotNull String name, @NotNull @Valid String serverNamePrefix) {
+        return new CloudClient(id, name, new NullProvider(), serverNamePrefix);
     }
 
     /**
@@ -61,7 +61,7 @@ public class CloudClientFactory {
      * This is the officially supported provider for VISA
      * Please use the web provider implementation if you wish to use a different cloud provider
      */
-    private CloudClient createOpenStackProvider(final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix) {
+    private CloudClient createOpenStackProvider(@NotNull Long id, @NotNull String name, final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix) {
         requireNonNull(parameters.get("identityEndpoint"), "identityEndpoint endpoint must be set");
         requireNonNull(parameters.get("computeEndpoint"), "computeEndpoint endpoint must be set");
         requireNonNull(parameters.get("imageEndpoint"), "imageEndpoint endpoint must be set");
@@ -73,20 +73,20 @@ public class CloudClientFactory {
 
         final OpenStackProviderConfiguration configuration = new OpenStackProviderConfiguration(parameters);
         final HttpClient httpClient = new OkHttpClientAdapter();
-        return new CloudClient(new OpenStackProvider(httpClient, configuration), serverNamePrefix);
+        return new CloudClient(id, name, new OpenStackProvider(httpClient, configuration), serverNamePrefix);
     }
 
     /**
      * This provider enables using a custom cloud provider i.e. proxmox, vmware etc.
      * It forwards requests to an implementation that encapsulates the underlying cloud provider
      */
-    private CloudClient createWebProvider(final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix) {
+    private CloudClient createWebProvider(@NotNull Long id, @NotNull String name, final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix) {
         final WebProviderConfiguration configuration = new WebProviderConfiguration(
             requireNonNull(parameters.get("url"), "url must be set"),
             requireNonNull(parameters.get("authToken"), "authToken must be set")
         );
         final HttpClient httpClient = new OkHttpClientAdapter();
-        return new CloudClient(new WebProvider(httpClient, configuration), serverNamePrefix);
+        return new CloudClient(id, name, new WebProvider(httpClient, configuration), serverNamePrefix);
     }
 
 }

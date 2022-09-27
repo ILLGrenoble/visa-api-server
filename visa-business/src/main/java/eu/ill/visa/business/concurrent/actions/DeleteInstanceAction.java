@@ -20,9 +20,13 @@ public class DeleteInstanceAction extends InstanceAction {
     @Override
     public void run() throws InstanceActionException {
         try {
-            final CloudClient cloudClient = getCloudClient();
             final Instance instance = getInstance();
             if (instance == null) {
+                return;
+            }
+
+            final CloudClient cloudClient = this.getCloudClient(instance.getCloudId());
+            if (cloudClient == null) {
                 return;
             }
 

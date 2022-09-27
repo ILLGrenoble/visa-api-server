@@ -32,7 +32,7 @@ public class CloudProviderService {
     private void init() {
         List<CloudProviderConfiguration> cloudProviderConfigurations = this.getAll();
         for (CloudProviderConfiguration cloudProviderConfiguration : cloudProviderConfigurations) {
-            this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
+            this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
         }
     }
 
@@ -53,12 +53,12 @@ public class CloudProviderService {
     public void save(@NotNull CloudProviderConfiguration cloudProviderConfiguration) {
         this.repository.save(cloudProviderConfiguration);
 
-        this.cloudClientGateway.updateCloudClient(cloudProviderConfiguration.getId(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
+        this.cloudClientGateway.updateCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
     }
 
     public void create(CloudProviderConfiguration cloudProviderConfiguration) {
         this.repository.create(cloudProviderConfiguration);
-        this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
+        this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
     }
 
     private ProviderConfiguration convert(CloudProviderConfiguration cloudProviderConfiguration) {

@@ -103,8 +103,7 @@ public class GuacamoleSocketService {
 
     private String getIpAddressForInstance(Instance instance) throws CloudException {
         if (instance.getIpAddress() == null) {
-            // TODO CloudClient: select specific cloud client
-            CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
             return cloudClient.ip(instance.getComputeId());
         }
         return instance.getIpAddress();

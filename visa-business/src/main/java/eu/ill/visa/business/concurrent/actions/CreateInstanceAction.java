@@ -29,7 +29,10 @@ public class CreateInstanceAction extends InstanceAction {
         }
 
         try {
-            final CloudClient cloudClient = this.getCloudClient();
+            final CloudClient cloudClient = this.getCloudClient(instance.getCloudId());
+            if (cloudClient == null) {
+                return;
+            }
 
             final Plan plan = instance.getPlan();
             final Flavour flavour = plan.getFlavour();

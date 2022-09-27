@@ -51,11 +51,13 @@ public class HealthService {
 
     private HealthState getCloudHealthStatus() {
         try {
-            // TODO CloudClient: select specific cloud client
-            CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
-            CloudLimit cloudLimit = cloudClient.limits();
-            if (cloudLimit == null) {
-                return new HealthState(HealthStatus.NOT_OK, "Unable to obtain Cloud status");
+            List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
+            for (CloudClient cloudClient : cloudClients) {
+                CloudLimit cloudLimit = cloudClient.limits();
+                if (cloudLimit == null) {
+                    return new HealthState(HealthStatus.NOT_OK, "Unable to obtain Cloud status from Cloud \"" + cloudClient.getName() + "\"");
+                }
+
             }
             return new HealthState(HealthStatus.OK);
 

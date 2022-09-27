@@ -38,26 +38,31 @@ public class InstanceResolver implements GraphQLResolver<Instance> {
 
     public CompletableFuture<List<ProtocolStatus>> protocols(Instance instance) {
         final CompletableFuture<List<ProtocolStatus>> future = new CompletableFuture<>();
-        // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
 
         runAsync(() -> {
             try {
-                final Plan plan = instance.getPlan();
-                final Image image = plan.getImage();
-                final List<ProtocolStatus> results = new ArrayList<>();
-                final List<ImageProtocol> protocols = requireNonNullElseGet(image.getProtocols(), ArrayList::new);
-                if (protocols.size() > 0) {
-                    final CloudInstance cloudInstance = cloudClient.instance(instance.getComputeId());
-                    for (final ImageProtocol protocol : protocols) {
-                        final String address = cloudInstance.getAddress();
-                        final int port = protocol.getPort();
-                        final boolean active = isPortOpen(address, port);
-                        results.add(new ProtocolStatus(protocol, active));
+                CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
+                if (cloudClient == null) {
+                    future.completeExceptionally(new DataFetchingException("Cloud Client with ID " + instance.getCloudId() + " does not exist"));
+
+                } else {
+                    final Plan plan = instance.getPlan();
+                    final Image image = plan.getImage();
+                    final List<ProtocolStatus> results = new ArrayList<>();
+                    final List<ImageProtocol> protocols = requireNonNullElseGet(image.getProtocols(), ArrayList::new);
+                    if (protocols.size() > 0) {
+                        final CloudInstance cloudInstance = cloudClient.instance(instance.getComputeId());
+                        for (final ImageProtocol protocol : protocols) {
+                            final String address = cloudInstance.getAddress();
+                            final int port = protocol.getPort();
+                            final boolean active = isPortOpen(address, port);
+                            results.add(new ProtocolStatus(protocol, active));
+                        }
+                        future.complete(results);
                     }
                     future.complete(results);
                 }
-                future.complete(results);
+
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }
@@ -72,11 +77,16 @@ public class InstanceResolver implements GraphQLResolver<Instance> {
      */
     public CompletableFuture<CloudInstance> cloudInstance(Instance instance) {
         final CompletableFuture<CloudInstance> future = new CompletableFuture<>();
-        // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
         runAsync(() -> {
             try {
-                future.complete(cloudClient.instance(instance.getComputeId()));
+                CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
+                if (cloudClient == null) {
+                    future.completeExceptionally(new DataFetchingException("Cloud Client with ID " + instance.getCloudId() + " does not exist"));
+
+                } else {
+                    future.complete(cloudClient.instance(instance.getComputeId()));
+                }
+
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }

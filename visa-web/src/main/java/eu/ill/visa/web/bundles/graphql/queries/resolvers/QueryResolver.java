@@ -56,7 +56,6 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final ClientNotificationService         clientNotificationService;
     private final ApplicationCredentialService      applicationCredentialService;
     private final InstanceExtensionRequestService   instanceExtensionRequestService;
-    private final CloudProviderService              cloudProviderService;
 
     @Inject
     QueryResolver(final InstrumentService instrumentService,
@@ -76,8 +75,7 @@ public class QueryResolver implements GraphQLQueryResolver {
                   final InstanceJupyterSessionService instanceJupyterSessionService,
                   final ClientNotificationService clientNotificationService,
                   final ApplicationCredentialService applicationCredentialService,
-                  final InstanceExtensionRequestService instanceExtensionRequestService,
-                  final CloudProviderService cloudProviderService) {
+                  final InstanceExtensionRequestService instanceExtensionRequestService) {
         this.instrumentService = instrumentService;
         this.experimentService = experimentService;
         this.flavourService = flavourService;
@@ -96,7 +94,6 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.clientNotificationService = clientNotificationService;
         this.applicationCredentialService = applicationCredentialService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
-        this.cloudProviderService = cloudProviderService;
     }
 
     /**
@@ -457,14 +454,16 @@ public class QueryResolver implements GraphQLQueryResolver {
      *
      * @return a list of cloud images
      */
-    public CompletableFuture<List<CloudImage>> cloudImages() {
+    public CompletableFuture<List<CloudImage>> cloudImages(Long cloudId) {
         final CompletableFuture<List<CloudImage>> future = new CompletableFuture<>();
-        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
                 future.complete(cloudClient.images());
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
             }
         });
         return future;
@@ -475,14 +474,16 @@ public class QueryResolver implements GraphQLQueryResolver {
      *
      * @return a list of cloud flavours
      */
-    public CompletableFuture<List<CloudFlavour>> cloudFlavours() {
+    public CompletableFuture<List<CloudFlavour>> cloudFlavours(Long cloudId) {
         final CompletableFuture<List<CloudFlavour>> future = new CompletableFuture<>();
-        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
                 future.complete(cloudClient.flavours());
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
             }
         });
         return future;
@@ -493,14 +494,16 @@ public class QueryResolver implements GraphQLQueryResolver {
      *
      * @return a list of cloud limits
      */
-    public CompletableFuture<CloudLimit> cloudLimits() {
+    public CompletableFuture<CloudLimit> cloudLimits(Long cloudId) {
         final CompletableFuture<CloudLimit> future = new CompletableFuture<>();
-        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
                 future.complete(cloudClient.limits());
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
             }
         });
         return future;
@@ -511,17 +514,19 @@ public class QueryResolver implements GraphQLQueryResolver {
      *
      * @return a list of security groups
      */
-    public CompletableFuture<List<CloudSecurityGroup>> cloudSecurityGroups() {
+    public CompletableFuture<List<CloudSecurityGroup>> cloudSecurityGroups(Long cloudId) {
         final CompletableFuture<List<CloudSecurityGroup>> future = new CompletableFuture<>();
-        CloudClient cloudClient = this.getCloudClient();
         runAsync(() -> {
             try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
                 final List<CloudSecurityGroup> cloudSecurityGroups = cloudClient.securityGroups().stream()
                     .map(CloudSecurityGroup::new)
                     .collect(toList());
                 future.complete(cloudSecurityGroups);
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
             }
         });
         return future;
@@ -669,9 +674,11 @@ public class QueryResolver implements GraphQLQueryResolver {
         }
     }
 
-    private CloudClient getCloudClient() {
-        // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
+    private CloudClient getCloudClient(Long cloudId) throws DataFetchingException {
+        CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+        if (cloudClient == null) {
+            throw new DataFetchingException("Cloud Client with ID " + cloudId + " does not exist");
+        }
 
         return cloudClient;
     }

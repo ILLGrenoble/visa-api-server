@@ -1,5 +1,7 @@
 package eu.ill.visa.core.domain;
 
+import javax.persistence.Transient;
+
 public class Plan extends Timestampable {
 
     private Long id;
@@ -40,6 +42,11 @@ public class Plan extends Timestampable {
 
     public void setPreset(Boolean preset) {
         this.preset = preset;
+    }
+
+    @Transient
+    public Long getCloudId() {
+        return this.image.getCloudId();
     }
 
     public static final class Builder {

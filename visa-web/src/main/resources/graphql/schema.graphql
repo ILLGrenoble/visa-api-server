@@ -57,13 +57,13 @@ type Query {
     # Get all roles
     roles: [Role]  @isAuthorised(role: "ADMIN")
     # Get images from cloud provider
-    cloudImages: [CloudImage] @isAuthorised(role: "ADMIN")
+    cloudImages(cloudId: Int): [CloudImage] @isAuthorised(role: "ADMIN")
     # Get flavours from cloud provider
-    cloudFlavours: [CloudFlavour] @isAuthorised(role: "ADMIN")
+    cloudFlavours(cloudId: Int): [CloudFlavour] @isAuthorised(role: "ADMIN")
     # Get cloud limits
-    cloudLimits: CloudLimit @isAuthorised(role: "ADMIN")
+    cloudLimits(cloudId: Int): CloudLimit @isAuthorised(role: "ADMIN")
     # Get cloud security groups
-    cloudSecurityGroups: [CloudSecurityGroup] @isAuthorised(role: "ADMIN")
+    cloudSecurityGroups(cloudId: Int): [CloudSecurityGroup] @isAuthorised(role: "ADMIN")
     # Count all sessions
     countSessions(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
     # Count all active sessions

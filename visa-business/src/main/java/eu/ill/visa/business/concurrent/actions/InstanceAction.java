@@ -20,8 +20,8 @@ public abstract class InstanceAction {
         this.command = command;
     }
 
-    public CloudClient getCloudClient() {
-        return this.serviceProvider.getCloudClient();
+    public CloudClient getCloudClient(Long cloudClientId) {
+        return this.serviceProvider.getCloudClient(cloudClientId);
     }
 
     public NotificationService getNotificationService() {

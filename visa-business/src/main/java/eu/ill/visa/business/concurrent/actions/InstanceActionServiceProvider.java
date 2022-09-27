@@ -80,10 +80,8 @@ public class InstanceActionServiceProvider {
         return instrumentService;
     }
 
-    public CloudClient getCloudClient() {
-        // TODO CloudClient: select specific cloud client
-        CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
-        return cloudClient;
+    public CloudClient getCloudClient(Long cloudClientId) {
+        return this.cloudClientGateway.getCloudClient(cloudClientId);
     }
 
     public NotificationService getNotificationService() {

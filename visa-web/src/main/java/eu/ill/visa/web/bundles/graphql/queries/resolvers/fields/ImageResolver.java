@@ -22,11 +22,12 @@ public class ImageResolver implements GraphQLResolver<Image> {
 
     CloudImage cloudImage(Image image) {
         try {
-            // TODO CloudClient: select specific cloud client
-            CloudClient cloudClient = this.cloudClientGateway.getDefaultCloudClient();
-            return cloudClient.image(image.getComputeId());
-        } catch (CloudException exception) {
-            return null;
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(image.getCloudId());
+            if (cloudClient != null) {
+                return cloudClient.image(image.getComputeId());
+            }
+        } catch (CloudException ignored) {
         }
+        return null;
     }
 }

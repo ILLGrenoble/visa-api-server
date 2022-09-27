@@ -341,6 +341,11 @@ public class Instance extends Timestampable {
         return false;
     }
 
+    @Transient
+    public Long getCloudId() {
+        return this.plan.getCloudId();
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)

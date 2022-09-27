@@ -2,6 +2,11 @@ package eu.ill.visa.web.bundles.graphql.queries.resolvers;
 
 import com.google.inject.Inject;
 import eu.ill.visa.business.services.*;
+import eu.ill.visa.cloud.domain.CloudFlavour;
+import eu.ill.visa.cloud.domain.CloudImage;
+import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceExtensionRequestState;
@@ -47,6 +52,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final SecurityGroupService       securityGroupService;
     private final SecurityGroupFilterService securityGroupFilterService;
     private final InstrumentService          instrumentService;
+    private final CloudClientGateway         cloudClientGateway;
 
     private final InstanceActionScheduler      instanceActionScheduler;
     private final RoleService                  roleService;
@@ -68,6 +74,7 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final SecurityGroupService securityGroupService,
                             final SecurityGroupFilterService securityGroupFilterService,
                             final InstrumentService instrumentService,
+                            final CloudClientGateway cloudClientGateway,
                             final InstanceActionScheduler instanceActionScheduler,
                             final RoleService roleService,
                             final UserService userService,
@@ -84,6 +91,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.securityGroupService = securityGroupService;
         this.securityGroupFilterService = securityGroupFilterService;
         this.instrumentService = instrumentService;
+        this.cloudClientGateway = cloudClientGateway;
         this.instanceActionScheduler = instanceActionScheduler;
         this.roleService = roleService;
         this.userService = userService;
@@ -100,7 +108,10 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created image
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Image createImage(@Valid ImageInput input) throws EntityNotFoundException {
+    public Image createImage(@Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
+        // Validate the image input
+        this.validateImageInput(input);
+
         final Image image = new Image();
         image.setName(input.getName());
         image.setVersion(input.getVersion());
@@ -134,7 +145,10 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created image
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Image updateImage(Long id, @Valid ImageInput input) throws EntityNotFoundException {
+    public Image updateImage(Long id, @Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
+        // Validate the image input
+        this.validateImageInput(input);
+
         final Image image = imageService.getById(id);
         image.setName(input.getName());
         image.setVersion(input.getVersion());
@@ -175,6 +189,23 @@ public class MutationResolver implements GraphQLMutationResolver {
         return image;
     }
 
+    private void validateImageInput(ImageInput imageInput) throws InvalidInputException {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(imageInput.getCloudId());
+            if (cloudClient == null) {
+                throw new InvalidInputException("Invalid cloud Id");
+            }
+
+            CloudImage cloudImage = cloudClient.image(imageInput.getComputeId());
+            if (cloudImage == null) {
+                throw new InvalidInputException("Invalid Cloud Image Id");
+            }
+
+        } catch (CloudException exception) {
+            throw new InvalidInputException("Error accessing Cloud");
+        }
+    }
+
     /**
      * Create a new flavour
      *
@@ -182,7 +213,10 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created flavour
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Flavour createFlavour(@Valid FlavourInput input) {
+    public Flavour createFlavour(@Valid FlavourInput input) throws InvalidInputException {
+        // Validate the flavour input
+        this.validateFlavourInput(input);
+
         final Flavour flavour = mapper.map(input, Flavour.class);
         flavourService.create(flavour);
 
@@ -201,7 +235,10 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the given the flavour id was not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Flavour updateFlavour(Long id, @Valid FlavourInput input) throws EntityNotFoundException {
+    public Flavour updateFlavour(Long id, @Valid FlavourInput input) throws EntityNotFoundException, InvalidInputException  {
+        // Validate the flavour input
+        this.validateFlavourInput(input);
+
         final Flavour flavour = this.flavourService.getById(id);
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour was not found for the given id");
@@ -229,7 +266,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         List<Long> instrumentsToAdd = instrumentIds.stream().filter(instrumentId ->
             !currentInstrumentIds.contains(instrumentId)).collect(Collectors.toList());
 
-        flavourLimitsToDelete.forEach(flavourLimit -> this.flavourLimitService.delete(flavourLimit));
+        flavourLimitsToDelete.forEach(this.flavourLimitService::delete);
         instrumentsToAdd.forEach(instrumentId -> {
             if (allInstrumentIds.contains(instrumentId)) {
                 FlavourLimit flavourLimit = new FlavourLimit(flavour, instrumentId, "INSTRUMENT");
@@ -256,6 +293,23 @@ public class MutationResolver implements GraphQLMutationResolver {
         flavour.setDeleted(true);
         flavourService.save(flavour);
         return flavour;
+    }
+
+    private void validateFlavourInput(FlavourInput flavourInput) throws InvalidInputException {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(flavourInput.getCloudId());
+            if (cloudClient == null) {
+                throw new InvalidInputException("Invalid cloud Id");
+            }
+
+            CloudFlavour cloudFlavour = cloudClient.flavour(flavourInput.getComputeId());
+            if (cloudFlavour == null) {
+                throw new InvalidInputException("Invalid Cloud Flavour Id");
+            }
+
+        } catch (CloudException exception) {
+            throw new InvalidInputException("Error accessing Cloud");
+        }
     }
 
     /**

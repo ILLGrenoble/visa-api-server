@@ -3,6 +3,8 @@ package eu.ill.visa.core.domain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.persistence.Transient;
+
 public class SecurityGroup {
 
     private Long id;
@@ -40,6 +42,11 @@ public class SecurityGroup {
 
     public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
         this.cloudProviderConfiguration = cloudProviderConfiguration;
+    }
+
+    @Transient
+    public Long getCloudId() {
+        return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
     }
 
     @Override
