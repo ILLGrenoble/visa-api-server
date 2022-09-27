@@ -14,6 +14,15 @@
         </query>
     </named-query>
 
+    <named-query name="cloudProviderConfiguration.getById">
+        <query>
+            SELECT cp
+            FROM CloudProviderConfiguration cp
+            WHERE cp.deletedAt IS NULL
+            AND cp.id = :id
+        </query>
+    </named-query>
+
     <entity class="eu.ill.visa.core.domain.CloudProviderConfiguration">
         <table name="cloud_provider_configuration"/>
         <attributes>

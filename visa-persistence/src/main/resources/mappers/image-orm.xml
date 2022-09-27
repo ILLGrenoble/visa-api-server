@@ -72,6 +72,10 @@
             <basic name="autologin">
                 <column name="autologin" nullable="true"/>
             </basic>
+            <many-to-one name="cloudProviderConfiguration" >
+                <join-column name="cloud_provider_configuration_id" nullable="true"/>
+                <foreign-key name="fk_cloud_provider_configuration_id"/>
+            </many-to-one>
             <many-to-many name="protocols" target-entity="eu.ill.visa.core.domain.ImageProtocol">
                 <join-table name="image_protocol">
                     <join-column name="image_id"/>

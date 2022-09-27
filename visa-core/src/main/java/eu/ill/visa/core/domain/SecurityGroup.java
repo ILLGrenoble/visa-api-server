@@ -9,6 +9,8 @@ public class SecurityGroup {
 
     private String name;
 
+    private CloudProviderConfiguration cloudProviderConfiguration;
+
     public SecurityGroup() {
     }
 
@@ -30,6 +32,14 @@ public class SecurityGroup {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public CloudProviderConfiguration getCloudProviderConfiguration() {
+        return cloudProviderConfiguration;
+    }
+
+    public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
+        this.cloudProviderConfiguration = cloudProviderConfiguration;
     }
 
     @Override

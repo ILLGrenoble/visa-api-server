@@ -17,6 +17,8 @@ public class Flavour extends Timestampable {
 
     private Boolean deleted = false;
 
+    private CloudProviderConfiguration cloudProviderConfiguration;
+
     public Long getId() {
         return id;
     }
@@ -63,6 +65,14 @@ public class Flavour extends Timestampable {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public CloudProviderConfiguration getCloudProviderConfiguration() {
+        return cloudProviderConfiguration;
+    }
+
+    public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
+        this.cloudProviderConfiguration = cloudProviderConfiguration;
     }
 
     @Override

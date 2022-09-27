@@ -32,6 +32,8 @@ public class Image extends Timestampable {
 
     private List<ImageProtocol> protocols = new ArrayList<>();
 
+    private CloudProviderConfiguration cloudProviderConfiguration;
+
     public Image() {
     }
 
@@ -155,6 +157,14 @@ public class Image extends Timestampable {
 
     public void setAutologin(String autologin) {
         this.autologin = autologin;
+    }
+
+    public CloudProviderConfiguration getCloudProviderConfiguration() {
+        return cloudProviderConfiguration;
+    }
+
+    public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
+        this.cloudProviderConfiguration = cloudProviderConfiguration;
     }
 
     public static final class Builder {

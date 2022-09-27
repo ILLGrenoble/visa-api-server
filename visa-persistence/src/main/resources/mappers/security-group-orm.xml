@@ -54,6 +54,10 @@
             <basic name="name">
                 <column name="name" length="250" nullable="false"/>
             </basic>
+            <many-to-one name="cloudProviderConfiguration" >
+                <join-column name="cloud_provider_configuration_id" nullable="true"/>
+                <foreign-key name="fk_cloud_provider_configuration_id"/>
+            </many-to-one>
         </attributes>
     </entity>
 

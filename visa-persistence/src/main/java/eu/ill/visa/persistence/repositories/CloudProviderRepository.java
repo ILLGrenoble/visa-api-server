@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.CloudProviderConfiguration;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
@@ -21,6 +22,16 @@ public class CloudProviderRepository extends AbstractRepository<CloudProviderCon
     public List<CloudProviderConfiguration> getAll() {
         final TypedQuery<CloudProviderConfiguration> query = getEntityManager().createNamedQuery("cloudProviderConfiguration.getAll", CloudProviderConfiguration.class);
         return query.getResultList();
+    }
+
+    public CloudProviderConfiguration getById(final Long id) {
+        try {
+            final TypedQuery<CloudProviderConfiguration> query = getEntityManager().createNamedQuery("cloudProviderConfiguration.getById", CloudProviderConfiguration.class);
+            query.setParameter("id", id);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
     }
 
     public void delete(CloudProviderConfiguration cloudProviderConfiguration) {

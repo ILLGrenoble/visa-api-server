@@ -36,6 +36,10 @@ public class CloudProviderService {
         }
     }
 
+    public CloudProviderConfiguration getById(Long id) {
+        return this.repository.getById(id);
+    }
+
     public List<CloudProviderConfiguration> getAll() {
         return this.repository.getAll();
     }
