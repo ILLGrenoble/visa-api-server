@@ -49,13 +49,14 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final UserService                       userService;
     private final ImageProtocolService              imageProtocolService;
     private final RoleService                       roleService;
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientGateway                cloudClientGateway;
     private final PlanService                       planService;
     private final InstanceSessionMemberService      instanceSessionMemberService;
     private final InstanceJupyterSessionService     instanceJupyterSessionService;
     private final ClientNotificationService         clientNotificationService;
     private final ApplicationCredentialService      applicationCredentialService;
     private final InstanceExtensionRequestService   instanceExtensionRequestService;
+    private final CloudProviderService              cloudProviderService;
 
     @Inject
     QueryResolver(final InstrumentService instrumentService,
@@ -75,7 +76,8 @@ public class QueryResolver implements GraphQLQueryResolver {
                   final InstanceJupyterSessionService instanceJupyterSessionService,
                   final ClientNotificationService clientNotificationService,
                   final ApplicationCredentialService applicationCredentialService,
-                  final InstanceExtensionRequestService instanceExtensionRequestService) {
+                  final InstanceExtensionRequestService instanceExtensionRequestService,
+                  final CloudProviderService cloudProviderService) {
         this.instrumentService = instrumentService;
         this.experimentService = experimentService;
         this.flavourService = flavourService;
@@ -94,6 +96,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.clientNotificationService = clientNotificationService;
         this.applicationCredentialService = applicationCredentialService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
+        this.cloudProviderService = cloudProviderService;
     }
 
     /**

@@ -35,6 +35,11 @@ public class CloudClientFactory {
         final ProviderConfiguration providerConfiguration = configuration.getProviderConfiguration(provider);
         final String serverNamePrefix = configuration.getServerNamePrefix();
 
+        return this.getClient(providerConfiguration, serverNamePrefix);
+    }
+
+    public CloudClient getClient(ProviderConfiguration providerConfiguration, String serverNamePrefix) throws CloudException {
+        String provider = providerConfiguration.getName();
         if (NULL.equals(provider)) {
             return createNullProvider(serverNamePrefix);
 

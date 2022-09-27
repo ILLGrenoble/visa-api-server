@@ -1,28 +1,64 @@
 package eu.ill.visa.cloud.services;
 
 import eu.ill.visa.cloud.CloudConfiguration;
+import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CloudClientGateway {
     private static final Logger logger = LoggerFactory.getLogger(CloudClientGateway.class);
+    private final CloudClientFactory factory = new CloudClientFactory();
 
     private CloudClient defaultCloudClient;
+    private Map<Long, CloudClient> secondaryCloudClients = new HashMap<>();
 
     public CloudClientGateway(final CloudConfiguration configuration) {
-        final CloudClientFactory factory = new CloudClientFactory();
         try {
             this.defaultCloudClient = factory.getClient(configuration);
 
         } catch (CloudException e) {
             logger.error("Failed to create default Cloud Provider: {}", e.getMessage());
-            e.printStackTrace();
         }
 
     }
 
     public CloudClient getDefaultCloudClient() {
         return defaultCloudClient;
+    }
+
+    public CloudClient getCloudClient(Long id) {
+        if (id == null) {
+            return this.getDefaultCloudClient();
+        }
+        CloudClient cloudClient = this.secondaryCloudClients.get(id);
+        if (cloudClient == null) {
+            logger.error("Failed to get Cloud Client with ID {}", id);
+        }
+
+        return cloudClient;
+    }
+
+    public void addCloudClient(Long providerId, ProviderConfiguration providerConfiguration, String serverNamePrefix) {
+        try {
+            CloudClient cloudClient = this.factory.getClient(providerConfiguration, serverNamePrefix);
+            this.secondaryCloudClients.put(providerId, cloudClient);
+
+        } catch (CloudException e) {
+            logger.error("Failed to create default Cloud Provider: {}", e.getMessage());
+        }
+    }
+
+    public void updateCloudClient(Long providerId, ProviderConfiguration providerConfiguration, String serverNamePrefix) {
+        this.secondaryCloudClients.remove(providerId);
+
+        this.addCloudClient(providerId, providerConfiguration, serverNamePrefix);
+    }
+
+    public void removeCloudClient(Long providerId) {
+        this.secondaryCloudClients.remove(providerId);
     }
 }
