@@ -53,6 +53,7 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final SecurityGroupFilterService securityGroupFilterService;
     private final InstrumentService          instrumentService;
     private final CloudClientGateway         cloudClientGateway;
+    private final CloudProviderService       cloudProviderService;
 
     private final InstanceActionScheduler      instanceActionScheduler;
     private final RoleService                  roleService;
@@ -75,6 +76,7 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final SecurityGroupFilterService securityGroupFilterService,
                             final InstrumentService instrumentService,
                             final CloudClientGateway cloudClientGateway,
+                            final CloudProviderService cloudProviderService,
                             final InstanceActionScheduler instanceActionScheduler,
                             final RoleService roleService,
                             final UserService userService,
@@ -92,6 +94,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.securityGroupFilterService = securityGroupFilterService;
         this.instrumentService = instrumentService;
         this.cloudClientGateway = cloudClientGateway;
+        this.cloudProviderService = cloudProviderService;
         this.instanceActionScheduler = instanceActionScheduler;
         this.roleService = roleService;
         this.userService = userService;
@@ -117,6 +120,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         image.setVersion(input.getVersion());
         image.setDescription(input.getDescription());
         image.setIcon(input.getIcon());
+        image.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         image.setComputeId(input.getComputeId());
         image.setVisible(input.getVisible());
         image.setDeleted(false);
@@ -154,6 +158,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         image.setVersion(input.getVersion());
         image.setDescription(input.getDescription());
         image.setIcon(input.getIcon());
+        image.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         image.setComputeId(input.getComputeId());
         image.setVisible(input.getVisible());
         image.setBootCommand(input.getBootCommand());
@@ -218,6 +223,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.validateFlavourInput(input);
 
         final Flavour flavour = mapper.map(input, Flavour.class);
+        flavour.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         flavourService.create(flavour);
 
         // Handle flavour limits
@@ -244,6 +250,7 @@ public class MutationResolver implements GraphQLMutationResolver {
             throw new EntityNotFoundException("Flavour was not found for the given id");
         }
         flavour.setName(input.getName());
+        flavour.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         flavour.setComputeId(input.getComputeId());
         flavour.setCpu(input.getCpu());
         flavour.setMemory(input.getMemory());
@@ -310,6 +317,14 @@ public class MutationResolver implements GraphQLMutationResolver {
         } catch (CloudException exception) {
             throw new InvalidInputException("Error accessing Cloud");
         }
+    }
+
+    private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {
+        if (cloudId != null && cloudId > 0) {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            return this.cloudProviderService.getById(cloudClient.getId());
+        }
+        return null;
     }
 
     /**

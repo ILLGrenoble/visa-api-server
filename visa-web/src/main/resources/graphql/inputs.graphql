@@ -13,6 +13,7 @@ input ImageInput {
     version: String
     description: String
     icon: String
+    cloudId: Int
     computeId: String!
     visible: Boolean!
     protocolIds: [Int]
@@ -42,6 +43,7 @@ input FlavourInput {
     description: String
     memory: Int!
     cpu: Int!
+    cloudId: Int
     computeId: String!
     instrumentIds: [Int]
 }

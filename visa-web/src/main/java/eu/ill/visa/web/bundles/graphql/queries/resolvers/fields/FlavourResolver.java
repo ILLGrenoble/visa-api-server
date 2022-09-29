@@ -2,6 +2,8 @@ package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import eu.ill.visa.cloud.domain.CloudFlavour;
+import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.Flavour;
@@ -22,4 +24,14 @@ public class FlavourResolver implements GraphQLResolver<Flavour> {
         return this.cloudClientGateway.getCloudClient(flavour.getCloudId());
     }
 
+    public CloudFlavour cloudFlavour(Flavour flavour) {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(flavour.getCloudId());
+            if (cloudClient != null) {
+                return cloudClient.flavour(flavour.getComputeId());
+            }
+        } catch (CloudException ignored) {
+        }
+        return null;
+    }
 }

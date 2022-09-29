@@ -1,5 +1,6 @@
 package eu.ill.visa.cloud.services;
 
+import com.google.inject.Singleton;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Singleton
 public class CloudClientGateway {
     private static final Logger logger = LoggerFactory.getLogger(CloudClientGateway.class);
     private final CloudClientFactory factory = new CloudClientFactory();

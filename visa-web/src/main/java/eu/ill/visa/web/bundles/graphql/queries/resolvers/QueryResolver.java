@@ -450,6 +450,15 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
+     * Get cloud clients
+     *
+     * @return a list of cloud clients
+     */
+    public List<CloudClient> cloudClients() {
+        return this.cloudClientGateway.getAll();
+    }
+
+    /**
      * Get cloud images from the the cloud provider
      *
      * @return a list of cloud images

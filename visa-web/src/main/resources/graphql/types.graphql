@@ -53,6 +53,7 @@ type Flavour {
     memory: Int!
     cpu: Int!
     computeId: String!
+    cloudFlavour: CloudFlavour
     cloudClient: CloudClient!
 }
 

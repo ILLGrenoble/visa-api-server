@@ -56,6 +56,8 @@ type Query {
     searchForUserByLastName(lastName: String!, onlyActivatedUsers: Boolean!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
     # Get all roles
     roles: [Role]  @isAuthorised(role: "ADMIN")
+    # Get all cloud clients
+    cloudClients: [CloudClient] @isAuthorised(role: "ADMIN")
     # Get images from cloud provider
     cloudImages(cloudId: Int): [CloudImage] @isAuthorised(role: "ADMIN")
     # Get flavours from cloud provider
