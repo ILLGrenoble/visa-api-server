@@ -18,6 +18,7 @@
             WHERE p.image.deleted = false
             AND p.flavour.deleted = false
             AND p.image.visible = true
+            ORDER BY p.id
         </query>
     </named-query>
 
@@ -26,6 +27,7 @@
             SELECT p FROM Plan p
             WHERE p.image.deleted = false
             AND p.flavour.deleted = false
+            ORDER BY p.id
         </query>
     </named-query>
 
@@ -45,6 +47,7 @@
             AND p.flavour.deleted = false
             AND p.image.visible = true
             AND (fl.objectId IN :instrumentIds OR fl.objectId IS NULL)
+            ORDER BY p.id
         </query>
     </named-query>
 
@@ -57,6 +60,7 @@
             AND p.flavour.deleted = false
             AND p.image.visible = true
             AND (e.id IN :experimentIds OR fl.objectId IS NULL)
+            ORDER BY p.id
         </query>
     </named-query>
 
@@ -70,6 +74,7 @@
             AND p.flavour.deleted = false
             AND p.image.visible = true
             AND (ir.user = :user OR e.id IN :experimentIds OR fl.objectId IS NULL)
+            ORDER BY p.id
         </query>
     </named-query>
 
@@ -81,6 +86,7 @@
             AND p.flavour.deleted = false
             AND p.image.visible = true
             AND fl.objectId IS NULL
+            ORDER BY p.id
         </query>
     </named-query>
 
@@ -93,6 +99,7 @@
             AND p.flavour.deleted = false
             AND p.image.visible = true
             AND (ir.user = :user OR fl.objectId IS NULL)
+            ORDER BY p.id
         </query>
     </named-query>
 

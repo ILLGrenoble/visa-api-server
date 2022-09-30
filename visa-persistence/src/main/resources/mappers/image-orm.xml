@@ -17,6 +17,7 @@
             SELECT i FROM Image i
             WHERE i.deleted = false
             AND i.visible = true
+            ORDER BY i.id
         </query>
     </named-query>
 
@@ -24,7 +25,7 @@
         <query>
             SELECT i FROM Image i
             WHERE i.deleted = false
-            ORDER BY i.id desc
+            ORDER BY i.id
         </query>
     </named-query>
 
