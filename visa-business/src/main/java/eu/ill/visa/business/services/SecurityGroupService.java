@@ -39,10 +39,6 @@ public class SecurityGroupService {
         return this.repository.getAll();
     }
 
-    public SecurityGroup getByName(@NotNull final String name) {
-        return this.repository.getByName(name);
-    }
-
     public List<SecurityGroup> getAllForInstance(final Instance instance) {
         User owner = instance.getOwner().getUser();
 

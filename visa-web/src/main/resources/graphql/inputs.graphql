@@ -48,6 +48,11 @@ input FlavourInput {
     instrumentIds: [Int]
 }
 
+input SecurityGroupInput {
+    name: String!
+    cloudId: Int
+}
+
 input UserInput {
     instanceQuota: Int!
     admin: Boolean!

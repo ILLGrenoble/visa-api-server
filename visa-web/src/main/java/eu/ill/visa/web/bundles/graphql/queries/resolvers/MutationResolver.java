@@ -29,10 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.ill.visa.web.bundles.graphql.queries.domain.Message.createMessage;
@@ -319,14 +316,6 @@ public class MutationResolver implements GraphQLMutationResolver {
         }
     }
 
-    private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {
-        if (cloudId != null && cloudId > 0) {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
-            return this.cloudProviderService.getById(cloudClient.getId());
-        }
-        return null;
-    }
-
     /**
      * Create a new securityGroup
      *
@@ -334,8 +323,26 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created securityGroup
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public SecurityGroup createSecurityGroup(String input) {
-        final SecurityGroup securityGroup = new SecurityGroup(input);
+    public SecurityGroup createSecurityGroup(SecurityGroupInput input) throws InvalidInputException {
+        // Validate the security group
+        this.validateSecurityGroupInput(input);
+
+        Optional<SecurityGroup> existingSecurityGroup = this.securityGroupService.getAll()
+            .stream()
+            .filter(securityGroup -> {
+                if (!input.getName().equals(securityGroup.getName())) {
+                    return false;
+                }
+                Long inputCloudId = input.getCloudId() == -1 ? null :  input.getCloudId();
+                return (inputCloudId == null && securityGroup.getCloudId() == null) || inputCloudId.equals(securityGroup.getCloudId());
+            })
+            .findFirst();
+        if (existingSecurityGroup.isPresent()) {
+            return existingSecurityGroup.get();
+        }
+
+        final SecurityGroup securityGroup = new SecurityGroup(input.getName());
+        securityGroup.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         securityGroupService.save(securityGroup);
         return securityGroup;
     }
@@ -349,15 +356,17 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the given the securityGroup id was not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public SecurityGroup updateSecurityGroup(Long id, String input) throws EntityNotFoundException {
+    public SecurityGroup updateSecurityGroup(Long id, SecurityGroupInput input) throws EntityNotFoundException, InvalidInputException {
         final SecurityGroup securityGroup = this.securityGroupService.getById(id);
         if (securityGroup == null) {
             throw new EntityNotFoundException("SecurityGroup was not found for the given id");
         }
 
-        // TODO Check that security group exists
+        // Validate the security group
+        this.validateSecurityGroupInput(input);
 
-        securityGroup.setName(input);
+        securityGroup.setName(input.getName());
+        securityGroup.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
 
         securityGroupService.save(securityGroup);
         return securityGroup;
@@ -381,6 +390,32 @@ public class MutationResolver implements GraphQLMutationResolver {
             .forEach(securityGroupFilterService::delete);
         securityGroupService.delete(securityGroup);
         return securityGroup;
+    }
+
+    private void validateSecurityGroupInput(SecurityGroupInput securityGroupInput) throws InvalidInputException {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(securityGroupInput.getCloudId());
+            if (cloudClient == null) {
+                throw new InvalidInputException("Invalid cloud Id");
+            }
+
+            boolean securityGroupExists = cloudClient.securityGroups().contains(securityGroupInput.getName());
+            if (!securityGroupExists) {
+                throw new InvalidInputException("Invalid Cloud Security Group");
+            }
+
+        } catch (CloudException exception) {
+            throw new InvalidInputException("Error accessing Cloud");
+        }
+    }
+
+
+    private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {
+        if (cloudId != null && cloudId > 0) {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            return this.cloudProviderService.getById(cloudClient.getId());
+        }
+        return null;
     }
 
     /**

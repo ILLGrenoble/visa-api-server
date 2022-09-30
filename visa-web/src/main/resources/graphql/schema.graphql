@@ -102,9 +102,9 @@ type Mutation {
     # Delete a flavour
     deleteFlavour(id: Int!) : Flavour! @isAuthorised(role: "ADMIN")
     # Create a securityGroup
-    createSecurityGroup(input: String!): SecurityGroup!  @isAuthorised(role: "ADMIN")
+    createSecurityGroup(input: SecurityGroupInput!): SecurityGroup!  @isAuthorised(role: "ADMIN")
     # Update a securityGroup
-    updateSecurityGroup(id: Int!, input: String!): SecurityGroup! @isAuthorised(role: "ADMIN")
+    updateSecurityGroup(id: Int!, input: SecurityGroupInput!): SecurityGroup! @isAuthorised(role: "ADMIN")
     # Delete a securityGroup
     deleteSecurityGroup(id: Int!) : SecurityGroup! @isAuthorised(role: "ADMIN")
     # Create a securityGroupFilter

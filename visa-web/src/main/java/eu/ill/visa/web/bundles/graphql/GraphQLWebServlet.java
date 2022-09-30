@@ -35,12 +35,12 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
     private final ImageResolver                  imageResolver;
     private final FlavourResolver                flavourResolver;
     private final CloudImageResolver             cloudImageResolver;
-    private final CloudSecurityGroupResolver     cloudSecurityGroupResolver;
     private final ImageProtocolResolver          imageProtocolResolver;
     private final UserResolver                   userResolver;
     private final RoleDirective                  roleDirective;
     private final AuthenticationContextBuilder   authenticationContext;
     private final SecurityGroupFilterResolver    securityGroupFilterResolver;
+    private final SecurityGroupResolver          securityGroupResolver;
 
     @Inject
     public GraphQLWebServlet(final GraphQLWebServletConfiguration configuration,
@@ -53,9 +53,9 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                              final ImageResolver imageResolver,
                              final FlavourResolver flavourResolver,
                              final CloudImageResolver cloudImageResolver,
-                             final CloudSecurityGroupResolver cloudSecurityGroupResolver,
                              final ImageProtocolResolver imageProtocolResolver,
                              final SecurityGroupFilterResolver securityGroupFilterResolver,
+                             final SecurityGroupResolver securityGroupResolver,
                              final AuthenticationContextBuilder authenticationContext,
                              final RoleDirective roleDirective) {
         this.configuration = configuration;
@@ -67,10 +67,10 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         this.userResolver = userResolver;
         this.imageResolver = imageResolver;
         this.flavourResolver = flavourResolver;
-        this.cloudSecurityGroupResolver = cloudSecurityGroupResolver;
         this.cloudImageResolver = cloudImageResolver;
         this.imageProtocolResolver = imageProtocolResolver;
         this.securityGroupFilterResolver = securityGroupFilterResolver;
+        this.securityGroupResolver = securityGroupResolver;
         this.authenticationContext = authenticationContext;
         this.roleDirective = roleDirective;
     }
@@ -120,9 +120,9 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                 imageResolver,
                 flavourResolver,
                 cloudImageResolver,
-                cloudSecurityGroupResolver,
                 imageProtocolResolver,
                 userResolver,
+                securityGroupResolver,
                 securityGroupFilterResolver
             )
             .directive("isAuthorised", roleDirective)

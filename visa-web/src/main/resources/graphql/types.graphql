@@ -74,7 +74,6 @@ type CloudImage {
 
 type CloudSecurityGroup {
     name: String!
-    integration: SecurityGroup
 }
 
 type Image {
@@ -102,6 +101,7 @@ type Plan {
 type SecurityGroup {
     id: Int!
     name: String!
+    cloudClient: CloudClient!
 }
 
 type SecurityGroupFilter {

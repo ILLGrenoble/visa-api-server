@@ -3,8 +3,10 @@ package eu.ill.visa.persistence.repositories;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import eu.ill.visa.core.domain.*;
-import eu.ill.visa.persistence.providers.FlavourFilterProvider;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.domain.SecurityGroup;
+import eu.ill.visa.core.domain.User;
 import eu.ill.visa.persistence.providers.SecurityGroupFilterProvider;
 
 import javax.persistence.EntityManager;
@@ -68,16 +70,6 @@ public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
             persist(securityGroup);
         } else {
             merge(securityGroup);
-        }
-    }
-
-    public SecurityGroup getByName(String name) {
-        try {
-            final TypedQuery<SecurityGroup> query = getEntityManager().createNamedQuery("securityGroup.getByName", SecurityGroup.class);
-            query.setParameter("name", name);
-            return query.getSingleResult();
-        } catch (NoResultException exception) {
-            return null;
         }
     }
 }
