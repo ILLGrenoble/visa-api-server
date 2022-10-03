@@ -39,8 +39,7 @@ public class CreateInstanceAction extends InstanceAction {
             final Image image = plan.getImage();
 
             // Get security groups for instance
-            List<SecurityGroup> securityGroups = this.getSecurityGroupService().getAllForInstance(instance);
-            List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
+            List<String> securityGroupNames = this.getSecurityGroupService().getAllSecurityGroupNamesForInstance(instance);
             logger.info("Adding security groups [{}] to instance {}", String.join(", ", securityGroupNames), instance.getId());
 
             instance.setSecurityGroups(securityGroupNames);

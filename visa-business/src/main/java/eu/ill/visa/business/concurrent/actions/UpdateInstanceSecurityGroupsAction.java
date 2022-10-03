@@ -4,12 +4,10 @@ import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionExceptio
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.SecurityGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UpdateInstanceSecurityGroupsAction extends InstanceAction {
 
@@ -35,9 +33,7 @@ public class UpdateInstanceSecurityGroupsAction extends InstanceAction {
             }
 
             // Get security groups for instance
-            List<SecurityGroup> securityGroups = this.getSecurityGroupService().getAllForInstance(instance);
-
-            List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
+            List<String> securityGroupNames = this.getSecurityGroupService().getAllSecurityGroupNamesForInstance(instance);
             logger.info("Setting security groups [{}] to instance {}", String.join(", ", securityGroupNames), instance.getId());
 
             instance.setSecurityGroups(securityGroupNames);

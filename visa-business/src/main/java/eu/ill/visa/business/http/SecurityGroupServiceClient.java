@@ -1,6 +1,7 @@
 package eu.ill.visa.business.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.inject.Singleton;
@@ -32,7 +33,8 @@ public class SecurityGroupServiceClient {
     public SecurityGroupServiceClient(final SecurityGroupServiceClientConfiguration configuration) {
         this.configuration = configuration;
         this.securityGroupServiceClient = new OkHttpClient.Builder().callTimeout(60, TimeUnit.SECONDS).build();
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        ;
         this.objectWriter = this.objectMapper.writer().withDefaultPrettyPrinter();
     }
 
@@ -66,12 +68,12 @@ public class SecurityGroupServiceClient {
         return null;
     }
 
-    public List<SecurityGroup> getSecurityGroups(final Instance instance) {
-        List<SecurityGroup> securityGroups = new ArrayList<>();
+    public List<String> getSecurityGroups(final Instance instance) {
+        List<String> securityGroupNames = new ArrayList<>();
 
         // Verify that the application is configured to use the security group service
         if (this.configuration == null || !this.configuration.isEnabled() || this.configuration.getUrl() == null || this.configuration.getUrl().equals("")) {
-            return securityGroups;
+            return securityGroupNames;
         }
 
         try {
@@ -81,9 +83,9 @@ public class SecurityGroupServiceClient {
             // Perform request
             String jsonString = this.requestSecurityGroups(instance.getId(), json);
             if (jsonString != null) {
-                securityGroups = this.objectMapper.readValue(jsonString,  new TypeReference<List<SecurityGroup>>(){});
+                List<SecurityGroup> securityGroups = this.objectMapper.readValue(jsonString,  new TypeReference<>(){});
 
-                List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
+                securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
                 logger.info("... got security groups [{}] for instance {}", String.join(", ", securityGroupNames), instance.getId());
             }
 
@@ -91,6 +93,6 @@ public class SecurityGroupServiceClient {
             logger.warn("Caught exception getting security groups for instance {}: {} ", instance.getId(), e.getMessage());
         }
 
-        return securityGroups;
+        return securityGroupNames;
     }
 }

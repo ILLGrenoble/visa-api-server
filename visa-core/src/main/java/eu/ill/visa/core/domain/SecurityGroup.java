@@ -49,6 +49,15 @@ public class SecurityGroup {
         return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
     }
 
+    public boolean hasSameCloudClientId(Long cloudClientId) {
+        if (this.cloudProviderConfiguration == null) {
+            return cloudClientId == null || cloudClientId.equals(-1L);
+
+        } else {
+            return this.cloudProviderConfiguration.getId().equals(cloudClientId);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

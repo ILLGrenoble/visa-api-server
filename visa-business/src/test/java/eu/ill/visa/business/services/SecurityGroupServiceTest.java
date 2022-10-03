@@ -36,7 +36,7 @@ public class SecurityGroupServiceTest {
     @Test
     @DisplayName("It should get all general securityGroups")
     void testGetDefaultSecurityGroups() {
-        final List<SecurityGroup> securityGroups = securityGroupService.getDefaultSecurityGroups();
+        final List<SecurityGroup> securityGroups = securityGroupService.getDefaultSecurityGroups(null);
         assertEquals(1, securityGroups.size());
     }
 
@@ -45,8 +45,8 @@ public class SecurityGroupServiceTest {
     void testSecurityGroupsForInstanceWithAdminOwner() {
         Instance instance = instanceService.getById(1000L);
 
-        final List<SecurityGroup> securityGroups = securityGroupService.getAllForInstance(instance);
-        assertEquals(7, securityGroups.size());
+        final List<String> securityGroupsNames = securityGroupService.getAllSecurityGroupNamesForInstance(instance);
+        assertEquals(7, securityGroupsNames.size());
     }
 
     @Test
@@ -54,8 +54,8 @@ public class SecurityGroupServiceTest {
     void testSecurityGroupsForInstanceWithStaffOwner() {
         Instance instance = instanceService.getById(1006L);
 
-        final List<SecurityGroup> securityGroups = securityGroupService.getAllForInstance(instance);
-        assertEquals(2, securityGroups.size());
+        final List<String> securityGroupsNames = securityGroupService.getAllSecurityGroupNamesForInstance(instance);
+        assertEquals(2, securityGroupsNames.size());
     }
 
 }

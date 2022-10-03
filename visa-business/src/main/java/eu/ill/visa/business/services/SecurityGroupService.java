@@ -8,10 +8,8 @@ import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.SecurityGroupRepository;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Transactional
 @Singleton
@@ -39,25 +37,45 @@ public class SecurityGroupService {
         return this.repository.getAll();
     }
 
-    public List<SecurityGroup> getAllForInstance(final Instance instance) {
+    public List<SecurityGroup> getAllForCloudClient(Long cloudClientId) {
+        List<SecurityGroup> securityGroups = this.getAll()
+            .stream()
+            .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
+            .collect(Collectors.toList());
+
+        return securityGroups;
+    }
+
+    public List<String> getAllSecurityGroupNamesForInstance(final Instance instance) {
         User owner = instance.getOwner().getUser();
 
+        Long cloudClientId = instance.getCloudId();
+
         // Get security groups from security-groups web service
-        List<SecurityGroup> customSecurityGroups = this.securityGroupServiceClient.getSecurityGroups(instance);
+        List<String> customSecurityGroups = this.securityGroupServiceClient.getSecurityGroups(instance);
 
         if (owner.hasRole(Role.ADMIN_ROLE)) {
-            List<SecurityGroup> allSecurityGroups = this.getAll();
+            List<String> allSecurityGroups = this.getAllForCloudClient(cloudClientId)
+                .stream()
+                .map(SecurityGroup::getName)
+                .collect(Collectors.toList());
 
-            Set<SecurityGroup> uniqueSecurityGroups = new LinkedHashSet<>(allSecurityGroups);
+            Set<String> uniqueSecurityGroups = new LinkedHashSet<>(allSecurityGroups);
             uniqueSecurityGroups.addAll(customSecurityGroups);
 
             return new ArrayList<>(uniqueSecurityGroups);
 
         } else {
-            List<SecurityGroup> generalSecurityGroups = this.getDefaultSecurityGroups();
-            List<SecurityGroup> roleBasedSecurityGroups = this.getRoleBasedSecurityGroups(owner);
+            List<String> generalSecurityGroups = this.getDefaultSecurityGroups(cloudClientId)
+                .stream()
+                .map(SecurityGroup::getName)
+                .collect(Collectors.toList());
+            List<String> roleBasedSecurityGroups = this.getRoleBasedSecurityGroups(owner, cloudClientId)
+                .stream()
+                .map(SecurityGroup::getName)
+                .collect(Collectors.toList());
 
-            Set<SecurityGroup> uniqueSecurityGroups = new LinkedHashSet<>(generalSecurityGroups);
+            Set<String> uniqueSecurityGroups = new LinkedHashSet<>(generalSecurityGroups);
             uniqueSecurityGroups.addAll(roleBasedSecurityGroups);
             uniqueSecurityGroups.addAll(customSecurityGroups);
 
@@ -70,11 +88,21 @@ public class SecurityGroupService {
         return repository.getAll(filter, orderBy);
     }
 
-    public List<SecurityGroup> getDefaultSecurityGroups() {
-        return repository.getDefaultSecurityGroups();
+    public List<SecurityGroup> getDefaultSecurityGroups(Long cloudClientId) {
+        List<SecurityGroup> securityGroups = repository.getDefaultSecurityGroups()
+            .stream()
+            .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
+            .collect(Collectors.toList());
+
+        return securityGroups;
     }
 
-    public List<SecurityGroup> getRoleBasedSecurityGroups(final User user) {
-        return repository.getRoleBasedSecurityGroups(user);
+    public List<SecurityGroup> getRoleBasedSecurityGroups(final User user, Long cloudClientId) {
+        List<SecurityGroup> securityGroups = repository.getRoleBasedSecurityGroups(user)
+            .stream()
+            .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
+            .collect(Collectors.toList());
+
+        return securityGroups;
     }
 }

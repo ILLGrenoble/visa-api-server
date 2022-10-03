@@ -6,7 +6,6 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.SecurityGroupService;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.SecurityGroup;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -16,19 +15,20 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @DisallowConcurrentExecution
 public class InstanceSecurityGroupUpdateJob implements Job {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceSecurityGroupUpdateJob.class);
 
-    private InstanceService instanceService;
-    private SecurityGroupService securityGroupService;
-    private InstanceCommandService instanceCommandService;
+    private final InstanceService instanceService;
+    private final SecurityGroupService securityGroupService;
+    private final InstanceCommandService instanceCommandService;
 
     @Inject
-    public InstanceSecurityGroupUpdateJob(InstanceService instanceService, SecurityGroupService securityGroupService, InstanceCommandService instanceCommandService) {
+    public InstanceSecurityGroupUpdateJob(final InstanceService instanceService,
+                                          final SecurityGroupService securityGroupService,
+                                          final InstanceCommandService instanceCommandService) {
         this.instanceService = instanceService;
         this.securityGroupService = securityGroupService;
         this.instanceCommandService = instanceCommandService;
@@ -43,8 +43,7 @@ public class InstanceSecurityGroupUpdateJob implements Job {
         // Determine which instances have changed security groups
         for (Instance instance : instances) {
             List<String> currentSecurityGroups = instance.getSecurityGroups();
-            List<String> updatedSecurityGroups = this.securityGroupService.getAllForInstance(instance).stream()
-                .map(SecurityGroup::getName).collect(Collectors.toList());
+            List<String> updatedSecurityGroups = this.securityGroupService.getAllSecurityGroupNamesForInstance(instance);
 
             // Check if lists of security groups has changed
             if (!equalSecurityGroups(currentSecurityGroups, updatedSecurityGroups)) {
