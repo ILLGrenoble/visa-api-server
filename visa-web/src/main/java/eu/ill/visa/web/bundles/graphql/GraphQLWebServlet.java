@@ -35,6 +35,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
     private final ImageResolver                  imageResolver;
     private final FlavourResolver                flavourResolver;
     private final CloudImageResolver             cloudImageResolver;
+    private final CloudClientResolver            cloudClientResolver;
     private final ImageProtocolResolver          imageProtocolResolver;
     private final UserResolver                   userResolver;
     private final RoleDirective                  roleDirective;
@@ -53,6 +54,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                              final ImageResolver imageResolver,
                              final FlavourResolver flavourResolver,
                              final CloudImageResolver cloudImageResolver,
+                             final CloudClientResolver cloudClientResolver,
                              final ImageProtocolResolver imageProtocolResolver,
                              final SecurityGroupFilterResolver securityGroupFilterResolver,
                              final SecurityGroupResolver securityGroupResolver,
@@ -68,6 +70,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         this.imageResolver = imageResolver;
         this.flavourResolver = flavourResolver;
         this.cloudImageResolver = cloudImageResolver;
+        this.cloudClientResolver = cloudClientResolver;
         this.imageProtocolResolver = imageProtocolResolver;
         this.securityGroupFilterResolver = securityGroupFilterResolver;
         this.securityGroupResolver = securityGroupResolver;
@@ -120,6 +123,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                 imageResolver,
                 flavourResolver,
                 cloudImageResolver,
+                cloudClientResolver,
                 imageProtocolResolver,
                 userResolver,
                 securityGroupResolver,

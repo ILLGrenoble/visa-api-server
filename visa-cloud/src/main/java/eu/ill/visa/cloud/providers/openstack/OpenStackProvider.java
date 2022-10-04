@@ -33,6 +33,10 @@ public class OpenStackProvider implements CloudProvider {
         this.configuration = configuration;
     }
 
+    public OpenStackProviderConfiguration getConfiguration() {
+        return configuration;
+    }
+
     private String authenticate() throws CloudException {
         final String data = AuthenticationConverter.toJson(configuration);
         final String url = format("%s/v3/auth/tokens", configuration.getIdentityEndpoint());

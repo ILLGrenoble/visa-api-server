@@ -16,14 +16,24 @@ public class CloudClient {
 
     private final        Long          id;
     private final        String        name;
+    private final        String        type;
     private final        CloudProvider provider;
     private final        String        serverNamePrefix;
+    private final        Boolean       visible;
 
-    public CloudClient(final Long id, final String name, final CloudProvider provider, final String serverNamePrefix) {
+
+    public CloudClient(final Long id,
+                       final String name,
+                       final String type,
+                       final CloudProvider provider,
+                       final String serverNamePrefix,
+                       final Boolean visible) {
         this.id = id;
+        this.type = type;
         this.name = name;
         this.provider = provider;
         this.serverNamePrefix = serverNamePrefix;
+        this.visible = visible;
     }
 
     public Long getId() {
@@ -32,6 +42,22 @@ public class CloudClient {
 
     public String getName() {
         return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getServerNamePrefix() {
+        return serverNamePrefix;
+    }
+
+    public Boolean getVisible() {
+        return visible;
+    }
+
+    public CloudProvider getProvider() {
+        return provider;
     }
 
     public List<CloudImage> images() throws CloudException {
@@ -105,10 +131,6 @@ public class CloudClient {
     public void deleteInstance(final String id) throws CloudException {
         logger.info("Deleting instance with id: {}", id);
         provider.deleteInstance(id);
-    }
-
-    public String getServerNamePrefix() {
-        return serverNamePrefix;
     }
 
     public CloudLimit limits() throws CloudException {

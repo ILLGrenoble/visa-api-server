@@ -53,20 +53,23 @@ public class CloudClientGateway {
         return new ArrayList<>(this.secondaryCloudClients.values());
     }
 
-    public void addCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix) {
+    public CloudClient addCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) {
         try {
-            CloudClient cloudClient = this.factory.getClient(providerId, name, providerConfiguration, serverNamePrefix);
+            CloudClient cloudClient = this.factory.getClient(providerId, name, providerConfiguration, serverNamePrefix, visible);
             this.secondaryCloudClients.put(providerId, cloudClient);
 
+            return cloudClient;
         } catch (CloudException e) {
             logger.error("Failed to create default Cloud Provider: {}", e.getMessage());
         }
+
+        return null;
     }
 
-    public void updateCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix) {
+    public CloudClient updateCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) {
         this.secondaryCloudClients.remove(providerId);
 
-        this.addCloudClient(providerId, name, providerConfiguration, serverNamePrefix);
+        return this.addCloudClient(providerId, name, providerConfiguration, serverNamePrefix, visible);
     }
 
     public void removeCloudClient(Long providerId) {

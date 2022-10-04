@@ -42,6 +42,10 @@ public class WebProvider implements CloudProvider {
         this.configuration = requireNonNull(configuration, "configuration cannot be null");
     }
 
+    public WebProviderConfiguration getConfiguration() {
+        return configuration;
+    }
+
     @Override
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
         final String url = format("%s/api/instances/identifiers", configuration.getUrl());

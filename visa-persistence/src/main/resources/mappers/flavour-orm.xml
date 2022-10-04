@@ -18,7 +18,7 @@
             SELECT f
             FROM Flavour f
             WHERE f.deleted = false
-            ORDER BY cpu, memory</query>
+            ORDER BY cpu, memory, id</query>
     </named-query>
 
     <named-query name="flavour.countAllForAdmin">

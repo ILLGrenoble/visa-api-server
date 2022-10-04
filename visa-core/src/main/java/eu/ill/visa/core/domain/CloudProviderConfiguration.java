@@ -1,5 +1,6 @@
 package eu.ill.visa.core.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -9,7 +10,7 @@ public class CloudProviderConfiguration extends Timestampable {
     private String type;
     private String name;
     private String serverNamePrefix;
-    private List<CloudProviderConfigurationParameter> parameters;
+    private List<CloudProviderConfigurationParameter> parameters = new ArrayList<>();
 
     private boolean visible = false;
     private Date deletedAt;
@@ -73,12 +74,21 @@ public class CloudProviderConfiguration extends Timestampable {
         this.parameters = parameters;
     }
 
+    public void addParameter(CloudProviderConfigurationParameter parameter) {
+        this.parameters.add(parameter);
+    }
+
     public static class CloudProviderConfigurationParameter extends Timestampable {
         private Long id;
         private String key;
         private String value;
 
         public CloudProviderConfigurationParameter() {
+        }
+
+        public CloudProviderConfigurationParameter(String key, String value) {
+            this.key = key;
+            this.value = value;
         }
 
         public Long getId() {
@@ -104,5 +114,57 @@ public class CloudProviderConfiguration extends Timestampable {
         public void setValue(String value) {
             this.value = value;
         }
+    }
+
+
+    public static final class Builder {
+        private Long id;
+        private String type;
+        private String name;
+        private String serverNamePrefix;
+        private boolean visible = false;
+
+        public Builder() {
+        }
+
+        public static CloudProviderConfiguration.Builder builder() {
+            return new CloudProviderConfiguration.Builder();
+        }
+
+        public CloudProviderConfiguration.Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public CloudProviderConfiguration.Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public CloudProviderConfiguration.Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public CloudProviderConfiguration.Builder serverNamePrefix(String serverNamePrefix) {
+            this.serverNamePrefix = serverNamePrefix;
+            return this;
+        }
+
+        public CloudProviderConfiguration.Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
+        public CloudProviderConfiguration build() {
+            CloudProviderConfiguration cloudProviderConfiguration = new CloudProviderConfiguration();
+            cloudProviderConfiguration.setId(id);
+            cloudProviderConfiguration.setType(type);
+            cloudProviderConfiguration.setName(name);
+            cloudProviderConfiguration.setServerNamePrefix(serverNamePrefix);
+            cloudProviderConfiguration.setVisible(visible);
+            return cloudProviderConfiguration;
+        }
+
     }
 }

@@ -119,6 +119,9 @@ type Mutation {
     updatePlan(id: Int!,input: PlanInput!): Plan! @isAuthorised(role: "ADMIN")
     # Delete a plan
     deletePlan(id: Int!) : Plan! @isAuthorised(role: "ADMIN")
+    # Create a cloud client
+    createCloudClient(input: CloudClientInput!): CloudClient! @isAuthorised(role: "ADMIN")
+
     # Reboot an instance
     rebootInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
     # Start an instance

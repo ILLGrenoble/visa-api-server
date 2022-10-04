@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.cloud.ProviderConfiguration;
+import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.CloudProviderConfiguration;
 import eu.ill.visa.persistence.repositories.CloudProviderRepository;
@@ -32,7 +33,10 @@ public class CloudProviderService {
     private void init() {
         List<CloudProviderConfiguration> cloudProviderConfigurations = this.getAll();
         for (CloudProviderConfiguration cloudProviderConfiguration : cloudProviderConfigurations) {
-            this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
+            this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix(), cloudProviderConfiguration.isVisible());
+            this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix(), cloudProviderConfiguration.isVisible());
+            this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix(), cloudProviderConfiguration.isVisible());
+            this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix(), cloudProviderConfiguration.isVisible());
         }
     }
 
@@ -50,15 +54,15 @@ public class CloudProviderService {
         this.cloudClientGateway.removeCloudClient(cloudProviderConfiguration.getId());
     }
 
-    public void save(@NotNull CloudProviderConfiguration cloudProviderConfiguration) {
+    public CloudClient save(@NotNull CloudProviderConfiguration cloudProviderConfiguration) {
         this.repository.save(cloudProviderConfiguration);
 
-        this.cloudClientGateway.updateCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
+        return this.cloudClientGateway.updateCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix(), cloudProviderConfiguration.isVisible());
     }
 
-    public void create(CloudProviderConfiguration cloudProviderConfiguration) {
+    public CloudClient createCloudClient(CloudProviderConfiguration cloudProviderConfiguration) {
         this.repository.create(cloudProviderConfiguration);
-        this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix());
+        return this.cloudClientGateway.addCloudClient(cloudProviderConfiguration.getId(), cloudProviderConfiguration.getName(), this.convert(cloudProviderConfiguration), cloudProviderConfiguration.getServerNamePrefix(), cloudProviderConfiguration.isVisible());
     }
 
     private ProviderConfiguration convert(CloudProviderConfiguration cloudProviderConfiguration) {

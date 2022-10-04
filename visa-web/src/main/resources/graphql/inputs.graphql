@@ -81,3 +81,29 @@ input InstanceExtensionResponseInput {
     accepted: Boolean!
     terminationDate: String!
 }
+
+
+input OpenStackProviderConfigurationInput {
+    applicationId: String!
+    applicationSecret: String!
+    computeEndpoint: String!
+    imageEndpoint: String!
+    networkEndpoint: String!
+    identityEndpoint: String!
+    addressProvider: String!
+    addressProviderUUID: String!
+}
+
+input WebProviderConfigurationInput {
+    url: String!
+    authToken: String!
+}
+
+input CloudClientInput {
+    name: String!
+    type: String!
+    serverNamePrefix: String!
+    visible: Boolean!
+    openStackProviderConfiguration: OpenStackProviderConfigurationInput
+    webProviderConfiguration: WebProviderConfigurationInput
+}

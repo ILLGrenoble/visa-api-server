@@ -42,9 +42,29 @@ type Proposal {
     summary: String
 }
 
+type OpenStackProviderConfiguration {
+    applicationId: String!
+    applicationSecret: String!
+    computeEndpoint: String!
+    imageEndpoint: String!
+    networkEndpoint: String!
+    identityEndpoint: String!
+    addressProvider: String!
+    addressProviderUUID: String!
+}
+type WebProviderConfiguration {
+    url: String!
+    authToken: String!
+}
+
 type CloudClient {
     id: Int!
     name: String!
+    type: String!
+    serverNamePrefix: String!
+    visible: Boolean!
+    openStackProviderConfiguration: OpenStackProviderConfiguration
+    webProviderConfiguration: WebProviderConfiguration
 }
 
 type Flavour {

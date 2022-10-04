@@ -6,6 +6,7 @@ import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
@@ -590,6 +591,55 @@ public class MutationResolver implements GraphQLMutationResolver {
         return plan;
     }
 
+
+    /**
+     * Create a new cloudClient
+     *
+     * @param input the cloudClient properties
+     * @return the newly created cloudClient
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    public CloudClient createCloudClient(@Valid CloudClientInput input) throws InvalidInputException {
+        CloudProviderConfiguration.Builder builder = new CloudProviderConfiguration.Builder();
+        CloudProviderConfiguration configuration = builder
+            .type(input.getType())
+            .name(input.getName())
+            .visible(input.getVisible())
+            .serverNamePrefix(input.getServerNamePrefix())
+            .build();
+
+        if (input.getType().equals(CloudClientFactory.OPENSTACK)) {
+            if (input.getOpenStackProviderConfiguration() == null) {
+                throw new InvalidInputException("OpenStack provider configuration must be specified");
+            }
+            OpenStackProviderConfigurationInput configurationInput = input.getOpenStackProviderConfiguration();
+
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("applicationId", configurationInput.getApplicationId()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("applicationSecret", configurationInput.getApplicationSecret()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("computeEndpoint", configurationInput.getComputeEndpoint()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("imageEndpoint", configurationInput.getImageEndpoint()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("networkEndpoint", configurationInput.getNetworkEndpoint()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("identityEndpoint", configurationInput.getIdentityEndpoint()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("addressProvider", configurationInput.getAddressProvider()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("addressProviderUUID", configurationInput.getAddressProviderUUID()));
+
+        } else if (input.getType().equals(CloudClientFactory.WEB)) {
+            if (input.getWebProviderConfiguration() == null) {
+                throw new InvalidInputException("Web provider configuration must be specified");
+            }
+
+            WebProviderConfigurationInput configurationInput = input.getWebProviderConfiguration();
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("url", configurationInput.getUrl()));
+            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("authToken", configurationInput.getAuthToken()));
+
+        } else {
+            throw new InvalidInputException("Cloud provider type must be specified");
+        }
+
+        CloudClient cloudClient = this.cloudProviderService.createCloudClient(configuration);
+
+        return cloudClient;
+    }
 
     /**
      * Reboot an instance
