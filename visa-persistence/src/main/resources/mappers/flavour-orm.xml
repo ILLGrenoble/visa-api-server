@@ -8,8 +8,10 @@
         <query>
             SELECT f
             FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
             WHERE f.id = :id
             AND f.deleted = false
+            AND cpc.deletedAt IS NULL
         </query>
     </named-query>
 
@@ -17,8 +19,10 @@
         <query>
             SELECT f
             FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
             WHERE f.deleted = false
-            ORDER BY cpu, memory, id</query>
+            AND cpc.deletedAt IS NULL
+            ORDER BY cpu, memory, f.id</query>
     </named-query>
 
     <named-query name="flavour.countAllForAdmin">

@@ -608,20 +608,59 @@ public class MutationResolver implements GraphQLMutationResolver {
             .serverNamePrefix(input.getServerNamePrefix())
             .build();
 
+        this.setCloudConfigurationParameters(configuration, input);
+
+        return this.cloudProviderService.createCloudClient(configuration);
+    }
+
+    /**
+     * Update a cloudClient
+     *
+     * @param id    the cloudClient id
+     * @param input the cloudClient properties
+     * @return the updated created cloudClient
+     * @throws EntityNotFoundException thrown if the given the cloudClient id was not found
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    public CloudClient updateCloudClient(Long id, @Valid CloudClientInput input) throws EntityNotFoundException, InvalidInputException  {
+        if (id == -1) {
+            throw new InvalidInputException("The default cloud provider cannot be modified");
+        }
+
+        CloudProviderConfiguration configuration = this.cloudProviderService.getById(id);
+        if (configuration == null) {
+            throw new EntityNotFoundException("Cloud provider not found for the given id");
+        }
+
+        if (!configuration.getType().equals(input.getType())) {
+            configuration.deleteParameters();
+        }
+
+        configuration.setName(input.getName());
+        configuration.setServerNamePrefix(input.getServerNamePrefix());
+        configuration.setType(input.getType());
+        configuration.setVisible(input.getVisible());
+
+        this.setCloudConfigurationParameters(configuration, input);
+
+        return this.cloudProviderService.save(configuration);
+    }
+
+    private void setCloudConfigurationParameters(CloudProviderConfiguration cloudProviderConfiguration, CloudClientInput input) throws InvalidInputException {
         if (input.getType().equals(CloudClientFactory.OPENSTACK)) {
             if (input.getOpenStackProviderConfiguration() == null) {
                 throw new InvalidInputException("OpenStack provider configuration must be specified");
             }
             OpenStackProviderConfigurationInput configurationInput = input.getOpenStackProviderConfiguration();
 
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("applicationId", configurationInput.getApplicationId()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("applicationSecret", configurationInput.getApplicationSecret()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("computeEndpoint", configurationInput.getComputeEndpoint()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("imageEndpoint", configurationInput.getImageEndpoint()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("networkEndpoint", configurationInput.getNetworkEndpoint()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("identityEndpoint", configurationInput.getIdentityEndpoint()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("addressProvider", configurationInput.getAddressProvider()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("addressProviderUUID", configurationInput.getAddressProviderUUID()));
+            cloudProviderConfiguration.setParameter("applicationId", configurationInput.getApplicationId());
+            cloudProviderConfiguration.setParameter("applicationSecret", configurationInput.getApplicationSecret());
+            cloudProviderConfiguration.setParameter("computeEndpoint", configurationInput.getComputeEndpoint());
+            cloudProviderConfiguration.setParameter("imageEndpoint", configurationInput.getImageEndpoint());
+            cloudProviderConfiguration.setParameter("networkEndpoint", configurationInput.getNetworkEndpoint());
+            cloudProviderConfiguration.setParameter("identityEndpoint", configurationInput.getIdentityEndpoint());
+            cloudProviderConfiguration.setParameter("addressProvider", configurationInput.getAddressProvider());
+            cloudProviderConfiguration.setParameter("addressProviderUUID", configurationInput.getAddressProviderUUID());
 
         } else if (input.getType().equals(CloudClientFactory.WEB)) {
             if (input.getWebProviderConfiguration() == null) {
@@ -629,16 +668,34 @@ public class MutationResolver implements GraphQLMutationResolver {
             }
 
             WebProviderConfigurationInput configurationInput = input.getWebProviderConfiguration();
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("url", configurationInput.getUrl()));
-            configuration.addParameter(new CloudProviderConfiguration.CloudProviderConfigurationParameter("authToken", configurationInput.getAuthToken()));
+            cloudProviderConfiguration.setParameter("url", configurationInput.getUrl());
+            cloudProviderConfiguration.setParameter("authToken", configurationInput.getAuthToken());
 
         } else {
             throw new InvalidInputException("Cloud provider type must be specified");
         }
+    }
 
-        CloudClient cloudClient = this.cloudProviderService.createCloudClient(configuration);
+    /**
+     * Delete a cloudClient for a given id
+     *
+     * @param id the cloudClient id
+     * @return true if deleted
+     * @throws EntityNotFoundException thrown if the cloudClient is not found
+     * @throws InvalidInputException thrown if trying to delete the default cloud client
+     */
+    public Boolean deleteCloudClient(Long id) throws EntityNotFoundException, InvalidInputException {
+        if (id == -1) {
+            throw new InvalidInputException("The default cloud client cannot be deleted");
+        }
 
-        return cloudClient;
+        final CloudProviderConfiguration configuration = this.cloudProviderService.getById(id);
+        if (configuration == null) {
+            throw new EntityNotFoundException("Cloud Client not found for the given id");
+        }
+
+        this.cloudProviderService.delete(configuration);
+        return true;
     }
 
     /**

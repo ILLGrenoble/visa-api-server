@@ -5,47 +5,72 @@
                  version="2.2">
     <named-query name="plan.getById">
         <query>
-            SELECT p FROM Plan p
+            SELECT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
             WHERE p.id = :id
-            AND p.image.deleted = false
-            AND p.flavour.deleted = false
+            AND i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
         </query>
     </named-query>
 
     <named-query name="plan.getAll">
         <query>
-            SELECT p FROM Plan p
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
-            AND p.image.visible = true
+            SELECT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND i.visible = true
+            AND cpc.deletedAt IS NULL
             ORDER BY p.id
         </query>
     </named-query>
 
     <named-query name="plan.getAllForAdmin">
         <query>
-            SELECT p FROM Plan p
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
+            SELECT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
             ORDER BY p.id
         </query>
     </named-query>
 
     <named-query name="plan.countAllForAdmin">
         <query>
-            SELECT COUNT(p) FROM Plan p
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
+            SELECT COUNT(p)
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
         </query>
     </named-query>
 
     <named-query name="plan.getAllForInstrumentIds">
         <query>
-            SELECT DISTINCT p FROM Plan p
+            SELECT DISTINCT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
-            AND p.image.visible = true
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
+            AND i.visible = true
             AND (fl.objectId IN :instrumentIds OR fl.objectId IS NULL)
             ORDER BY p.id
         </query>
@@ -53,12 +78,17 @@
 
     <named-query name="plan.getAllForExperimentIds">
         <query>
-            SELECT DISTINCT p FROM Plan p
+            SELECT DISTINCT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
             LEFT OUTER JOIN Experiment e ON e.instrument.id = fl.objectId
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
-            AND p.image.visible = true
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
+            AND i.visible = true
             AND (e.id IN :experimentIds OR fl.objectId IS NULL)
             ORDER BY p.id
         </query>
@@ -66,13 +96,18 @@
 
     <named-query name="plan.getAllForUserAndExperimentIds">
         <query>
-            SELECT DISTINCT p FROM Plan p
+            SELECT DISTINCT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
             LEFT OUTER JOIN Experiment e ON e.instrument.id = fl.objectId
             LEFT OUTER JOIN InstrumentScientist ir on ir.instrument.id = fl.objectId
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
-            AND p.image.visible = true
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
+            AND i.visible = true
             AND (ir.user = :user OR e.id IN :experimentIds OR fl.objectId IS NULL)
             ORDER BY p.id
         </query>
@@ -80,11 +115,16 @@
 
     <named-query name="plan.getAllForAllInstruments">
         <query>
-            SELECT DISTINCT p FROM Plan p
+            SELECT DISTINCT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
-            AND p.image.visible = true
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
+            AND i.visible = true
             AND fl.objectId IS NULL
             ORDER BY p.id
         </query>
@@ -92,12 +132,17 @@
 
     <named-query name="plan.getAllForUserAndAllInstruments">
         <query>
-            SELECT DISTINCT p FROM Plan p
+            SELECT DISTINCT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
             LEFT OUTER JOIN InstrumentScientist ir on ir.instrument.id = fl.objectId
-            WHERE p.image.deleted = false
-            AND p.flavour.deleted = false
-            AND p.image.visible = true
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
+            AND i.visible = true
             AND (ir.user = :user OR fl.objectId IS NULL)
             ORDER BY p.id
         </query>

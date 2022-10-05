@@ -5,26 +5,52 @@
                  version="2.2">
 
     <named-query name="securityGroup.getById">
-        <query>SELECT sg FROM SecurityGroup sg WHERE sg.id = :id</query>
+        <query>
+            SELECT sg
+            FROM SecurityGroup sg
+            LEFT JOIN sg.cloudProviderConfiguration cpc
+            WHERE sg.id = :id
+            AND cpc.deletedAt IS NULL
+        </query>
     </named-query>
 
     <named-query name="securityGroup.getAll">
-        <query>SELECT sg FROM SecurityGroup sg order by name</query>
+        <query>
+            SELECT sg
+            FROM SecurityGroup sg
+            LEFT JOIN sg.cloudProviderConfiguration cpc
+            WHERE cpc.deletedAt IS NULL
+            ORDER BY sg.name
+        </query>
     </named-query>
 
     <named-query name="securityGroup.getByName">
-        <query>SELECT sg FROM SecurityGroup sg WHERE sg.name = :name</query>
+        <query>
+            SELECT sg
+            FROM SecurityGroup sg
+            LEFT JOIN sg.cloudProviderConfiguration cpc
+            WHERE sg.name = :name
+            AND cpc.deletedAt IS NULL
+        </query>
     </named-query>
 
     <named-query name="securityGroup.countAll">
-        <query>SELECT count(sg.id) FROM SecurityGroup sg</query>
+        <query>
+            SELECT count(sg.id)
+            FROM SecurityGroup sg
+            LEFT JOIN sg.cloudProviderConfiguration cpc
+            WHERE cpc.deletedAt IS NULL
+        </query>
     </named-query>
 
     <named-query name="securityGroup.getDefaultSecurityGroups">
         <query>
-            SELECT DISTINCT sg FROM SecurityGroup sg
+            SELECT DISTINCT sg
+            FROM SecurityGroup sg
+            LEFT JOIN sg.cloudProviderConfiguration cpc
             LEFT OUTER JOIN SecurityGroupFilter sgf ON sgf.securityGroup = sg
             WHERE sgf.objectId IS NULL
+            AND cpc.deletedAt IS NULL
         </query>
     </named-query>
 
@@ -32,14 +58,16 @@
                         result-class="eu.ill.visa.core.domain.SecurityGroup">
         <query>
             <![CDATA[
-                SELECT DISTINCT sg.id, sg.name
+                SELECT DISTINCT sg.id, sg.name, sg.cloud_provider_configuration_id
                 FROM security_group sg
+                LEFT JOIN cloud_provider_configuration cpc ON sg.cloud_provider_configuration_id = cpc.id
                 LEFT JOIN security_group_filter sgf ON sg.id = sgf.security_group_id
                 LEFT JOIN role r ON r.id = sgf.object_id
                 LEFT JOIN user_role ur ON r.id = ur.role_id
                 LEFT JOIN users u ON ur.user_id = u.id
                 WHERE sgf.object_type = 'ROLE'
                 AND u.id = :userId
+                AND cpc.deleted_at IS NULL
             ]]>
         </query>
     </named-native-query>

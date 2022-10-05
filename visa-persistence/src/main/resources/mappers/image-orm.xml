@@ -14,17 +14,23 @@
 
     <named-query name="image.getAll">
         <query>
-            SELECT i FROM Image i
+            SELECT i
+            FROM Image i
+            LEFT JOIN i.cloudProviderConfiguration cpc
             WHERE i.deleted = false
             AND i.visible = true
+            AND cpc.deletedAt IS NULL
             ORDER BY i.id
         </query>
     </named-query>
 
     <named-query name="image.getAllForAdmin">
         <query>
-            SELECT i FROM Image i
+            SELECT i
+            FROM Image i
+            LEFT JOIN i.cloudProviderConfiguration cpc
             WHERE i.deleted = false
+            AND cpc.deletedAt IS NULL
             ORDER BY i.id
         </query>
     </named-query>

@@ -74,8 +74,21 @@ public class CloudProviderConfiguration extends Timestampable {
         this.parameters = parameters;
     }
 
+    public void deleteParameters() {
+        this.parameters = new ArrayList<>();
+    }
+
     public void addParameter(CloudProviderConfigurationParameter parameter) {
         this.parameters.add(parameter);
+    }
+
+    public void setParameter(String key, String value) {
+        CloudProviderConfigurationParameter parameter = this.parameters.stream().filter(cloudProviderConfigurationParameter -> cloudProviderConfigurationParameter.getKey().equals(key)).findFirst().orElse(null);
+        if (parameter == null) {
+            this.addParameter(new CloudProviderConfigurationParameter(key, value));
+        } else {
+            parameter.setValue(value);
+        }
     }
 
     public static class CloudProviderConfigurationParameter extends Timestampable {
