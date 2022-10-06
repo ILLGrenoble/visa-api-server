@@ -20,6 +20,7 @@
             WHERE i.deleted = false
             AND i.visible = true
             AND cpc.deletedAt IS NULL
+            AND COALESCE(cpc.visible, true) = true
             ORDER BY i.id
         </query>
     </named-query>

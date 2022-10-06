@@ -22,6 +22,7 @@
             LEFT JOIN f.cloudProviderConfiguration cpc
             WHERE f.deleted = false
             AND cpc.deletedAt IS NULL
+            AND COALESCE(cpc.visible, true) = true
             ORDER BY cpu, memory, f.id</query>
     </named-query>
 
