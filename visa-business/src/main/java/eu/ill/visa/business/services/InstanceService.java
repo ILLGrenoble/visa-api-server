@@ -257,6 +257,10 @@ public class InstanceService {
         return this.repository.countByImage();
     }
 
+    public List<NumberInstancesByCloudClient> countByCloudClient() {
+        return this.repository.countByCloudClient();
+    }
+
     public List<Instance> getAllForSupportUser(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
         if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
             return this.getAllForInstrumentControlSupport(filter, orderBy, pagination);

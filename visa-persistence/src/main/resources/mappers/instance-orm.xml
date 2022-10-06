@@ -202,6 +202,20 @@
         </query>
     </named-native-query>
 
+
+    <named-native-query name="instance.countByCloudClient" result-set-mapping="countByCloudClientMapping">
+        <query>
+            SELECT cpc.id as id, cpc.name as name, COUNT(i.id) as total
+            FROM instance i
+            JOIN plan p on i.plan_id = p.id
+            JOIN image im on p.image_id = im.id
+            LEFT JOIN cloud_provider_configuration cpc on im.cloud_provider_configuration_id = cpc.id
+            WHERE i.deleted_at IS NULL
+            GROUP BY cpc.id
+            ORDER BY cpc.name
+        </query>
+    </named-native-query>
+
     <sql-result-set-mapping name="countByFlavourMapping">
         <constructor-result target-class="eu.ill.visa.core.domain.NumberInstancesByFlavour">
             <column name="id" class="java.lang.Long"/>
@@ -215,6 +229,14 @@
             <column name="id" class="java.lang.Long"/>
             <column name="name" class="java.lang.String" />
             <column name="version" class="java.lang.String" />
+            <column name="total" class="java.lang.Long"/>
+        </constructor-result>
+    </sql-result-set-mapping>
+
+    <sql-result-set-mapping name="countByCloudClientMapping">
+        <constructor-result target-class="eu.ill.visa.core.domain.NumberInstancesByCloudClient">
+            <column name="id" class="java.lang.Long"/>
+            <column name="name" class="java.lang.String" />
             <column name="total" class="java.lang.Long"/>
         </constructor-result>
     </sql-result-set-mapping>

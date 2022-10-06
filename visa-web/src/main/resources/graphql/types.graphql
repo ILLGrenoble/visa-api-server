@@ -217,6 +217,12 @@ type CloudLimit {
     totalCoresUsed: Int!
 }
 
+type DetailedCloudLimit {
+    cloudClient: CloudClient!
+    cloudLimit: CloudLimit
+    error: String
+}
+
 type ProtocolStatus {
     protocol: ImageProtocol!
     active: Boolean!
@@ -331,6 +337,12 @@ type NumberInstancesByImage {
     id: Int!
     name: String!
     version: String
+    total: Int!
+}
+
+type NumberInstancesByCloudClients {
+    id: Int
+    name: String
     total: Int!
 }
 

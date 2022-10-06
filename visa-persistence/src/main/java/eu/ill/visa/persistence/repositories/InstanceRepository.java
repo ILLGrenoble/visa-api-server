@@ -293,6 +293,11 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         return query.getResultList();
     }
 
+    public List<NumberInstancesByCloudClient> countByCloudClient() {
+        final TypedQuery<NumberInstancesByCloudClient> query = getEntityManager().createNamedQuery("instance.countByCloudClient", NumberInstancesByCloudClient.class);
+        return query.getResultList();
+    }
+
     /**
      * Get all instances for IT support => all active instances
      */

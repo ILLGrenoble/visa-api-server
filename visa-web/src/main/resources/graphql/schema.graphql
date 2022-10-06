@@ -63,7 +63,7 @@ type Query {
     # Get flavours from cloud provider
     cloudFlavours(cloudId: Int): [CloudFlavour] @isAuthorised(role: "ADMIN")
     # Get cloud limits
-    cloudLimits(cloudId: Int): CloudLimit @isAuthorised(role: "ADMIN")
+    cloudLimits: [DetailedCloudLimit] @isAuthorised(role: "ADMIN")
     # Get cloud security groups
     cloudSecurityGroups(cloudId: Int): [CloudSecurityGroup] @isAuthorised(role: "ADMIN")
     # Count all sessions
@@ -80,6 +80,8 @@ type Query {
     countInstancesByFlavours: [NumberInstancesByFlavour]  @isAuthorised(role: "ADMIN")
     # Count instances by images
     countInstancesByImages: [NumberInstancesByImage]  @isAuthorised(role: "ADMIN")
+    # Count instances by cloud clients
+    countInstancesByCloudClients: [NumberInstancesByCloudClients]  @isAuthorised(role: "ADMIN")
     # Get system notifications
     systemNotifications: [SystemNotification] @isAuthorised(role: "ADMIN")
     # Get application credentials
