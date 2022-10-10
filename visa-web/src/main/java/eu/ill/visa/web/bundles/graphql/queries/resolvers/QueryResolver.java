@@ -114,7 +114,7 @@ public class QueryResolver implements GraphQLQueryResolver {
      */
     public List<Flavour> flavours() throws DataFetchingException {
         try {
-            return flavourService.getAll();
+            return flavourService.getAllForAdmin();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
