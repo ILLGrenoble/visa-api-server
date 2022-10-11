@@ -694,7 +694,13 @@ public class MutationResolver implements GraphQLMutationResolver {
             throw new EntityNotFoundException("Cloud Client not found for the given id");
         }
 
-        NumberInstancesByCloudClient counter = this.instanceService.countByCloudClient().stream().filter(count -> count.getId().equals(id)).findFirst().orElse(null);
+        NumberInstancesByCloudClient counter = this.instanceService.countByCloudClient().stream().filter(count -> {
+            if (count.getId() == null) {
+                return id == null || id == -1L;
+            } else {
+                return count.getId().equals(id);
+            }
+        }).findFirst().orElse(null);
         if (counter != null && counter.getTotal() > 0) {
             throw new InvalidInputException("Cannot delete a cloud provider with active instances");
         }
