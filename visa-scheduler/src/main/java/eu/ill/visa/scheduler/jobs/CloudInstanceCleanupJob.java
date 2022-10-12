@@ -47,14 +47,14 @@ public class CloudInstanceCleanupJob implements Job {
                     return instanceNotExists && cloudInstance.getName().startsWith(serverNamePrefix);
                 }).collect(Collectors.toUnmodifiableList());
 
-                logger.info("Found {} cloud instances, on Cloud with Id {}, that no longer exist in the database", zombieCloudInstances.size(), cloudClient.getId());
+                logger.info("Found {} cloud instances, on Cloud \"{}\", that no longer exist in the database", zombieCloudInstances.size(), cloudClient.getName());
                 for (CloudInstanceIdentifier cloudInstance : zombieCloudInstances) {
-                    logger.info("Deleting cloud instance {} with id {} on Cloud {}", cloudInstance.getName(), cloudInstance.getId(), cloudClient.getId());
+                    logger.info("Deleting cloud instance {} with id {} on Cloud \"{}\"", cloudInstance.getName(), cloudInstance.getId(), cloudClient.getName());
                     cloudClient.deleteInstance(cloudInstance.getId());
                 }
 
             } catch (CloudException e) {
-                logger.error("Failed to get cloud instances on cloud with Id {} during cleanup job: {}", cloudClient.getId(), e.getMessage());
+                logger.error("Failed to get cloud instances on cloud \"{}\" during cleanup job: {}", cloudClient.getName(), e.getMessage());
             }
         }
 

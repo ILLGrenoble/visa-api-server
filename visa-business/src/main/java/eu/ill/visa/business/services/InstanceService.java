@@ -115,14 +115,18 @@ public class InstanceService {
 
     public Map<CloudClient, List<Instance>> getAllByCloud() {
         List<Instance> instances = this.getAll();
+
+        List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
         Map<CloudClient, List<Instance>> cloudInstances = new HashMap<>();
+
+        for (CloudClient cloudClient : cloudClients) {
+            cloudInstances.put(cloudClient, new ArrayList<>());
+        }
+
         instances.forEach(instance -> {
             Long cloudId = instance.getCloudId();
             CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
             if (cloudClient != null) {
-                if (!cloudInstances.containsKey(cloudClient)) {
-                    cloudInstances.put(cloudClient, new ArrayList<>());
-                }
                 cloudInstances.get(cloudClient).add(instance);
 
             } else {
