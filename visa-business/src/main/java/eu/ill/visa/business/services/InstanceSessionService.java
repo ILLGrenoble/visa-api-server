@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Transactional
 @Singleton
@@ -20,15 +19,20 @@ public class InstanceSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceSessionService.class);
 
-    private InstanceSessionRepository repository;
-    private InstanceSessionMemberRepository instanceSessionMemberRepository;
-    private InstanceJupyterSessionService instanceJupyterSessionService;
+    private final InstanceSessionRepository repository;
+    private final InstanceSessionMemberRepository instanceSessionMemberRepository;
+    private final InstanceJupyterSessionService instanceJupyterSessionService;
+    private final InstanceService instanceService;
 
     @Inject
-    public InstanceSessionService(InstanceSessionRepository repository, InstanceSessionMemberRepository instanceSessionMemberRepository, InstanceJupyterSessionService instanceJupyterSessionService) {
+    public InstanceSessionService(final InstanceSessionRepository repository,
+                                  final InstanceSessionMemberRepository instanceSessionMemberRepository,
+                                  final InstanceJupyterSessionService instanceJupyterSessionService,
+                                  final InstanceService instanceService) {
         this.repository = repository;
         this.instanceSessionMemberRepository = instanceSessionMemberRepository;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
+        this.instanceService = instanceService;
     }
 
     public List<InstanceSession> getAll() {
@@ -123,44 +127,27 @@ public class InstanceSessionService {
     }
 
     public boolean canConnectWhileOwnerAway(Instance instance, User user) {
-        InstanceMember owner = instance.getOwner();
-        if (owner.getUser().getId().equals(user.getId())) {
-            // The user is the owner
+        boolean userIsOwner = instance.isOwner(user);
+
+        // The user is the owner
+        if (userIsOwner) {
             return true;
         }
 
-        // Allow INSTRUMENT_SCIENTIST user to connect to standard user instances (if IR is responsible for instrument associated to experiments of the instance)
-        boolean ownerIsExternalUser = !owner.getUser().hasRole(Role.STAFF_ROLE);
-        boolean userIsInstrumentScientist = user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE);
+        // If owner has selected unrestricted access to the instance then let members and support access it
         boolean userIsMember = instance.isMember(user);
-        if (ownerIsExternalUser && userIsInstrumentScientist) {
-            // Get IRs for the instance experiments
-            List<String> instrumentScientistIds = instance.getExperiments().stream()
-                .map(experiment -> experiment.getInstrument().getScientists())
-                .flatMap(List::stream)
-                .map(User::getId)
-                .distinct()
-                .collect(Collectors.toList());
-
-            // Return true if the user is an instrument scientist for the associated instruments of the instance
-            return instrumentScientistIds.contains(user.getId());
-
-        } else if (!ownerIsExternalUser && userIsInstrumentScientist) {
-            // If owner is staff then the instrument scientist can only connect if there is an active experiment
-            List<Experiment> activeExperiments = instance.getActiveExperiments();
-            List<String> activeExperimentInstrumentScientistIds = activeExperiments.stream()
-                .map(experiment -> experiment.getInstrument().getScientists())
-                .flatMap(List::stream)
-                .map(User::getId)
-                .distinct()
-                .collect(Collectors.toList());
-
-            // Return true if the user is an instrument scientist for the associated instruments of the instance
-            return activeExperimentInstrumentScientistIds.contains(user.getId());
+        if (userIsMember && instance.canAccessWhenOwnerAway()) {
+            return true;
         }
 
-        // Allow ADMIN user to connect to any standard user instances
-        boolean userIsAdmin = user.hasRole(Role.ADMIN_ROLE);
-        return ownerIsExternalUser && userIsAdmin;
+        // Check for support/admin access: can access if owner is standard user (not staff) or has granted unrestricted access
+        boolean userIsSupport = this.instanceService.isInstanceSupport(user, instance);
+        InstanceMember owner = instance.getOwner();
+        boolean ownerIsExternalUser = !owner.getUser().hasRole(Role.STAFF_ROLE);
+        if (userIsSupport) {
+            return instance.canAccessWhenOwnerAway() || ownerIsExternalUser;
+        }
+
+        return false;
     }
 }

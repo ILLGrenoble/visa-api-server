@@ -216,42 +216,39 @@ public class InstanceService {
         return 0L;
     }
 
+    public boolean isOwnerOrAdmin(User user, Instance instance) {
+        return instance.isOwner(user) || user.hasRole(Role.ADMIN_ROLE);
+    }
 
     public boolean isAuthorisedForInstance(User user, Instance instance) {
-        return this.isAuthorisedForInstance(user, instance, null);
-    }
-
-    public boolean isAuthorisedForInstance(User user, Instance instance, InstanceMemberRole role) {
-        final InstanceMember member = instance.getMember(user);
-
-        if (member == null) {
-            if (!user.hasAnyRole(List.of(Role.ADMIN_ROLE, Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
-                return false;
-            }
-
-            if (!user.hasRole(Role.ADMIN_ROLE)) {
-                // Check specific instances for the different support roles
-                if (user.hasRole(Role.IT_SUPPORT_ROLE)) {
-                    Instance instanceForITSupport = this.getByIdForITSupport(instance.getId());
-                    return (instanceForITSupport != null);
-
-                } else if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
-                    Instance instanceForInstrumentControl = this.getByIdForInstrumentControlSupport(instance.getId());
-                    return (instanceForInstrumentControl != null);
-
-                } else if (user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE)) {
-                    Instance instanceForInstrumentScientist = this.getByIdForInstrumentScientist(user, instance.getId());
-                    return (instanceForInstrumentScientist != null);
-                }
-            }
-
-        } else if (role != null && !member.isRole(role)) {
-            return false;
+        if (instance.isMember(user)) {
+            return true;
         }
 
-        return true;
+        return this.isInstanceSupport(user, instance);
     }
 
+
+    public boolean isInstanceSupport(User user, Instance instance) {
+        // Check specific instances for the different support roles
+        if (user.hasRole(Role.ADMIN_ROLE)) {
+            return true;
+
+        } else if (user.hasRole(Role.IT_SUPPORT_ROLE)) {
+            Instance instanceForITSupport = this.getByIdForITSupport(instance.getId());
+            return (instanceForITSupport != null);
+
+        } else if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
+            Instance instanceForInstrumentControl = this.getByIdForInstrumentControlSupport(instance.getId());
+            return (instanceForInstrumentControl != null);
+
+        } else if (user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE)) {
+            Instance instanceForInstrumentScientist = this.getByIdForInstrumentScientist(user, instance.getId());
+            return (instanceForInstrumentScientist != null);
+        }
+
+        return false;
+    }
 
     public List<NumberInstancesByFlavour> countByFlavour() {
         return this.repository.countByFlavour();

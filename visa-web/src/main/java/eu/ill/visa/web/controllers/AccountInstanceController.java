@@ -317,7 +317,7 @@ public class AccountInstanceController extends AbstractController {
                            @PathParam("instance") Instance instance,
                            @Valid @NotNull final InstanceUpdatorDto instanceUpdatorDto) {
         final User user = accountToken.getUser();
-        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             if (this.desktopConfiguration.getKeyboardLayoutForLayout(instanceUpdatorDto.getKeyboardLayout()) == null) {
                 throw new BadRequestException("Invalid keyboard layout provided");
             }
@@ -422,7 +422,7 @@ public class AccountInstanceController extends AbstractController {
                               @PathParam("instance") final Instance instance,
                               @Valid @NotNull final InstanceMemberCreatorDto instanceMemberCreatorDto) {
         final User user = accountToken.getUser();
-        if (this.instanceService.isAuthorisedForInstance(user, instance)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             User memberUser = userService.getById(instanceMemberCreatorDto.getUserId());
             if (memberUser != null) {
                 InstanceMember instanceMember = InstanceMember.newBuilder()
@@ -456,7 +456,7 @@ public class AccountInstanceController extends AbstractController {
                                  @PathParam("member") InstanceMember instanceMember,
                                  @Valid @NotNull final InstanceMemberUpdatorDto memberUpdateDto) {
         final User user = accountToken.getUser();
-        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             if (instance.isMember(instanceMember)) {
                 if (memberUpdateDto.isRole(OWNER)) {
                     throw new BadRequestException("Cannot make a member an owner. There can only be one owner.");
@@ -475,7 +475,7 @@ public class AccountInstanceController extends AbstractController {
                                  @PathParam("instance") Instance instance,
                                  @PathParam("member") InstanceMember instanceMember) {
         final User user = accountToken.getUser();
-        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             if (instance.isMember(instanceMember) && !instanceMember.isRole(OWNER)) {
                 instance.removeMember(instanceMember);
 
@@ -491,10 +491,10 @@ public class AccountInstanceController extends AbstractController {
 
     @GET
     @Path("/{instance}/history")
-    public Response removeMember(@Auth final AccountToken accountToken,
+    public Response getHistory(@Auth final AccountToken accountToken,
                                  @PathParam("instance") Instance instance) {
         final User user = accountToken.getUser();
-        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             List<InstanceCommand> commands = instanceCommandService.getAllForInstance(instance);
 
             List<InstanceCommandDto> history = commands.stream().map(instanceCommand -> mapper
@@ -511,7 +511,7 @@ public class AccountInstanceController extends AbstractController {
     }
 
     private Response performAction(final Instance instance, final User user, final InstanceCommandType instanceCommandType) {
-        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             if (instanceCommandType.equals(InstanceCommandType.START)) {
                 instance.setState(InstanceState.STARTING);
 
@@ -573,7 +573,7 @@ public class AccountInstanceController extends AbstractController {
                                 @NotNull @FormDataParam("file") final InputStream is) {
         try {
             final User user = accountToken.getUser();
-            if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+            if (this.instanceService.isOwnerOrAdmin(user, instance)) {
                 final byte[] data = is.readAllBytes();
                 final ImageFormat mimeType = Imaging.guessFormat(data);
                 if (mimeType == ImageFormats.JPEG) {
@@ -591,7 +591,7 @@ public class AccountInstanceController extends AbstractController {
     public Response getThumbnail(@Auth final AccountToken accountToken,
                                  @PathParam("instance") final Instance instance) {
         final User user = accountToken.getUser();
-        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             final InstanceThumbnail thumbnail = instanceService.getThumbnailForInstance(instance);
             if (thumbnail != null) {
                 final ResponseBuilder response = Response.ok(thumbnail.getData());
@@ -632,7 +632,7 @@ public class AccountInstanceController extends AbstractController {
                               @PathParam("instance") final Instance instance,
                               @Valid @NotNull final InstanceExtensionRequestDto instanceExtensionRequestDto) {
         final User user = accountToken.getUser();
-        if (this.instanceService.isAuthorisedForInstance(user, instance, OWNER)) {
+        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
 
             // Check an existing request hasn't already been made
             InstanceExtensionRequest request = this.instanceExtensionRequestService.getForInstance(instance);

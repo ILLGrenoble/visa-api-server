@@ -10,7 +10,6 @@ import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Instance extends Timestampable {
 
@@ -30,6 +29,7 @@ public class Instance extends Timestampable {
     private Date terminationDate;
     private Date deletedAt;
     private Boolean deleteRequested = false;
+    private Date unrestrictedMemberAccess = null;
     private List<InstanceMember> members = new ArrayList<>();
     private List<Experiment>        experiments = new ArrayList<>();
     private List<InstanceAttribute> attributes  = new ArrayList<>();
@@ -210,6 +210,18 @@ public class Instance extends Timestampable {
         this.deleteRequested = deleteRequested;
     }
 
+    public Date getUnrestrictedMemberAccess() {
+        return unrestrictedMemberAccess;
+    }
+
+    public void setUnrestrictedMemberAccess(Date unrestrictedMemberAccess) {
+        this.unrestrictedMemberAccess = unrestrictedMemberAccess;
+    }
+
+    public boolean canAccessWhenOwnerAway() {
+        return this.unrestrictedMemberAccess != null;
+    }
+
     public String getKeyboardLayout() {
         return keyboardLayout;
     }
@@ -298,6 +310,15 @@ public class Instance extends Timestampable {
     public boolean isMember(User user) {
         for (final InstanceMember member : this.members) {
             if (member.isUser(user)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isOwner(User user) {
+        for (final InstanceMember aMember : this.members) {
+            if (aMember.isUser(user) && aMember.isRole(InstanceMemberRole.OWNER)) {
                 return true;
             }
         }
@@ -398,12 +419,6 @@ public class Instance extends Timestampable {
         this.addMember(instanceMember);
 
         return instanceMember;
-    }
-
-    public List<Experiment> getActiveExperiments() {
-        Date now = new Date();
-        return this.experiments.stream()
-            .filter(experiment -> experiment.getStartDate().before(now) && experiment.getEndDate().after(now)).collect(Collectors.toList());
     }
 
     public static final class Builder {
