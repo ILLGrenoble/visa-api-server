@@ -8,8 +8,10 @@
         <query>
             SELECT f
             FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
             WHERE f.id = :id
             AND f.deleted = false
+            AND cpc.deletedAt IS NULL
         </query>
     </named-query>
 
@@ -17,8 +19,21 @@
         <query>
             SELECT f
             FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
             WHERE f.deleted = false
-            ORDER BY cpu, memory</query>
+            AND cpc.deletedAt IS NULL
+            AND COALESCE(cpc.visible, true) = true
+            ORDER BY cpu, memory, f.id</query>
+    </named-query>
+
+    <named-query name="flavour.getAllForAdmin">
+        <query>
+            SELECT f
+            FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
+            WHERE f.deleted = false
+            AND cpc.deletedAt IS NULL
+            ORDER BY cpu, memory, f.id</query>
     </named-query>
 
     <named-query name="flavour.countAllForAdmin">
@@ -53,6 +68,10 @@
             <basic name="deleted">
                 <column name="deleted" nullable="false" column-definition=""/>
             </basic>
+            <many-to-one name="cloudProviderConfiguration" >
+                <join-column name="cloud_provider_configuration_id" nullable="true"/>
+                <foreign-key name="fk_cloud_provider_configuration_id"/>
+            </many-to-one>
         </attributes>
     </entity>
 

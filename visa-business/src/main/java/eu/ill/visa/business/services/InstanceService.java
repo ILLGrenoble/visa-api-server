@@ -4,15 +4,17 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
+import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceRepository;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,18 +23,23 @@ import static java.util.Objects.requireNonNullElse;
 @Transactional
 @Singleton
 public class InstanceService {
+    private static final Logger logger = LoggerFactory.getLogger(InstanceService.class);
 
     private final InstanceRepository repository;
-    private InstanceConfiguration configuration;
+    private final InstanceConfiguration configuration;
+    private final CloudClientGateway cloudClientGateway;
 
     // Specifies a window in which to look for instances for which an instrument control support user can provider support.
     // Defines a window and looks for experiment schedules that overlap this window
     private static final int INSTRUMENT_CONTROL_SUPPORT_WINDOW_HALF_WIDTH_IN_DAYS = 7;
 
     @Inject
-    public InstanceService(InstanceRepository repository, InstanceConfiguration configuration) {
+    public InstanceService(final InstanceRepository repository,
+                           final InstanceConfiguration configuration,
+                           final CloudClientGateway cloudClientGateway) {
         this.repository = repository;
         this.configuration = configuration;
+        this.cloudClientGateway = cloudClientGateway;
     }
 
     public Long countAll() {
@@ -104,6 +111,30 @@ public class InstanceService {
 
     public List<Instance> getAll() {
         return this.repository.getAll();
+    }
+
+    public Map<CloudClient, List<Instance>> getAllByCloud() {
+        List<Instance> instances = this.getAll();
+
+        List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
+        Map<CloudClient, List<Instance>> cloudInstances = new HashMap<>();
+
+        for (CloudClient cloudClient : cloudClients) {
+            cloudInstances.put(cloudClient, new ArrayList<>());
+        }
+
+        instances.forEach(instance -> {
+            Long cloudId = instance.getCloudId();
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            if (cloudClient != null) {
+                cloudInstances.get(cloudClient).add(instance);
+
+            } else {
+                logger.warn("Instance with Id {} does not have a valid Cloud Provider with Id {}", instance.getId(), instance.getCloudId());
+            }
+        });
+
+        return cloudInstances;
     }
 
     public List<Instance> getAllInactive(final Integer maxInactivityDurationHours) {
@@ -228,6 +259,10 @@ public class InstanceService {
 
     public List<NumberInstancesByImage> countByImage() {
         return this.repository.countByImage();
+    }
+
+    public List<NumberInstancesByCloudClient> countByCloudClient() {
+        return this.repository.countByCloudClient();
     }
 
     public List<Instance> getAllForSupportUser(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {

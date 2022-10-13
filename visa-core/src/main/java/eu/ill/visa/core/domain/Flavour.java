@@ -3,6 +3,8 @@ package eu.ill.visa.core.domain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.persistence.Transient;
+
 public class Flavour extends Timestampable {
 
     private Long id;
@@ -16,6 +18,8 @@ public class Flavour extends Timestampable {
     private String computeId;
 
     private Boolean deleted = false;
+
+    private CloudProviderConfiguration cloudProviderConfiguration;
 
     public Long getId() {
         return id;
@@ -63,6 +67,19 @@ public class Flavour extends Timestampable {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public CloudProviderConfiguration getCloudProviderConfiguration() {
+        return cloudProviderConfiguration;
+    }
+
+    public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
+        this.cloudProviderConfiguration = cloudProviderConfiguration;
+    }
+
+    @Transient
+    public Long getCloudId() {
+        return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
     }
 
     @Override

@@ -1,7 +1,5 @@
 package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
-import eu.ill.visa.web.bundles.graphql.validation.Cloud;
-
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -20,7 +18,8 @@ public class FlavourInput {
     @NotNull
     private Float cpu;
 
-    @Cloud(type = "flavour")
+    private Long cloudId;
+
     @NotNull
     private String computeId;
 
@@ -48,6 +47,14 @@ public class FlavourInput {
 
     public void setCpu(Float cpu) {
         this.cpu = cpu;
+    }
+
+    public Long getCloudId() {
+        return cloudId;
+    }
+
+    public void setCloudId(Long cloudId) {
+        this.cloudId = cloudId;
     }
 
     public String getComputeId() {

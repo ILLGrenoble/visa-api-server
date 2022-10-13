@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,8 @@ public class Image extends Timestampable {
     private String autologin;
 
     private List<ImageProtocol> protocols = new ArrayList<>();
+
+    private CloudProviderConfiguration cloudProviderConfiguration;
 
     public Image() {
     }
@@ -107,6 +110,19 @@ public class Image extends Timestampable {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public CloudProviderConfiguration getCloudProviderConfiguration() {
+        return cloudProviderConfiguration;
+    }
+
+    public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
+        this.cloudProviderConfiguration = cloudProviderConfiguration;
+    }
+
+    @Transient
+    public Long getCloudId() {
+        return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
     }
 
     @Override

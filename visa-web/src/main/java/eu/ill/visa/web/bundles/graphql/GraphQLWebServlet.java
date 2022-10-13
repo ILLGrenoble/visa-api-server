@@ -33,13 +33,15 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
     private final InstanceSessionMemberResolver  instanceSessionMemberResolver;
     private final InstanceJupyterSessionResolver instanceJupyterSessionResolver;
     private final ImageResolver                  imageResolver;
+    private final FlavourResolver                flavourResolver;
     private final CloudImageResolver             cloudImageResolver;
-    private final CloudSecurityGroupResolver     cloudSecurityGroupResolver;
+    private final CloudClientResolver            cloudClientResolver;
     private final ImageProtocolResolver          imageProtocolResolver;
     private final UserResolver                   userResolver;
     private final RoleDirective                  roleDirective;
     private final AuthenticationContextBuilder   authenticationContext;
     private final SecurityGroupFilterResolver    securityGroupFilterResolver;
+    private final SecurityGroupResolver          securityGroupResolver;
 
     @Inject
     public GraphQLWebServlet(final GraphQLWebServletConfiguration configuration,
@@ -50,10 +52,12 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                              final InstanceJupyterSessionResolver instanceJupyterSessionResolver,
                              final UserResolver userResolver,
                              final ImageResolver imageResolver,
+                             final FlavourResolver flavourResolver,
                              final CloudImageResolver cloudImageResolver,
-                             final CloudSecurityGroupResolver cloudSecurityGroupResolver,
+                             final CloudClientResolver cloudClientResolver,
                              final ImageProtocolResolver imageProtocolResolver,
                              final SecurityGroupFilterResolver securityGroupFilterResolver,
+                             final SecurityGroupResolver securityGroupResolver,
                              final AuthenticationContextBuilder authenticationContext,
                              final RoleDirective roleDirective) {
         this.configuration = configuration;
@@ -64,10 +68,12 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         this.instanceJupyterSessionResolver = instanceJupyterSessionResolver;
         this.userResolver = userResolver;
         this.imageResolver = imageResolver;
-        this.cloudSecurityGroupResolver = cloudSecurityGroupResolver;
+        this.flavourResolver = flavourResolver;
         this.cloudImageResolver = cloudImageResolver;
+        this.cloudClientResolver = cloudClientResolver;
         this.imageProtocolResolver = imageProtocolResolver;
         this.securityGroupFilterResolver = securityGroupFilterResolver;
+        this.securityGroupResolver = securityGroupResolver;
         this.authenticationContext = authenticationContext;
         this.roleDirective = roleDirective;
     }
@@ -115,10 +121,12 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                 instanceJupyterSessionResolver,
                 userResolver,
                 imageResolver,
+                flavourResolver,
                 cloudImageResolver,
-                cloudSecurityGroupResolver,
+                cloudClientResolver,
                 imageProtocolResolver,
                 userResolver,
+                securityGroupResolver,
                 securityGroupFilterResolver
             )
             .directive("isAuthorised", roleDirective)

@@ -26,6 +26,10 @@ public class FlavourService {
         return this.repository.getAll();
     }
 
+    public List<Flavour> getAllForAdmin() {
+        return this.repository.getAllForAdmin();
+    }
+
     public Flavour getById(Long id) {
         return this.repository.getById(id);
     }

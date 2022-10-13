@@ -2,9 +2,9 @@ package eu.ill.visa.cloud;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientFactory;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 
 public class CloudModule extends AbstractModule {
     @Override
@@ -13,12 +13,9 @@ public class CloudModule extends AbstractModule {
     }
 
     @Provides
-    public CloudClient providesCloudClient(final CloudConfiguration configuration) throws CloudException {
-        final CloudClientFactory factory = new CloudClientFactory();
-        return factory.getClient(
-            configuration.getProvider(),
-            configuration.getParameters(),
-            configuration.getServerNamePrefix());
+    @Singleton
+    public CloudClientGateway providesCloudClientGateway(final CloudConfiguration configuration) throws CloudException {
+        return new CloudClientGateway(configuration);
     }
 
 }

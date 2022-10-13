@@ -13,6 +13,7 @@ input ImageInput {
     version: String
     description: String
     icon: String
+    cloudId: Int
     computeId: String!
     visible: Boolean!
     protocolIds: [Int]
@@ -42,8 +43,14 @@ input FlavourInput {
     description: String
     memory: Int!
     cpu: Int!
+    cloudId: Int
     computeId: String!
     instrumentIds: [Int]
+}
+
+input SecurityGroupInput {
+    name: String!
+    cloudId: Int
 }
 
 input UserInput {
@@ -73,4 +80,30 @@ input InstanceExtensionResponseInput {
     handlerComments: String
     accepted: Boolean!
     terminationDate: String!
+}
+
+
+input OpenStackProviderConfigurationInput {
+    applicationId: String!
+    applicationSecret: String!
+    computeEndpoint: String!
+    imageEndpoint: String!
+    networkEndpoint: String!
+    identityEndpoint: String!
+    addressProvider: String!
+    addressProviderUUID: String!
+}
+
+input WebProviderConfigurationInput {
+    url: String!
+    authToken: String!
+}
+
+input CloudClientInput {
+    name: String!
+    type: String!
+    serverNamePrefix: String!
+    visible: Boolean!
+    openStackProviderConfiguration: OpenStackProviderConfigurationInput
+    webProviderConfiguration: WebProviderConfigurationInput
 }

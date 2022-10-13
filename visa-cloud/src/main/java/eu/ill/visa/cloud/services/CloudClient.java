@@ -1,24 +1,63 @@
 package eu.ill.visa.cloud.services;
 
-import com.google.inject.Singleton;
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.CloudProvider;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-@Singleton
 public class CloudClient {
 
     private final static Logger        logger = LoggerFactory.getLogger(CloudClient.class);
+
+    private final        Long          id;
+    private final        String        name;
+    private final        String        type;
     private final        CloudProvider provider;
     private final        String        serverNamePrefix;
+    private final        Boolean       visible;
 
-    public CloudClient(final CloudProvider provider, final String serverNamePrefix) {
+
+    public CloudClient(final Long id,
+                       final String name,
+                       final String type,
+                       final CloudProvider provider,
+                       final String serverNamePrefix,
+                       final Boolean visible) {
+        this.id = id;
+        this.type = type;
+        this.name = name;
         this.provider = provider;
         this.serverNamePrefix = serverNamePrefix;
+        this.visible = visible;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getServerNamePrefix() {
+        return serverNamePrefix;
+    }
+
+    public Boolean getVisible() {
+        return visible;
+    }
+
+    public CloudProvider getProvider() {
+        return provider;
     }
 
     public List<CloudImage> images() throws CloudException {
@@ -94,10 +133,6 @@ public class CloudClient {
         provider.deleteInstance(id);
     }
 
-    public String getServerNamePrefix() {
-        return serverNamePrefix;
-    }
-
     public CloudLimit limits() throws CloudException {
         return provider.limits();
     }
@@ -111,4 +146,19 @@ public class CloudClient {
         return provider.securityGroups();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CloudClient that = (CloudClient) o;
+
+        return new EqualsBuilder().append(id, that.id).append(name, that.name).append(serverNamePrefix, that.serverNamePrefix).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(id).append(name).append(serverNamePrefix).toHashCode();
+    }
 }

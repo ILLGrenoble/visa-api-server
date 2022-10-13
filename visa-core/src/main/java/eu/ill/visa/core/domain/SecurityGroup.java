@@ -3,11 +3,15 @@ package eu.ill.visa.core.domain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.persistence.Transient;
+
 public class SecurityGroup {
 
     private Long id;
 
     private String name;
+
+    private CloudProviderConfiguration cloudProviderConfiguration;
 
     public SecurityGroup() {
     }
@@ -30,6 +34,28 @@ public class SecurityGroup {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public CloudProviderConfiguration getCloudProviderConfiguration() {
+        return cloudProviderConfiguration;
+    }
+
+    public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
+        this.cloudProviderConfiguration = cloudProviderConfiguration;
+    }
+
+    @Transient
+    public Long getCloudId() {
+        return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
+    }
+
+    public boolean hasSameCloudClientId(Long cloudClientId) {
+        if (this.cloudProviderConfiguration == null) {
+            return cloudClientId == null || cloudClientId.equals(-1L);
+
+        } else {
+            return this.cloudProviderConfiguration.getId().equals(cloudClientId);
+        }
     }
 
     @Override

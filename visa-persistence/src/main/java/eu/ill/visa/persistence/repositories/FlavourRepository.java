@@ -25,6 +25,11 @@ public class FlavourRepository extends AbstractRepository<Flavour> {
         return query.getResultList();
     }
 
+    public List<Flavour> getAllForAdmin() {
+        final TypedQuery<Flavour> query = getEntityManager().createNamedQuery("flavour.getAllForAdmin", Flavour.class);
+        return query.getResultList();
+    }
+
     public List<Flavour> getAll(Pagination pagination) {
         final TypedQuery<Flavour> query = getEntityManager().createNamedQuery("flavour.getAll", Flavour.class);
         if (pagination != null) {

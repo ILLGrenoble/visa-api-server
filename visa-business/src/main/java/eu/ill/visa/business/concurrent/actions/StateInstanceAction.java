@@ -23,12 +23,15 @@ public class StateInstanceAction extends InstanceAction {
     @Override
     public void run() throws InstanceActionException {
         try {
-            final CloudClient cloudClient = this.getCloudClient();
-
             final Instance instance = getInstance();
 
             // Test case when a instance has not yet been created on open stack
             if (instance == null || instance.getComputeId() == null) {
+                return;
+            }
+
+            final CloudClient cloudClient = this.getCloudClient(instance.getCloudId());
+            if (cloudClient == null) {
                 return;
             }
 

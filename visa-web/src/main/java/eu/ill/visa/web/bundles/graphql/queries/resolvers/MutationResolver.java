@@ -2,6 +2,12 @@ package eu.ill.visa.web.bundles.graphql.queries.resolvers;
 
 import com.google.inject.Inject;
 import eu.ill.visa.business.services.*;
+import eu.ill.visa.cloud.domain.CloudFlavour;
+import eu.ill.visa.cloud.domain.CloudImage;
+import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientFactory;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceExtensionRequestState;
@@ -24,10 +30,7 @@ import org.slf4j.LoggerFactory;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.ill.visa.web.bundles.graphql.queries.domain.Message.createMessage;
@@ -47,6 +50,8 @@ public class MutationResolver implements GraphQLMutationResolver {
     private final SecurityGroupService       securityGroupService;
     private final SecurityGroupFilterService securityGroupFilterService;
     private final InstrumentService          instrumentService;
+    private final CloudClientGateway         cloudClientGateway;
+    private final CloudProviderService       cloudProviderService;
 
     private final InstanceActionScheduler      instanceActionScheduler;
     private final RoleService                  roleService;
@@ -68,6 +73,8 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final SecurityGroupService securityGroupService,
                             final SecurityGroupFilterService securityGroupFilterService,
                             final InstrumentService instrumentService,
+                            final CloudClientGateway cloudClientGateway,
+                            final CloudProviderService cloudProviderService,
                             final InstanceActionScheduler instanceActionScheduler,
                             final RoleService roleService,
                             final UserService userService,
@@ -84,6 +91,8 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.securityGroupService = securityGroupService;
         this.securityGroupFilterService = securityGroupFilterService;
         this.instrumentService = instrumentService;
+        this.cloudClientGateway = cloudClientGateway;
+        this.cloudProviderService = cloudProviderService;
         this.instanceActionScheduler = instanceActionScheduler;
         this.roleService = roleService;
         this.userService = userService;
@@ -100,12 +109,16 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created image
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Image createImage(@Valid ImageInput input) throws EntityNotFoundException {
+    public Image createImage(@Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
+        // Validate the image input
+        this.validateImageInput(input);
+
         final Image image = new Image();
         image.setName(input.getName());
         image.setVersion(input.getVersion());
         image.setDescription(input.getDescription());
         image.setIcon(input.getIcon());
+        image.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         image.setComputeId(input.getComputeId());
         image.setVisible(input.getVisible());
         image.setDeleted(false);
@@ -134,12 +147,16 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created image
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Image updateImage(Long id, @Valid ImageInput input) throws EntityNotFoundException {
+    public Image updateImage(Long id, @Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
+        // Validate the image input
+        this.validateImageInput(input);
+
         final Image image = imageService.getById(id);
         image.setName(input.getName());
         image.setVersion(input.getVersion());
         image.setDescription(input.getDescription());
         image.setIcon(input.getIcon());
+        image.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         image.setComputeId(input.getComputeId());
         image.setVisible(input.getVisible());
         image.setBootCommand(input.getBootCommand());
@@ -175,6 +192,23 @@ public class MutationResolver implements GraphQLMutationResolver {
         return image;
     }
 
+    private void validateImageInput(ImageInput imageInput) throws InvalidInputException {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(imageInput.getCloudId());
+            if (cloudClient == null) {
+                throw new InvalidInputException("Invalid cloud Id");
+            }
+
+            CloudImage cloudImage = cloudClient.image(imageInput.getComputeId());
+            if (cloudImage == null) {
+                throw new InvalidInputException("Invalid Cloud Image Id");
+            }
+
+        } catch (CloudException exception) {
+            throw new InvalidInputException("Error accessing Cloud");
+        }
+    }
+
     /**
      * Create a new flavour
      *
@@ -182,8 +216,12 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created flavour
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Flavour createFlavour(@Valid FlavourInput input) {
+    public Flavour createFlavour(@Valid FlavourInput input) throws InvalidInputException {
+        // Validate the flavour input
+        this.validateFlavourInput(input);
+
         final Flavour flavour = mapper.map(input, Flavour.class);
+        flavour.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         flavourService.create(flavour);
 
         // Handle flavour limits
@@ -201,12 +239,16 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the given the flavour id was not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public Flavour updateFlavour(Long id, @Valid FlavourInput input) throws EntityNotFoundException {
+    public Flavour updateFlavour(Long id, @Valid FlavourInput input) throws EntityNotFoundException, InvalidInputException  {
+        // Validate the flavour input
+        this.validateFlavourInput(input);
+
         final Flavour flavour = this.flavourService.getById(id);
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour was not found for the given id");
         }
         flavour.setName(input.getName());
+        flavour.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         flavour.setComputeId(input.getComputeId());
         flavour.setCpu(input.getCpu());
         flavour.setMemory(input.getMemory());
@@ -229,7 +271,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         List<Long> instrumentsToAdd = instrumentIds.stream().filter(instrumentId ->
             !currentInstrumentIds.contains(instrumentId)).collect(Collectors.toList());
 
-        flavourLimitsToDelete.forEach(flavourLimit -> this.flavourLimitService.delete(flavourLimit));
+        flavourLimitsToDelete.forEach(this.flavourLimitService::delete);
         instrumentsToAdd.forEach(instrumentId -> {
             if (allInstrumentIds.contains(instrumentId)) {
                 FlavourLimit flavourLimit = new FlavourLimit(flavour, instrumentId, "INSTRUMENT");
@@ -258,6 +300,23 @@ public class MutationResolver implements GraphQLMutationResolver {
         return flavour;
     }
 
+    private void validateFlavourInput(FlavourInput flavourInput) throws InvalidInputException {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(flavourInput.getCloudId());
+            if (cloudClient == null) {
+                throw new InvalidInputException("Invalid cloud Id");
+            }
+
+            CloudFlavour cloudFlavour = cloudClient.flavour(flavourInput.getComputeId());
+            if (cloudFlavour == null) {
+                throw new InvalidInputException("Invalid Cloud Flavour Id");
+            }
+
+        } catch (CloudException exception) {
+            throw new InvalidInputException("Error accessing Cloud");
+        }
+    }
+
     /**
      * Create a new securityGroup
      *
@@ -265,8 +324,26 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created securityGroup
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public SecurityGroup createSecurityGroup(String input) {
-        final SecurityGroup securityGroup = new SecurityGroup(input);
+    public SecurityGroup createSecurityGroup(SecurityGroupInput input) throws InvalidInputException {
+        // Validate the security group
+        this.validateSecurityGroupInput(input);
+
+        Optional<SecurityGroup> existingSecurityGroup = this.securityGroupService.getAll()
+            .stream()
+            .filter(securityGroup -> {
+                if (!input.getName().equals(securityGroup.getName())) {
+                    return false;
+                }
+                Long inputCloudId = input.getCloudId() == -1 ? null :  input.getCloudId();
+                return (inputCloudId == null && securityGroup.getCloudId() == null) || inputCloudId.equals(securityGroup.getCloudId());
+            })
+            .findFirst();
+        if (existingSecurityGroup.isPresent()) {
+            return existingSecurityGroup.get();
+        }
+
+        final SecurityGroup securityGroup = new SecurityGroup(input.getName());
+        securityGroup.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
         securityGroupService.save(securityGroup);
         return securityGroup;
     }
@@ -280,15 +357,17 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the given the securityGroup id was not found
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public SecurityGroup updateSecurityGroup(Long id, String input) throws EntityNotFoundException {
+    public SecurityGroup updateSecurityGroup(Long id, SecurityGroupInput input) throws EntityNotFoundException, InvalidInputException {
         final SecurityGroup securityGroup = this.securityGroupService.getById(id);
         if (securityGroup == null) {
             throw new EntityNotFoundException("SecurityGroup was not found for the given id");
         }
 
-        // TODO Check that security group exists
+        // Validate the security group
+        this.validateSecurityGroupInput(input);
 
-        securityGroup.setName(input);
+        securityGroup.setName(input.getName());
+        securityGroup.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
 
         securityGroupService.save(securityGroup);
         return securityGroup;
@@ -312,6 +391,32 @@ public class MutationResolver implements GraphQLMutationResolver {
             .forEach(securityGroupFilterService::delete);
         securityGroupService.delete(securityGroup);
         return securityGroup;
+    }
+
+    private void validateSecurityGroupInput(SecurityGroupInput securityGroupInput) throws InvalidInputException {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(securityGroupInput.getCloudId());
+            if (cloudClient == null) {
+                throw new InvalidInputException("Invalid cloud Id");
+            }
+
+            boolean securityGroupExists = cloudClient.securityGroups().contains(securityGroupInput.getName());
+            if (!securityGroupExists) {
+                throw new InvalidInputException("Invalid Cloud Security Group");
+            }
+
+        } catch (CloudException exception) {
+            throw new InvalidInputException("Error accessing Cloud");
+        }
+    }
+
+
+    private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {
+        if (cloudId != null && cloudId > 0) {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            return this.cloudProviderService.getById(cloudClient.getId());
+        }
+        return null;
     }
 
     /**
@@ -486,6 +591,123 @@ public class MutationResolver implements GraphQLMutationResolver {
         return plan;
     }
 
+
+    /**
+     * Create a new cloudClient
+     *
+     * @param input the cloudClient properties
+     * @return the newly created cloudClient
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    public CloudClient createCloudClient(@Valid CloudClientInput input) throws InvalidInputException {
+        CloudProviderConfiguration.Builder builder = new CloudProviderConfiguration.Builder();
+        CloudProviderConfiguration configuration = builder
+            .type(input.getType())
+            .name(input.getName())
+            .visible(input.getVisible())
+            .serverNamePrefix(input.getServerNamePrefix())
+            .build();
+
+        this.setCloudConfigurationParameters(configuration, input);
+
+        return this.cloudProviderService.createCloudClient(configuration);
+    }
+
+    /**
+     * Update a cloudClient
+     *
+     * @param id    the cloudClient id
+     * @param input the cloudClient properties
+     * @return the updated created cloudClient
+     * @throws EntityNotFoundException thrown if the given the cloudClient id was not found
+     */
+    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+    public CloudClient updateCloudClient(Long id, @Valid CloudClientInput input) throws EntityNotFoundException, InvalidInputException  {
+        if (id == -1) {
+            throw new InvalidInputException("The default cloud provider cannot be modified");
+        }
+
+        CloudProviderConfiguration configuration = this.cloudProviderService.getById(id);
+        if (configuration == null) {
+            throw new EntityNotFoundException("Cloud provider not found for the given id");
+        }
+
+        if (!configuration.getType().equals(input.getType())) {
+            configuration.deleteParameters();
+        }
+
+        configuration.setName(input.getName());
+        configuration.setServerNamePrefix(input.getServerNamePrefix());
+        configuration.setType(input.getType());
+        configuration.setVisible(input.getVisible());
+
+        this.setCloudConfigurationParameters(configuration, input);
+
+        return this.cloudProviderService.save(configuration);
+    }
+
+    private void setCloudConfigurationParameters(CloudProviderConfiguration cloudProviderConfiguration, CloudClientInput input) throws InvalidInputException {
+        if (input.getType().equals(CloudClientFactory.OPENSTACK)) {
+            if (input.getOpenStackProviderConfiguration() == null) {
+                throw new InvalidInputException("OpenStack provider configuration must be specified");
+            }
+            OpenStackProviderConfigurationInput configurationInput = input.getOpenStackProviderConfiguration();
+
+            cloudProviderConfiguration.setParameter("applicationId", configurationInput.getApplicationId());
+            cloudProviderConfiguration.setParameter("applicationSecret", configurationInput.getApplicationSecret());
+            cloudProviderConfiguration.setParameter("computeEndpoint", configurationInput.getComputeEndpoint());
+            cloudProviderConfiguration.setParameter("imageEndpoint", configurationInput.getImageEndpoint());
+            cloudProviderConfiguration.setParameter("networkEndpoint", configurationInput.getNetworkEndpoint());
+            cloudProviderConfiguration.setParameter("identityEndpoint", configurationInput.getIdentityEndpoint());
+            cloudProviderConfiguration.setParameter("addressProvider", configurationInput.getAddressProvider());
+            cloudProviderConfiguration.setParameter("addressProviderUUID", configurationInput.getAddressProviderUUID());
+
+        } else if (input.getType().equals(CloudClientFactory.WEB)) {
+            if (input.getWebProviderConfiguration() == null) {
+                throw new InvalidInputException("Web provider configuration must be specified");
+            }
+
+            WebProviderConfigurationInput configurationInput = input.getWebProviderConfiguration();
+            cloudProviderConfiguration.setParameter("url", configurationInput.getUrl());
+            cloudProviderConfiguration.setParameter("authToken", configurationInput.getAuthToken());
+
+        } else {
+            throw new InvalidInputException("Cloud provider type must be specified");
+        }
+    }
+
+    /**
+     * Delete a cloudClient for a given id
+     *
+     * @param id the cloudClient id
+     * @return true if deleted
+     * @throws EntityNotFoundException thrown if the cloudClient is not found
+     * @throws InvalidInputException thrown if trying to delete the default cloud client
+     */
+    public Boolean deleteCloudClient(Long id) throws EntityNotFoundException, InvalidInputException {
+        if (id == -1) {
+            throw new InvalidInputException("The default cloud client cannot be deleted");
+        }
+
+        final CloudProviderConfiguration configuration = this.cloudProviderService.getById(id);
+        if (configuration == null) {
+            throw new EntityNotFoundException("Cloud Client not found for the given id");
+        }
+
+        NumberInstancesByCloudClient counter = this.instanceService.countByCloudClient().stream().filter(count -> {
+            if (count.getId() == null) {
+                return id == null || id == -1L;
+            } else {
+                return count.getId().equals(id);
+            }
+        }).findFirst().orElse(null);
+        if (counter != null && counter.getTotal() > 0) {
+            throw new InvalidInputException("Cannot delete a cloud provider with active instances");
+        }
+
+        this.cloudProviderService.delete(configuration);
+        return true;
+    }
 
     /**
      * Reboot an instance

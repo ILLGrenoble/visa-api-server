@@ -9,6 +9,7 @@ import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
@@ -17,6 +18,7 @@ import eu.ill.visa.web.bundles.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.bundles.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.bundles.graphql.queries.domain.ApplicationCredentialDetail;
 import eu.ill.visa.web.bundles.graphql.queries.domain.CloudSecurityGroup;
+import eu.ill.visa.web.bundles.graphql.queries.domain.DetailedCloudLimit;
 import eu.ill.visa.web.bundles.graphql.queries.domain.InstanceStateCount;
 import eu.ill.visa.web.bundles.graphql.relay.Connection;
 import eu.ill.visa.web.bundles.graphql.relay.PageInfo;
@@ -48,7 +50,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     private final UserService                       userService;
     private final ImageProtocolService              imageProtocolService;
     private final RoleService                       roleService;
-    private final CloudClient                       cloudClient;
+    private final CloudClientGateway                cloudClientGateway;
     private final PlanService                       planService;
     private final InstanceSessionMemberService      instanceSessionMemberService;
     private final InstanceJupyterSessionService     instanceJupyterSessionService;
@@ -69,7 +71,7 @@ public class QueryResolver implements GraphQLQueryResolver {
                   final PlanService planService,
                   final ImageProtocolService imageProtocolService,
                   final RoleService roleService,
-                  final CloudClient cloudClient,
+                  final CloudClientGateway cloudClientGateway,
                   final InstanceSessionMemberService instanceSessionMemberService,
                   final InstanceJupyterSessionService instanceJupyterSessionService,
                   final ClientNotificationService clientNotificationService,
@@ -87,7 +89,7 @@ public class QueryResolver implements GraphQLQueryResolver {
         this.planService = planService;
         this.imageProtocolService = imageProtocolService;
         this.roleService = roleService;
-        this.cloudClient = cloudClient;
+        this.cloudClientGateway = cloudClientGateway;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.clientNotificationService = clientNotificationService;
@@ -112,7 +114,7 @@ public class QueryResolver implements GraphQLQueryResolver {
      */
     public List<Flavour> flavours() throws DataFetchingException {
         try {
-            return flavourService.getAll();
+            return flavourService.getAllForAdmin();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -449,17 +451,29 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
+     * Get cloud clients
+     *
+     * @return a list of cloud clients
+     */
+    public List<CloudClient> cloudClients() {
+        return this.cloudClientGateway.getAll();
+    }
+
+    /**
      * Get cloud images from the the cloud provider
      *
      * @return a list of cloud images
      */
-    public CompletableFuture<List<CloudImage>> cloudImages() {
+    public CompletableFuture<List<CloudImage>> cloudImages(Long cloudId) {
         final CompletableFuture<List<CloudImage>> future = new CompletableFuture<>();
         runAsync(() -> {
             try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
                 future.complete(cloudClient.images());
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
             }
         });
         return future;
@@ -470,13 +484,16 @@ public class QueryResolver implements GraphQLQueryResolver {
      *
      * @return a list of cloud flavours
      */
-    public CompletableFuture<List<CloudFlavour>> cloudFlavours() {
+    public CompletableFuture<List<CloudFlavour>> cloudFlavours(Long cloudId) {
         final CompletableFuture<List<CloudFlavour>> future = new CompletableFuture<>();
         runAsync(() -> {
             try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
                 future.complete(cloudClient.flavours());
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
             }
         });
         return future;
@@ -487,16 +504,25 @@ public class QueryResolver implements GraphQLQueryResolver {
      *
      * @return a list of cloud limits
      */
-    public CompletableFuture<CloudLimit> cloudLimits() {
-        final CompletableFuture<CloudLimit> future = new CompletableFuture<>();
-        runAsync(() -> {
-            try {
-                future.complete(cloudClient.limits());
-            } catch (CloudException exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
-            }
-        });
-        return future;
+    public CompletableFuture<List<DetailedCloudLimit>> cloudLimits() {
+        List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
+
+        List<CompletableFuture<DetailedCloudLimit>> allCloudLimitsFutures = cloudClients.stream().map(cloudClient -> {
+            final CompletableFuture<DetailedCloudLimit> future = new CompletableFuture<>();
+            runAsync(() -> {
+                try {
+                    CloudLimit cloudLimit = cloudClient.limits();
+                    future.complete(new DetailedCloudLimit(cloudClient, cloudLimit));
+                } catch (CloudException exception) {
+                    future.complete(new DetailedCloudLimit(cloudClient, exception.getMessage()));
+                }
+            });
+            return future;
+        }).collect(toList());
+
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(allCloudLimitsFutures.toArray(new CompletableFuture[0]));
+
+        return allFutures.thenApply(future -> allCloudLimitsFutures.stream().map(CompletableFuture::join).collect(toList())).toCompletableFuture();
     }
 
     /**
@@ -504,16 +530,19 @@ public class QueryResolver implements GraphQLQueryResolver {
      *
      * @return a list of security groups
      */
-    public CompletableFuture<List<CloudSecurityGroup>> cloudSecurityGroups() {
+    public CompletableFuture<List<CloudSecurityGroup>> cloudSecurityGroups(Long cloudId) {
         final CompletableFuture<List<CloudSecurityGroup>> future = new CompletableFuture<>();
         runAsync(() -> {
             try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
                 final List<CloudSecurityGroup> cloudSecurityGroups = cloudClient.securityGroups().stream()
                     .map(CloudSecurityGroup::new)
                     .collect(toList());
                 future.complete(cloudSecurityGroups);
             } catch (CloudException exception) {
                 future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
             }
         });
         return future;
@@ -635,6 +664,19 @@ public class QueryResolver implements GraphQLQueryResolver {
         }
     }
 
+    public List<NumberInstancesByCloudClient> countInstancesByCloudClients() throws DataFetchingException {
+        try {
+            return instanceService.countByCloudClient().stream()
+                .map(countByCloudClient -> {
+                    CloudClient cloudClient = this.cloudClientGateway.getCloudClient(countByCloudClient.getId());
+                    return new NumberInstancesByCloudClient(cloudClient.getId(), cloudClient.getName(), countByCloudClient.getTotal());
+                })
+                .collect(toList());
+        } catch (InvalidQueryException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
     public List<SystemNotification> systemNotifications() throws DataFetchingException {
         try {
             return clientNotificationService.getAllSystemNotifications();
@@ -659,5 +701,14 @@ public class QueryResolver implements GraphQLQueryResolver {
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
+    }
+
+    private CloudClient getCloudClient(Long cloudId) throws DataFetchingException {
+        CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+        if (cloudClient == null) {
+            throw new DataFetchingException("Cloud Client with ID " + cloudId + " does not exist");
+        }
+
+        return cloudClient;
     }
 }

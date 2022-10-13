@@ -1,7 +1,5 @@
 package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
-import eu.ill.visa.web.bundles.graphql.validation.Cloud;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -20,7 +18,9 @@ public class ImageInput {
 
     private String icon;
 
-    @Cloud(type = "image")
+    private Long cloudId;
+
+    @NotNull
     private String computeId;
 
     private Boolean visible;
@@ -62,6 +62,14 @@ public class ImageInput {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public Long getCloudId() {
+        return cloudId;
+    }
+
+    public void setCloudId(Long cloudId) {
+        this.cloudId = cloudId;
     }
 
     public String getComputeId() {

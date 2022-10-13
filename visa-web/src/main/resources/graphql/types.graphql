@@ -42,12 +42,39 @@ type Proposal {
     summary: String
 }
 
+type OpenStackProviderConfiguration {
+    applicationId: String!
+    applicationSecret: String!
+    computeEndpoint: String!
+    imageEndpoint: String!
+    networkEndpoint: String!
+    identityEndpoint: String!
+    addressProvider: String!
+    addressProviderUUID: String!
+}
+type WebProviderConfiguration {
+    url: String!
+    authToken: String!
+}
+
+type CloudClient {
+    id: Int!
+    name: String!
+    type: String!
+    serverNamePrefix: String!
+    visible: Boolean!
+    openStackProviderConfiguration: OpenStackProviderConfiguration
+    webProviderConfiguration: WebProviderConfiguration
+}
+
 type Flavour {
     id: Int!
     name: String!
     memory: Int!
     cpu: Int!
     computeId: String!
+    cloudFlavour: CloudFlavour
+    cloudClient: CloudClient!
 }
 
 type CloudFlavour {
@@ -67,7 +94,6 @@ type CloudImage {
 
 type CloudSecurityGroup {
     name: String!
-    integration: SecurityGroup
 }
 
 type Image {
@@ -82,6 +108,7 @@ type Image {
     protocols: [ImageProtocol]
     bootCommand: String
     autologin: String
+    cloudClient: CloudClient!
 }
 
 type Plan {
@@ -94,6 +121,7 @@ type Plan {
 type SecurityGroup {
     id: Int!
     name: String!
+    cloudClient: CloudClient!
 }
 
 type SecurityGroupFilter {
@@ -177,6 +205,7 @@ type Instance {
     username: String!
     keyboardLayout: String!
     attributes: [InstanceAttribute]
+    cloudClient: CloudClient!
 }
 
 type CloudLimit {
@@ -186,6 +215,12 @@ type CloudLimit {
     totalInstancesUsed: Int!
     maxTotalCores: Int!
     totalCoresUsed: Int!
+}
+
+type DetailedCloudLimit {
+    cloudClient: CloudClient!
+    cloudLimit: CloudLimit
+    error: String
 }
 
 type ProtocolStatus {
@@ -302,6 +337,12 @@ type NumberInstancesByImage {
     id: Int!
     name: String!
     version: String
+    total: Int!
+}
+
+type NumberInstancesByCloudClients {
+    id: Int
+    name: String
     total: Int!
 }
 

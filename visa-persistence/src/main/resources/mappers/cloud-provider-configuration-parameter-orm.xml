@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
+
+    <entity class="eu.ill.visa.core.domain.CloudProviderConfiguration$CloudProviderConfigurationParameter">
+        <table name="cloud_provider_configuration_parameter"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="key">
+                <column name="key" nullable="false" length="256"/>
+            </basic>
+            <basic name="value">
+                <column name="value" nullable="false" length="8192"/>
+            </basic>
+        </attributes>
+    </entity>
+
+</entity-mappings>

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @DisallowConcurrentExecution
@@ -20,38 +21,43 @@ public class CloudInstanceCleanupJob implements Job {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudInstanceCleanupJob.class);
 
-    private InstanceService instanceService;
-    private CloudClient cloudClient;
+    private final InstanceService instanceService;
 
     @Inject
-    public CloudInstanceCleanupJob(InstanceService instanceService, CloudClient cloudClient) {
+    public CloudInstanceCleanupJob(final InstanceService instanceService) {
         this.instanceService = instanceService;
-        this.cloudClient = cloudClient;
     }
 
     @Override
     public void execute(final JobExecutionContext context) {
         logger.info("Executing cloud instance cleanup job");
 
-        try {
-            List<Instance> instances = this.instanceService.getAll();
-            List<CloudInstanceIdentifier> cloudInstances = this.cloudClient.instanceIdentifiers();
+        Map<CloudClient, List<Instance>> instancesByCloud = this.instanceService.getAllByCloud();
+        for (Map.Entry<CloudClient, List<Instance>> entry : instancesByCloud.entrySet()) {
+            CloudClient cloudClient = entry.getKey();
+            List<Instance> instances = entry.getValue();
 
-            String serverNamePrefix = this.cloudClient.getServerNamePrefix();
+            try {
+                List<CloudInstanceIdentifier> cloudInstances = cloudClient.instanceIdentifiers();
 
-            List<CloudInstanceIdentifier> zombieCloudInstances = cloudInstances.stream().filter(cloudInstance -> {
-                boolean instanceNotExists = instances.stream().noneMatch(instance -> cloudInstance.getId().equals(instance.getComputeId()));
-                return instanceNotExists && cloudInstance.getName().startsWith(serverNamePrefix);
-            }).collect(Collectors.toUnmodifiableList());
+                String serverNamePrefix = cloudClient.getServerNamePrefix();
 
-            logger.info("Found {} cloud instances that no longer exist in the database", zombieCloudInstances.size());
-            for (CloudInstanceIdentifier cloudInstance : zombieCloudInstances) {
-                logger.info("Deleting cloud instance {} with id {}", cloudInstance.getName(), cloudInstance.getId());
-                cloudClient.deleteInstance(cloudInstance.getId());
+                List<CloudInstanceIdentifier> zombieCloudInstances = cloudInstances.stream().filter(cloudInstance -> {
+                    boolean instanceNotExists = instances.stream().noneMatch(instance -> cloudInstance.getId().equals(instance.getComputeId()));
+                    return instanceNotExists && cloudInstance.getName().startsWith(serverNamePrefix);
+                }).collect(Collectors.toUnmodifiableList());
+
+                logger.info("Found {} cloud instances, on Cloud \"{}\", that no longer exist in the database", zombieCloudInstances.size(), cloudClient.getName());
+                for (CloudInstanceIdentifier cloudInstance : zombieCloudInstances) {
+                    logger.info("Deleting cloud instance {} with id {} on Cloud \"{}\"", cloudInstance.getName(), cloudInstance.getId(), cloudClient.getName());
+                    cloudClient.deleteInstance(cloudInstance.getId());
+                }
+
+            } catch (CloudException e) {
+                logger.error("Failed to get cloud instances on cloud \"{}\" during cleanup job: {}", cloudClient.getName(), e.getMessage());
             }
-
-        } catch (CloudException e) {
-            logger.error("Failed to get cloud instances during cleanup job: {}", e.getMessage());
         }
+
+
     }
 }

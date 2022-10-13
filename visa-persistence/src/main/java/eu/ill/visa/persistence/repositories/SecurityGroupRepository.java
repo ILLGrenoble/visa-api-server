@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.*;
-import eu.ill.visa.persistence.providers.FlavourFilterProvider;
 import eu.ill.visa.persistence.providers.SecurityGroupFilterProvider;
 
 import javax.persistence.EntityManager;
@@ -12,6 +11,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Singleton
 public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
@@ -28,7 +28,16 @@ public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
 
     public List<SecurityGroup> getAll(QueryFilter filter,  OrderBy orderBy) {
         final SecurityGroupFilterProvider provider = new SecurityGroupFilterProvider(getEntityManager());
-        return super.getAll(provider, filter, orderBy);
+        List<SecurityGroup> allSecurityGroups = super.getAll(provider, filter, orderBy);
+
+        return allSecurityGroups.stream().filter(securityGroup -> {
+            CloudProviderConfiguration cloudProviderConfiguration = securityGroup.getCloudProviderConfiguration();
+            if (cloudProviderConfiguration == null) {
+                return true;
+            }
+
+            return cloudProviderConfiguration.getDeletedAt() == null;
+        }).collect(Collectors.toList());
     }
 
     public SecurityGroup getById(Long id) {
@@ -68,16 +77,6 @@ public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
             persist(securityGroup);
         } else {
             merge(securityGroup);
-        }
-    }
-
-    public SecurityGroup getByName(String name) {
-        try {
-            final TypedQuery<SecurityGroup> query = getEntityManager().createNamedQuery("securityGroup.getByName", SecurityGroup.class);
-            query.setParameter("name", name);
-            return query.getSingleResult();
-        } catch (NoResultException exception) {
-            return null;
         }
     }
 }

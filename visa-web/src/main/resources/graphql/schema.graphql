@@ -56,14 +56,16 @@ type Query {
     searchForUserByLastName(lastName: String!, onlyActivatedUsers: Boolean!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
     # Get all roles
     roles: [Role]  @isAuthorised(role: "ADMIN")
+    # Get all cloud clients
+    cloudClients: [CloudClient] @isAuthorised(role: "ADMIN")
     # Get images from cloud provider
-    cloudImages: [CloudImage] @isAuthorised(role: "ADMIN")
+    cloudImages(cloudId: Int): [CloudImage] @isAuthorised(role: "ADMIN")
     # Get flavours from cloud provider
-    cloudFlavours: [CloudFlavour] @isAuthorised(role: "ADMIN")
+    cloudFlavours(cloudId: Int): [CloudFlavour] @isAuthorised(role: "ADMIN")
     # Get cloud limits
-    cloudLimits: CloudLimit @isAuthorised(role: "ADMIN")
+    cloudLimits: [DetailedCloudLimit] @isAuthorised(role: "ADMIN")
     # Get cloud security groups
-    cloudSecurityGroups: [CloudSecurityGroup] @isAuthorised(role: "ADMIN")
+    cloudSecurityGroups(cloudId: Int): [CloudSecurityGroup] @isAuthorised(role: "ADMIN")
     # Count all sessions
     countSessions(filter: QueryFilter): Int!  @isAuthorised(role: "ADMIN")
     # Count all active sessions
@@ -78,6 +80,8 @@ type Query {
     countInstancesByFlavours: [NumberInstancesByFlavour]  @isAuthorised(role: "ADMIN")
     # Count instances by images
     countInstancesByImages: [NumberInstancesByImage]  @isAuthorised(role: "ADMIN")
+    # Count instances by cloud clients
+    countInstancesByCloudClients: [NumberInstancesByCloudClients]  @isAuthorised(role: "ADMIN")
     # Get system notifications
     systemNotifications: [SystemNotification] @isAuthorised(role: "ADMIN")
     # Get application credentials
@@ -100,9 +104,9 @@ type Mutation {
     # Delete a flavour
     deleteFlavour(id: Int!) : Flavour! @isAuthorised(role: "ADMIN")
     # Create a securityGroup
-    createSecurityGroup(input: String!): SecurityGroup!  @isAuthorised(role: "ADMIN")
+    createSecurityGroup(input: SecurityGroupInput!): SecurityGroup!  @isAuthorised(role: "ADMIN")
     # Update a securityGroup
-    updateSecurityGroup(id: Int!, input: String!): SecurityGroup! @isAuthorised(role: "ADMIN")
+    updateSecurityGroup(id: Int!, input: SecurityGroupInput!): SecurityGroup! @isAuthorised(role: "ADMIN")
     # Delete a securityGroup
     deleteSecurityGroup(id: Int!) : SecurityGroup! @isAuthorised(role: "ADMIN")
     # Create a securityGroupFilter
@@ -117,6 +121,12 @@ type Mutation {
     updatePlan(id: Int!,input: PlanInput!): Plan! @isAuthorised(role: "ADMIN")
     # Delete a plan
     deletePlan(id: Int!) : Plan! @isAuthorised(role: "ADMIN")
+    # Create a cloud client
+    createCloudClient(input: CloudClientInput!): CloudClient! @isAuthorised(role: "ADMIN")
+    # Update a cloud client
+    updateCloudClient(id: Int!, input: CloudClientInput!): CloudClient! @isAuthorised(role: "ADMIN")
+    # Delete a cloud client
+    deleteCloudClient(id: Int!): Boolean @isAuthorised(role: "ADMIN")
     # Reboot an instance
     rebootInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
     # Start an instance

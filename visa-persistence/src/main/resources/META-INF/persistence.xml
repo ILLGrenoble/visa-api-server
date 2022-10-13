@@ -36,6 +36,8 @@
         <mapping-file>mappers/system-notification-orm.xml</mapping-file>
         <mapping-file>mappers/instrument-scientist-orm.xml</mapping-file>
         <mapping-file>mappers/user-role-orm.xml</mapping-file>
+        <mapping-file>mappers/cloud-provider-configuration-orm.xml</mapping-file>
+        <mapping-file>mappers/cloud-provider-configuration-parameter-orm.xml</mapping-file>
 
         <class>eu.ill.visa.core.domain.ApplicationCredential</class>
         <class>eu.ill.visa.core.domain.Configuration</class>
@@ -63,6 +65,8 @@
         <class>eu.ill.visa.core.domain.SecurityGroupFilter</class>
         <class>eu.ill.visa.core.domain.SystemNotification</class>
         <class>eu.ill.visa.core.domain.InstrumentScientist</class>
+        <class>eu.ill.visa.core.domain.CloudProviderConfiguration</class>
+        <class>eu.ill.visa.core.domain.CloudProviderConfiguration$CloudProviderConfigurationParameter</class>
 
     </persistence-unit>
 

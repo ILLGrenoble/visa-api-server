@@ -29,15 +29,17 @@ public class CreateInstanceAction extends InstanceAction {
         }
 
         try {
-            final CloudClient cloudClient = this.getCloudClient();
+            final CloudClient cloudClient = this.getCloudClient(instance.getCloudId());
+            if (cloudClient == null) {
+                return;
+            }
 
             final Plan plan = instance.getPlan();
             final Flavour flavour = plan.getFlavour();
             final Image image = plan.getImage();
 
             // Get security groups for instance
-            List<SecurityGroup> securityGroups = this.getSecurityGroupService().getAllForInstance(instance);
-            List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
+            List<String> securityGroupNames = this.getSecurityGroupService().getAllSecurityGroupNamesForInstance(instance);
             logger.info("Adding security groups [{}] to instance {}", String.join(", ", securityGroupNames), instance.getId());
 
             instance.setSecurityGroups(securityGroupNames);

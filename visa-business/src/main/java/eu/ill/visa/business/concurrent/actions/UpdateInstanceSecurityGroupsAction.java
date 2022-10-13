@@ -4,12 +4,10 @@ import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionExceptio
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.SecurityGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UpdateInstanceSecurityGroupsAction extends InstanceAction {
 
@@ -22,8 +20,6 @@ public class UpdateInstanceSecurityGroupsAction extends InstanceAction {
     @Override
     public void run() throws InstanceActionException {
         try {
-            final CloudClient cloudClient = this.getCloudClient();
-
             final Instance instance = getInstance();
 
             // Test case when a instance has not yet been created on open stack
@@ -31,10 +27,13 @@ public class UpdateInstanceSecurityGroupsAction extends InstanceAction {
                 return;
             }
 
-            // Get security groups for instance
-            List<SecurityGroup> securityGroups = this.getSecurityGroupService().getAllForInstance(instance);
+            final CloudClient cloudClient = this.getCloudClient(instance.getCloudId());
+            if (cloudClient == null) {
+                return;
+            }
 
-            List<String> securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
+            // Get security groups for instance
+            List<String> securityGroupNames = this.getSecurityGroupService().getAllSecurityGroupNamesForInstance(instance);
             logger.info("Setting security groups [{}] to instance {}", String.join(", ", securityGroupNames), instance.getId());
 
             instance.setSecurityGroups(securityGroupNames);

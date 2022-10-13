@@ -4,41 +4,47 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 public class CloudConfiguration {
 
-    private String provider;
+    private String providerType;
 
-    private Map<String, String> parameters;
+    private String providerName = "Default";
+
+    private List<ProviderConfiguration> providers;
 
     private String serverNamePrefix;
 
     public CloudConfiguration() {
     }
 
-    public CloudConfiguration(String provider) {
-        this.provider = provider;
+    public CloudConfiguration(String providerType) {
+        this.providerType = providerType;
     }
 
     @JsonProperty
-    public String getProvider() {
-        return provider;
+    @NotNull
+    @Valid
+    public String getProviderType() {
+        return providerType;
     }
 
     @JsonProperty
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public void setProviderType(String providerType) {
+        this.providerType = providerType;
     }
 
     @JsonProperty
-    public Map<String, String> getParameters() {
-        return parameters;
+    @NotNull
+    @Valid
+    public String getProviderName() {
+        return providerName;
     }
 
-    @JsonProperty
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
     }
 
     @JsonProperty
@@ -46,5 +52,22 @@ public class CloudConfiguration {
     @Valid
     public String getServerNamePrefix() {
         return serverNamePrefix;
+    }
+
+    @JsonProperty
+    public List<ProviderConfiguration> getProviders() {
+        return providers;
+    }
+
+    @JsonProperty
+    public void setProviders(List<ProviderConfiguration> providers) {
+        this.providers = providers;
+    }
+
+    public ProviderConfiguration getProviderConfiguration(String provider) {
+        Optional<ProviderConfiguration> configuration = providers.stream()
+            .filter(providerConfiguration -> providerConfiguration.getName().equals(provider))
+            .findFirst();
+        return configuration.orElse(null);
     }
 }
