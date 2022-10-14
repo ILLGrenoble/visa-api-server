@@ -28,6 +28,7 @@ public class InstanceDto {
     private boolean deleteRequested;
     private boolean canConnectWhileOwnerAway;
     private String keyboardLayout;
+    private boolean unrestrictedAccess;
 
     private Date createdAt;
 
@@ -197,5 +198,13 @@ public class InstanceDto {
 
     public void setKeyboardLayout(String keyboardLayout) {
         this.keyboardLayout = keyboardLayout;
+    }
+
+    public boolean isUnrestrictedAccess() {
+        return unrestrictedAccess;
+    }
+
+    public void setUnrestrictedAccess(boolean unrestrictedAccess) {
+        this.unrestrictedAccess = unrestrictedAccess;
     }
 }

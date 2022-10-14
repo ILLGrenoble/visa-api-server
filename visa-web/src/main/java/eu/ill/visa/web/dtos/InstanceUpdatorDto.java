@@ -18,8 +18,12 @@ public class InstanceUpdatorDto {
     @NotNull
     private Integer screenHeight;
 
+    @NotNull
     @Size(max = 250)
     private String keyboardLayout;
+
+    @NotNull
+    private Boolean unrestrictedAccess;
 
     public String getName() {
         return name;
@@ -59,5 +63,13 @@ public class InstanceUpdatorDto {
 
     public void setKeyboardLayout(String keyboardLayout) {
         this.keyboardLayout = keyboardLayout;
+    }
+
+    public Boolean getUnrestrictedAccess() {
+        return unrestrictedAccess;
+    }
+
+    public void setUnrestrictedAccess(Boolean unrestrictedAccess) {
+        this.unrestrictedAccess = unrestrictedAccess;
     }
 }

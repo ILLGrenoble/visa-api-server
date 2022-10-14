@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static eu.ill.visa.core.domain.enumerations.InstanceMemberRole.OWNER;
@@ -327,8 +328,13 @@ public class AccountInstanceController extends AbstractController {
             instance.setScreenWidth(instanceUpdatorDto.getScreenWidth());
             instance.setScreenHeight(instanceUpdatorDto.getScreenHeight());
             instance.setKeyboardLayout(instanceUpdatorDto.getKeyboardLayout());
+            if (instanceUpdatorDto.getUnrestrictedAccess() && !instance.canAccessWhenOwnerAway()) {
+                instance.setUnrestrictedMemberAccess(new Date());
+            } else if (!instanceUpdatorDto.getUnrestrictedAccess()) {
+                instance.setUnrestrictedMemberAccess(null);
+            }
             instanceService.save(instance);
-            return createResponse(mapper.map(instance, InstanceDto.class));
+            return createResponse(mapInstance(instance, accountToken.getUser()));
         }
         throw new NotFoundException();
     }
@@ -552,6 +558,7 @@ public class AccountInstanceController extends AbstractController {
         }
         instanceDto.setExpirationDate(instanceExpirationService.getExpirationDate(instance));
         instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));
+        instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
 
         return instanceDto;
     }
