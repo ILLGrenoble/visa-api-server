@@ -3,10 +3,12 @@ package eu.ill.visa.vdi.listeners;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.DataListener;
+import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceSessionMember;
+import eu.ill.visa.core.domain.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.domain.Role;
 import eu.ill.visa.vdi.models.DesktopConnection;
 import eu.ill.visa.vdi.services.DesktopConnectionService;
@@ -27,13 +29,16 @@ public class ClientDisplayListener extends AbstractListener implements DataListe
 
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
+    private final InstanceActivityService instanceActivityService;
 
     public ClientDisplayListener(final DesktopConnectionService desktopConnectionService,
                                  final InstanceService instanceService,
-                                 final InstanceSessionService instanceSessionService) {
+                                 final InstanceSessionService instanceSessionService,
+                                 final InstanceActivityService instanceActivityService) {
         super(desktopConnectionService);
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
+        this.instanceActivityService = instanceActivityService;
     }
 
     @Override
@@ -53,7 +58,11 @@ public class ClientDisplayListener extends AbstractListener implements DataListe
             String command = data.substring(separatorPos + 1, separatorPos + 1 + commandLength);
             boolean isControlAction = command.equals("mouse") || command.equals("key");
             if (isControlAction) {
-                connection.updateLastInteractionAt();
+                if (command.equals("mouse")) {
+                    connection.setInstanceActivity(InstanceActivityType.MOUSE);
+                } else {
+                    connection.setInstanceActivity(InstanceActivityType.KEYBOARD);
+                }
             }
 
             Role role = connection.getConnectedUser().getRole();
@@ -64,7 +73,7 @@ public class ClientDisplayListener extends AbstractListener implements DataListe
             // Update last seen time of instance if more than one minute
             final Date lastSeenDate = connection.getLastSeenAt();
             final Date currentDate = new Date();
-            if (lastSeenDate == null ||  (currentDate.getTime() - lastSeenDate.getTime() > 10 * 1000)) {
+            if (lastSeenDate == null ||  (currentDate.getTime() - lastSeenDate.getTime() > 5 * 1000)) {
                 final Long instanceId = connection.getInstanceId();
                 final Instance instance = instanceService.getById(instanceId);
                 if (instance == null) {
@@ -86,6 +95,12 @@ public class ClientDisplayListener extends AbstractListener implements DataListe
                         instanceSessionMember.updateLastSeenAt();
                         instanceSessionMember.setLastInteractionAt(connection.getLastInteractionAt());
                         instanceSessionService.saveInstanceSessionMember(instanceSessionMember);
+
+                        InstanceActivityType instanceActivityType = connection.getInstanceActivity();
+                        if (instanceActivityType != null) {
+                            this.instanceActivityService.create(instanceSessionMember.getUser(), instance, instanceActivityType);
+                            connection.resetInstanceActivity();
+                        }
                     }
                     connection.setLastSeenAt(instance.getLastSeenAt());
                 }

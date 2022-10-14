@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.models;
 
+import eu.ill.visa.core.domain.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.concurrency.ConnectionThread;
 
 import java.util.Date;
@@ -8,7 +9,8 @@ public class DesktopConnection {
 
     private final Long instanceId;
     private Date lastSeenAt;
-    private Date lastInteractionAt = new Date() ;
+    private Date lastInteractionAt = new Date();
+    private InstanceActivityType instanceActivityType;
     private final ConnectedUser connectedUser;
     private final ConnectionThread connectionThread;
     private final String roomId;
@@ -40,6 +42,27 @@ public class DesktopConnection {
 
     public void setLastInteractionAt(Date lastInteractionAt) {
         this.lastInteractionAt = lastInteractionAt;
+    }
+
+    public InstanceActivityType getInstanceActivity() {
+        return instanceActivityType;
+    }
+
+    public void resetInstanceActivity() {
+        this.instanceActivityType = null;
+    }
+
+    public void setInstanceActivity(InstanceActivityType instanceActivityType) {
+        if (this.instanceActivityType == null) {
+            this.instanceActivityType = instanceActivityType;
+
+        } else if (instanceActivityType.equals(InstanceActivityType.MOUSE) && this.instanceActivityType.equals(InstanceActivityType.KEYBOARD)) {
+            this.instanceActivityType = InstanceActivityType.MOUSE_AND_KEYBOARD;
+
+        } else if (instanceActivityType.equals(InstanceActivityType.KEYBOARD) && this.instanceActivityType.equals(InstanceActivityType.MOUSE)) {
+            this.instanceActivityType = InstanceActivityType.MOUSE_AND_KEYBOARD;
+        }
+        this.updateLastInteractionAt();
     }
 
     public void updateLastInteractionAt() {

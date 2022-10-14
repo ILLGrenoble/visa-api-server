@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
+                 version="2.2">
+
+
+    <named-query name="instanceActivity.getAll">
+        <query>SELECT a FROM InstanceActivity a order by a.id</query>
+    </named-query>
+
+    <named-query name="instanceActivity.getAllForUser">
+        <query>SELECT a FROM InstanceActivity a where a.user = :user order by a.id</query>
+    </named-query>
+
+    <named-query name="instanceActivity.getAllForInstance">
+        <query>SELECT a FROM InstanceActivity a where a.instance = :instance order by a.id</query>
+    </named-query>
+
+    <entity class="eu.ill.visa.core.domain.InstanceActivity">
+        <table name="instance_activity"/>
+        <attributes>
+            <id name="id">
+                <column name="id" nullable="false"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="instanceActivityType">
+                <column name="activity_type" length="50" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <many-to-one name="user" optional="true">
+                <join-column name="user_id" nullable="true"/>
+                <foreign-key name="fk_users_id" />
+            </many-to-one>
+            <many-to-one name="instance" optional="false">
+                <join-column name="instance_id"/>
+                <foreign-key name="fk_instance_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>

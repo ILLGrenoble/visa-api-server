@@ -31,6 +31,7 @@
         <mapping-file>mappers/instance-authentication-token-orm.xml</mapping-file>
         <mapping-file>mappers/instance-thumbnail-orm.xml</mapping-file>
         <mapping-file>mappers/instance-extension-request-orm.xml</mapping-file>
+        <mapping-file>mappers/instance-activity-orm.xml</mapping-file>
         <mapping-file>mappers/security-group-orm.xml</mapping-file>
         <mapping-file>mappers/security-group-filter-orm.xml</mapping-file>
         <mapping-file>mappers/system-notification-orm.xml</mapping-file>
@@ -59,6 +60,7 @@
         <class>eu.ill.visa.core.domain.InstanceJupyterSession</class>
         <class>eu.ill.visa.core.domain.InstanceExpiration</class>
         <class>eu.ill.visa.core.domain.InstanceThumbnail</class>
+        <class>eu.ill.visa.core.domain.InstanceActivity</class>
         <class>eu.ill.visa.core.domain.User</class>
         <class>eu.ill.visa.core.domain.Employer</class>
         <class>eu.ill.visa.core.domain.SecurityGroup</class>
