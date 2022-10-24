@@ -1,3 +1,9 @@
+2.4.0 24/10/2022
+================
+ * Record mouse and keyboard activity on instances to maintain history of when users have interacted with instances
+ * Allow users to indicate whether others can access their instance when they are not connected
+ * Allow for multiple cloud providers: Cloud providers can be configured from database settings as well as the default config file
+ 
 2.3.2 23/09/2022
 ================
  * CC the admins in the email sent when replying to instance extension requests (keep all team informed)
