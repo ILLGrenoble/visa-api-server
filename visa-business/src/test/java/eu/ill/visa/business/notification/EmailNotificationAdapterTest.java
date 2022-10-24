@@ -33,7 +33,7 @@ class EmailNotificationAdapterTest {
         final String port = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_PORT");
         final String fromEmailAddress = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_FROM_EMAIL_ADDRESS");
         final String adminEmailAddress = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS");
-        final String devEmailAddress = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS");
+        final String devEmailAddress = getenv("VISA_NOTIFICATION_EMAIL_ADAPTER_DEV_EMAIL_ADDRESS");
         final String userMaxInactivityDurationHours = getenv("VISA_INSTANCE_USER_MAX_INACTIVITY_DURATION_HOURS");
         final String staffMaxInactivityDurationHours = getenv("VISA_INSTANCE_STAFF_MAX_INACTIVITY_DURATION_HOURS");
         final String userMaxLifetimeDurationHours = getenv("VISA_INSTANCE_USER_MAX_LIFETIME_DURATION_HOURS");
