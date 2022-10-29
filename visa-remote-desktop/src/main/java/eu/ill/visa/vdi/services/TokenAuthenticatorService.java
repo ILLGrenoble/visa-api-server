@@ -9,8 +9,8 @@ import eu.ill.visa.vdi.exceptions.InvalidTokenException;
 import eu.ill.visa.vdi.support.HttpRequest;
 
 public class TokenAuthenticatorService {
-    private final static String                             TOKEN_PARAMETER = "token";
-    private final        InstanceAuthenticationTokenService instanceAuthenticationTokenService;
+    private final static String TOKEN_PARAMETER = "token";
+    private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
 
     @Inject
     public TokenAuthenticatorService(final InstanceAuthenticationTokenService instanceAuthenticationTokenService) {

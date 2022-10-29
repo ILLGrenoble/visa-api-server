@@ -5,9 +5,8 @@ import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.vdi.domain.Role;
-import org.apache.guacamole.net.GuacamoleSocket;
+import eu.ill.webx.WebXTunnel;
 import org.apache.guacamole.net.GuacamoleTunnel;
-import org.apache.guacamole.net.SimpleGuacamoleTunnel;
 
 import java.util.concurrent.ExecutorService;
 
@@ -18,9 +17,16 @@ public class ConnectionThreadExecutor {
 
     private final ExecutorService executorService = newCachedThreadPool(new ConnectionThreadFactory());
 
-    public ConnectionThread startConnectionThread(SocketIOClient client, GuacamoleSocket socket, Instance instance, User user, Role role) {
-        final GuacamoleTunnel tunnel = new SimpleGuacamoleTunnel(socket);
-        final ConnectionThread thread = new ConnectionThread(client, tunnel, instance, user, role);
+    public ConnectionThread startGuacamoleConnectionThread(SocketIOClient client, GuacamoleTunnel tunnel, Instance instance, User user, Role role) {
+        final ConnectionThread thread = new GuacamoleConnectionThread(client, tunnel, instance, user, role);
+
+        executorService.submit(thread);
+
+        return thread;
+    }
+
+    public ConnectionThread startWebXConnectionThread(SocketIOClient client, WebXTunnel tunnel, Instance instance, User user, Role role) {
+        final ConnectionThread thread = new WebXConnectionThread(client, tunnel, instance, user, role);
 
         executorService.submit(thread);
 

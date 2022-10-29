@@ -1,6 +1,7 @@
 package eu.ill.visa.vdi.services;
 
 import com.corundumstudio.socketio.BroadcastOperations;
+import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.store.StoreFactory;
@@ -14,7 +15,6 @@ import eu.ill.visa.core.domain.InstanceSessionMember;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.concurrency.ConnectionThread;
-import eu.ill.visa.vdi.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.Role;
 import eu.ill.visa.vdi.events.*;
 import eu.ill.visa.vdi.exceptions.ConnectionException;
@@ -23,7 +23,7 @@ import eu.ill.visa.vdi.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.models.ConnectedUser;
 import eu.ill.visa.vdi.models.DesktopConnection;
 import eu.ill.visa.vdi.socketio.RoomBroadcastOperations;
-import org.apache.guacamole.net.GuacamoleSocket;
+import eu.ill.visa.vdi.support.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,27 +35,27 @@ import static eu.ill.visa.vdi.events.Event.OWNER_AWAY_EVENT;
 
 @Singleton
 public class DesktopConnectionService {
-
+    private final static String PROTOCOL_PARAMETER = "protocol";
     private final static Logger logger = LoggerFactory.getLogger(DesktopConnectionService.class);
 
-    private final ConnectionThreadExecutor executorService;
     private final InstanceSessionService instanceSessionService;
-    private final GuacamoleSocketService guacamoleSocketService;
+    private final GuacamoleDesktopService guacamoleDesktopService;
+    private final WebXDesktopService webXDesktopService;
     private final InstanceExpirationService instanceExpirationService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
     private final Map<UUID, DesktopConnection> desktopConnections = new HashMap<>();
     private final StoreFactory storeFactory;
 
     @Inject
-    public DesktopConnectionService(final ConnectionThreadExecutor executorService,
-                                    final InstanceSessionService instanceSessionService,
-                                    final GuacamoleSocketService guacamoleSocketService,
+    public DesktopConnectionService(final InstanceSessionService instanceSessionService,
+                                    final GuacamoleDesktopService guacamoleDesktopService,
+                                    final WebXDesktopService webXDesktopService,
                                     final InstanceExpirationService instanceExpirationService,
                                     final VirtualDesktopConfiguration virtualDesktopConfiguration,
                                     final StoreFactory storeFactory) {
-        this.executorService = executorService;
         this.instanceSessionService = instanceSessionService;
-        this.guacamoleSocketService = guacamoleSocketService;
+        this.guacamoleDesktopService = guacamoleDesktopService;
+        this.webXDesktopService = webXDesktopService;
         this.instanceExpirationService = instanceExpirationService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
         this.storeFactory = storeFactory;
@@ -83,9 +83,19 @@ public class DesktopConnectionService {
             throw new UnauthorizedException("User " + user.getFullName() + " is unauthorised to access the instance " + instance.getId());
         }
 
-        logger.info("User {} creating desktop connection to instance {}", (user.getFullName() + "(" + role.toString() + ")"), instance.getId());
-        GuacamoleSocket guacamoleSocket = guacamoleSocketService.createGuacamoleSocket(instance, user, role);
-        final ConnectionThread thread = executorService.startConnectionThread(client, guacamoleSocket, instance, user, role);
+        final HandshakeData data = client.getHandshakeData();
+        final HttpRequest request = new HttpRequest(data);
+        final String protocol = request.getStringParameter(PROTOCOL_PARAMETER);
+
+        boolean isWebX = protocol != null && protocol.equals("webx");
+        final ConnectionThread thread;
+        if (isWebX) {
+            logger.info("User {} creating WebX desktop connection to instance {}", (user.getFullName() + "(" + role.toString() + ")"), instance.getId());
+            thread = webXDesktopService.connect(client, instance, user, role);
+        } else {
+            logger.info("User {} creating Guacamole desktop connection to instance {}", (user.getFullName() + "(" + role.toString() + ")"), instance.getId());
+            thread = guacamoleDesktopService.connect(client, instance, user, role);
+        }
 
         ConnectedUser connectedUser = new ConnectedUser(user.getId(), user.getFullName(), role);
         DesktopConnection desktopConnection = new DesktopConnection(instance.getId(), instance.getLastSeenAt(), connectedUser, thread, instance.getId().toString());

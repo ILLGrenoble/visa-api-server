@@ -1,23 +1,27 @@
 package eu.ill.visa.vdi.services;
 
+import com.corundumstudio.socketio.SocketIOClient;
 import com.google.inject.Inject;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.ImageProtocol;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceSession;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
+import eu.ill.visa.vdi.concurrency.ConnectionThread;
+import eu.ill.visa.vdi.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.Role;
 import eu.ill.visa.vdi.exceptions.ConnectionException;
 import eu.ill.visa.vdi.exceptions.OwnerNotConnectedException;
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.GuacamoleSocket;
+import org.apache.guacamole.net.GuacamoleTunnel;
 import org.apache.guacamole.net.InetGuacamoleSocket;
+import org.apache.guacamole.net.SimpleGuacamoleTunnel;
 import org.apache.guacamole.protocol.ConfiguredGuacamoleSocket;
 import org.apache.guacamole.protocol.GuacamoleClientInformation;
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
@@ -29,26 +33,31 @@ import java.util.Map;
 import static eu.ill.visa.vdi.domain.Role.OWNER;
 import static java.util.Objects.requireNonNullElse;
 
-public class GuacamoleSocketService {
+public class GuacamoleDesktopService extends DesktopService {
 
-    private final static Logger                      logger = LoggerFactory.getLogger(GuacamoleSocketService.class);
-    private final        InstanceSessionService      instanceSessionService;
-    private final CloudClientGateway cloudClientGateway;
-    private final        SignatureService            signatureService;
-    private final        ImageProtocolService        imageProtocolService;
-    private final        VirtualDesktopConfiguration configuration;
+    private final static Logger logger = LoggerFactory.getLogger(GuacamoleDesktopService.class);
+
+    private final InstanceSessionService instanceSessionService;
+    private final SignatureService signatureService;
+    private final ImageProtocolService imageProtocolService;
+    private final VirtualDesktopConfiguration configuration;
+    private final ConnectionThreadExecutor executorService;
+
 
     @Inject
-    GuacamoleSocketService(final InstanceSessionService instanceSessionService,
-                           final CloudClientGateway cloudClientGateway,
-                           final SignatureService signatureService,
-                           final ImageProtocolService imageProtocolService,
-                           final VirtualDesktopConfiguration configuration) {
+    GuacamoleDesktopService(final InstanceSessionService instanceSessionService,
+                            final CloudClientGateway cloudClientGateway,
+                            final SignatureService signatureService,
+                            final ImageProtocolService imageProtocolService,
+                            final VirtualDesktopConfiguration configuration,
+                            final ConnectionThreadExecutor executorService) {
+        super(cloudClientGateway);
+
         this.instanceSessionService = instanceSessionService;
-        this.cloudClientGateway = cloudClientGateway;
         this.signatureService = signatureService;
         this.imageProtocolService = imageProtocolService;
         this.configuration = configuration;
+        this.executorService = executorService;
     }
 
     private GuacamoleClientInformation createClientInformation(final Instance instance) {
@@ -101,14 +110,6 @@ public class GuacamoleSocketService {
         return new ConfiguredGuacamoleSocket(socket, config, information);
     }
 
-    private String getIpAddressForInstance(Instance instance) throws CloudException {
-        if (instance.getIpAddress() == null) {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
-            return cloudClient.ip(instance.getComputeId());
-        }
-        return instance.getIpAddress();
-    }
-
     private ConfiguredGuacamoleSocket createSocketAndSession(Instance instance, User user, Role role) throws OwnerNotConnectedException, GuacamoleException, CloudException {
         // Create new session if user is owner
         if (role.equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
@@ -148,7 +149,7 @@ public class GuacamoleSocketService {
         }
     }
 
-    public GuacamoleSocket createGuacamoleSocket(final Instance instance,
+    private GuacamoleSocket createGuacamoleSocket(final Instance instance,
                                                               final User user,
                                                               final Role role) throws OwnerNotConnectedException, ConnectionException {
         try {
@@ -165,8 +166,14 @@ public class GuacamoleSocketService {
         }
     }
 
-    private String getInstanceAndUser(Instance instance, User user, Role role) {
-        return "User " + user.getFullName() + " (" + user.getId() + ", " + role.toString() + "), Instance " + instance.getId();
-    }
+    @Override
+    public ConnectionThread connect(final SocketIOClient client,
+                                    final Instance instance,
+                                    final User user,
+                                    final Role role) throws OwnerNotConnectedException, ConnectionException {
+        final GuacamoleSocket guacamoleSocket = this.createGuacamoleSocket(instance, user, role);
 
+        final GuacamoleTunnel guacamoleTunnel = new SimpleGuacamoleTunnel(guacamoleSocket);
+        return executorService.startGuacamoleConnectionThread(client, guacamoleTunnel, instance, user, role);
+    }
 }

@@ -38,6 +38,12 @@
             <artifactId>redisson</artifactId>
             <version>${redisson.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>eu.ill.webx</groupId>
+            <artifactId>webx-relay</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/webx-relay-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
