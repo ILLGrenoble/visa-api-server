@@ -23,8 +23,8 @@ public class WebXClientDisplayListener extends ClientDisplayListener<byte[]> {
     @Override
     protected InstanceActivityType getControlActivityType(byte[] data) {
 
-        ByteBuffer instructionWrapper = ByteBuffer.wrap(data, 16, 1).order(LITTLE_ENDIAN);
-        int instructionType = instructionWrapper.getInt();
+        ByteBuffer instructionWrapper = ByteBuffer.wrap(data, 16, 4).order(LITTLE_ENDIAN);
+        int instructionType = instructionWrapper.getInt() & 0x000000ff;
 
         if (instructionType == 5) {
             return InstanceActivityType.MOUSE;

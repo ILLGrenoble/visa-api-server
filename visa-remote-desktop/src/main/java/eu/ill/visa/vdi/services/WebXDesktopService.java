@@ -12,6 +12,7 @@ import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceSession;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.vdi.concurrency.ConnectionThread;
+import eu.ill.visa.vdi.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.Role;
 import eu.ill.visa.vdi.exceptions.ConnectionException;
 import eu.ill.visa.vdi.exceptions.OwnerNotConnectedException;
@@ -34,16 +35,19 @@ public class WebXDesktopService extends DesktopService {
     private final InstanceSessionService instanceSessionService;
     private final SignatureService signatureService;
     private final ImageProtocolService imageProtocolService;
+    private final ConnectionThreadExecutor executorService;
 
     @Inject
     public WebXDesktopService(final InstanceSessionService instanceSessionService,
                               final CloudClientGateway cloudClientGateway,
                               final SignatureService signatureService,
-                              final ImageProtocolService imageProtocolService) {
+                              final ImageProtocolService imageProtocolService,
+                              final ConnectionThreadExecutor executorService) {
         super(cloudClientGateway);
         this.instanceSessionService = instanceSessionService;
         this.signatureService = signatureService;
         this.imageProtocolService = imageProtocolService;
+        this.executorService = executorService;
     }
 
     private WebXClientInformation createClientInformation(final InstanceSession session, final Instance instance) {
@@ -53,7 +57,7 @@ public class WebXDesktopService extends DesktopService {
         final Integer screenHeight = instance.getScreenHeight();
         final Integer screenWidth = instance.getScreenWidth();
         String username = instance.getUsername();
-        logger.info("Creating new guacamole session on instance {} with username {}", instance.getId(), username);
+        logger.info("Creating new WebX session on instance {} with username {}", instance.getId(), username);
         String autologin = instance.getPlan().getImage().getAutologin();
         String password = null;
         if (autologin != null && autologin.equals("VISA_PAM")) {
@@ -103,7 +107,7 @@ public class WebXDesktopService extends DesktopService {
         if (role.equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
             final WebXTunnel tunnel = buildTunnel(instance);
             InstanceSession session = instanceSessionService.create(instance, tunnel.getConnectionId());
-            logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
+            logger.info("User {} created WebX session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
 
             return tunnel;
 
@@ -122,11 +126,11 @@ public class WebXDesktopService extends DesktopService {
         } else {
             try {
                 // try to connect to existing sessionId
-                logger.info("User {} connecting to existing guacamole session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
+                logger.info("User {} connecting to existing WebX session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
                 return buildTunnel(instance, session);
 
             } catch (WebXConnectionException exception) {
-                logger.error("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user, role), session.getConnectionId());
+                logger.error("Failed to connect {} to given WebX session {} so creating a new one", getInstanceAndUser(instance, user, role), session.getConnectionId());
                 // If it fails then invalidate current session
                 session.setCurrent(false);
                 this.instanceSessionService.save(session);
@@ -149,8 +153,10 @@ public class WebXDesktopService extends DesktopService {
             throw new ConnectionException("There was an exception contacting the cloud for : " + this.getInstanceAndUser(instance, user, role) + " : " + exception.getMessage());
         }
     }
+
     @Override
     public ConnectionThread connect(SocketIOClient client, Instance instance, User user, Role role) throws OwnerNotConnectedException, ConnectionException {
-        return null;
+        final WebXTunnel webXTunnel = this.createWebXTunnel(instance, user, role);
+        return executorService.startWebXConnectionThread(client, webXTunnel, instance, user, role);
     }
 }

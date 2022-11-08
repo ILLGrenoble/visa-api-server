@@ -78,7 +78,7 @@ public class RemoteDesktopServer {
     private void bindListeners(final SocketIOServer server) {
         server.addConnectListener(new ClientConnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.roleService, this.authenticator));
         server.addEventListener("display", String.class, new GuacamoleClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
-        server.addEventListener("display_webx", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
+        server.addEventListener("webxdisplay", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("thumbnail", byte[].class, new ClientThumbnailListener(this.desktopConnectionService, this.instanceService));
         server.addEventListener(Event.ACCESS_REPLY_EVENT, AccessReply.class, new ClientAccessReplyListener(this.desktopAccessService));
         server.addEventListener(Event.ACCESS_REVOKED_EVENT, AccessRevokedCommand.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService, this.instanceSessionService, this.instanceService));

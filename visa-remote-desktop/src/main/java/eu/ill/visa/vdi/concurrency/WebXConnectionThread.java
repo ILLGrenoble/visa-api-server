@@ -10,8 +10,6 @@ import eu.ill.webx.exceptions.WebXConnectionInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
-
 public class WebXConnectionThread extends ConnectionThread {
 
     private static final Logger logger = LoggerFactory.getLogger(WebXConnectionThread.class);
@@ -54,7 +52,7 @@ public class WebXConnectionThread extends ConnectionThread {
 
             byte[] messageData;
             while (tunnel.isRunning() && (messageData = tunnel.read()) != null) {
-                client.sendEvent("display", ByteBuffer.wrap(messageData));
+                client.sendEvent("webxdisplay", messageData);
             }
 
         } catch (WebXClientException exception) {
