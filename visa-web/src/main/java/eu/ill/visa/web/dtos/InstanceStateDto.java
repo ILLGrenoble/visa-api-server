@@ -2,7 +2,9 @@ package eu.ill.visa.web.dtos;
 
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class InstanceStateDto {
 
@@ -10,6 +12,7 @@ public class InstanceStateDto {
     private Date terminationDate;
     private Date expirationDate;
     private boolean deleteRequested;
+    private List<String> activeProtocols = new ArrayList<>();
 
     public InstanceState getState() {
         return state;
@@ -41,5 +44,13 @@ public class InstanceStateDto {
 
     public void setDeleteRequested(boolean deleteRequested) {
         this.deleteRequested = deleteRequested;
+    }
+
+    public List<String> getActiveProtocols() {
+        return activeProtocols;
+    }
+
+    public void setActiveProtocols(List<String> activeProtocols) {
+        this.activeProtocols = activeProtocols;
     }
 }

@@ -23,7 +23,7 @@
             <job-data-map>
                 <entry>
                     <key>states</key>
-                    <value>BUILDING,STARTING,REBOOTING,STOPPING,DELETED</value>
+                    <value>BUILDING,STARTING,PARTIALLY_ACTIVE,REBOOTING,STOPPING,DELETED</value>
                 </entry>
             </job-data-map>
         </job>

@@ -5,6 +5,7 @@ enum InstanceState {
     BUILDING
     STARTING
     ACTIVE
+    PARTIALLY_ACTIVE
     STOPPING
     STOPPED
     REBOOTING

@@ -29,6 +29,9 @@
             <basic name="port">
                 <column name="port"  nullable="false"/>
             </basic>
+            <basic name="optional">
+                <column name="optional"  nullable="true"/>
+            </basic>
         </attributes>
 
     </entity>

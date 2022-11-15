@@ -29,6 +29,7 @@ public class InstanceDto {
     private boolean canConnectWhileOwnerAway;
     private String keyboardLayout;
     private boolean unrestrictedAccess;
+    private List<String> activeProtocols = new ArrayList<>();
 
     private Date createdAt;
 
@@ -206,5 +207,13 @@ public class InstanceDto {
 
     public void setUnrestrictedAccess(boolean unrestrictedAccess) {
         this.unrestrictedAccess = unrestrictedAccess;
+    }
+
+    public List<String> getActiveProtocols() {
+        return activeProtocols;
+    }
+
+    public void setActiveProtocols(List<String> activeProtocols) {
+        this.activeProtocols = activeProtocols;
     }
 }

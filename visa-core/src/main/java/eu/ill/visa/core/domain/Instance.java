@@ -35,6 +35,7 @@ public class Instance extends Timestampable {
     private List<InstanceAttribute> attributes  = new ArrayList<>();
     private String                  keyboardLayout;
     private List<String> securityGroups = new ArrayList<>();
+    private List<String> activeProtocols = new ArrayList<>();
 
     public Instance() {
     }
@@ -236,6 +237,14 @@ public class Instance extends Timestampable {
 
     public void setSecurityGroups(List<String> securityGroups) {
         this.securityGroups = securityGroups;
+    }
+
+    public List<String> getActiveProtocols() {
+        return activeProtocols;
+    }
+
+    public void setActiveProtocols(List<String> activeProtocols) {
+        this.activeProtocols = activeProtocols;
     }
 
     public List<InstanceMember> getMembers() {
