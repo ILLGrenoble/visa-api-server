@@ -1,3 +1,8 @@
+2.4.1 15/11/2022
+================
+ * Add url and doi columns to experiment and proposal tables
+ * Filter by DOIs or Proposal Identifiers when getting experiments for a user 
+
 2.4.0 24/10/2022
 ================
  * Record mouse and keyboard activity on instances to maintain history of when users have interacted with instances
