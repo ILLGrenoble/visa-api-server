@@ -68,6 +68,12 @@
             <basic name="title">
                 <column name="title" nullable="true" length="2000"/>
             </basic>
+            <basic name="url">
+                <column name="url" nullable="true" length="2000"/>
+            </basic>
+            <basic name="doi">
+                <column name="doi" nullable="true" length="2000"/>
+            </basic>
             <basic name="startDate">
                 <column name="start_date" nullable="true" />
             </basic>

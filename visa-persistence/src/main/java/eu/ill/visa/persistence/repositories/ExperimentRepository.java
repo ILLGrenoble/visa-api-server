@@ -97,6 +97,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
             final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
+            final Set<String> dois = filter.getDois();
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
             }
@@ -106,8 +107,19 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             if (endDate != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), endDate));
             }
-            if (proposalIdentifiers != null) {
+            if (proposalIdentifiers != null && dois != null) {
+                Predicate proposalIdentifierPredicate = root.get("proposal").get("identifier").in(proposalIdentifiers);
+                Predicate proposalDOIPredicate = root.get("proposal").get("doi").in(dois);
+                Predicate experimentDOIPredicate = root.get("doi").in(dois);
+                predicates.add(cb.or(proposalIdentifierPredicate, proposalDOIPredicate, experimentDOIPredicate));
+
+            } else if (proposalIdentifiers != null) {
                 predicates.add(root.get("proposal").get("identifier").in(proposalIdentifiers));
+
+            } else if (dois != null) {
+                Predicate proposalDOIPredicate = root.get("proposal").get("doi").in(dois);
+                Predicate experimentDOIPredicate = root.get("doi").in(dois);
+                predicates.add(cb.or(proposalDOIPredicate, experimentDOIPredicate));
             }
         }
 

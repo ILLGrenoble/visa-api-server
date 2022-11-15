@@ -14,6 +14,8 @@ public class Proposal implements Serializable {
     private String title;
     private Date   publicAt;
     private String summary;
+    private String url;
+    private String doi;
 
     public Long getId() {
         return id;
@@ -55,6 +57,22 @@ public class Proposal implements Serializable {
         this.summary = summary;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getDoi() {
+        return doi;
+    }
+
+    public void setDoi(String doi) {
+        this.doi = doi;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object instanceof Proposal) {
@@ -81,6 +99,8 @@ public class Proposal implements Serializable {
             .append("title", title)
             .append("publicAt", publicAt)
             .append("summary", summary)
+            .append("url", summary)
+            .append("doi", summary)
             .toString();
     }
 }

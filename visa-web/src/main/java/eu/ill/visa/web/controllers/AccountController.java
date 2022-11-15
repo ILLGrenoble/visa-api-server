@@ -107,6 +107,7 @@ public class AccountController extends AbstractController {
                                 @QueryParam("startDate") final String startDateString,
                                 @QueryParam("endDate") final String endDateString,
                                 @QueryParam("proposals") final String proposalsString,
+                                @QueryParam("dois") final String doisString,
                                 @QueryParam("page") @DefaultValue("1") @Min(1) final Integer page,
                                 @QueryParam("limit") @DefaultValue("25") @Min(5) @Max(100) final Integer limit,
                                 @QueryParam("orderBy") @DefaultValue("date") final String orderByValue,
@@ -121,7 +122,8 @@ public class AccountController extends AbstractController {
             Date startDate = startDateString == null ? null : simpleDateFormat.parse(startDateString);
             Date endDate = endDateString == null ? null : simpleDateFormat.parse(endDateString);
             Set<String> proposalIdentifiers = proposalsString == null ? null : new HashSet<>(Arrays.asList(proposalsString.split(",")));
-            final ExperimentFilter filter = new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers);
+            Set<String> dois = doisString == null ? null : new HashSet<>(Arrays.asList(doisString.split(",")));
+            final ExperimentFilter filter = new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers, dois);
 
             final List<ExperimentDto> experiments = new ArrayList<>();
             final Long total = experimentService.getAllCountForUser(user, filter);
