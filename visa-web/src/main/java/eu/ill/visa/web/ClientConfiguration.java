@@ -19,6 +19,10 @@ public class ClientConfiguration {
     @Valid
     private DesktopConfiguration desktopConfiguration;
 
+    @NotNull
+    @Valid
+    private ExperimentsConfiguration experimentsConfiguration;
+
     private String contactEmail;
 
     @JsonProperty("login")
@@ -42,6 +46,11 @@ public class ClientConfiguration {
     @JsonProperty("desktop")
     public DesktopConfiguration getDesktopConfiguration() {
         return desktopConfiguration;
+    }
+
+    @JsonProperty("experiments")
+    public ExperimentsConfiguration getExperimentsConfiguration() {
+        return experimentsConfiguration;
     }
 
     @JsonProperty("contactEmail")

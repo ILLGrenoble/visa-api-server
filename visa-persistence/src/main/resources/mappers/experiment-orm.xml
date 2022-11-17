@@ -35,6 +35,17 @@
         </query>
     </named-query>
 
+    <named-query name="experiment.getYearsForOpenData">
+        <query>
+            <![CDATA[
+                SELECT distinct YEAR(e.startDate)
+                FROM Experiment e
+                JOIN e.proposal p
+                WHERE p.publicAt <= :currentDate
+            ]]>
+        </query>
+    </named-query>
+
     <named-query name="experiment.getByIdAndUser">
         <query>
             SELECT e

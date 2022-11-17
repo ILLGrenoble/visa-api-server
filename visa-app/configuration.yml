@@ -178,3 +178,5 @@ client:
     allowedClipboardUrlHosts: ${VISA_CLIENT_CONFIG_DESKTOP_ALLOWED_CLIPBOARD_URL_HOSTS:-[]}
     keyboardLayouts: ${VISA_CLIENT_CONFIG_DESKTOP_KEYBOARD_LAYOUTS:-[]}
   contactEmail: ${VISA_CLIENT_CONFIG_CONTACT_EMAIL:-null}
+  experiments:
+    openDataIncluded: ${VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA:-false}

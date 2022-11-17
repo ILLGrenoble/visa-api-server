@@ -10,6 +10,7 @@ public class ExperimentFilter {
     private Instrument instrument;
     private Set<String> proposalIdentifiers;
     private Set<String> dois;
+    private Boolean includeOpenData;
 
     public ExperimentFilter() {
 
@@ -21,12 +22,13 @@ public class ExperimentFilter {
         this.instrument = instrument;
     }
 
-    public ExperimentFilter(Date startDate, Date endDate, Instrument instrument, Set<String> proposalIdentifiers, Set<String> dois) {
+    public ExperimentFilter(Date startDate, Date endDate, Instrument instrument, Set<String> proposalIdentifiers, Set<String> dois, Boolean includeOpenData) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.instrument = instrument;
         this.proposalIdentifiers = proposalIdentifiers;
         this.dois = dois;
+        this.includeOpenData = includeOpenData;
     }
 
     public ExperimentFilter(Date startDate, Date endDate) {
@@ -54,15 +56,11 @@ public class ExperimentFilter {
         return proposalIdentifiers;
     }
 
-    public void setProposalIdentifiers(Set<String> proposalIdentifiers) {
-        this.proposalIdentifiers = proposalIdentifiers;
-    }
-
     public Set<String> getDois() {
         return dois;
     }
 
-    public void setDois(Set<String> dois) {
-        this.dois = dois;
+    public Boolean getIncludeOpenData() {
+        return includeOpenData;
     }
 }
