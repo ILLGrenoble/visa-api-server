@@ -1,3 +1,9 @@
+2.4.2 18/11/2022
+================
+ * Add possibility to search for open data (disabled by default, enabled with env var VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA)
+ * Allow protocols to be optional (allow remote desktop to be available before Jupyter starts)
+ * Change default SSO scope (remove offline_access)
+
 2.4.1 15/11/2022
 ================
  * Add url and doi columns to experiment and proposal tables
