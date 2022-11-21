@@ -1,3 +1,7 @@
+2.4.3 21/11/2022
+================
+ * Add env var (VISA_INSTANCE_USER_DEFAULT_QUOTA) to allow configuration of default instance quota for users created by VISA
+
 2.4.2 18/11/2022
 ================
  * Add possibility to search for open data (disabled by default, enabled with env var VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA)
