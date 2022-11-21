@@ -36,6 +36,11 @@ public class BusinessModule extends AbstractModule {
     }
 
     @Provides
+    public InstanceConfiguration providesInstanceConfiguration(final BusinessConfiguration configuration) {
+        return configuration.getInstanceConfiguration();
+    }
+
+    @Provides
     public SignatureService providesSignatureService(final SignatureConfiguration configuration) {
         return new SignatureService(
             configuration.getPrivateKeyPath(),

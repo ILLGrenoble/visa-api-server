@@ -136,6 +136,7 @@ business:
     userMaxInactivityDurationHours: ${VISA_INSTANCE_USER_MAX_INACTIVITY_DURATION_HOURS:-96}
     # Defaults to 8 days
     staffMaxInactivityDurationHours: ${VISA_INSTANCE_STAFF_MAX_INACTIVITY_DURATION_HOURS:-192}
+    defaultUserInstanceQuota: ${VISA_INSTANCE_USER_DEFAULT_QUOTA:-2}
   rootURL: ${VISA_ROOT_URL}
   notifications:
     - adapter: email
