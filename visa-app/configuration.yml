@@ -167,7 +167,7 @@ client:
   login:
     issuer: ${VISA_CLIENT_CONFIG_LOGIN_ISSUER}
     clientId: ${VISA_CLIENT_CONFIG_LOGIN_CLIENT_ID}
-    scope: ${VISA_CLIENT_CONFIG_LOGIN_SCOPE:-'openid'}
+    scope: ${VISA_CLIENT_CONFIG_LOGIN_SCOPE:-'openid offline_access'}
     showDebugInformation: ${VISA_CLIENT_CONFIG_LOGIN_SHOW_DEBUG_INFORMATION:-false}
     sessionChecksEnabled: ${VISA_CLIENT_CONFIG_LOGIN_SESSION_CHECKS_ENABLED:-true}
   analytics:
