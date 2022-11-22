@@ -4,7 +4,7 @@
 
     <groupId>eu.ill.visa</groupId>
     <artifactId>api</artifactId>
-    <version>2.4.3</version>
+    <version>2.4.4</version>
     <modules>
         <module>visa-app</module>
         <module>visa-business</module>

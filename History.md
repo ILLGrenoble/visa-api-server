@@ -1,3 +1,7 @@
+2.4.4 22/11/2022
+================
+ * Fix bug on creation of instances with open data (experiment check takes into account open data)
+
 2.4.3 21/11/2022
 ================
  * Add env var (VISA_INSTANCE_USER_DEFAULT_QUOTA) to allow configuration of default instance quota for users created by VISA
