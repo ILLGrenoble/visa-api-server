@@ -7,6 +7,7 @@ import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
+import eu.ill.visa.web.ClientConfiguration;
 import eu.ill.visa.web.DesktopConfiguration;
 import eu.ill.visa.web.dtos.*;
 import io.dropwizard.auth.Auth;
@@ -61,6 +62,7 @@ public class AccountInstanceController extends AbstractController {
     private final ExperimentService experimentService;
     private final NotificationService notificationService;
     private final DesktopConfiguration desktopConfiguration;
+    private final ClientConfiguration clientConfiguration;
     private final Mapper mapper;
 
     @Inject
@@ -76,6 +78,7 @@ public class AccountInstanceController extends AbstractController {
                                      final ExperimentService experimentService,
                                      final NotificationService notificationService,
                                      final DesktopConfiguration desktopConfiguration,
+                                     final ClientConfiguration clientConfiguration,
                                      final Mapper mapper) {
         this.userService = userService;
         this.instanceService = instanceService;
@@ -89,6 +92,7 @@ public class AccountInstanceController extends AbstractController {
         this.experimentService = experimentService;
         this.notificationService = notificationService;
         this.desktopConfiguration = desktopConfiguration;
+        this.clientConfiguration = clientConfiguration;
         this.mapper = mapper;
     }
 
@@ -255,7 +259,7 @@ public class AccountInstanceController extends AbstractController {
         // Verify user has access to experiments
         List<Experiment> experiments = new ArrayList<>();
         dto.getExperiments().forEach(experimentId -> {
-            Experiment experiment = experimentService.getByIdAndUser(experimentId, user);
+            Experiment experiment = experimentService.getByIdAndUser(experimentId, user, clientConfiguration.getExperimentsConfiguration().getOpenDataIncluded());
             if (experiment != null) {
                 experiments.add(experiment);
             }

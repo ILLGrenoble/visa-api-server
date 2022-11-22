@@ -83,6 +83,18 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         }
     }
 
+    public Experiment getByIdForOpenData(final String id) {
+        try {
+            final TypedQuery<Experiment> query = getEntityManager().createNamedQuery("experiment.getByIdForOpenData", Experiment.class);
+            query.setParameter("id", id);
+            query.setParameter("currentDate", new Date());
+            return query.getSingleResult();
+
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
     public Set<Experiment> getAllForInstance(final Instance instance) {
         final TypedQuery<Experiment> query = getEntityManager().createNamedQuery("experiment.getAllForInstance", Experiment.class);
         query.setParameter("instance", instance);

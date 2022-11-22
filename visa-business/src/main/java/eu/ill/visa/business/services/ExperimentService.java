@@ -66,6 +66,15 @@ public class ExperimentService {
         return repository.getByIdAndUser(id, user);
     }
 
+    public Experiment getByIdAndUser(@NotNull String id, @NotNull final User user, Boolean includeOpenData) {
+        Experiment experiment = repository.getByIdAndUser(id, user);
+        if (experiment == null && includeOpenData) {
+            experiment = repository.getByIdForOpenData(id);
+        }
+
+        return experiment;
+    }
+
     public Set<Experiment> getAllForInstance(final Instance instance) {
         return repository.getAllForInstance(instance);
     }
