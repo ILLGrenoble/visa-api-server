@@ -77,7 +77,7 @@ public class WebXDesktopService extends DesktopService {
         String hostname = getIpAddressForInstance(instance);
 
         // Set as standalone for now
-        hostname = "dssdev2.ill.fr";
+//        hostname = "dssdev2.ill.fr";
 
         return new WebXConfiguration(hostname, protocol.getPort(), true);
     }
