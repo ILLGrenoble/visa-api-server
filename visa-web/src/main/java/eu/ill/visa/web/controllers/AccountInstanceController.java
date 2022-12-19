@@ -366,8 +366,15 @@ public class AccountInstanceController extends AbstractController {
     @Path("/{instance}/experiments/team")
     public Response getTeam(@Auth final AccountToken accountToken, @PathParam("instance") Instance instance) {
         final User user = accountToken.getUser();
-        final List<User> team = userService.getExperimentalTeamForInstance(instance);
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
+            List<User> team = userService.getExperimentalTeamForInstance(instance);
+            if (clientConfiguration.getExperimentsConfiguration().getOpenDataIncluded()) {
+                // Only return the team if the owner is part of it
+                if (!team.contains(user)) {
+                    team = new ArrayList<>();
+                }
+            }
+
             return createResponse(team.stream().map(this::mapUserSimpler).collect(toList()));
         }
 
