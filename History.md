@@ -1,3 +1,7 @@
+2.5.0 20/12/2022
+================
+ * Check whether visa is in open-data mode before sending back all the members of the proposals: empty the list of the user is not part of the original proposal.
+
 2.4.4 22/11/2022
 ================
  * Fix bug on creation of instances with open data (experiment check takes into account open data)
