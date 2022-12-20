@@ -8,6 +8,7 @@ import eu.ill.visa.business.services.InstrumentService;
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.security.tokens.AccountToken;
+import eu.ill.visa.web.ClientConfiguration;
 import eu.ill.visa.web.dtos.*;
 import io.dropwizard.auth.Auth;
 import org.dozer.Mapper;
@@ -39,18 +40,20 @@ public class AccountController extends AbstractController {
     private final ExperimentService experimentService;
     private final Mapper            mapper;
     private final InstanceService   instanceService;
+    private final ClientConfiguration clientConfiguration;
 
     @Inject
     public AccountController(final UserService userService,
                              final InstrumentService instrumentService,
                              final InstanceService instanceService,
                              final ExperimentService experimentService,
-                             final Mapper mapper
-    ) {
+                             final Mapper mapper,
+                             final ClientConfiguration clientConfiguration) {
         this.userService = userService;
         this.instrumentService = instrumentService;
         this.instanceService = instanceService;
         this.experimentService = experimentService;
+        this.clientConfiguration = clientConfiguration;
         this.mapper = mapper;
     }
 
@@ -96,7 +99,7 @@ public class AccountController extends AbstractController {
     @Path("/experiments/years")
     public Response experimentYears(@Auth final AccountToken accountToken) {
         final User user = accountToken.getUser();
-        List<Integer> years = experimentService.getYearsForUser(user);
+        List<Integer> years = experimentService.getYearsForUser(user, clientConfiguration.getExperimentsConfiguration().getOpenDataIncluded());
         return createResponse(years, OK);
     }
 
@@ -107,9 +110,11 @@ public class AccountController extends AbstractController {
                                 @QueryParam("startDate") final String startDateString,
                                 @QueryParam("endDate") final String endDateString,
                                 @QueryParam("proposals") final String proposalsString,
+                                @QueryParam("dois") final String doisString,
+                                @QueryParam("includeOpenData") @DefaultValue("false") Boolean includeOpenData,
                                 @QueryParam("page") @DefaultValue("1") @Min(1) final Integer page,
                                 @QueryParam("limit") @DefaultValue("25") @Min(5) @Max(100) final Integer limit,
-                                @QueryParam("orderBy") @DefaultValue("date") final String orderByValue,
+                                @QueryParam("orderBy") final String orderByValue,
                                 @QueryParam("descending") @DefaultValue("false") final boolean descending) {
 
         try {
@@ -121,14 +126,21 @@ public class AccountController extends AbstractController {
             Date startDate = startDateString == null ? null : simpleDateFormat.parse(startDateString);
             Date endDate = endDateString == null ? null : simpleDateFormat.parse(endDateString);
             Set<String> proposalIdentifiers = proposalsString == null ? null : new HashSet<>(Arrays.asList(proposalsString.split(",")));
-            final ExperimentFilter filter = new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers);
+            Set<String> dois = doisString == null ? null : new HashSet<>(Arrays.asList(doisString.split(",")));
+
+            includeOpenData = includeOpenData && clientConfiguration.getExperimentsConfiguration().getOpenDataIncluded();
+
+            final ExperimentFilter filter = new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers, dois, includeOpenData);
 
             final List<ExperimentDto> experiments = new ArrayList<>();
             final Long total = experimentService.getAllCountForUser(user, filter);
             final int offset = (page - 1) * limit;
 
             final Pagination pagination = new Pagination(limit, offset);
-            final OrderBy orderBy = new OrderBy(orderByValue, !descending);
+            OrderBy orderBy = null;
+            if (orderByValue != null) {
+                orderBy = new OrderBy(orderByValue, !descending);
+            }
 
             final ImmutableMap metadata = ImmutableMap.of(
                 "count", total,
@@ -141,14 +153,23 @@ public class AccountController extends AbstractController {
             }
 
             // Check if proposals was specified whether all the proposals have associated experiments
-            List<String> errors = null;
+            List<String> errors = new ArrayList<>();
             if (proposalIdentifiers != null) {
                 Set<String> experimentProposalIdentifiers = experiments.stream().map(experiment -> experiment.getProposal().getIdentifier()).collect(Collectors.toSet());
                 Set<String> missingProposalIdentifiers = new HashSet<>(proposalIdentifiers);
                 missingProposalIdentifiers.removeAll(experimentProposalIdentifiers);
                 if (missingProposalIdentifiers.size() > 0) {
                     String error = "Could not obtain experiments for the following proposal(s): " + String.join(", ", missingProposalIdentifiers);
-                    errors = Arrays.asList(error);
+                    errors.add(error);
+                }
+            }
+            if (dois != null) {
+                Set<String> experimentDOIs = experiments.stream().map(experiment -> experiment.getDoi() != null ? experiment.getDoi() : experiment.getProposal().getDoi()).collect(Collectors.toSet());
+                Set<String> missingDOIs = new HashSet<>(dois);
+                missingDOIs.removeAll(experimentDOIs);
+                if (missingDOIs.size() > 0) {
+                    String error = "Could not obtain experiments for the following doi(s): " + String.join(", ", missingDOIs);
+                    errors.add(error);
                 }
             }
 

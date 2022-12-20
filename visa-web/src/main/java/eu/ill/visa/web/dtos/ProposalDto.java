@@ -4,6 +4,8 @@ public class ProposalDto {
     private Long   id;
     private String identifier;
     private String title;
+    private String        url;
+    private String        doi;
 
     public ProposalDto() {
 
@@ -31,6 +33,22 @@ public class ProposalDto {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getDoi() {
+        return doi;
+    }
+
+    public void setDoi(String doi) {
+        this.doi = doi;
     }
 }
 

@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
 
-import static java.util.Objects.requireNonNullElse;
-
 @Singleton
 public class TokenAuthenticator implements Authenticator<String, AccountToken> {
     private static final Logger logger = LoggerFactory.getLogger(TokenAuthenticator.class);
@@ -49,6 +47,7 @@ public class TokenAuthenticator implements Authenticator<String, AccountToken> {
             .lastName(lastName)
             .activatedAt(new Date())
             .lastSeenAt(new Date())
+            .instanceQuota(this.userService.getDefaultInstanceQuota())
             .build();
     }
 
@@ -63,7 +62,10 @@ public class TokenAuthenticator implements Authenticator<String, AccountToken> {
         }
 
         // Generate a persisted version of the User object
-        user = requireNonNullElse(userService.getById(id), createUserFromData(id, firstName, lastName, email));
+        user = userService.getById(id);
+        if (user == null) {
+            user = createUserFromData(id, firstName, lastName, email);
+        }
 
         // Set activated date if not already
         if (user.getActivatedAt() == null) {

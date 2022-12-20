@@ -47,7 +47,7 @@ public class StateInstanceAction extends InstanceAction {
             } else {
                 logger.debug("Fetched cloud instance with address :{}", cloudInstance.getAddress());
                 CloudInstanceState cloudInstanceState = cloudInstance.getState();
-                if(cloudInstanceState.equals(CloudInstanceState.ACTIVE)) {
+                if (cloudInstanceState.equals(CloudInstanceState.ACTIVE)) {
                     this.updateInstanceIpAddress(cloudInstance.getAddress());
                 }
                 instanceState = InstanceState.valueOf(cloudInstanceState.toString());
@@ -58,14 +58,23 @@ public class StateInstanceAction extends InstanceAction {
 
                 // Update instance state in the database (unless we have requested it to be deleted and provider says it is active)
                 if (!ignoreCloudState) {
-                    if (instanceState.equals(InstanceState.ACTIVE)) {
+                    if (instanceState.equals(InstanceState.ACTIVE) || instanceState.equals(InstanceState.PARTIALLY_ACTIVE)) {
                         logger.debug("Checking ports are open for address: {}", cloudInstance.getAddress());
                         final Plan plan = instance.getPlan();
                         final Image image = plan.getImage();
                         final List<ImageProtocol> protocols = image.getProtocols();
-                        boolean instanceIsUpAndRunning = PortService.arePortsOpen(cloudInstance.getAddress(), protocols);
+                        boolean instanceIsUpAndRunning = PortService.areMandatoryPortsOpen(cloudInstance.getAddress(), protocols);
                         if (!instanceIsUpAndRunning) {
                             instanceState = InstanceState.STARTING;
+
+                        } else {
+                            List<ImageProtocol> activeProtocols = PortService.getActiveProtocols(cloudInstance.getAddress(), protocols);
+                            if (activeProtocols.size() < protocols.size()) {
+                                instanceState = InstanceState.PARTIALLY_ACTIVE;
+                            } else {
+
+                            }
+                            this.updateInstanceProtocols(activeProtocols);
                         }
                     }
                     this.updateInstanceState(instanceState);

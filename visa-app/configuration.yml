@@ -136,6 +136,7 @@ business:
     userMaxInactivityDurationHours: ${VISA_INSTANCE_USER_MAX_INACTIVITY_DURATION_HOURS:-96}
     # Defaults to 8 days
     staffMaxInactivityDurationHours: ${VISA_INSTANCE_STAFF_MAX_INACTIVITY_DURATION_HOURS:-192}
+    defaultUserInstanceQuota: ${VISA_INSTANCE_USER_DEFAULT_QUOTA:-2}
   rootURL: ${VISA_ROOT_URL}
   notifications:
     - adapter: email
@@ -178,3 +179,5 @@ client:
     allowedClipboardUrlHosts: ${VISA_CLIENT_CONFIG_DESKTOP_ALLOWED_CLIPBOARD_URL_HOSTS:-[]}
     keyboardLayouts: ${VISA_CLIENT_CONFIG_DESKTOP_KEYBOARD_LAYOUTS:-[]}
   contactEmail: ${VISA_CLIENT_CONFIG_CONTACT_EMAIL:-null}
+  experiments:
+    openDataIncluded: ${VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA:-false}

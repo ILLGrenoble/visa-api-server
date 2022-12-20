@@ -15,6 +15,8 @@ public class Experiment implements Serializable {
     private Instrument instrument;
     private Proposal proposal;
     private String title;
+    private String url;
+    private String doi;
     private Date startDate;
     private Date endDate;
 
@@ -24,21 +26,8 @@ public class Experiment implements Serializable {
     @JsonIgnore
     private Set<Instance> instances;
 
-    private Experiment(Builder builder) {
-        this.id = builder.id;
-        this.instrument = builder.instrument;
-        this.proposal = builder.proposal;
-        this.title = builder.title;
-        this.startDate = builder.startDate;
-        this.endDate = builder.endDate;
-    }
-
     public Experiment() {
 
-    }
-
-    public static Builder newExperiment() {
-        return new Builder();
     }
 
     public String getId() {
@@ -89,6 +78,22 @@ public class Experiment implements Serializable {
         this.title = title;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getDoi() {
+        return doi;
+    }
+
+    public void setDoi(String doi) {
+        this.doi = doi;
+    }
+
     public Date getStartDate() {
         return startDate;
     }
@@ -130,55 +135,10 @@ public class Experiment implements Serializable {
             .append("instrument", instrument)
             .append("proposal", proposal)
             .append("title", title)
+            .append("url", url)
+            .append("doi", doi)
             .append("startDate", startDate)
             .append("endDate", endDate)
             .toString();
-    }
-
-
-    public static final class Builder {
-        private String id;
-        private Instrument instrument;
-        private Proposal proposal;
-        private String title;
-        private Date startDate;
-        private Date endDate;
-
-        private Builder() {
-        }
-
-        public Experiment build() {
-            return new Experiment(this);
-        }
-
-        public Builder id(String id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder instrument(Instrument instrument) {
-            this.instrument = instrument;
-            return this;
-        }
-
-        public Builder proposal(Proposal proposal) {
-            this.proposal = proposal;
-            return this;
-        }
-
-        public Builder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public Builder startDate(Date startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder endDate(Date endDate) {
-            this.endDate = endDate;
-            return this;
-        }
     }
 }

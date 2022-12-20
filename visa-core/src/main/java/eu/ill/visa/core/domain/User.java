@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 public class User implements Serializable {
 
-    private static int DEFAULT_INSTANCE_QUOTA = 2;
-
     private String id;
 
     private String firstName;
@@ -214,7 +212,7 @@ public class User implements Serializable {
         private String  email;
         private Date    activatedAt;
         private Date    lastSeenAt;
-        private Integer instanceQuota = DEFAULT_INSTANCE_QUOTA;
+        private Integer instanceQuota; // Default quota now provided by the UserService
 
         public Builder() {
         }

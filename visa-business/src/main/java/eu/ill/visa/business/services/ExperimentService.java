@@ -7,6 +7,8 @@ import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.ExperimentRepository;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -27,8 +29,17 @@ public class ExperimentService {
         return repository.getAll();
     }
 
-    public List<Integer> getYearsForUser(@NotNull final User user) {
-        return repository.getYearsForUser(user);
+    public List<Integer> getYearsForUser(@NotNull final User user, Boolean includeOpenData) {
+        List<Integer> userYears = repository.getYearsForUser(user);
+        if (includeOpenData) {
+            Set<Integer> openYears = new HashSet<>(repository.getYearsForOpenData());
+            openYears.addAll(userYears);
+
+            return new ArrayList<>(openYears);
+
+        } else {
+            return userYears;
+        }
     }
 
     public List<Experiment> getAllForUser(@NotNull final User user) {
@@ -46,13 +57,22 @@ public class ExperimentService {
     public List<Experiment> getAllForUser(@NotNull final User user,
                                           @NotNull final ExperimentFilter filter,
                                           @NotNull final Pagination pagination,
-                                          @NotNull final OrderBy orderBy) {
+                                          final OrderBy orderBy) {
         return repository.getAllForUser(user, filter, pagination, orderBy);
 
     }
 
     public Experiment getByIdAndUser(@NotNull String id, @NotNull final User user) {
         return repository.getByIdAndUser(id, user);
+    }
+
+    public Experiment getByIdAndUser(@NotNull String id, @NotNull final User user, Boolean includeOpenData) {
+        Experiment experiment = repository.getByIdAndUser(id, user);
+        if (experiment == null && includeOpenData) {
+            experiment = repository.getByIdForOpenData(id);
+        }
+
+        return experiment;
     }
 
     public Set<Experiment> getAllForInstance(final Instance instance) {

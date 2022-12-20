@@ -4,6 +4,7 @@ import eu.ill.visa.core.domain.ImageProtocol;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PortService {
@@ -26,10 +27,10 @@ public class PortService {
         }
     }
 
-    public static boolean arePortsOpen(String hostname, List<ImageProtocol> protocols) {
+    public static boolean areMandatoryPortsOpen(String hostname, List<ImageProtocol> protocols) {
         if (protocols.size() > 0) {
             for (ImageProtocol protocol : protocols) {
-                if (!isPortOpen(hostname, protocol.getPort())) {
+                if (!protocol.isOptional() && !isPortOpen(hostname, protocol.getPort())) {
                     return false;
                 }
             }
@@ -37,6 +38,18 @@ public class PortService {
             return false;
         }
         return true;
+    }
+
+    public static List<ImageProtocol> getActiveProtocols(String hostname, List<ImageProtocol> protocols) {
+        List<ImageProtocol> activeProtocols = new ArrayList<>();
+        if (protocols.size() > 0) {
+            for (ImageProtocol protocol : protocols) {
+                if (isPortOpen(hostname, protocol.getPort())) {
+                    activeProtocols.add(protocol);
+                }
+            }
+        }
+        return activeProtocols;
     }
 
     /**

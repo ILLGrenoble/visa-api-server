@@ -10,6 +10,8 @@ public class ExperimentDto {
     private InstrumentDto instrument;
     private ProposalDto   proposal;
     private String        title;
+    private String        url;
+    private String        doi;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date startDate;
@@ -47,6 +49,22 @@ public class ExperimentDto {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getDoi() {
+        return doi;
+    }
+
+    public void setDoi(String doi) {
+        this.doi = doi;
     }
 
     public Date getStartDate() {

@@ -1,3 +1,26 @@
+2.5.0 20/12/2022
+================
+ * Check whether visa is in open-data mode before sending back all the members of the proposals: empty the list of the user is not part of the original proposal.
+
+2.4.4 22/11/2022
+================
+ * Fix bug on creation of instances with open data (experiment check takes into account open data)
+
+2.4.3 21/11/2022
+================
+ * Add env var (VISA_INSTANCE_USER_DEFAULT_QUOTA) to allow configuration of default instance quota for users created by VISA
+
+2.4.2 18/11/2022
+================
+ * Add possibility to search for open data (disabled by default, enabled with env var VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA)
+ * Allow protocols to be optional (allow remote desktop to be available before Jupyter starts)
+ * Change default SSO scope (remove offline_access)
+
+2.4.1 15/11/2022
+================
+ * Add url and doi columns to experiment and proposal tables
+ * Filter by DOIs or Proposal Identifiers when getting experiments for a user 
+
 2.4.0 24/10/2022
 ================
  * Record mouse and keyboard activity on instances to maintain history of when users have interacted with instances

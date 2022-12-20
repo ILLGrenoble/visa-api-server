@@ -10,6 +10,7 @@ public class ImageProtocol {
     private Long id;
     private String name;
     private Integer port;
+    private Boolean optional;
 
     public ImageProtocol() {
     }
@@ -17,6 +18,7 @@ public class ImageProtocol {
     public ImageProtocol(String name, Integer port) {
         this.name = name;
         this.port = port;
+        this.optional = false;
     }
 
 
@@ -42,6 +44,18 @@ public class ImageProtocol {
 
     public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public Boolean isOptional() {
+        if (this.optional == null) {
+            return false;
+        } else {
+            return this.optional;
+        }
+    }
+
+    public void setOptional(Boolean optional) {
+        this.optional = optional;
     }
 
     @Override

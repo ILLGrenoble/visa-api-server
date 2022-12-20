@@ -54,6 +54,12 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         return query.getResultList();
     }
 
+    public List<Integer> getYearsForOpenData() {
+        final TypedQuery<Integer> query = getEntityManager().createNamedQuery("experiment.getYearsForOpenData", Integer.class);
+        query.setParameter("currentDate", new Date());
+        return query.getResultList();
+    }
+
     public List<Experiment> getAllForUser(final User user) {
         return getAllForUser(user, null);
     }
@@ -77,6 +83,18 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         }
     }
 
+    public Experiment getByIdForOpenData(final String id) {
+        try {
+            final TypedQuery<Experiment> query = getEntityManager().createNamedQuery("experiment.getByIdForOpenData", Experiment.class);
+            query.setParameter("id", id);
+            query.setParameter("currentDate", new Date());
+            return query.getSingleResult();
+
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
     public Set<Experiment> getAllForInstance(final Instance instance) {
         final TypedQuery<Experiment> query = getEntityManager().createNamedQuery("experiment.getAllForInstance", Experiment.class);
         query.setParameter("instance", instance);
@@ -84,34 +102,14 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         return new HashSet<>(query.getResultList());
     }
 
-    public List<Experiment> getAllForUser(final User user, ExperimentFilter filter, Pagination pagination, OrderBy orderBy) {
-        final List<Predicate> predicates = new ArrayList<>();
+    public List<Experiment> getAllForUser(final User user, final ExperimentFilter filter, Pagination pagination, OrderBy orderBy) {
         final CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
         final CriteriaQuery<Experiment> cbQuery = cb.createQuery(Experiment.class);
         final Root<Experiment> root = cbQuery.from(Experiment.class);
 
-        predicates.add(cb.equal(root.join("users"), user));
+        final List<Predicate> predicates = this.getExperimentPredicates(user, filter, cb, root);
 
-        if (filter != null) {
-            final Instrument instrument = filter.getInstrument();
-            final Date startDate = filter.getStartDate();
-            final Date endDate = filter.getEndDate();
-            final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
-            if (instrument != null) {
-                predicates.add(cb.equal(root.get("instrument"), instrument));
-            }
-            if (startDate != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));
-            }
-            if (endDate != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), endDate));
-            }
-            if (proposalIdentifiers != null) {
-                predicates.add(root.get("proposal").get("identifier").in(proposalIdentifiers));
-            }
-        }
-
-        cbQuery.where(cb.and(predicates.toArray(new Predicate[0])));
+        cbQuery.where(cb.and(predicates.toArray(new Predicate[0]))).distinct(true);
 
         if (orderBy != null) {
             Path orderByPath = null;
@@ -131,6 +129,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         }
 
         TypedQuery<Experiment> query = getEntityManager().createQuery(cbQuery);
+
         if (pagination != null) {
             final int offset = pagination.getOffset();
             final int limit = pagination.getLimit();
@@ -141,35 +140,73 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
     }
 
     public Long getAllCountForUser(User user, ExperimentFilter filter) {
-        final List<Predicate> predicates = new ArrayList<>();
         final CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
         final CriteriaQuery<Long> cbQuery = cb.createQuery(Long.class);
         final Root<Experiment> root = cbQuery.from(Experiment.class);
 
-        predicates.add(cb.equal(root.join("users"), user));
+        final List<Predicate> predicates = this.getExperimentPredicates(user, filter, cb, root);
+
+        cbQuery.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        cbQuery.select(cb.countDistinct(root));
+        TypedQuery<Long> query = getEntityManager().createQuery(cbQuery);
+        return query.getSingleResult();
+
+    }
+
+    private List<Predicate> getExperimentPredicates(final User user,
+                                                    final ExperimentFilter filter,
+                                                    final CriteriaBuilder cb,
+                                                    final Root<Experiment> root) {
+        final List<Predicate> predicates = new ArrayList<>();
+
+        Boolean includeOpenData = false;
 
         if (filter != null) {
             final Instrument instrument = filter.getInstrument();
             final Date startDate = filter.getStartDate();
             final Date endDate = filter.getEndDate();
             final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
+            final Set<String> dois = filter.getDois();
+            includeOpenData = filter.getIncludeOpenData();
+
             if (instrument != null) {
                 predicates.add(cb.equal(root.get("instrument"), instrument));
             }
+
             if (startDate != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), startDate));
             }
+
             if (endDate != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("endDate"), endDate));
+                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), endDate));
             }
-            if (proposalIdentifiers != null) {
+
+            if (proposalIdentifiers != null && dois != null) {
+                Predicate proposalIdentifierPredicate = root.get("proposal").get("identifier").in(proposalIdentifiers);
+                Predicate proposalDOIPredicate = root.get("proposal").get("doi").in(dois);
+                Predicate experimentDOIPredicate = root.get("doi").in(dois);
+                predicates.add(cb.or(proposalIdentifierPredicate, proposalDOIPredicate, experimentDOIPredicate));
+
+            } else if (proposalIdentifiers != null) {
                 predicates.add(root.get("proposal").get("identifier").in(proposalIdentifiers));
+
+            } else if (dois != null) {
+                Predicate proposalDOIPredicate = root.get("proposal").get("doi").in(dois);
+                Predicate experimentDOIPredicate = root.get("doi").in(dois);
+                predicates.add(cb.or(proposalDOIPredicate, experimentDOIPredicate));
             }
         }
-        cbQuery.select(cb.countDistinct(root));
-        cbQuery.where(cb.and(predicates.toArray(new Predicate[0])));
-        TypedQuery<Long> query = getEntityManager().createQuery(cbQuery);
-        return query.getSingleResult();
 
+        Predicate userPredicate = cb.equal(root.join("users"), user);
+        if (includeOpenData) {
+            Predicate openDataPredicate = cb.lessThanOrEqualTo(root.get("proposal").get("publicAt"), new Date());
+            predicates.add(cb.or(userPredicate, openDataPredicate));
+
+        } else {
+            predicates.add(userPredicate);
+        }
+
+        return predicates;
     }
 }

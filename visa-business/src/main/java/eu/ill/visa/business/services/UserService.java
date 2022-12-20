@@ -4,6 +4,7 @@ package eu.ill.visa.business.services;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
+import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.UserRepository;
 
@@ -17,10 +18,13 @@ import static java.util.Objects.requireNonNullElseGet;
 public class UserService {
 
     private final UserRepository repository;
+    private final InstanceConfiguration configuration;
 
     @Inject
-    public UserService(final UserRepository repository) {
+    public UserService(final UserRepository repository,
+                       final InstanceConfiguration configuration) {
         this.repository = repository;
+        this.configuration = configuration;
     }
 
     public User getById(final String id) {
@@ -85,6 +89,10 @@ public class UserService {
 
     public Long countAllActivated() {
         return repository.countAllActivated();
+    }
+
+    public int getDefaultInstanceQuota() {
+        return this.configuration.getDefaultUserInstanceQuota();
     }
 
 

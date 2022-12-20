@@ -244,6 +244,7 @@
     <entity class="eu.ill.visa.core.domain.Instance">
         <table name="instance"/>
         <convert converter="eu.ill.visa.persistence.converter.CommaSeparatedListConverter" attribute-name="securityGroups"/>
+        <convert converter="eu.ill.visa.persistence.converter.CommaSeparatedListConverter" attribute-name="activeProtocols"/>
 
         <attributes>
             <id name="id">
@@ -301,6 +302,9 @@
             </basic>
             <basic name="securityGroups">
                 <column name="security_groups" nullable="true" column-definition="TEXT"/>
+            </basic>
+            <basic name="activeProtocols">
+                <column name="active_protocols" nullable="true" column-definition="TEXT"/>
             </basic>
             <many-to-one name="plan">
                 <join-column name="plan_id"/>

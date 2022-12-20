@@ -3,12 +3,16 @@ package eu.ill.visa.business.concurrent.actions;
 import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionException;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.core.domain.ImageProtocol;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandState;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class InstanceAction {
 
@@ -80,6 +84,18 @@ public abstract class InstanceAction {
                 instance.setDeleted(true);
             }
 
+            this.getInstanceService().save(instance);
+        }
+    }
+
+    public void updateInstanceProtocols(List<ImageProtocol> activeProtocols) {
+        Instance commandInstance = this.command.getInstance();
+        List<String> protocolNames = activeProtocols.stream().map(ImageProtocol::getName).collect(Collectors.toList());
+        commandInstance.setActiveProtocols(protocolNames);
+
+        Instance instance = this.getInstance();
+        if (instance != null) {
+            instance.setActiveProtocols(protocolNames);
             this.getInstanceService().save(instance);
         }
     }

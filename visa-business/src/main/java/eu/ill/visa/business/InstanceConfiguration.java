@@ -11,6 +11,7 @@ public class InstanceConfiguration {
     private Integer staffMaxLifetimeDurationHours = 1440;
     private Integer userMaxInactivityDurationHours = 96;
     private Integer staffMaxInactivityDurationHours = 192;
+    private Integer defaultUserInstanceQuota = 2;
 
     @JsonProperty
     @NotNull
@@ -54,5 +55,16 @@ public class InstanceConfiguration {
 
     public void setStaffMaxInactivityDurationHours(Integer staffMaxInactivityDurationHours) {
         this.staffMaxInactivityDurationHours = staffMaxInactivityDurationHours;
+    }
+
+    @JsonProperty
+    @NotNull
+    @Valid
+    public Integer getDefaultUserInstanceQuota() {
+        return defaultUserInstanceQuota;
+    }
+
+    public void setDefaultUserInstanceQuota(Integer defaultUserInstanceQuota) {
+        this.defaultUserInstanceQuota = defaultUserInstanceQuota;
     }
 }

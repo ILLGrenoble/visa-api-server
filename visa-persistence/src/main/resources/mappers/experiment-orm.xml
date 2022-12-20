@@ -35,6 +35,17 @@
         </query>
     </named-query>
 
+    <named-query name="experiment.getYearsForOpenData">
+        <query>
+            <![CDATA[
+                SELECT distinct YEAR(e.startDate)
+                FROM Experiment e
+                JOIN e.proposal p
+                WHERE p.publicAt <= :currentDate
+            ]]>
+        </query>
+    </named-query>
+
     <named-query name="experiment.getByIdAndUser">
         <query>
             SELECT e
@@ -44,6 +55,20 @@
             AND e.id = :id
             AND e.startDate IS NOT NULL
             AND e.endDate IS NOT NULL
+        </query>
+    </named-query>
+
+    <named-query name="experiment.getByIdForOpenData">
+        <query>
+            <![CDATA[
+                SELECT e
+                FROM Experiment e
+                JOIN e.proposal p
+                WHERE p.publicAt <= :currentDate
+                AND e.id = :id
+                AND e.startDate IS NOT NULL
+                AND e.endDate IS NOT NULL
+            ]]>
         </query>
     </named-query>
 
@@ -67,6 +92,12 @@
             </id>
             <basic name="title">
                 <column name="title" nullable="true" length="2000"/>
+            </basic>
+            <basic name="url">
+                <column name="url" nullable="true" length="2000"/>
+            </basic>
+            <basic name="doi">
+                <column name="doi" nullable="true" length="2000"/>
             </basic>
             <basic name="startDate">
                 <column name="start_date" nullable="true" />

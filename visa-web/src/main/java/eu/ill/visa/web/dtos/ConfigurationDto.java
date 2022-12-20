@@ -2,6 +2,7 @@ package eu.ill.visa.web.dtos;
 
 import eu.ill.visa.web.AnalyticsConfiguration;
 import eu.ill.visa.web.DesktopConfiguration;
+import eu.ill.visa.web.ExperimentsConfiguration;
 import eu.ill.visa.web.LoginConfiguration;
 
 import java.util.Map;
@@ -12,6 +13,7 @@ public class ConfigurationDto {
     private LoginConfiguration login;
     private AnalyticsConfiguration analytics;
     private DesktopConfiguration desktop;
+    private ExperimentsConfiguration experiments;
     private Map<String, String> metadata;
 
     private String contactEmail;
@@ -62,5 +64,13 @@ public class ConfigurationDto {
 
     public void setContactEmail(String contactEmail) {
         this.contactEmail = contactEmail;
+    }
+
+    public ExperimentsConfiguration getExperiments() {
+        return experiments;
+    }
+
+    public void setExperiments(ExperimentsConfiguration experiments) {
+        this.experiments = experiments;
     }
 }
