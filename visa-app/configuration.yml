@@ -40,11 +40,11 @@ database:
   minIdleTime: 1 minute
 
 logging:
-  level: ${VISA_LOGGING_LEVEL:-INFO}
+  level: INFO
   loggers:
     org.apache.guacamole: DEBUG
     io.dropwizard: INFO
-    eu.ill.visa: INFO
+    eu.ill: ${VISA_LOGGING_LEVEL:-INFO}
     org.hibernate.sql: DEBUG
   appenders:
     - type: console

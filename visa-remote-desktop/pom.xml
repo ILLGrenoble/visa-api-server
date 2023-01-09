@@ -44,7 +44,7 @@
             <artifactId>webx-relay</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/webx-relay-1.0-SNAPSHOT.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/webx-relay-0.1.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
