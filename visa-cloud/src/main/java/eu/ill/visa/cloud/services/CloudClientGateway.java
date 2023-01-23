@@ -55,7 +55,7 @@ public class CloudClientGateway {
 
     public CloudClient addCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) {
         try {
-            CloudClient cloudClient = this.factory.getClient(providerId, name, providerConfiguration, serverNamePrefix, visible);
+            CloudClient cloudClient = this.factory.getClient(providerId, name, providerConfiguration.getName(), providerConfiguration, serverNamePrefix, visible);
             this.secondaryCloudClients.put(providerId, cloudClient);
 
             return cloudClient;

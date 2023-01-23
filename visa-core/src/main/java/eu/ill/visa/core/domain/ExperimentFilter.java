@@ -10,7 +10,7 @@ public class ExperimentFilter {
     private Instrument instrument;
     private Set<String> proposalIdentifiers;
     private Set<String> dois;
-    private Boolean includeOpenData;
+    private Boolean includeOpenData = Boolean.FALSE;
 
     public ExperimentFilter() {
 

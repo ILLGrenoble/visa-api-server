@@ -5,9 +5,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import eu.ill.visa.business.BusinessConfiguration;
 import eu.ill.visa.business.BusinessModule;
+import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.business.SignatureConfiguration;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.CloudModule;
+import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.persistence.PersistenceModule;
 import org.hibernate.Session;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -44,8 +46,8 @@ public class BusinessExtension implements TestInstancePostProcessor, BeforeEachC
             @Override
             protected void configure() {
 
-                bind(BusinessConfiguration.class).toInstance(new BusinessConfiguration(new SignatureConfiguration()));
-                bind(CloudConfiguration.class).toInstance(new CloudConfiguration("null"));
+                bind(BusinessConfiguration.class).toInstance(new BusinessConfiguration(new SignatureConfiguration(), new InstanceConfiguration()));
+                bind(CloudConfiguration.class).toInstance(new CloudConfiguration(CloudClientFactory.NULL));
                 install(new CloudModule());
                 install(new BusinessModule());
                 install(new PersistenceModule("visa"));

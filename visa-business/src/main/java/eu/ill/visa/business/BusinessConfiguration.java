@@ -26,8 +26,9 @@ public class BusinessConfiguration {
     }
 
     // Constructor used for tests
-    public BusinessConfiguration(SignatureConfiguration signatureConfiguration) {
+    public BusinessConfiguration(SignatureConfiguration signatureConfiguration, InstanceConfiguration instanceConfiguration) {
         this.signatureConfiguration = signatureConfiguration;
+        this.instanceConfiguration = instanceConfiguration;
     }
 
     @JsonProperty
