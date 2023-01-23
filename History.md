@@ -1,3 +1,8 @@
+2.5.1 23/01/2023
+================
+ * Fix tests
+ * Fix bug on experiment search failing when ordering by instrument or proposal identifier.
+
 2.5.0 20/12/2022
 ================
  * Check whether visa is in open-data mode before sending back all the members of the proposals: empty the list of the user is not part of the original proposal.
