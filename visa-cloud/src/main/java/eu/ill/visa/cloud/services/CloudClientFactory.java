@@ -32,14 +32,13 @@ public class CloudClientFactory {
      */
     public CloudClient getClient(final CloudConfiguration configuration) throws CloudException {
         final String provider = configuration.getProviderType();
-        final ProviderConfiguration providerConfiguration = configuration.getProviderConfiguration(provider);
+        final ProviderConfiguration providerConfiguration = provider.equals(CloudClientFactory.NULL) ? null :  configuration.getProviderConfiguration(provider);
         final String serverNamePrefix = configuration.getServerNamePrefix();
 
-        return this.getClient(-1L, configuration.getProviderName(), providerConfiguration, serverNamePrefix, true);
+        return this.getClient(-1L, configuration.getProviderName(), provider, providerConfiguration, serverNamePrefix, true);
     }
 
-    public CloudClient getClient(Long id, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) throws CloudException {
-        String provider = providerConfiguration.getName();
+    public CloudClient getClient(Long id, String name, String provider, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) throws CloudException {
         if (NULL.equals(provider)) {
             return createNullProvider(id, name, "null", serverNamePrefix, visible);
 

@@ -106,6 +106,8 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         final CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
         final CriteriaQuery<Experiment> cbQuery = cb.createQuery(Experiment.class);
         final Root<Experiment> root = cbQuery.from(Experiment.class);
+        root.fetch("instrument", JoinType.INNER); // make sure instruments are selected so that the order by works correctly
+        root.fetch("proposal", JoinType.INNER); // make sure proposals are selected so that the order by works correctly
 
         final List<Predicate> predicates = this.getExperimentPredicates(user, filter, cb, root);
 
