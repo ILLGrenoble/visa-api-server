@@ -40,11 +40,9 @@
             <version>${redisson.version}</version>
         </dependency>
         <dependency>
-            <groupId>eu.ill.webx</groupId>
+            <groupId>eu.ill</groupId>
             <artifactId>webx-relay</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/webx-relay-0.1.0.jar</systemPath>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
