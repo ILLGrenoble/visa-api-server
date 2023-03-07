@@ -76,10 +76,7 @@ public class WebXDesktopService extends DesktopService {
 
         String hostname = getIpAddressForInstance(instance);
 
-        // Set as standalone for now
-//        hostname = "dssdev2.ill.fr";
-
-        return new WebXConfiguration(hostname, protocol.getPort(), true);
+        return new WebXConfiguration(hostname, protocol.getPort());
     }
 
     private WebXTunnel buildTunnel(final Instance instance) throws CloudException, WebXConnectionException {
@@ -92,9 +89,6 @@ public class WebXDesktopService extends DesktopService {
         final WebXConfiguration configuration = createConfiguration(instance);
 
         WebXClientInformation clientInformation = createClientInformation(session, instance);
-
-        // Just standalone for now
-        clientInformation = null;
 
         WebXTunnel tunnel = new WebXTunnel();
         tunnel.connect(configuration, clientInformation);
