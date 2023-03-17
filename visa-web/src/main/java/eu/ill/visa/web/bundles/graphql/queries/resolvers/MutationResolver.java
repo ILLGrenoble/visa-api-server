@@ -813,9 +813,9 @@ public class MutationResolver implements GraphQLMutationResolver {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
         try {
-            Date terminationDate = simpleDateFormat.parse(dateString);
+            Date terminationDate = dateString == null ? null : simpleDateFormat.parse(dateString);
 
-            this.instanceExtensionRequestService.grantExtension(instance, terminationDate, null);
+            this.instanceExtensionRequestService.grantExtension(instance, terminationDate, null, false);
 
         } catch (ParseException e) {
             throw new ValidationException(e);
@@ -1037,7 +1037,7 @@ public class MutationResolver implements GraphQLMutationResolver {
                 Date terminationDate = InstanceExtensionResponseInput.DATE_FORMAT.parse(response.getTerminationDate());
                 request.setExtensionDate(terminationDate);
 
-                this.instanceExtensionRequestService.grantExtension(request.getInstance(), terminationDate, response.getHandlerComments());
+                this.instanceExtensionRequestService.grantExtension(request.getInstance(), terminationDate, response.getHandlerComments(), true);
 
             } else {
                 this.instanceExtensionRequestService.refuseExtension(request.getInstance(), response.getHandlerComments());

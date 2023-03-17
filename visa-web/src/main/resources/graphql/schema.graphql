@@ -136,7 +136,7 @@ type Mutation {
     # Delete an instance
     deleteInstance(id: Int!): Message! @isAuthorised(role: "ADMIN")
     # Update an instance termination date
-    updateInstanceTerminationDate(id: Int!, date: String!): Message! @isAuthorised(role: "ADMIN")
+    updateInstanceTerminationDate(id: Int!, date: String): Message! @isAuthorised(role: "ADMIN")
     # Create a system notification
     createSystemNotification(input: SystemNotificationInput!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Update a system notification

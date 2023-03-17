@@ -62,7 +62,7 @@ public class InstanceExtensionRequestService {
         return request;
     }
 
-    public void grantExtension(Instance instance, Date terminationDate, String handlerComments) {
+    public void grantExtension(Instance instance, Date terminationDate, String handlerComments, boolean sendNotification) {
         instance.setTerminationDate(terminationDate);
 
         // Update the instance
@@ -75,7 +75,9 @@ public class InstanceExtensionRequestService {
         }
 
         // Email owner
-        this.notificationService.sendInstanceExtensionNotification(instance, true, handlerComments);
+        if (sendNotification) {
+            this.notificationService.sendInstanceExtensionNotification(instance, true, handlerComments);
+        }
     }
 
     public void refuseExtension(Instance instance, String handlerComments) {

@@ -60,7 +60,7 @@ public class InstanceExtensionRenderer implements NotificationRenderer {
             final Long maxInactivityDurationDays = user.hasRole(Role.STAFF_ROLE) ? staffMaxInactivityDurationDays : userMaxInactivityDurationDays;
 
             variables.put("instance", instance);
-            variables.put("handlerComments", handlerComments.replaceAll("\n", "<br>"));
+            variables.put("handlerComments", handlerComments == null ? "" : handlerComments.replaceAll("\n", "<br>"));
             variables.put("accepted", extensionGranted);
             variables.put("maxInactivityDurationDays", maxInactivityDurationDays);
             variables.put("user", user);
