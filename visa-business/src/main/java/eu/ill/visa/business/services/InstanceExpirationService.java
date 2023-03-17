@@ -186,13 +186,17 @@ public class InstanceExpirationService {
             Instance instance = instanceExpiration.getInstance();
 
             // check expiration due to inactivity rather than max_lifetime
-            if (instance.getTerminationDate() == null || instance.getTerminationDate().compareTo(instanceExpiration.getExpirationDate()) > 0) {
+            if (instance.getTerminationDate() != null && instance.getTerminationDate().compareTo(instanceExpiration.getExpirationDate()) > 0) {
 
                 // If instance has had activity since the instance expiration was created then delete it
                 if (instance.getLastSeenAt().compareTo(instanceExpiration.getCreatedAt()) > 0) {
                     logger.info("Instance expiration removed for instance {} after activity recorded", instance.getId());
                     this.delete(instanceExpiration);
                 }
+
+            } else if (instance.getTerminationDate() == null) {
+                logger.info("Instance expiration removed for instance {} as it is now immortal", instance.getId());
+                this.delete(instanceExpiration);
             }
         }
     }
