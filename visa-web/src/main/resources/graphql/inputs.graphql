@@ -46,6 +46,7 @@ input FlavourInput {
     cloudId: Int
     computeId: String!
     instrumentIds: [Int]
+    roleIds: [Int]
 }
 
 input SecurityGroupInput {

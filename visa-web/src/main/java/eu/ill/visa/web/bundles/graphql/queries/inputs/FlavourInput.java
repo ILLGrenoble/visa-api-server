@@ -25,6 +25,8 @@ public class FlavourInput {
 
     private List<Long> instrumentIds;
 
+    private List<Long> roleIds;
+
     public String getName() {
         return name;
     }
@@ -71,5 +73,13 @@ public class FlavourInput {
 
     public void setInstrumentIds(List<Long> instrumentIds) {
         this.instrumentIds = instrumentIds;
+    }
+
+    public List<Long> getRoleIds() {
+        return roleIds;
+    }
+
+    public void setRoleIds(List<Long> roleIds) {
+        this.roleIds = roleIds;
     }
 }

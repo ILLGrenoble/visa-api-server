@@ -56,16 +56,8 @@ public class PlanService {
         return repository.countAll(requireNonNullElseGet(filter, QueryFilter::new));
     }
 
-    public Long countAllForAdmin() {
-        return repository.countAllForAdmin();
-    }
-
     public List<Plan> getAllForAdmin() {
         return repository.getAllForAdmin();
-    }
-
-    public List<Plan> getAllForAdmin(Pagination pagination) {
-        return repository.getAllForAdmin(pagination);
     }
 
     public List<Plan> getAllForInstruments(final List<Instrument> instruments) {
@@ -78,10 +70,6 @@ public class PlanService {
 
     public List<Plan> getAllForUserAndExperiments(final User user, final List<Experiment> experiments$) {
         return repository.getAllForUserAndExperiments(user, requireNonNullElseGet(experiments$, ArrayList::new));
-    }
-
-    public List<Plan> getAllForAllInstruments() {
-        return repository.getAllForAllInstruments();
     }
 
     public List<Plan> getAllForUserAndAllInstruments(final User user) {

@@ -261,24 +261,45 @@ public class MutationResolver implements GraphQLMutationResolver {
     }
 
     private void updateFlavourLimits(Flavour flavour, FlavourInput input) {
-        List<FlavourLimit> currentFlavourLimits = this.flavourLimitService.getAllOfTypeForFlavour(flavour, "INSTRUMENT");
-        List<Long> currentInstrumentIds = currentFlavourLimits.stream().map(FlavourLimit::getObjectId).collect(Collectors.toList());
+        // Handle instrument limits
+        List<FlavourLimit> currentInstrumentFlavourLimits = this.flavourLimitService.getAllOfTypeForFlavour(flavour, "INSTRUMENT");
+        List<Long> currentInstrumentIds = currentInstrumentFlavourLimits.stream().map(FlavourLimit::getObjectId).collect(Collectors.toList());
         List<Long> instrumentIds = input.getInstrumentIds();
         List<Long> allInstrumentIds = this.instrumentService.getAll().stream().map(Instrument::getId).collect(Collectors.toList());
 
-        List<FlavourLimit> flavourLimitsToDelete = currentFlavourLimits.stream().filter(flavourLimit ->
+        List<FlavourLimit> instrumentFlavourLimitsToDelete = currentInstrumentFlavourLimits.stream().filter(flavourLimit ->
             !instrumentIds.contains(flavourLimit.getObjectId())).collect(Collectors.toList());
-        List<Long> instrumentsToAdd = instrumentIds.stream().filter(instrumentId ->
-            !currentInstrumentIds.contains(instrumentId)).collect(Collectors.toList());
+        this.deleteFlavourLimits(instrumentFlavourLimitsToDelete);
 
-        flavourLimitsToDelete.forEach(this.flavourLimitService::delete);
-        instrumentsToAdd.forEach(instrumentId -> {
-            if (allInstrumentIds.contains(instrumentId)) {
-                FlavourLimit flavourLimit = new FlavourLimit(flavour, instrumentId, "INSTRUMENT");
+        List<Long> instrumentsToAdd = instrumentIds.stream().filter(instrumentId -> !currentInstrumentIds.contains(instrumentId)).collect(Collectors.toList());
+        this.createFlavourLimits(instrumentsToAdd, allInstrumentIds, flavour, "INSTRUMENT");
+
+        // Handle role limits
+        List<FlavourLimit> currentRoleFlavourLimits = this.flavourLimitService.getAllOfTypeForFlavour(flavour, "ROLE");
+        List<Long> currentRoleIds = currentRoleFlavourLimits.stream().map(FlavourLimit::getObjectId).collect(Collectors.toList());
+        List<Long> roleIds = input.getRoleIds();
+        List<Long> allRoleIds = this.roleService.getAll().stream().map(Role::getId).collect(Collectors.toList());
+
+        List<FlavourLimit> roleFlavourLimitsToDelete = currentRoleFlavourLimits.stream().filter(flavourLimit ->
+            !roleIds.contains(flavourLimit.getObjectId())).collect(Collectors.toList());
+
+        this.deleteFlavourLimits(roleFlavourLimitsToDelete);
+        List<Long> rolesToAdd = roleIds.stream().filter(roleId -> !currentRoleIds.contains(roleId)).collect(Collectors.toList());
+        this.createFlavourLimits(rolesToAdd, allRoleIds, flavour, "ROLE");
+    }
+
+    private void deleteFlavourLimits(List<FlavourLimit> flavourLimits) {
+        flavourLimits.forEach(this.flavourLimitService::delete);
+    }
+
+    private void createFlavourLimits(List<Long> objectIds, List<Long> validObjectIds, Flavour flavour, String type) {
+        objectIds.forEach(objectId -> {
+            if (validObjectIds.contains(objectId)) {
+                FlavourLimit flavourLimit = new FlavourLimit(flavour, objectId, type);
                 this.flavourLimitService.save(flavourLimit);
 
             } else {
-                logger.warn("Cannot create FlavourLimit with instrument Id {} for Flavour {} as it does not exist", instrumentId, flavour.getName());
+                logger.warn("Cannot create FlavourLimit with {} Id {} for Flavour {} as it does not exist", type, objectId, flavour.getName());
             }
         });
     }

@@ -36,11 +36,6 @@ public class PlanRepository extends AbstractRepository<Plan> {
         return super.countAll(provider, filter);
     }
 
-    public Long countAllForAdmin() {
-        final TypedQuery<Long> query = getEntityManager().createNamedQuery("plan.countAllForAdmin", Long.class);
-        return query.getSingleResult();
-    }
-
     public Plan getById(final Long id) {
         try {
             final TypedQuery<Plan> query = getEntityManager().createNamedQuery("plan.getById", Plan.class);
@@ -73,17 +68,6 @@ public class PlanRepository extends AbstractRepository<Plan> {
         return query.getResultList();
     }
 
-    public List<Plan> getAllForAdmin(Pagination pagination) {
-        final TypedQuery<Plan> query = getEntityManager().createNamedQuery("plan.getAllForAdmin", Plan.class);
-        if (pagination != null) {
-            final int offset = pagination.getOffset();
-            final int limit = pagination.getLimit();
-            query.setFirstResult(offset);
-            query.setMaxResults(limit);
-        }
-        return query.getResultList();
-    }
-
     public List<Plan> getAllForInstruments(final List<Instrument> instruments) {
         if (instruments == null || instruments.size() == 0) {
             return this.getAllForAllInstruments();
@@ -96,7 +80,6 @@ public class PlanRepository extends AbstractRepository<Plan> {
             return query.getResultList();
         }
     }
-
 
     public List<Plan> getAllForUserAndExperiments(final User user, final List<Experiment> experiments) {
         if (experiments == null || experiments.size() == 0) {
