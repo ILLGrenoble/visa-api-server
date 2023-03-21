@@ -1,3 +1,10 @@
+2.6.0 21/03/2023
+================
+ * Ensure instance expirations are removed when an instance termination date is set to null (immortal)
+ * Add role-based flavour limits (flavour only available to users with specified roles)
+ * Add WebX as a remote desktop implementation (some features unavailable such as instance sharing and screen capture)
+ * Refactor remote desktop to add abstraction layer to implementation
+
 2.5.1 23/01/2023
 ================
  * Fix tests
