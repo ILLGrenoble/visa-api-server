@@ -109,11 +109,13 @@
             LEFT OUTER JOIN InstrumentScientist ir on ir.instrument.id = ifl.objectId
             LEFT OUTER JOIN FlavourLimit rfl ON rfl.flavour.id = p.flavour.id AND rfl.objectType = 'ROLE'
             LEFT OUTER JOIN UserRole ur on ur.role.id = rfl.objectId
+            LEFT OUTER JOIN Role r on r.id = ur.role.id
             WHERE i.deleted = false
             AND f.deleted = false
             AND cpc.deletedAt IS NULL
             AND i.visible = true
             AND COALESCE(cpc.visible, true) = true
+            AND r.groupDeletedAt IS NULL
             AND (ir.user = :user OR ur.user = :user OR e.id IN :experimentIds OR (ifl.objectId IS NULL AND rfl.objectId IS NULL))
             ORDER BY p.id
         </query>
@@ -148,11 +150,13 @@
             LEFT OUTER JOIN InstrumentScientist ir on ir.instrument.id = ifl.objectId
             LEFT OUTER JOIN FlavourLimit rfl ON rfl.flavour.id = p.flavour.id AND rfl.objectType = 'ROLE'
             LEFT OUTER JOIN UserRole ur on ur.role.id = rfl.objectId
+            LEFT OUTER JOIN Role r on r.id = ur.role.id
             WHERE i.deleted = false
             AND f.deleted = false
             AND cpc.deletedAt IS NULL
             AND i.visible = true
             AND COALESCE(cpc.visible, true) = true
+            AND r.groupDeletedAt IS NULL
             AND (ir.user = :user OR ur.user = :user OR (ifl.objectId IS NULL AND rfl.objectId IS NULL))
             ORDER BY p.id
         </query>

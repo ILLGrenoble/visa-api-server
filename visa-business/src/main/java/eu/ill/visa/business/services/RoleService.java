@@ -6,6 +6,7 @@ import com.google.inject.persist.Transactional;
 import eu.ill.visa.core.domain.Role;
 import eu.ill.visa.persistence.repositories.RoleRepository;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Transactional
@@ -19,13 +20,21 @@ public class RoleService {
         this.repository = repository;
 
         // Initialise data if empty
-        if (this.getAll().size() == 0) {
+        if (this.getAllRoles().size() == 0) {
             this.repository.initialise();
         }
     }
 
-    public List<Role> getAll() {
+    public List<Role> getAllRolesAndGroups() {
         return this.repository.getAll();
+    }
+
+    public List<Role> getAllRoles() {
+        return this.repository.getAllRoles();
+    }
+
+    public List<Role> getAllGroups() {
+        return this.repository.getAllGroups();
     }
 
     public Role getById(Long id) {
@@ -35,4 +44,7 @@ public class RoleService {
     public Role getByName(String name) {
         return this.repository.getByName(name);
     }
-}
+
+    public void save(@NotNull final Role role) {
+        repository.save(role);
+    }}

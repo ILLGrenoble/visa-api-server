@@ -17,7 +17,8 @@ public class UserFullDto {
     private Integer  signInCount;
     private Integer  machineQuotaLimit;
     private EmployerDto affiliation;
-    private List<RoleDto> userRoles = new ArrayList<>();
+    private List<RoleDto> activeUserRoles = new ArrayList<>();
+    private List<String> groups = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -109,11 +110,19 @@ public class UserFullDto {
         return affiliation;
     }
 
-    public List<RoleDto> getUserRoles() {
-        return userRoles;
+    public List<RoleDto> getActiveUserRoles() {
+        return activeUserRoles;
     }
 
-    public void addUserRole(RoleDto userRole) {
-        this.userRoles.add(userRole);
+    public void addActiveUserRole(RoleDto userRole) {
+        this.activeUserRoles.add(userRole);
+    }
+
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    public void addGroup(String group) {
+        this.groups.add(group);
     }
 }

@@ -9,7 +9,8 @@ public class UserSimpleDto {
     private String  firstName;
     private String  lastName;
     private EmployerDto  affiliation;
-    private List<RoleDto> userRoles = new ArrayList<>();
+    private List<RoleDto> activeUserRoles = new ArrayList<>();
+    private List<String> groups = new ArrayList<>();
 
     public String getFirstName() {
         return firstName;
@@ -51,11 +52,19 @@ public class UserSimpleDto {
         this.fullName = fullName;
     }
 
-    public List<RoleDto> getUserRoles() {
-        return userRoles;
+    public List<RoleDto> getActiveUserRoles() {
+        return activeUserRoles;
     }
 
-    public void addUserRole(RoleDto userRole) {
-        this.userRoles.add(userRole);
+    public void addActiveUserRole(RoleDto userRole) {
+        this.activeUserRoles.add(userRole);
+    }
+
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    public void addGroup(String group) {
+        this.groups.add(group);
     }
 }

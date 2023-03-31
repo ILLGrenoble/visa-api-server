@@ -29,6 +29,16 @@ public class RoleRepository extends AbstractRepository<Role> {
         return query.getResultList();
     }
 
+    public List<Role> getAllRoles() {
+        final TypedQuery<Role> query = getEntityManager().createNamedQuery("role.getAllRoles", Role.class);
+        return query.getResultList();
+    }
+
+    public List<Role> getAllGroups() {
+        final TypedQuery<Role> query = getEntityManager().createNamedQuery("role.getAllGroups", Role.class);
+        return query.getResultList();
+    }
+
     public Role getById(final Long id) {
         try {
             final TypedQuery<Role> query = getEntityManager().createNamedQuery("role.getById", Role.class);
@@ -46,6 +56,14 @@ public class RoleRepository extends AbstractRepository<Role> {
             return query.getSingleResult();
         } catch (NoResultException exception) {
             return null;
+        }
+    }
+
+    public void save(Role role) {
+        if (role.getId() == null) {
+            persist(role);
+        } else {
+            merge(role);
         }
     }
 }

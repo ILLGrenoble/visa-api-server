@@ -54,8 +54,12 @@ type Query {
 #    experimentsForUser(id: String!): [Experiment] @isAuthorised(role: "ADMIN")
     # Find a user by their last name
     searchForUserByLastName(lastName: String!, onlyActivatedUsers: Boolean!, pagination: Pagination!): UserConnection! @isAuthorised(role: "ADMIN")
-    # Get all roles
+    # Get all roles and groups
+    rolesAndGroups: [Role]  @isAuthorised(role: "ADMIN")
+    # Get all system roles
     roles: [Role]  @isAuthorised(role: "ADMIN")
+    # Get all groups
+    groups: [Role]  @isAuthorised(role: "ADMIN")
     # Get all cloud clients
     cloudClients: [CloudClient] @isAuthorised(role: "ADMIN")
     # Get images from cloud provider
@@ -143,6 +147,12 @@ type Mutation {
     updateSystemNotification(id: Int!, input: SystemNotificationInput!): SystemNotification! @isAuthorised(role: "ADMIN")
     # Delete a system notification
     deleteSystemNotification(id: Int!): SystemNotification! @isAuthorised(role: "ADMIN")
+    # Create a role
+    createRole(input: RoleInput!): Role! @isAuthorised(role: "ADMIN")
+    # Update a role
+    updateRole(id: Int!, input: RoleInput!): Role! @isAuthorised(role: "ADMIN")
+    # Delete a role
+    deleteRole(id: Int!): Boolean! @isAuthorised(role: "ADMIN")
     # Update a user role
     updateUserRole(userId: String!, roleName: String!, isEnabled: Boolean!): User! @isAuthorised(role: "ADMIN")
     # Create an application credential

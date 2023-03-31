@@ -100,6 +100,8 @@ public class User implements Serializable {
     public List<UserRole> getActiveUserRoles() {
         long currentTime = new Date().getTime();
         return this.userRoles.stream()
+            .filter(userRole -> userRole.getRole().getGroupCreatedAt() == null)
+            .filter(userRole -> userRole.getRole().getGroupDeletedAt() == null)
             .filter(userRole -> userRole.getExpiresAt() == null || userRole.getExpiresAt().getTime() > currentTime)
             .collect(Collectors.toList());
     }
@@ -107,6 +109,15 @@ public class User implements Serializable {
     @Transient
     public List<Role> getRoles() {
         return this.getActiveUserRoles().stream().map(UserRole::getRole).collect(Collectors.toList());
+    }
+
+    @Transient
+    public List<Role> getGroups() {
+        return this.userRoles.stream()
+            .map(UserRole::getRole)
+            .filter(role -> role.getGroupCreatedAt() != null)
+            .filter(role -> role.getGroupDeletedAt() == null)
+            .collect(Collectors.toList());
     }
 
     public Date getLastSeenAt() {

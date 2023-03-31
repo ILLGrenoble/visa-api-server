@@ -5,11 +5,19 @@
                  version="2.2">
 
     <named-query name="user.getById">
-        <query>SELECT u FROM User u WHERE u.id = :id</query>
+        <query>
+            SELECT u
+            FROM User u
+            WHERE u.id = :id
+        </query>
     </named-query>
 
     <named-query name="user.getAll">
-        <query>SELECT u FROM User u ORDER BY u.lastName ASC</query>
+        <query>
+            SELECT u
+            FROM User u
+            ORDER BY u.lastName ASC
+        </query>
     </named-query>
 
     <named-query name="user.getAllActivated">
@@ -23,7 +31,8 @@
 
     <named-query name="user.countAll">
         <query>
-            SELECT COUNT(u) FROM User u
+            SELECT COUNT(u)
+            FROM User u
         </query>
     </named-query>
 
@@ -38,7 +47,8 @@
 
     <named-query name="user.getAllLikeLastName">
         <query>
-            SELECT DISTINCT(u) FROM User u
+            SELECT DISTINCT(u)
+            FROM User u
             WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
             ORDER BY u.lastName, u.firstName ASC
         </query>
@@ -46,7 +56,8 @@
 
     <named-query name="user.getAllActivatedLikeLastName">
         <query>
-            SELECT DISTINCT(u) FROM User u
+            SELECT DISTINCT(u)
+            FROM User u
             WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
             AND u.activatedAt IS NOT NULL
             ORDER BY u.lastName, u.firstName ASC
@@ -55,14 +66,16 @@
 
     <named-query name="user.countAllLikeLastName">
         <query>
-            SELECT COUNT(u) FROM User u
+            SELECT COUNT(u)
+            FROM User u
             WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
         </query>
     </named-query>
 
     <named-query name="user.countAllActivatedLikeLastName">
         <query>
-            SELECT COUNT(u) FROM User u
+            SELECT COUNT(u)
+            FROM User u
             WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
             AND u.activatedAt IS NOT NULL
         </query>
@@ -71,7 +84,8 @@
 
     <named-query name="user.getAllStaff">
         <query>
-            SELECT DISTINCT u FROM User u
+            SELECT DISTINCT u
+            FROM User u
             JOIN u.userRoles ur
             JOIN ur.role r
             WHERE r.name = 'STAFF'
@@ -81,7 +95,8 @@
 
     <named-query name="user.getAllSupport">
         <query>
-            SELECT DISTINCT u FROM User u
+            SELECT DISTINCT u
+            FROM User u
             JOIN u.userRoles ur
             JOIN ur.role r
             WHERE r.name in ('INSTRUMENT_SCIENTIST', 'INSTRUMENT_CONTROL', 'IT_SUPPORT', 'SCIENTIFIC_COMPUTING')

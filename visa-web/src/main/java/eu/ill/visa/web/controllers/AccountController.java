@@ -62,7 +62,10 @@ public class AccountController extends AbstractController {
         final User user = accountToken.getUser();
         final UserFullDto userDto = mapper.map(user, UserFullDto.class);
         for (UserRole userRole : user.getActiveUserRoles()) {
-            userDto.addUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
+            userDto.addActiveUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
+        }
+        for (Role group : user.getGroups()) {
+            userDto.addGroup(group.getName());
         }
 
         return createResponse(userDto, OK);
@@ -221,7 +224,10 @@ public class AccountController extends AbstractController {
     private UserSimpleDto mapUserSimpler(User user) {
         UserSimpleDto userSimpleDto = mapper.map(user, UserSimpleDto.class);
         for (UserRole userRole : user.getActiveUserRoles()) {
-            userSimpleDto.addUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
+            userSimpleDto.addActiveUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
+        }
+        for (Role group : user.getGroups()) {
+            userSimpleDto.addGroup(group.getName());
         }
         return userSimpleDto;
     }

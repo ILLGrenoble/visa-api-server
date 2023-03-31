@@ -278,7 +278,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         List<FlavourLimit> currentRoleFlavourLimits = this.flavourLimitService.getAllOfTypeForFlavour(flavour, "ROLE");
         List<Long> currentRoleIds = currentRoleFlavourLimits.stream().map(FlavourLimit::getObjectId).collect(Collectors.toList());
         List<Long> roleIds = input.getRoleIds();
-        List<Long> allRoleIds = this.roleService.getAll().stream().map(Role::getId).collect(Collectors.toList());
+        List<Long> allRoleIds = this.roleService.getAllRolesAndGroups().stream().map(Role::getId).collect(Collectors.toList());
 
         List<FlavourLimit> roleFlavourLimitsToDelete = currentRoleFlavourLimits.stream().filter(flavourLimit ->
             !roleIds.contains(flavourLimit.getObjectId())).collect(Collectors.toList());
@@ -899,6 +899,50 @@ public class MutationResolver implements GraphQLMutationResolver {
         return systemNotification;
     }
 
+    public Role createRole(RoleInput input) throws InvalidInputException {
+        final Role existingRole = this.roleService.getByName(input.getName());
+        if (existingRole != null) {
+            throw new InvalidInputException("Role with given name already exists");
+        }
+
+        Role role = new Role(input.getName(), input.getDescription());
+        role.setGroupCreatedAt(new Date());
+
+        this.roleService.save(role);
+
+        return role;
+    }
+
+    public Role updateRole(Long roleId, RoleInput input) throws EntityNotFoundException, InvalidInputException {
+        final Role existingRoleWithId = this.roleService.getById(roleId);
+        if (existingRoleWithId == null) {
+            throw new EntityNotFoundException("Role with given Id does not exist");
+        }
+
+        final Role existingRoleWithName = this.roleService.getByName(input.getName());
+        if (existingRoleWithName != null && !existingRoleWithName.getId().equals(roleId)) {
+            throw new InvalidInputException("Role with given name already exists");
+        }
+        existingRoleWithId.setName(input.getName());
+        existingRoleWithId.setDescription(input.getDescription());
+
+        this.roleService.save(existingRoleWithId);
+
+        return existingRoleWithId;
+    }
+
+    public Boolean deleteRole(Long roleId) throws EntityNotFoundException {
+        final Role existingRoleWithId = this.roleService.getById(roleId);
+        if (existingRoleWithId == null) {
+            throw new EntityNotFoundException("Role with given Id does not exist");
+        }
+
+        existingRoleWithId.setGroupDeletedAt(new Date());
+        this.roleService.save(existingRoleWithId);
+
+        return true;
+    }
+
     /**
      * Updates a user's role
      *
@@ -995,6 +1039,16 @@ public class MutationResolver implements GraphQLMutationResolver {
         final Role adminRole = roleService.getByName("ADMIN");
         final Role guestRole = roleService.getByName("GUEST");
 
+        // Filter input groups, remove any that do not exist
+        List<Role> inputGroups = input.getGroupIds().stream().map(roleService::getById).filter(Objects::nonNull).collect(Collectors.toList());
+
+        // Get all current groups of the user
+        List<Role> userGroups = user.getGroups();
+
+        // Determine which ones to add and to remove
+        List<Role> rolesToAdd = inputGroups.stream().filter(role -> !userGroups.contains(role)).collect(Collectors.toList());
+        List<Role> rolesToRemove =  userGroups.stream().filter(userRole -> !inputGroups.contains(userRole)).collect(Collectors.toList());
+
         try {
             if (input.getAdmin()) {
                 user.addRole(adminRole);
@@ -1007,6 +1061,14 @@ public class MutationResolver implements GraphQLMutationResolver {
                 user.addRole(guestRole, guestExpiresAt);
             } else {
                 user.removeRole(guestRole);
+            }
+
+            for (Role role : rolesToAdd) {
+                user.addRole(role);
+            }
+
+            for (Role role : rolesToRemove) {
+                user.removeRole(role);
             }
 
             user.setInstanceQuota(input.getInstanceQuota());

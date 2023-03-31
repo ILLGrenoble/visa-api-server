@@ -59,6 +59,7 @@ input UserInput {
     admin: Boolean!
     guest: Boolean!
     guestExpiresAt: String
+    groupIds: [Int]
 }
 
 input Pagination {
@@ -107,4 +108,9 @@ input CloudClientInput {
     visible: Boolean!
     openStackProviderConfiguration: OpenStackProviderConfigurationInput
     webProviderConfiguration: WebProviderConfigurationInput
+}
+
+input RoleInput {
+    name: String!
+    description: String
 }

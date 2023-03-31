@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Role implements Serializable {
 
@@ -22,6 +23,8 @@ public class Role implements Serializable {
 
     private String description;
 
+    private Date groupCreatedAt;
+    private Date groupDeletedAt;
 
 
     Role() {
@@ -30,6 +33,11 @@ public class Role implements Serializable {
 
     public Role(String name) {
         this.name = name;
+    }
+
+    public Role(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
 
@@ -55,6 +63,22 @@ public class Role implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getGroupCreatedAt() {
+        return groupCreatedAt;
+    }
+
+    public void setGroupCreatedAt(Date groupCreatedAt) {
+        this.groupCreatedAt = groupCreatedAt;
+    }
+
+    public Date getGroupDeletedAt() {
+        return groupDeletedAt;
+    }
+
+    public void setGroupDeletedAt(Date groupDeletedAt) {
+        this.groupDeletedAt = groupDeletedAt;
     }
 
     @Override

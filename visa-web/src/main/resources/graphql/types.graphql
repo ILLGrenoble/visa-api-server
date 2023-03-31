@@ -29,6 +29,8 @@ type Instrument {
 type Role {
     id: Int!
     name: String!
+    description: String
+    groupCreatedAt: String
 }
 
 type UserRole {
@@ -247,7 +249,8 @@ type User {
     instances: [Instance]
     experiments: [Experiment]
     instanceQuota: Int!
-    userRoles: [UserRole]
+    activeUserRoles: [UserRole]
+    groups: [Role]
     lastSeenAt: Date
     activatedAt: Date
 }

@@ -65,7 +65,9 @@
                 LEFT JOIN role r ON r.id = sgf.object_id
                 LEFT JOIN user_role ur ON r.id = ur.role_id
                 LEFT JOIN users u ON ur.user_id = u.id
+                LEFT JOIN role r ON r.id = ur.role_id
                 WHERE sgf.object_type = 'ROLE'
+                AND r.group_deleted_at IS NULL
                 AND u.id = :userId
                 AND cpc.deleted_at IS NULL
             ]]>

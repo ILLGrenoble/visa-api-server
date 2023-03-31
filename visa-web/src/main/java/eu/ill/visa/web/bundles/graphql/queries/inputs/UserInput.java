@@ -4,6 +4,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class UserInput {
 
@@ -20,6 +21,8 @@ public class UserInput {
     private Boolean guest;
 
     private String guestExpiresAt;
+
+    private List<Long> groupIds;
 
     public Integer getInstanceQuota() {
         return instanceQuota;
@@ -59,5 +62,13 @@ public class UserInput {
 
     public void setGuestExpiresAt(String guestExpiresAt) {
         this.guestExpiresAt = guestExpiresAt;
+    }
+
+    public List<Long> getGroupIds() {
+        return groupIds;
+    }
+
+    public void setGroupIds(List<Long> groupIds) {
+        this.groupIds = groupIds;
     }
 }

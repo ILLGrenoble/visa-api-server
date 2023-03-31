@@ -430,12 +430,30 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     /**
+     * Get a list of all roles and groups
+     *
+     * @return all the roles and groups
+     */
+    public List<Role> rolesAndGroups() {
+        return this.roleService.getAllRolesAndGroups();
+    }
+
+    /**
      * Get a list of all roles
      *
      * @return all the roles
      */
     public List<Role> roles() {
-        return this.roleService.getAll();
+        return this.roleService.getAllRoles();
+    }
+
+    /**
+     * Get a list of all groups
+     *
+     * @return all the groups
+     */
+    public List<Role> groups() {
+        return this.roleService.getAllGroups();
     }
 
     /**

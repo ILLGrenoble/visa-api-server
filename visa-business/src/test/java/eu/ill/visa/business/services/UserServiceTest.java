@@ -23,13 +23,6 @@ public class UserServiceTest {
     private InstanceService instanceService;
 
     @Test
-    @DisplayName("Get all users")
-    void testGetAll() {
-        List<User> users = userService.getAll();
-        assertEquals(6, users.size());
-    }
-
-    @Test
     @DisplayName("Get all users that match a last name wildcard")
     void testGetAllLikeLastName() {
         List<User> users = userService.getAllLikeLastName("cla", true);

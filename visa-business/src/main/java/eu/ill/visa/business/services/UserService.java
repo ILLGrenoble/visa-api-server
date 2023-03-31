@@ -31,10 +31,6 @@ public class UserService {
         return repository.getById(id);
     }
 
-    public List<User> getAll() {
-        return repository.getAll();
-    }
-
     public List<User> getAll(OrderBy orderBy, Pagination pagination) {
         return this.getAll(new QueryFilter(), orderBy, pagination);
     }
