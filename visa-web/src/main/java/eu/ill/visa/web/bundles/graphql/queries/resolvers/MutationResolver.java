@@ -34,8 +34,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.ill.visa.web.bundles.graphql.queries.domain.Message.createMessage;
-import static java.lang.String.format;
-import static java.util.Collections.singletonList;
 
 public class MutationResolver implements GraphQLMutationResolver {
 
@@ -602,13 +600,8 @@ public class MutationResolver implements GraphQLMutationResolver {
         if (plan == null) {
             throw new EntityNotFoundException("Plan not found for the given id");
         }
-        final List<Parameter> parameters = singletonList(new Parameter("id", plan.getId().toString()));
-        final QueryFilter filter = new QueryFilter("plan.id = :id", parameters);
-        final Long countInstances = instanceService.countAll(filter);
-        if (countInstances > 0) {
-            throw new EntityNotFoundException(format("Cannot delete this plan because there are %d instances associated to it", countInstances));
-        }
-        planService.delete(plan);
+        plan.setDeleted(true);
+        planService.save(plan);
         return plan;
     }
 

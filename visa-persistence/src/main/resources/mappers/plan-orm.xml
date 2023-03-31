@@ -13,6 +13,7 @@
             WHERE p.id = :id
             AND i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
         </query>
     </named-query>
@@ -27,6 +28,7 @@
             WHERE i.deleted = false
             AND f.deleted = false
             AND i.visible = true
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
             AND COALESCE(cpc.visible, true) = true
             ORDER BY p.id
@@ -42,6 +44,7 @@
             LEFT JOIN i.cloudProviderConfiguration cpc
             WHERE i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
             ORDER BY p.id
         </query>
@@ -56,6 +59,7 @@
             LEFT JOIN i.cloudProviderConfiguration cpc
             WHERE i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
         </query>
     </named-query>
@@ -70,6 +74,7 @@
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
             WHERE i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
             AND i.visible = true
             AND COALESCE(cpc.visible, true) = true
@@ -89,6 +94,7 @@
             LEFT OUTER JOIN Experiment e ON e.instrument.id = fl.objectId
             WHERE i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
             AND i.visible = true
             AND COALESCE(cpc.visible, true) = true
@@ -112,6 +118,7 @@
             LEFT OUTER JOIN Role r on r.id = ur.role.id
             WHERE i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
             AND i.visible = true
             AND COALESCE(cpc.visible, true) = true
@@ -131,6 +138,7 @@
             LEFT OUTER JOIN FlavourLimit fl ON fl.flavour.id = p.flavour.id AND fl.objectType = 'INSTRUMENT'
             WHERE i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
             AND i.visible = true
             AND COALESCE(cpc.visible, true) = true
@@ -153,6 +161,7 @@
             LEFT OUTER JOIN Role r on r.id = ur.role.id
             WHERE i.deleted = false
             AND f.deleted = false
+            AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
             AND i.visible = true
             AND COALESCE(cpc.visible, true) = true
@@ -171,6 +180,9 @@
             </id>
             <basic name="preset">
                 <column name="preset" nullable="false" />
+            </basic>
+            <basic name="deletedAt">
+                <column name="deleted_at" nullable="true"/>
             </basic>
             <many-to-one name="flavour">
                 <join-column name="flavour_id"/>

@@ -1,6 +1,7 @@
 package eu.ill.visa.core.domain;
 
 import javax.persistence.Transient;
+import java.util.Date;
 
 public class Plan extends Timestampable {
 
@@ -11,6 +12,8 @@ public class Plan extends Timestampable {
     private Flavour flavour;
 
     private Boolean preset;
+
+    private Date deletedAt;
 
     public Long getId() {
         return id;
@@ -42,6 +45,24 @@ public class Plan extends Timestampable {
 
     public void setPreset(Boolean preset) {
         this.preset = preset;
+    }
+
+    public Date getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Date deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    @Transient
+    public void setDeleted(boolean value) {
+        if (value) {
+            this.deletedAt = new Date();
+
+        } else {
+            this.deletedAt = null;
+        }
     }
 
     @Transient
