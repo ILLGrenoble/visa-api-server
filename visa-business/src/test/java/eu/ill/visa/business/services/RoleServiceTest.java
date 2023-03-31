@@ -36,7 +36,7 @@ public class RoleServiceTest {
     @Test
     @DisplayName("Get all roles")
     void testGetAll() {
-        List<Role> results = roleService.getAll();
+        List<Role> results = roleService.getAllRoles();
         assertEquals(3, results.size());
     }
 
