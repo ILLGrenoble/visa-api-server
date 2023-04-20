@@ -1,3 +1,8 @@
+2.7.0 20/04/2023
+================
+ * Soft deletion of plans
+ * User groups: allow groups of users to be created by admin. Groups work the same as roles and can be used in the management of flavours and security groups.
+
 2.6.0 21/03/2023
 ================
  * Ensure instance expirations are removed when an instance termination date is set to null (immortal)
