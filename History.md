@@ -1,3 +1,7 @@
+2.7.1 21/04/2023
+================
+ * Fix bug on role based security groups SQL
+
 2.7.0 20/04/2023
 ================
  * Soft deletion of plans
