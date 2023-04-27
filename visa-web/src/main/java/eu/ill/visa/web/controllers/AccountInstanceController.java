@@ -453,7 +453,7 @@ public class AccountInstanceController extends AbstractController {
 
                 notificationService.sendInstanceMemberAddedNotification(instance, instanceMember);
 
-                return createResponse();
+                return createResponse(mapper.map(instanceMember, InstanceMemberDto.class));
 
             } else {
                 throw new BadRequestException("User not found");
