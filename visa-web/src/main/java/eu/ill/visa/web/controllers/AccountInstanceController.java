@@ -635,12 +635,11 @@ public class AccountInstanceController extends AbstractController {
             final ResponseBuilder response;
             if (request != null) {
                 InstanceExtensionRequestDto requestDto = mapper.map(request, InstanceExtensionRequestDto.class);
-                response = Response.ok(requestDto);
+                return createResponse(requestDto);
 
             } else {
-                response = Response.ok();
+                return createResponse();
             }
-            return response.build();
 
         } else{
             throw new NotAuthorizedException("Not authorized to perform this action");
@@ -661,8 +660,7 @@ public class AccountInstanceController extends AbstractController {
                 request = this.instanceExtensionRequestService.create(instance, instanceExtensionRequestDto.getComments());
             }
             InstanceExtensionRequestDto requestDto = mapper.map(request, InstanceExtensionRequestDto.class);
-            final ResponseBuilder response = Response.ok(requestDto);
-            return response.build();
+            return createResponse(requestDto);
 
         } else{
             throw new NotAuthorizedException("Not authorized to perform this action");
