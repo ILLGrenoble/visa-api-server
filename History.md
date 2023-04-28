@@ -1,3 +1,7 @@
+2.8.0 28/04/2023
+================
+ * Minor updates to standardise the API 
+
 2.7.1 21/04/2023
 ================
  * Fix bug on role based security groups SQL
