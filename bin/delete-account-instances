@@ -43,7 +43,7 @@ if response.status_code == 200:
         response = requests.delete('%s/api/account/instances/%d' % (server, instance['id']),
                             verify=False,
                             headers={
-                                'Authorization': 'bearer %s' % (token),
+                                'Authorization': '%s' % (token),
                                 'Content-type': 'application/json',
                                 'Accept': 'application/json'})
         if response.status_code == 200:
