@@ -26,8 +26,8 @@ if token is None:
 response = requests.get('%s/api/account/instances' % (server),
                         verify=False,
                         headers={
-                            'Authorization': 'bearer %s' % (token),
-                            'Content-type': 'application/json', 
+                            'Authorization': '%s' % (token),
+                            'Content-type': 'application/json',
                             'Accept': 'application/json'})
 
 if response.status_code == 200:
@@ -44,8 +44,8 @@ if response.status_code == 200:
                             verify=False,
                             headers={
                                 'Authorization': 'bearer %s' % (token),
-                                'Content-type': 'application/json', 
-                                'Accept': 'application/json'})    
+                                'Content-type': 'application/json',
+                                'Accept': 'application/json'})
         if response.status_code == 200:
             print("Successfully deleted instance. Waiting %d seconds before deleting the next instance..." % (delay))
         else:

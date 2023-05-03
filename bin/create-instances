@@ -47,7 +47,7 @@ for n in range(count):
                             },
                             verify=False,
                             headers={
-                                'Authorization': 'bearer %s' % (token),
+                                'Authorization': '%s' % (token),
                                 'Content-type': 'application/json',
                                 'Accept': 'application/json'})
     if response.status_code == 200:
