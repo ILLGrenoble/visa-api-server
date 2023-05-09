@@ -354,7 +354,11 @@ public class MutationResolver implements GraphQLMutationResolver {
                     return false;
                 }
                 Long inputCloudId = input.getCloudId() == -1 ? null :  input.getCloudId();
-                return (inputCloudId == null && securityGroup.getCloudId() == null) || inputCloudId.equals(securityGroup.getCloudId());
+                if (inputCloudId == null) {
+                    return securityGroup.getCloudId() == null;
+                } else {
+                    return inputCloudId.equals(securityGroup.getCloudId());
+                }
             })
             .findFirst();
         if (existingSecurityGroup.isPresent()) {
