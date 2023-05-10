@@ -1,3 +1,9 @@
+2.8.1 10/05/2023
+================
+ * Fix anonymous access to /api/jupyter/instances/{instance}/notebook/close
+ * Fix null pointer exception creating security groups.
+ * Modify create/delete test scripts: assume that the token already includes the prefix "Bearer "
+
 2.8.0 28/04/2023
 ================
  * Minor updates to standardise the API 
