@@ -88,3 +88,4 @@ VISA has been developed as part of the Photon and Neutron Open Science Cloud (<a
 <img src="https://github.com/panosc-eu/panosc/raw/master/Work%20Packages/WP9%20Outreach%20and%20communication/images/logos/eu_flag_yellow_low.jpg"/>
 
 PaNOSC has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 823852.
+
