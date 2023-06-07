@@ -68,6 +68,17 @@ public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
         return query.getResultList();
     }
 
+    public List<SecurityGroup> getFlavourBasedSecurityGroups(Flavour flavour) {
+        if (flavour == null) {
+            return new ArrayList<>();
+        }
+
+        final TypedQuery<SecurityGroup> query = getEntityManager().createNamedQuery("securityGroup.getFlavourBasedSecurityGroups", SecurityGroup.class);
+        query.setParameter("flavourId", flavour.getId());
+
+        return query.getResultList();
+    }
+
     public void delete(final SecurityGroup securityGroup) {
         remove(securityGroup);
     }

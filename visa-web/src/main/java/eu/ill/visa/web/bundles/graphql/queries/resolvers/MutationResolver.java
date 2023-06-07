@@ -449,12 +449,12 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created securityGroupFilter
      */
     @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) throws InvalidInputException {
+    public SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
         if (securityGroupFilterService.securityGroupFilterBySecurityIdAndObjectIdAndType(input.getSecurityGroupId(), input.getObjectId(), input.getObjectType()) == null) {
-            final SecurityGroup securityGroup = securityGroupService.getById(input.getSecurityGroupId());
-            if (securityGroup == null) {
-                throw new InvalidInputException("Security group does not exist");
-            }
+
+            // Validate the input data
+            SecurityGroup securityGroup = this.validateSecurityGroupFilterInput(input);
+
             final SecurityGroupFilter securityGroupFilter = new SecurityGroupFilter(securityGroup, input.getObjectId(), input.getObjectType());
             securityGroupFilterService.save(securityGroupFilter);
             return securityGroupFilter;
@@ -477,13 +477,25 @@ public class MutationResolver implements GraphQLMutationResolver {
             throw new EntityNotFoundException("SecurityGroupFilter was not found for the given id");
         }
 
+        // Validate the input data
+        SecurityGroup securityGroup = this.validateSecurityGroupFilterInput(input);
+
+        securityGroupFilter.setSecurityGroup(securityGroup);
+        securityGroupFilter.setObjectId(input.getObjectId());
+        securityGroupFilter.setObjectType(input.getObjectType());
+        securityGroupFilterService.save(securityGroupFilter);
+        return securityGroupFilter;
+    }
+
+    private SecurityGroup validateSecurityGroupFilterInput(SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
+
         final SecurityGroup securityGroup = this.securityGroupService.getById(input.getSecurityGroupId());
         if (securityGroup == null) {
             throw new EntityNotFoundException("SecurityGroup not found for the given id");
         }
 
         String objectType = input.getObjectType();
-        final String[] validObjectTypes = {"INSTRUMENT", "ROLE"};
+        final String[] validObjectTypes = {"INSTRUMENT", "ROLE", "FLAVOUR"};
         if (!Arrays.asList(validObjectTypes).contains(objectType)) {
             throw new InvalidInputException("ObjectType is not valid for SecurityGroupFilter");
         }
@@ -494,13 +506,12 @@ public class MutationResolver implements GraphQLMutationResolver {
 
         } else if (objectType.equals("ROLE") && roleService.getById(input.getObjectId()) == null) {
             throw new EntityNotFoundException("Role not found for the given id");
+
+        } else if (objectType.equals("FLAVOUR") && flavourService.getById(input.getObjectId()) == null) {
+            throw new EntityNotFoundException("Flavour not found for the given id");
         }
 
-        securityGroupFilter.setSecurityGroup(securityGroup);
-        securityGroupFilter.setObjectId(input.getObjectId());
-        securityGroupFilter.setObjectType(input.getObjectType());
-        securityGroupFilterService.save(securityGroupFilter);
-        return securityGroupFilter;
+        return securityGroup;
     }
 
     /**

@@ -16,10 +16,6 @@
         </query>
     </named-query>
 
-    <named-query name="securityGroupFilter.getByObjectIdAndObjectType">
-        <query>SELECT l FROM SecurityGroupFilter l WHERE l.id = :id</query>
-    </named-query>
-
     <named-query name="securityGroupFilter.getAll">
         <query>SELECT l FROM SecurityGroupFilter l</query>
     </named-query>

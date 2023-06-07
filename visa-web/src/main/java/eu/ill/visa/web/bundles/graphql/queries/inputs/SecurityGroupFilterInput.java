@@ -12,8 +12,7 @@ public class SecurityGroupFilterInput {
     private Long objectId;
 
     @NotNull
-    @Pattern(regexp = "INSTRUMENT|ROLE")
-
+    @Pattern(regexp = "INSTRUMENT|ROLE|FLAVOUR")
     private String objectType;
 
     public Long getSecurityGroupId() {

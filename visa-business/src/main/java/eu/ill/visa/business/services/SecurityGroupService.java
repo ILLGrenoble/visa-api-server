@@ -74,9 +74,14 @@ public class SecurityGroupService {
                 .stream()
                 .map(SecurityGroup::getName)
                 .collect(Collectors.toList());
+            List<String> flavourBasedSecurityGroups = this.getFlavourBasedSecurityGroups(instance.getPlan().getFlavour(), cloudClientId)
+                .stream()
+                .map(SecurityGroup::getName)
+                .collect(Collectors.toList());
 
             Set<String> uniqueSecurityGroups = new LinkedHashSet<>(generalSecurityGroups);
             uniqueSecurityGroups.addAll(roleBasedSecurityGroups);
+            uniqueSecurityGroups.addAll(flavourBasedSecurityGroups);
             uniqueSecurityGroups.addAll(customSecurityGroups);
 
             return new ArrayList<>(uniqueSecurityGroups);
@@ -90,6 +95,15 @@ public class SecurityGroupService {
 
     public List<SecurityGroup> getDefaultSecurityGroups(Long cloudClientId) {
         List<SecurityGroup> securityGroups = repository.getDefaultSecurityGroups()
+            .stream()
+            .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
+            .collect(Collectors.toList());
+
+        return securityGroups;
+    }
+
+    public List<SecurityGroup> getFlavourBasedSecurityGroups(final Flavour flavour, Long cloudClientId) {
+        List<SecurityGroup> securityGroups = repository.getFlavourBasedSecurityGroups(flavour)
             .stream()
             .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
             .collect(Collectors.toList());

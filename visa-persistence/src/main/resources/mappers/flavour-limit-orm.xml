@@ -14,15 +14,6 @@
         </query>
     </named-query>
 
-    <named-query name="flavourLimit.getByObjectIdAndObjectType">
-        <query>
-            SELECT l
-            FROM FlavourLimit l
-            WHERE l.id = :id
-            AND l.flavour.deleted = false
-        </query>
-    </named-query>
-
     <named-query name="flavourLimit.getAll">
         <query>
             SELECT l
