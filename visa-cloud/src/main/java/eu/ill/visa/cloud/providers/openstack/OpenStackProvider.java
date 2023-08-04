@@ -348,6 +348,7 @@ public class OpenStackProvider implements CloudProvider {
         }
         final JsonArray currentSecurityGroups = parseObject(response.getBody()).getJsonArray("security_groups");
         return currentSecurityGroups.stream().map(jsonValue -> jsonValue.asJsonObject().getString("name"))
+            .distinct()
             .sorted(String::compareToIgnoreCase)
             .collect(toUnmodifiableList());
     }
