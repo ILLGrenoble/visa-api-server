@@ -1,4 +1,4 @@
-FROM maven:3.6-openjdk-14 as builder
+FROM maven:3.8-openjdk-17 as builder
 
 ARG MAVEN_OPTS
 
@@ -10,7 +10,7 @@ COPY . /usr/src/app
 
 RUN mvn package -B -DskipTests=true $MAVEN_OPTS
 
-FROM openjdk:14-alpine
+FROM openjdk:17-alpine
 
 RUN mkdir -p /app
 
