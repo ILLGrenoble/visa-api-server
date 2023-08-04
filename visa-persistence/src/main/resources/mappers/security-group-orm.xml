@@ -84,6 +84,7 @@
                 LEFT JOIN flavour f ON f.id = sgf.object_id
                 WHERE sgf.object_type = 'FLAVOUR'
                 AND f.deleted = false
+                AND f.id = :flavourId
                 AND cpc.deleted_at IS NULL
             ]]>
         </query>
