@@ -6,9 +6,12 @@ import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceActivity;
 import eu.ill.visa.core.domain.User;
+import org.apache.commons.lang3.time.DateUtils;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.util.Date;
 import java.util.List;
 
 @Singleton
@@ -43,5 +46,13 @@ public class InstanceActivityRepository extends AbstractRepository<InstanceActiv
         } else {
             merge(instanceActivity);
         }
+    }
+
+    public void cleanup(int activityRetentionPeriod) {
+        final Date date = DateUtils.addDays(new Date(), -activityRetentionPeriod);
+        final Query query = getEntityManager().createNamedQuery("instanceActivity.cleanup");
+        query.setParameter("date", date);
+
+        query.executeUpdate();
     }
 }

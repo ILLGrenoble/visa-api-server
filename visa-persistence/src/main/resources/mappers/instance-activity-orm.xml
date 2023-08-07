@@ -17,6 +17,15 @@
         <query>SELECT a FROM InstanceActivity a where a.instance = :instance order by a.id</query>
     </named-query>
 
+    <named-query name="instanceActivity.cleanup">
+        <query>
+            <![CDATA[
+                DELETE FROM InstanceActivity a
+                WHERE a.createdAt < :date
+            ]]>
+        </query>
+    </named-query>
+
     <entity class="eu.ill.visa.core.domain.InstanceActivity">
         <table name="instance_activity"/>
         <attributes>

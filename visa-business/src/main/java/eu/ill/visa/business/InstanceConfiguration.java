@@ -12,6 +12,7 @@ public class InstanceConfiguration {
     private Integer userMaxInactivityDurationHours = 96;
     private Integer staffMaxInactivityDurationHours = 192;
     private Integer defaultUserInstanceQuota = 2;
+    private Integer activityRetentionPeriodDays = 2;
 
     @JsonProperty
     @NotNull
@@ -66,5 +67,16 @@ public class InstanceConfiguration {
 
     public void setDefaultUserInstanceQuota(Integer defaultUserInstanceQuota) {
         this.defaultUserInstanceQuota = defaultUserInstanceQuota;
+    }
+
+    @JsonProperty
+    @NotNull
+    @Valid
+    public Integer getActivityRetentionPeriodDays() {
+        return activityRetentionPeriodDays;
+    }
+
+    public void setActivityRetentionPeriodDays(Integer activityRetentionPeriodDays) {
+        this.activityRetentionPeriodDays = activityRetentionPeriodDays;
     }
 }

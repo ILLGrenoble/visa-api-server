@@ -81,6 +81,15 @@
             </job-class>
         </job>
 
+        <job>
+            <name>instance_activity_cleanup_job</name>
+            <group>visa</group>
+            <description>Deletes any instance activity that is older than a configured age</description>
+            <job-class>
+                eu.ill.visa.scheduler.jobs.InstanceActivityCleanupJob
+            </job-class>
+        </job>
+
         <trigger>
             <cron>
                 <name>minute_trigger</name>
@@ -134,6 +143,17 @@
                 <job-group>visa</job-group>
                 <!-- Run every day at 2am -->
                 <cron-expression>0 0 2 ? * *</cron-expression>
+            </cron>
+        </trigger>
+
+        <trigger>
+            <cron>
+                <name>instance_activity_cleanup_job_trigger</name>
+                <group>instance_activity_cleanup_job_trigger_group</group>
+                <job-name>instance_activity_cleanup_job</job-name>
+                <job-group>visa</job-group>
+                <!-- Run every day at 1am -->
+                <cron-expression>0 0 1 ? * *</cron-expression>
             </cron>
         </trigger>
 
