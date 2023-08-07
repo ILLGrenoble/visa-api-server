@@ -25,7 +25,7 @@ public class GuacamoleClientDisplayListener extends ClientDisplayListener<String
         if (command.equals("mouse")) {
             return InstanceActivityType.MOUSE;
 
-        } else if (command.equals("kay")){
+        } else if (command.equals("key")){
             return InstanceActivityType.KEYBOARD;
         }
 
