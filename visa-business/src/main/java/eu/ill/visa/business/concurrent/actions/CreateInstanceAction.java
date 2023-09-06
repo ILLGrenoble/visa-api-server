@@ -50,6 +50,10 @@ public class CreateInstanceAction extends InstanceAction {
 
             List<String> proposals = instance.getExperiments().stream().map(experiment -> experiment.getProposal().getIdentifier()).collect(Collectors.toUnmodifiableList());
 
+            List<String> experiments = instance.getExperiments().stream()
+                .map(experiment -> String.format("%s:%s", experiment.getInstrument().getName(), experiment.getProposal().getIdentifier()))
+                .collect(Collectors.toUnmodifiableList());
+
             final CloudInstanceMetadata metadata = new CloudInstanceMetadata();
 
             instance.getAttributes().forEach(attribute -> metadata.put(attribute.getName(), attribute.getValue()));
@@ -57,6 +61,7 @@ public class CreateInstanceAction extends InstanceAction {
             metadata.put("owner", instance.getUsername());
             metadata.put("instruments", String.join(",", instrumentNames));
             metadata.put("proposals", String.join(",", proposals));
+            metadata.put("experiments", String.join(",", experiments));
 
             String pamPublicKey = this.getSignatureService().readPublicKey();
             if (pamPublicKey != null) {
