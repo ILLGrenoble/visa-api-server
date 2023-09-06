@@ -1,0 +1,41 @@
+stages:
+  - build
+
+variables:
+  IMAGE: ${CI_REGISTRY_IMAGE}
+
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"username\":\"${CI_REGISTRY_USER}\",\"password\":\"${CI_REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
+
+    # Git Branch/Tag to Docker Image Tag Mapping
+    #   * Default Branch: main -> latest
+    #   * Branch: feature/my-feature -> branch-feature-my-feature
+    #   * Tag: v1.0.0/beta2 -> v1.0.0-beta2
+    - |
+      set -- "--destination" "${IMAGE}:${CI_COMMIT_SHORT_SHA}"
+
+      if [ "${CI_COMMIT_REF_NAME}" = "${CI_DEFAULT_BRANCH}" ]; then
+        set -- "$@" "--destination" "${IMAGE}:latest"
+      else
+        CI_COMMIT_REF="${CI_COMMIT_TAG:-branch-$CI_COMMIT_REF_NAME}"
+        NO_SLASH=$(echo "${CI_COMMIT_REF}" | tr -s / -)
+        SANITIZED=$(echo "${NO_SLASH}" | tr -cd '[:alnum:]_.-')
+        set -- "$@" "--destination" "${IMAGE}:${SANITIZED}"
+      fi
+
+      for var in http_proxy https_proxy no_proxy; do
+        eval "value=\$$var"
+        if [ -n "$value" ]; then
+          set -- "$@" "--build-arg" "${var}=${value}"
+        fi
+      done
+
+      /kaniko/executor "$@" \
+        --context "${CI_PROJECT_DIR}" \
+        --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
