@@ -29,6 +29,7 @@ At its most basic, the VISA API Server can be described as managing instance cre
 - System usage stats: VISA can provide realtime analysis data for instances and sessions (real-time user usage of instances)
 
 ####  Micro-service enhancement
+
 Customisation of VISA is possible through:
 
 - a rich set of environment variables
