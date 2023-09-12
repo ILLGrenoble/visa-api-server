@@ -7,20 +7,6 @@
         <query>SELECT i FROM Instrument i WHERE i.id = :id</query>
     </named-query>
 
-    <named-query name="instrument.getAll">
-        <query>
-            SELECT i
-            FROM Instrument i
-            WHERE i IN (
-                SELECT DISTINCT e.instrument
-                FROM Experiment e
-                WHERE e.startDate IS NOT NULL
-                AND e.endDate IS NOT NULL
-            )
-            ORDER BY i.name ASC
-        </query>
-    </named-query>
-
     <named-query name="instrument.getAllForUser">
         <query>
             SELECT i FROM Instrument i
@@ -35,6 +21,21 @@
             ORDER BY i.name ASC
         </query>
     </named-query>
+
+    <named-native-query name="instrument.getAll" result-class="eu.ill.visa.core.domain.Instrument">
+        <query>
+            <![CDATA[
+                SELECT i.id, i.name
+                FROM instrument i
+                WHERE i.id IN (SELECT DISTINCT e.instrument_id FROM experiment e)
+                UNION
+                SELECT i.id, i.name
+                FROM instrument i, instrument_scientist ins
+                WHERE ins.instrument_id = i.id
+                ORDER by name
+            ]]>
+        </query>
+    </named-native-query>
 
     <named-native-query name="instrument.getAllForExperimentsAndInstrumentScientist" result-class="eu.ill.visa.core.domain.Instrument">
         <query>
