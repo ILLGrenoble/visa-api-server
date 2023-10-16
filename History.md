@@ -1,4 +1,4 @@
-2.9.0 16/08/2023
+2.9.0 16/10/2023
 ================
  * Fix instance activity to register keyboard
  * Add daily job to remove instance activity data older than configured age (env var VISA_INSTANCE_ACTIVITY_RETENTION_PERIOD_DAYS)
