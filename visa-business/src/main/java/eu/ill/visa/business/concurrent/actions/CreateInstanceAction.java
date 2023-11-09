@@ -54,6 +54,7 @@ public class CreateInstanceAction extends InstanceAction {
 
             instance.getAttributes().forEach(attribute -> metadata.put(attribute.getName(), attribute.getValue()));
             metadata.put("id", instance.getId());
+            metadata.put("uid", instance.getUid());
             metadata.put("owner", instance.getUsername());
             metadata.put("instruments", String.join(",", instrumentNames));
             metadata.put("proposals", String.join(",", proposals));
