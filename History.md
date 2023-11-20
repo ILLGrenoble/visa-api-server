@@ -1,3 +1,8 @@
+2.10.0 20/11/2023
+================
+ * Send instance UID to cloud-init
+ * Add VISAFS protocol to fixtures
+
 2.9.0 16/10/2023
 ================
  * Fix instance activity to register keyboard
