@@ -1,3 +1,7 @@
+2.11.0 09/01/2024
+================
+* Integrate visa-print to enable printing to a local printer from the remote desktop
+
 2.10.0 20/11/2023
 ================
  * Send instance UID to cloud-init
