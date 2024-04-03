@@ -67,5 +67,5 @@ hs_err_pid*
 
 *.env
 certs/
-pgdata
+pgdata*
 log
