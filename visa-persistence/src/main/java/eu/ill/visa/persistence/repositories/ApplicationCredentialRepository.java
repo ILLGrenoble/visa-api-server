@@ -1,20 +1,19 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.ApplicationCredential;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Singleton
 public class ApplicationCredentialRepository extends AbstractRepository<ApplicationCredential> {
 
     @Inject
-    ApplicationCredentialRepository(final Provider<EntityManager> entityManager) {
+    ApplicationCredentialRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

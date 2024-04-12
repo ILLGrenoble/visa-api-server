@@ -1,7 +1,7 @@
 package eu.ill.visa.security.authenticators;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.services.ApplicationCredentialService;
 import eu.ill.visa.core.domain.ApplicationCredential;
 import eu.ill.visa.security.tokens.ApplicationToken;

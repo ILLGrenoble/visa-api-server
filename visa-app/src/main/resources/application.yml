@@ -1,0 +1,77 @@
+
+quarkus:
+  http:
+    root-path: /api
+    test-port: 8081
+    test-ssl-port: 8446
+  hibernate-orm:
+    database:
+      generation: update
+    log:
+      sql: false
+
+
+cloud:
+  serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
+  providerType: ${VISA_DEFAULT_CLOUD_PROVIDER_TYPE:'openstack'}
+  providerName: ${VISA_DEFAULT_CLOUD_PROVIDER_NAME:'Default'}
+  providers:
+    - name: openstack
+      parameters:
+        identityEndpoint: ${VISA_CLOUD_IDENTITY_ENDPOINT}
+        computeEndpoint: ${VISA_CLOUD_COMPUTE_ENDPOINT}
+        imageEndpoint: ${VISA_CLOUD_IMAGE_ENDPOINT}
+        networkEndpoint: ${VISA_CLOUD_NETWORK_ENDPOINT}
+        applicationId: ${VISA_CLOUD_APPLICATION_ID}
+        applicationSecret: ${VISA_CLOUD_APPLICATION_SECRET}
+        addressProvider: ${VISA_CLOUD_ADDRESS_PROVIDER}
+        addressProviderUUID: ${VISA_CLOUD_ADDRESS_PROVIDER_UUID}
+    - name: web
+      parameters:
+        url: ${VISA_CLOUD_WEB_PROVIDER_URL}
+        authToken: ${VISA_CLOUD_WEB_PROVIDER_AUTH_TOKEN}
+
+"%prod":
+  quarkus:
+    datasource:
+      username: ${VISA_DATABASE_USERNAME}
+      password: ${VISA_DATABASE_PASSWORD}
+      jdbc:
+        url: ${VISA_DATABASE_URL}
+      db-kind: postgresql
+      devservices:
+        enabled: false
+    log:
+      category:
+        "eu.ill":
+          level: DEBUG
+
+"%dev":
+  quarkus:
+    datasource:
+      username: ${VISA_DATABASE_USERNAME}
+      password: ${VISA_DATABASE_PASSWORD}
+      jdbc:
+        url: ${VISA_DATABASE_URL}
+      db-kind: postgresql
+      devservices:
+        enabled: false
+    log:
+      category:
+        "eu.ill":
+          level: DEBUG
+
+"%test":
+  quarkus:
+    log:
+      level: info
+    hibernate-orm:
+      log:
+        sql: false
+      database:
+        generation: create
+      sql-load-script: test-fixtures.sql
+    datasource:
+      devservices:
+        enabled: true
+

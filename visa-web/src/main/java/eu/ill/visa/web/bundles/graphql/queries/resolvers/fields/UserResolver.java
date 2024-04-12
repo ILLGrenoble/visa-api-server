@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.domain.Experiment;

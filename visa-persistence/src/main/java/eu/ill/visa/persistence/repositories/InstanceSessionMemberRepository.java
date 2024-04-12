@@ -1,15 +1,14 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.providers.InstanceSessionMemberFilterProvider;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +18,7 @@ import static java.util.Objects.requireNonNullElseGet;
 public class InstanceSessionMemberRepository extends AbstractRepository<InstanceSessionMember> {
 
     @Inject
-    InstanceSessionMemberRepository(final Provider<EntityManager> entityManager) {
+    InstanceSessionMemberRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

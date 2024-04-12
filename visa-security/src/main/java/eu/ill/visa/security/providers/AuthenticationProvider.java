@@ -3,7 +3,7 @@ package eu.ill.visa.security.providers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.security.authenticators.ApplicationCredentialAuthenticator;
 import eu.ill.visa.security.authenticators.TokenAuthenticator;
 import eu.ill.visa.security.authorizers.ApplicationAuthorizer;

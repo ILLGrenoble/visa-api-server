@@ -1,6 +1,6 @@
 package eu.ill.visa.core.domain;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 import java.util.Date;
 
 public class Plan extends Timestampable {

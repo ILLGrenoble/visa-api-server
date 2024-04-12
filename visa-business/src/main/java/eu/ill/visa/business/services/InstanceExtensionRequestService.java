@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceExpiration;
@@ -10,7 +10,7 @@ import eu.ill.visa.persistence.repositories.InstanceExtensionRequestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProvider;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.web.WebProvider;

@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.core.domain.ClientNotification;
 import eu.ill.visa.core.domain.Instance;
@@ -10,7 +10,7 @@ import eu.ill.visa.core.domain.SystemNotification;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.SystemNotificationRepository;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

@@ -1,21 +1,23 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.Flavour;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.persistence.providers.FlavourFilterProvider;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Singleton
 public class FlavourRepository extends AbstractRepository<Flavour> {
 
     @Inject
-    FlavourRepository(final Provider<EntityManager> entityManager) {
+    FlavourRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

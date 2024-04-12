@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.directives;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.security.authorizers.ApplicationAuthorizer;
 import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;

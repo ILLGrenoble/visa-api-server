@@ -7,7 +7,7 @@ import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class InstanceFilterProvider extends AbstractFilterQueryProvider<Instance> {
 

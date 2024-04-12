@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class SecurityGroupInput {
 

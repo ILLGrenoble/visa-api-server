@@ -3,7 +3,7 @@ package eu.ill.visa.persistence.providers;
 import eu.ill.preql.AbstractFilterQueryProvider;
 import eu.ill.visa.core.domain.Image;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class ImageFilterProvider extends AbstractFilterQueryProvider<Image> {
 

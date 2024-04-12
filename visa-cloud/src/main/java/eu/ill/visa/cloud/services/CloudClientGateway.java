@@ -1,6 +1,7 @@
 package eu.ill.visa.cloud.services;
 
-import com.google.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -20,6 +21,7 @@ public class CloudClientGateway {
     private CloudClient defaultCloudClient;
     private final Map<Long, CloudClient> secondaryCloudClients = new HashMap<>();
 
+    @Inject
     public CloudClientGateway(final CloudConfiguration configuration) {
         try {
             this.defaultCloudClient = factory.getClient(configuration);
@@ -55,7 +57,7 @@ public class CloudClientGateway {
 
     public CloudClient addCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) {
         try {
-            CloudClient cloudClient = this.factory.getClient(providerId, name, providerConfiguration.getName(), providerConfiguration, serverNamePrefix, visible);
+            CloudClient cloudClient = this.factory.getClient(providerId, name, providerConfiguration.name(), providerConfiguration, serverNamePrefix, visible);
             this.secondaryCloudClients.put(providerId, cloudClient);
 
             return cloudClient;

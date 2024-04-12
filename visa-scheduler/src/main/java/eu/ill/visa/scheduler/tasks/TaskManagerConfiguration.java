@@ -1,7 +1,7 @@
 package eu.ill.visa.scheduler.tasks;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 public class TaskManagerConfiguration {
 

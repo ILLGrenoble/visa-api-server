@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class VirtualDesktopApplication {

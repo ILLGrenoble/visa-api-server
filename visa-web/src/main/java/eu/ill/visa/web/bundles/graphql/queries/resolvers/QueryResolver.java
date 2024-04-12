@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;

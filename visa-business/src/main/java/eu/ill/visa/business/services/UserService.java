@@ -2,13 +2,13 @@ package eu.ill.visa.business.services;
 
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.UserRepository;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 import static java.util.Objects.requireNonNullElseGet;

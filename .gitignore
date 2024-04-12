@@ -65,6 +65,9 @@ hs_err_pid*
 .classpath
 .settings
 
+# Plugin directory
+/.quarkus/cli/plugins/
+
 *.env
 certs/
 pgdata*

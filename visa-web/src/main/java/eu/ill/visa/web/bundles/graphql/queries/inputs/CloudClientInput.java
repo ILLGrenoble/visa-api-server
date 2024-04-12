@@ -1,6 +1,6 @@
 package eu.ill.visa.web.bundles.graphql.queries.inputs;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class CloudClientInput {
 

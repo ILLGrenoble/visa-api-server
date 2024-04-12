@@ -3,7 +3,7 @@ package eu.ill.visa.security.authenticators;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.security.configuration.TokenConfiguration;

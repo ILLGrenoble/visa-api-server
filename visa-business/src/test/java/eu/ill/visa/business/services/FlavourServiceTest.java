@@ -6,7 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.persistence.RollbackException;
+import jakarta.persistence.RollbackException;
 import java.util.List;
 import java.util.UUID;
 

@@ -1,15 +1,14 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.Experiment;
 import eu.ill.visa.core.domain.Instrument;
 import eu.ill.visa.core.domain.User;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 public class InstrumentRepository extends AbstractRepository<Instrument> {
 
     @Inject
-    InstrumentRepository(final Provider<EntityManager> entityManager) {
+    InstrumentRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

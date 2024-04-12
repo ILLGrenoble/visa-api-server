@@ -1,21 +1,20 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
 import eu.ill.visa.core.domain.User;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Singleton
 public class InstanceCommandRepository extends AbstractRepository<InstanceCommand> {
 
     @Inject
-    InstanceCommandRepository(final Provider<EntityManager> entityManager) {
+    InstanceCommandRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

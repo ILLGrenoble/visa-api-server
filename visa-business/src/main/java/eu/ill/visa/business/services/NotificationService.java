@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.notification.NotificationAdapter;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceExpiration;

@@ -6,7 +6,7 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.store.StoreFactory;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.services.InstanceExpirationService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.domain.Instance;

@@ -1,6 +1,6 @@
 package eu.ill.visa.security.configuration;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class TokenConfiguration {
 

@@ -1,7 +1,7 @@
 package eu.ill.visa.web;
 
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.BusinessConfiguration;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.persistence.PersistenceModule;
@@ -34,10 +34,10 @@ public class WebModule extends DropwizardAwareModule<WebConfiguration> {
 
     private Properties createDatabasePropertiesFromDataSource(final DataSourceFactory dataSourceFactory) {
         final Properties properties = new Properties();
-        properties.put("javax.persistence.jdbc.driver", dataSourceFactory.getDriverClass());
-        properties.put("javax.persistence.jdbc.url", dataSourceFactory.getUrl());
-        properties.put("javax.persistence.jdbc.user", dataSourceFactory.getUser());
-        properties.put("javax.persistence.jdbc.password", dataSourceFactory.getPassword());
+        properties.put("jakarta.persistence.jdbc.driver", dataSourceFactory.getDriverClass());
+        properties.put("jakarta.persistence.jdbc.url", dataSourceFactory.getUrl());
+        properties.put("jakarta.persistence.jdbc.user", dataSourceFactory.getUser());
+        properties.put("jakarta.persistence.jdbc.password", dataSourceFactory.getPassword());
 
         for (Map.Entry<String, String> entry : dataSourceFactory.getProperties().entrySet()) {
             properties.put(entry.getKey(), entry.getValue());

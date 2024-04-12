@@ -11,9 +11,10 @@ import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.web.WebProvider;
 import eu.ill.visa.cloud.providers.web.WebProviderConfiguration;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -31,11 +32,11 @@ public class CloudClientFactory {
      * @throws CloudException if the provider is not found
      */
     public CloudClient getClient(final CloudConfiguration configuration) throws CloudException {
-        final String provider = configuration.getProviderType();
-        final ProviderConfiguration providerConfiguration = provider.equals(CloudClientFactory.NULL) ? null :  configuration.getProviderConfiguration(provider);
-        final String serverNamePrefix = configuration.getServerNamePrefix();
+        final String provider = configuration.providerType();
+        final ProviderConfiguration providerConfiguration = provider.equals(CloudClientFactory.NULL) ? null :  this.getProviderConfiguration(configuration, provider);
+        final String serverNamePrefix = configuration.serverNamePrefix();
 
-        return this.getClient(-1L, configuration.getProviderName(), provider, providerConfiguration, serverNamePrefix, true);
+        return this.getClient(-1L, configuration.providerName(), provider, providerConfiguration, serverNamePrefix, true);
     }
 
     public CloudClient getClient(Long id, String name, String provider, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) throws CloudException {
@@ -43,10 +44,10 @@ public class CloudClientFactory {
             return createNullProvider(id, name, "null", serverNamePrefix, visible);
 
         } else if (OPENSTACK.equals(provider)) {
-            return createOpenStackProvider(id, name, provider, providerConfiguration.getParameters(), serverNamePrefix, visible);
+            return createOpenStackProvider(id, name, provider, providerConfiguration.parameters(), serverNamePrefix, visible);
 
         } else if (WEB.equals(provider)) {
-            return createWebProvider(id, name, provider, providerConfiguration.getParameters(), serverNamePrefix, visible);
+            return createWebProvider(id, name, provider, providerConfiguration.parameters(), serverNamePrefix, visible);
         }
         throw new CloudException(format("Unsupported provider provided: %s", provider));
     }
@@ -88,4 +89,11 @@ public class CloudClientFactory {
         return new CloudClient(id, name, provider, new WebProvider(httpClient, configuration), serverNamePrefix, visible);
     }
 
+
+    private ProviderConfiguration getProviderConfiguration(final CloudConfiguration configuration, String provider) {
+        Optional<ProviderConfiguration> providerConfiguration = configuration.providers().stream()
+            .filter(aProviderConfiguration -> aProviderConfiguration.name().equals(provider))
+            .findFirst();
+        return providerConfiguration.orElse(null);
+    }
 }

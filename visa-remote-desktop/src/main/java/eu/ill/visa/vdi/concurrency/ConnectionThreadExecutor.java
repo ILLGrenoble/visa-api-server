@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.concurrency;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.vdi.domain.Role;

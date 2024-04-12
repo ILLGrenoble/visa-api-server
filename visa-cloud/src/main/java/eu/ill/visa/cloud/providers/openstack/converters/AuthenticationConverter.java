@@ -2,9 +2,9 @@ package eu.ill.visa.cloud.providers.openstack.converters;
 
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 public class AuthenticationConverter {
 

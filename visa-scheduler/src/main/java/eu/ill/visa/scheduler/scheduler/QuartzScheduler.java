@@ -5,7 +5,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class QuartzScheduler {

@@ -1,21 +1,20 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.Flavour;
 import eu.ill.visa.core.domain.FlavourLimit;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Singleton
 public class FlavourLimitRepository extends AbstractRepository<FlavourLimit> {
 
     @Inject
-    FlavourLimitRepository(final Provider<EntityManager> entityManager) {
+    FlavourLimitRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

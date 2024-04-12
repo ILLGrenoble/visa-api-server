@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
 
-import javax.json.JsonObjectBuilder;
-import javax.json.spi.JsonProvider;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;

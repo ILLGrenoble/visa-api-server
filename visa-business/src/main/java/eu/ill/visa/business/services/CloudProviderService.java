@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -9,7 +9,7 @@ import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.CloudProviderConfiguration;
 import eu.ill.visa.persistence.repositories.CloudProviderRepository;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.*;
 
 @Transactional

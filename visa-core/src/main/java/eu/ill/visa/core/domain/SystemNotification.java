@@ -2,7 +2,7 @@ package eu.ill.visa.core.domain;
 
 import eu.ill.visa.core.domain.enumerations.SystemNotificationLevel;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;

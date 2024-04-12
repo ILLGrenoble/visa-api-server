@@ -2,7 +2,7 @@ package eu.ill.visa.cloud.providers.openstack.converters;
 
 import eu.ill.visa.cloud.domain.CloudImage;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public class ImageConverter {
 

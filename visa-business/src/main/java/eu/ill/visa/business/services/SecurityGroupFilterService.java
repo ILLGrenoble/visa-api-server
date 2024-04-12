@@ -1,14 +1,14 @@
 package eu.ill.visa.business.services;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.domain.SecurityGroupFilter;
 import eu.ill.visa.persistence.repositories.SecurityGroupFilterRepository;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Transactional

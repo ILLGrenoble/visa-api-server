@@ -2,7 +2,7 @@ package eu.ill.visa.web.dtos;
 
 import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class InstanceMemberCreatorDto {
 

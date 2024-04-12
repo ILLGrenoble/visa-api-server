@@ -3,8 +3,8 @@ package eu.ill.visa.scheduler;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.ill.visa.scheduler.tasks.TaskManagerConfiguration;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 public class SchedulerConfiguration {
 

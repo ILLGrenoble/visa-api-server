@@ -1,6 +1,7 @@
 package eu.ill.visa.core.domain;
 
-import org.joda.time.DateTime;
+import java.util.Calendar;
+import java.util.Date;
 
 public class InstanceAuthenticationToken extends Timestampable {
     private Long     id;
@@ -40,8 +41,12 @@ public class InstanceAuthenticationToken extends Timestampable {
     }
 
     public Boolean isExpired(int deltaSeconds) {
-        final DateTime now = DateTime.now();
-        return new DateTime(this.createdAt).plusSeconds(deltaSeconds).isBefore(now);
+        final Date now = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.createdAt);
+        calendar.add(Calendar.SECOND, deltaSeconds);
+
+        return calendar.getTime().before(now);
     }
 
     public User getUser() {

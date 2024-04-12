@@ -1,6 +1,6 @@
 package eu.ill.visa.vdi.concurrency;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.concurrent.ThreadFactory;
 
 public class ConnectionThreadFactory implements ThreadFactory {

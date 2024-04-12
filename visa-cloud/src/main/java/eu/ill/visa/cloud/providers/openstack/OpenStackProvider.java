@@ -9,15 +9,15 @@ import eu.ill.visa.cloud.providers.openstack.converters.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.*;
+import jakarta.json.*;
 import java.util.*;
 
 import static eu.ill.visa.cloud.helpers.JsonHelper.parseObject;
 import static eu.ill.visa.cloud.http.HttpMethod.*;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toUnmodifiableList;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
+import static jakarta.json.Json.createArrayBuilder;
+import static jakarta.json.Json.createObjectBuilder;
 
 public class OpenStackProvider implements CloudProvider {
 

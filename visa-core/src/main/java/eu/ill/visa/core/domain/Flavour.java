@@ -3,7 +3,7 @@ package eu.ill.visa.core.domain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 
 public class Flavour extends Timestampable {
 

@@ -1,15 +1,14 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Provider;
 import eu.ill.preql.AbstractFilterQueryProvider;
 import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.Parameter;
 import eu.ill.visa.core.domain.QueryFilter;
+import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 
-import javax.persistence.EntityManager;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,23 +20,24 @@ import static java.util.Objects.requireNonNullElseGet;
 
 abstract class AbstractRepository<T> {
 
-    private final Provider<EntityManager> entityManager;
+    private final EntityManager entityManager;
 
-    protected AbstractRepository(Provider<EntityManager> entityManager) {
+
+    protected AbstractRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
     public void persist(final T object) {
-        entityManager.get().persist(object);
+        entityManager.persist(object);
     }
 
     public T merge(final T object) {
-        T persistedObject = entityManager.get().merge(object);
+        T persistedObject = entityManager.merge(object);
         return persistedObject;
     }
 
     public void remove(final T object) {
-        EntityManager em = entityManager.get();
+        EntityManager em = entityManager;
 
         em.remove(em.contains(object) ? object : em.merge(object));
     }
@@ -45,7 +45,7 @@ abstract class AbstractRepository<T> {
     public abstract List<T> getAll();
 
     public EntityManager getEntityManager() {
-        return entityManager.get();
+        return entityManager;
     }
 
     public FilterQuery<T> createFilterQuery(AbstractFilterQueryProvider<T> provider, QueryFilter filter, OrderBy orderBy, Pagination pagination) {

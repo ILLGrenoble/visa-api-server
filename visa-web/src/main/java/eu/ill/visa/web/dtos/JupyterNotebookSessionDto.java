@@ -1,6 +1,6 @@
 package eu.ill.visa.web.dtos;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 public class JupyterNotebookSessionDto {
 

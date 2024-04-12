@@ -1,12 +1,12 @@
 package eu.ill.visa.cloud.helpers;
 
-import javax.json.*;
+import jakarta.json.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import static javax.json.Json.*;
+import static jakarta.json.Json.*;
 
 public class JsonHelper {
     public static JsonObject parseObject(final String json) {

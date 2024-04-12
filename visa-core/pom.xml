@@ -5,19 +5,18 @@
     <parent>
         <artifactId>api</artifactId>
         <groupId>eu.ill.visa</groupId>
-        <version>2.11.0</version>
+        <version>3.0.0</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>visa-core</artifactId>
 
     <dependencies>
-
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>5.6.1.Final</version>
-            <scope>compile</scope>
+            <groupId>eu.ill.visa</groupId>
+            <artifactId>visa-app</artifactId>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
 </project>

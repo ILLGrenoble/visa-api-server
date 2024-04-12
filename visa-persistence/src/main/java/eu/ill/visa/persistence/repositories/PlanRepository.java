@@ -1,14 +1,13 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.providers.PlanFilterProvider;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,7 @@ public class PlanRepository extends AbstractRepository<Plan> {
 
 
     @Inject
-    PlanRepository(final Provider<EntityManager> entityManager) {
+    PlanRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

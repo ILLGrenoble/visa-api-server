@@ -1,17 +1,16 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.providers.ExperimentFilterProvider;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
 import java.util.*;
 
 @Singleton
@@ -19,7 +18,7 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
     private static final Logger logger = LoggerFactory.getLogger(ExperimentRepository.class);
 
     @Inject
-    ExperimentRepository(final Provider<EntityManager> entityManager) {
+    ExperimentRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

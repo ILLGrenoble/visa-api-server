@@ -1,6 +1,6 @@
 package eu.ill.visa.security.authorizers;
 
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.security.tokens.AccountToken;
 import io.dropwizard.auth.Authorizer;

@@ -4,7 +4,7 @@ import eu.ill.preql.AbstractFilterQueryProvider;
 import eu.ill.visa.core.domain.SecurityGroup;
 import eu.ill.visa.core.domain.SecurityGroupFilter;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class SecurityGroupFilterFilterProvider extends AbstractFilterQueryProvider<SecurityGroupFilter> {
 

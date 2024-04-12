@@ -5,35 +5,40 @@
     <parent>
         <artifactId>api</artifactId>
         <groupId>eu.ill.visa</groupId>
-        <version>2.11.0</version>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>visa-cloud</artifactId>
 
     <properties>
-        <java.json-api.version>1.1</java.json-api.version>
-        <javax.json.version>1.0.4</javax.json.version>
-        <okhttp.version>3.13.1</okhttp.version>
+        <java.json-api.version>2.1.3</java.json-api.version>
+        <jakarta.json.version>2.0.1</jakarta.json.version>
+        <okhttp.version>4.12.0</okhttp.version>
+        <joda-time.version>2.12.7</joda-time.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>javax.json</groupId>
-            <artifactId>javax.json-api</artifactId>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
             <version>${java.json-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>${javax.json.version}</version>
+            <artifactId>jakarta.json</artifactId>
+            <version>${jakarta.json.version}</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda-time.version}</version>
+        </dependency>
     </dependencies>
 
 

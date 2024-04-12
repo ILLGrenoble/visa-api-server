@@ -1,14 +1,13 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.providers.InstanceJupyterSessionFilterProvider;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 import static java.util.Objects.requireNonNullElseGet;
@@ -17,7 +16,7 @@ import static java.util.Objects.requireNonNullElseGet;
 public class InstanceJupyterSessionRepository extends AbstractRepository<InstanceJupyterSession> {
 
     @Inject
-    InstanceJupyterSessionRepository(final Provider<EntityManager> entityManager) {
+    InstanceJupyterSessionRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 

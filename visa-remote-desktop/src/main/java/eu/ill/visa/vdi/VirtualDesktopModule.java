@@ -8,7 +8,7 @@ import com.corundumstudio.socketio.store.RedissonStoreFactory;
 import com.corundumstudio.socketio.store.StoreFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.vdi.exceptions.DefaultExceptionListener;
 import org.redisson.Redisson;
 import org.redisson.config.Config;

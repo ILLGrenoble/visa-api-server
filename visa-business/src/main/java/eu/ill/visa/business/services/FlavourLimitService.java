@@ -1,13 +1,13 @@
 package eu.ill.visa.business.services;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import eu.ill.visa.core.domain.Flavour;
 import eu.ill.visa.core.domain.FlavourLimit;
 import eu.ill.visa.persistence.repositories.FlavourLimitRepository;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Transactional

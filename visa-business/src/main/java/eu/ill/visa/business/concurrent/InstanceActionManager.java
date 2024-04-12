@@ -1,7 +1,7 @@
 package eu.ill.visa.business.concurrent;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.concurrent.actions.InstanceAction;
 import eu.ill.visa.business.concurrent.actions.InstanceActionFactory;
 import eu.ill.visa.business.services.InstanceCommandService;

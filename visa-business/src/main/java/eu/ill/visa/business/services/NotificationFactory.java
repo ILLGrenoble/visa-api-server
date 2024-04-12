@@ -1,13 +1,13 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.business.NotificationConfiguration;
 import eu.ill.visa.business.notification.EmailNotificationAdapter;
 import eu.ill.visa.business.notification.NotificationAdapter;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

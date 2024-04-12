@@ -3,7 +3,7 @@ package eu.ill.visa.persistence.providers;
 import eu.ill.preql.AbstractFilterQueryProvider;
 import eu.ill.visa.core.domain.InstanceJupyterSession;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 public class InstanceJupyterSessionFilterProvider extends AbstractFilterQueryProvider<InstanceJupyterSession> {
 

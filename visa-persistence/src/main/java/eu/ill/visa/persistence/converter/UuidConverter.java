@@ -1,7 +1,7 @@
 package eu.ill.visa.persistence.converter;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import java.util.UUID;
 
 @Converter(autoApply = true)

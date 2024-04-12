@@ -2,8 +2,8 @@ package eu.ill.visa.persistence.listeners;
 
 import eu.ill.visa.core.domain.Timestampable;
 
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import java.util.Date;
 
 public class TimestampableEntityListener {

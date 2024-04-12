@@ -1,6 +1,6 @@
 package eu.ill.visa.web;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class AnalyticsConfiguration {
 

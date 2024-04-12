@@ -1,16 +1,15 @@
 package eu.ill.visa.persistence.repositories;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceActivity;
 import eu.ill.visa.core.domain.User;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import org.apache.commons.lang3.time.DateUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +17,7 @@ import java.util.List;
 public class InstanceActivityRepository extends AbstractRepository<InstanceActivity> {
 
     @Inject
-    InstanceActivityRepository(final Provider<EntityManager> entityManager) {
+    InstanceActivityRepository(final EntityManager entityManager) {
         super(entityManager);
     }
 
