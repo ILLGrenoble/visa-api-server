@@ -1,8 +1,5 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
-import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
@@ -11,14 +8,16 @@ import eu.ill.visa.core.domain.Role;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceExpirationRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Transactional
@@ -28,11 +27,12 @@ public class InstanceExpirationService {
     public static final  int                          HOURS_BEFORE_EXPIRATION_INACTIVITY = 24;
     public static final  int                          HOURS_BEFORE_EXPIRATION_LIFETIME = 48;
     private static final Logger                       logger                  = LoggerFactory.getLogger(InstanceExpirationService.class);
-    private              InstanceExpirationRepository repository;
-    private              InstanceService              instanceService;
-    private              InstanceCommandService       instanceCommandService;
-    private              InstanceConfiguration        configuration;
-    private              NotificationService          notificationService;
+
+    private final InstanceExpirationRepository repository;
+    private final InstanceService instanceService;
+    private final InstanceCommandService instanceCommandService;
+    private final InstanceConfiguration configuration;
+    private final NotificationService notificationService;
 
     @Inject
     public InstanceExpirationService(InstanceExpirationRepository repository,
@@ -145,19 +145,19 @@ public class InstanceExpirationService {
     }
 
     public void createExpirationForAllInactiveInstances() {
-        Integer userInactivityDurationHours = this.configuration.getUserMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION_INACTIVITY;
-        Integer staffInactivityDurationHours = this.configuration.getStaffMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION_INACTIVITY;
+        Integer userInactivityDurationHours = this.configuration.userMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION_INACTIVITY;
+        Integer staffInactivityDurationHours = this.configuration.staffMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION_INACTIVITY;
 
         var userInstancesStream = this.instanceService.getAllNewInactive(userInactivityDurationHours).stream()
             .filter(instance -> !instance.getOwner().getUser().hasRole(Role.STAFF_ROLE));
         var staffInstancesStream = this.instanceService.getAllNewInactive(staffInactivityDurationHours).stream()
             .filter(instance -> instance.getOwner().getUser().hasRole(Role.STAFF_ROLE));
-        var instances = Stream.concat(userInstancesStream, staffInstancesStream).collect(Collectors.toUnmodifiableList());
+        var instances = Stream.concat(userInstancesStream, staffInstancesStream).toList();
         for (var instance : instances) {
             boolean isStaffOwner = instance.getOwner().getUser().hasRole(Role.STAFF_ROLE);
             var maxInactivityDurationHours = isStaffOwner
-                ? this.configuration.getStaffMaxInactivityDurationHours()
-                : this.configuration.getUserMaxInactivityDurationHours();
+                ? this.configuration.staffMaxInactivityDurationHours()
+                : this.configuration.userMaxInactivityDurationHours();
             Date expirationDate = DateUtils.addHours(instance.getLastSeenAt(), maxInactivityDurationHours);
             this.create(instance, expirationDate);
             logger.info("Scheduled expiration for instance {} due to inactivity", instance.getId());

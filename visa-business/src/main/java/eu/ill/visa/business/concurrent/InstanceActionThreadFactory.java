@@ -11,7 +11,7 @@ public class InstanceActionThreadFactory implements ThreadFactory {
 
         private static final Logger log = LoggerFactory.getLogger(InstanceActionThreadFactory.class);
 
-        private static ThreadLocal<String> threadName = new ThreadLocal<String>();
+        private static final ThreadLocal<String> threadName = new ThreadLocal<String>();
 
         public TaskThread(Runnable target) {
             super(target);

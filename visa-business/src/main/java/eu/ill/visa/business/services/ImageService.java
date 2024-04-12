@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Image;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNullElseGet;
 @Singleton
 public class ImageService {
 
-    private ImageRepository repository;
+    private final ImageRepository repository;
 
     @Inject
     public ImageService(ImageRepository repository) {

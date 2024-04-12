@@ -1,8 +1,9 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import eu.ill.visa.cloud.ProviderConfigurationImpl;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
@@ -62,7 +63,7 @@ public class CloudProviderService {
     }
 
     private ProviderConfiguration convert(CloudProviderConfiguration cloudProviderConfiguration) {
-        ProviderConfiguration providerConfiguration = new ProviderConfiguration();
+        ProviderConfigurationImpl providerConfiguration = new ProviderConfigurationImpl();
         providerConfiguration.setName(cloudProviderConfiguration.getType());
         Map<String, String> parameters = new HashMap<>();
         for (CloudProviderConfiguration.CloudProviderConfigurationParameter configurationParameter : cloudProviderConfiguration.getParameters()) {

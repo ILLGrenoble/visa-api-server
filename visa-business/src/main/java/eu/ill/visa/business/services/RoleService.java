@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Role;
 import eu.ill.visa.persistence.repositories.RoleRepository;
 
@@ -13,14 +13,14 @@ import java.util.List;
 @Singleton
 public class RoleService {
 
-    private RoleRepository repository;
+    private final RoleRepository repository;
 
     @Inject
     public RoleService(RoleRepository repository) {
         this.repository = repository;
 
         // Initialise data if empty
-        if (this.getAllRoles().size() == 0) {
+        if (this.getAllRoles().isEmpty()) {
             this.repository.initialise();
         }
     }

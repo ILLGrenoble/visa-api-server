@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import eu.ill.visa.business.SecurityGroupServiceClientConfiguration;
 import eu.ill.visa.business.services.SecurityGroupService;
@@ -30,6 +31,7 @@ public class SecurityGroupServiceClient {
     private final ObjectMapper objectMapper;
     private final ObjectWriter objectWriter;
 
+    @Inject
     public SecurityGroupServiceClient(final SecurityGroupServiceClientConfiguration configuration) {
         this.configuration = configuration;
         this.securityGroupServiceClient = new OkHttpClient.Builder().callTimeout(60, TimeUnit.SECONDS).build();

@@ -1,13 +1,13 @@
 package eu.ill.visa.scheduler.scheduler;
 
-import com.google.inject.Injector;
+import jakarta.inject.Injector;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton

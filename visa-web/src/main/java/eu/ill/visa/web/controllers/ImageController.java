@@ -1,6 +1,6 @@
 package eu.ill.visa.web.controllers;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.ImageService;
 import eu.ill.visa.core.domain.Image;
 

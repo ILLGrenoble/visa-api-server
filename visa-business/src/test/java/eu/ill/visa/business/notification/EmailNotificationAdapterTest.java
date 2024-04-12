@@ -1,6 +1,6 @@
 package eu.ill.visa.business.notification;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.BusinessExtension;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.domain.Instance;

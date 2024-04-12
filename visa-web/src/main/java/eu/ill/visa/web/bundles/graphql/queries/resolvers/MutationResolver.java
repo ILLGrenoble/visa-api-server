@@ -1,6 +1,6 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.domain.CloudImage;

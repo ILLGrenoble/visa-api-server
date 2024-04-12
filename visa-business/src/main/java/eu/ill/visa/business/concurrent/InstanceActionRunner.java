@@ -15,10 +15,11 @@ public class InstanceActionRunner implements Callable<Instance> {
 
     private final static Logger logger = LoggerFactory.getLogger(InstanceActionRunner.class);
 
-    private InstanceAction action;
-    private InstanceActionListener listener;
+    private final InstanceAction action;
+    private final InstanceActionListener listener;
 
-    public InstanceActionRunner(InstanceAction action, InstanceActionListener listener) {
+    public InstanceActionRunner(final InstanceAction action,
+                                final InstanceActionListener listener) {
         this.action = action;
         this.listener = listener;
     }

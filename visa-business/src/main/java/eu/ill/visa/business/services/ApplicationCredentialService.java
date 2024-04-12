@@ -1,10 +1,10 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
 import eu.ill.visa.core.domain.ApplicationCredential;
 import eu.ill.visa.persistence.repositories.ApplicationCredentialRepository;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.slf4j.Logger;

@@ -1,24 +1,12 @@
 package eu.ill.visa.business;
 
-public class SignatureConfiguration {
+import io.smallrye.config.ConfigMapping;
 
-    private String privateKeyPath;
-    private String publicKeyPath;
+import java.util.Optional;
 
-    public SignatureConfiguration() {
+@ConfigMapping(prefix = "business.signature")
+public interface SignatureConfiguration {
 
-    }
-
-    public SignatureConfiguration(String privateKeyPath, String publicKeyPath) {
-        this.privateKeyPath = privateKeyPath;
-        this.publicKeyPath = publicKeyPath;
-    }
-
-    public String getPrivateKeyPath() {
-        return privateKeyPath;
-    }
-
-    public String getPublicKeyPath() {
-        return publicKeyPath;
-    }
+    Optional<String> privateKeyPath();
+    Optional<String> publicKeyPath();
 }

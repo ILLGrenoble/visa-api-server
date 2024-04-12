@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.core.domain.InstanceMember;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

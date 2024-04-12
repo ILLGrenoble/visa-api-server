@@ -1,7 +1,7 @@
 package eu.ill.visa.web.converters.http;
 
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstrumentService;
 import eu.ill.visa.core.domain.Instrument;
 

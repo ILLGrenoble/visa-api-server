@@ -9,26 +9,11 @@ import java.util.List;
 
 public class PortService {
 
-    public static class Service {
-        private final String hostname;
-        private final int port;
-
-        public Service(String hostname, int port) {
-            this.hostname = hostname;
-            this.port = port;
-        }
-
-        public String getHostname() {
-            return hostname;
-        }
-
-        public int getPort() {
-            return port;
-        }
+    public record Service(String hostname, int port) {
     }
 
     public static boolean areMandatoryPortsOpen(String hostname, List<ImageProtocol> protocols) {
-        if (protocols.size() > 0) {
+        if (!protocols.isEmpty()) {
             for (ImageProtocol protocol : protocols) {
                 if (!protocol.isOptional() && !isPortOpen(hostname, protocol.getPort())) {
                     return false;
@@ -42,7 +27,7 @@ public class PortService {
 
     public static List<ImageProtocol> getActiveProtocols(String hostname, List<ImageProtocol> protocols) {
         List<ImageProtocol> activeProtocols = new ArrayList<>();
-        if (protocols.size() > 0) {
+        if (!protocols.isEmpty()) {
             for (ImageProtocol protocol : protocols) {
                 if (isPortOpen(hostname, protocol.getPort())) {
                     activeProtocols.add(protocol);

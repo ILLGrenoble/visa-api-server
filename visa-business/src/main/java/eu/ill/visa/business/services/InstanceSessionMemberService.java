@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.InstanceSessionMember;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
@@ -21,10 +21,10 @@ public class InstanceSessionMemberService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceSessionMemberService.class);
 
-    private InstanceSessionMemberRepository repository;
+    private final InstanceSessionMemberRepository repository;
 
     @Inject
-    public InstanceSessionMemberService(InstanceSessionMemberRepository repository) {
+    public InstanceSessionMemberService(final InstanceSessionMemberRepository repository) {
         this.repository = repository;
     }
 

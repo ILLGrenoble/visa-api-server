@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.FlavourRepository;
 
@@ -15,7 +15,7 @@ import static java.util.Objects.requireNonNullElseGet;
 @Singleton
 public class FlavourService {
 
-    private FlavourRepository repository;
+    private final FlavourRepository repository;
 
     @Inject
     public FlavourService(FlavourRepository repository) {

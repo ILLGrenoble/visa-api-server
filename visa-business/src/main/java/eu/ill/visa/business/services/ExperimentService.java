@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.ExperimentRepository;
 
@@ -18,8 +18,12 @@ import static java.util.Objects.requireNonNullElseGet;
 @Singleton
 public class ExperimentService {
 
+    private final ExperimentRepository repository;
+
     @Inject
-    private ExperimentRepository repository;
+    public ExperimentService(final ExperimentRepository repository) {
+        this.repository = repository;
+    }
 
     public Experiment getById(@NotNull final String id) {
         return repository.getById(id);

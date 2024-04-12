@@ -11,7 +11,6 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-@Singleton
 public class NotificationService {
 
     private final List<NotificationAdapter> adapters;

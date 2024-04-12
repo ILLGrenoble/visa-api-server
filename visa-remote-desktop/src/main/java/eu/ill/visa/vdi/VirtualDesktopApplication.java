@@ -1,6 +1,6 @@
 package eu.ill.visa.vdi;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton

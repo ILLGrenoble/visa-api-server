@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

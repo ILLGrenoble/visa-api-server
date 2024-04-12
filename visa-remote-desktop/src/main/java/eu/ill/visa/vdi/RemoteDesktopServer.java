@@ -6,7 +6,7 @@ import com.corundumstudio.socketio.store.RedissonStoreFactory;
 import com.corundumstudio.socketio.store.StoreFactory;
 import com.corundumstudio.socketio.store.pubsub.DispatchMessage;
 import com.corundumstudio.socketio.store.pubsub.PubSubType;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;

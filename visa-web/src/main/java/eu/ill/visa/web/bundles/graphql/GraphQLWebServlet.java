@@ -1,6 +1,6 @@
 package eu.ill.visa.web.bundles.graphql;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContextBuilder;
 import eu.ill.visa.web.bundles.graphql.directives.RoleDirective;
 import eu.ill.visa.web.bundles.graphql.instrumentation.AuthenticationInstrumentation;

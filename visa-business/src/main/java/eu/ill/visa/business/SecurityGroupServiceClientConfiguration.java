@@ -1,7 +1,9 @@
 package eu.ill.visa.business;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.smallrye.config.ConfigMapping;
 
+@ConfigMapping(prefix = "business.securityGroupServiceClient")
 public class SecurityGroupServiceClientConfiguration {
 
     private Boolean enabled = false;

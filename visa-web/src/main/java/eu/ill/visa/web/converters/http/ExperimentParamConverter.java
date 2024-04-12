@@ -3,7 +3,7 @@ package eu.ill.visa.web.converters.http;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.core.domain.Experiment;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ext.ParamConverter;
 

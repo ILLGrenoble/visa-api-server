@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
@@ -88,11 +88,11 @@ public class InstanceService {
         // Determine from owner whether to apply staff or user lifetime durations
         InstanceMember owner = instance.getOwner();
         if (owner != null && owner.getUser().hasRole(Role.STAFF_ROLE)) {
-            long terminationDate = (new Date().getTime()) + this.configuration.getStaffMaxLifetimeDurationHours() * 60L * 60L * 1000L;
+            long terminationDate = (new Date().getTime()) + this.configuration.staffMaxLifetimeDurationHours() * 60L * 60L * 1000L;
             instance.setTerminationDate(new Date(terminationDate));
 
         } else {
-            long terminationDate = (new Date().getTime()) + this.configuration.getUserMaxLifetimeDurationHours() * 60L * 60L * 1000L;
+            long terminationDate = (new Date().getTime()) + this.configuration.userMaxLifetimeDurationHours() * 60L * 60L * 1000L;
             instance.setTerminationDate(new Date(terminationDate));
         }
 

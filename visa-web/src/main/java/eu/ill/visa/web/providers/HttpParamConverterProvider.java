@@ -3,7 +3,7 @@ package eu.ill.visa.web.providers;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.web.converters.http.*;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;

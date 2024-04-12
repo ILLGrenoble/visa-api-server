@@ -1,6 +1,6 @@
 package eu.ill.visa.web.bundles.graphql.context;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.security.authenticators.TokenAuthenticator;
 import eu.ill.visa.security.tokens.AccountToken;
 import graphql.kickstart.execution.context.GraphQLContext;

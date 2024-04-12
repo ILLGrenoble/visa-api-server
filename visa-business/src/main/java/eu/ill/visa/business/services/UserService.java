@@ -1,9 +1,9 @@
 package eu.ill.visa.business.services;
 
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.UserRepository;
@@ -88,7 +88,7 @@ public class UserService {
     }
 
     public int getDefaultInstanceQuota() {
-        return this.configuration.getDefaultUserInstanceQuota();
+        return this.configuration.defaultUserInstanceQuota();
     }
 
 

@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.InstanceJupyterSessionRepository;
 import org.slf4j.Logger;
@@ -19,10 +19,10 @@ public class InstanceJupyterSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceJupyterSessionService.class);
 
-    private InstanceJupyterSessionRepository repository;
+    private final InstanceJupyterSessionRepository repository;
 
     @Inject
-    public InstanceJupyterSessionService(InstanceJupyterSessionRepository repository) {
+    public InstanceJupyterSessionService(final InstanceJupyterSessionRepository repository) {
         this.repository = repository;
     }
 

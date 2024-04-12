@@ -2,7 +2,7 @@ package eu.ill.visa.business.services;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Injector;
+import jakarta.inject.Injector;
 import eu.ill.visa.business.BusinessConfiguration;
 import eu.ill.visa.business.BusinessModule;
 import eu.ill.visa.business.InstanceConfiguration;

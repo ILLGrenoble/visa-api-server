@@ -1,7 +1,7 @@
 package eu.ill.visa.web.controllers;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstrumentService;

@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.ImageProtocol;
 import eu.ill.visa.persistence.repositories.ImageProtocolRepository;
 
@@ -13,14 +13,14 @@ import java.util.List;
 @Singleton
 public class ImageProtocolService {
 
-    private ImageProtocolRepository repository;
+    private final ImageProtocolRepository repository;
 
     @Inject
     public ImageProtocolService(ImageProtocolRepository repository) {
         this.repository = repository;
 
         // Initialise data if empty
-        if (this.getAll().size() == 0) {
+        if (this.getAll().isEmpty()) {
             this.repository.initialise();
         }
     }

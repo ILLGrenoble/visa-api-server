@@ -1,6 +1,6 @@
 package eu.ill.visa.business.concurrent;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.concurrent.actions.InstanceActionServiceProvider;
 import eu.ill.visa.business.services.BusinessExtension;
 import eu.ill.visa.business.services.InstanceCommandService;

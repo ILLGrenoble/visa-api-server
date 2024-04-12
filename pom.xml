@@ -12,7 +12,7 @@
         <module>visa-core</module>
         <module>visa-persistence</module>
         <module>visa-cloud</module>
-<!--        <module>visa-business</module>-->
+        <module>visa-business</module>
     </modules>
 
     <packaging>pom</packaging>

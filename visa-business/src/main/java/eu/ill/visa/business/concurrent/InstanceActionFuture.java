@@ -8,7 +8,7 @@ import java.util.concurrent.FutureTask;
 
 public class InstanceActionFuture extends FutureTask<Future<Instance>> {
 
-    private InstanceActionRunner runner;
+    private final InstanceActionRunner runner;
 
     public InstanceActionFuture(InstanceActionDispatcher dispatcher, InstanceActionRunner runner) {
         super(() -> dispatcher.execute(runner));

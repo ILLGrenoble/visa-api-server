@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.business.concurrent.InstanceActionFuture;
 import eu.ill.visa.business.concurrent.InstanceActionManager;
 import eu.ill.visa.core.domain.Instance;
@@ -21,13 +21,16 @@ public class InstanceCommandService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceCommandService.class);
 
-    @Inject
-    private InstanceCommandRepository repository;
+    private final InstanceCommandRepository repository;
+
+    private final InstanceActionManager instanceActionManager;
 
     @Inject
-    private InstanceActionManager instanceActionManager;
-
-
+    public InstanceCommandService(final InstanceCommandRepository repository,
+                                  final InstanceActionManager instanceActionManager) {
+        this.repository = repository;
+        this.instanceActionManager = instanceActionManager;
+    }
 
     public List<InstanceCommand> getAll() {
         return this.repository.getAll();

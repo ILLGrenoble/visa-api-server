@@ -1,6 +1,6 @@
 package eu.ill.visa.business.concurrent;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import eu.ill.visa.business.concurrent.actions.InstanceAction;
 import eu.ill.visa.business.concurrent.actions.InstanceActionFactory;
@@ -17,18 +17,19 @@ import java.util.Optional;
 @Singleton
 public class InstanceActionManager implements InstanceActionListener {
 
-    @Inject
-    private InstanceActionDispatcher dispatcher;
+    private final InstanceActionDispatcher dispatcher;
+    private final InstanceCommandService instanceCommandService;
+    private final InstanceActionFactory instanceActionFactory;
+
+    private final HashMap<Instance, Deque<InstanceActionFuture>> actions = new HashMap<>();
 
     @Inject
-    private InstanceCommandService instanceCommandService;
-
-    @Inject
-    private InstanceActionFactory instanceActionFactory;
-
-    private HashMap<Instance, Deque<InstanceActionFuture>> actions = new HashMap<>();
-
-    public InstanceActionManager() {
+    public InstanceActionManager(final InstanceActionDispatcher dispatcher,
+                                 final InstanceCommandService instanceCommandService,
+                                 final InstanceActionFactory instanceActionFactory) {
+        this.dispatcher = dispatcher;
+        this.instanceCommandService = instanceCommandService;
+        this.instanceActionFactory = instanceActionFactory;
     }
 
     public synchronized InstanceActionFuture queue(InstanceCommand command) {

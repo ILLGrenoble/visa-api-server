@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.business.http.SecurityGroupServiceClient;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.SecurityGroupRepository;
@@ -15,11 +15,16 @@ import java.util.stream.Collectors;
 @Singleton
 public class SecurityGroupService {
 
-    @Inject
-    private SecurityGroupRepository repository;
+    private final SecurityGroupRepository repository;
+
+    private final SecurityGroupServiceClient securityGroupServiceClient;
 
     @Inject
-    private SecurityGroupServiceClient securityGroupServiceClient;
+    public SecurityGroupService(final SecurityGroupRepository repository,
+                                final SecurityGroupServiceClient securityGroupServiceClient) {
+        this.repository = repository;
+        this.securityGroupServiceClient = securityGroupServiceClient;
+    }
 
     public SecurityGroup getById(Long id) {
         return this.repository.getById(id);

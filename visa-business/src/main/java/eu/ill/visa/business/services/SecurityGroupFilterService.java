@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.domain.SecurityGroupFilter;
@@ -15,8 +15,12 @@ import java.util.List;
 @Singleton
 public class SecurityGroupFilterService {
 
+    private final SecurityGroupFilterRepository repository;
+
     @Inject
-    private SecurityGroupFilterRepository repository;
+    public SecurityGroupFilterService(final SecurityGroupFilterRepository repository) {
+        this.repository = repository;
+    }
 
     public SecurityGroupFilter getById(Long id) {
         return this.repository.getById(id);

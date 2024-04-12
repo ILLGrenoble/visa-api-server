@@ -1,6 +1,6 @@
 package eu.ill.visa.web.controllers;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.ClientNotificationService;
 import eu.ill.visa.core.domain.ClientNotification;
 import eu.ill.visa.core.domain.Role;

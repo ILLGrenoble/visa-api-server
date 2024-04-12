@@ -1,11 +1,11 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Proposal;
 import eu.ill.visa.persistence.repositories.ProposalRepository;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 

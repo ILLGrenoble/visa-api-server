@@ -1,6 +1,6 @@
 package eu.ill.visa.scheduler.jobs;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 import eu.ill.visa.cloud.exceptions.CloudException;

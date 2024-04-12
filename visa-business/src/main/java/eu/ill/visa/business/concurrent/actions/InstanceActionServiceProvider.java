@@ -1,6 +1,6 @@
 package eu.ill.visa.business.concurrent.actions;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;

@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceMember;
 import eu.ill.visa.core.domain.User;
@@ -19,10 +19,10 @@ public class InstanceMemberService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceMemberService.class);
 
-    private InstanceMemberRepository repository;
+    private final InstanceMemberRepository repository;
 
     @Inject
-    public InstanceMemberService(InstanceMemberRepository repository) {
+    public InstanceMemberService(final InstanceMemberRepository repository) {
         this.repository = repository;
     }
 

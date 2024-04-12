@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceActivity;
@@ -43,12 +43,12 @@ public class InstanceActivityService {
     }
 
     public boolean cleanupActive() {
-        return this.configuration.getActivityRetentionPeriodDays() != 0;
+        return this.configuration.activityRetentionPeriodDays() != 0;
     }
 
     public void cleanup() {
         if (this.cleanupActive()) {
-            this.repository.cleanup(this.configuration.getActivityRetentionPeriodDays());
+            this.repository.cleanup(this.configuration.activityRetentionPeriodDays());
         }
     }
 

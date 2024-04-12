@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import com.google.inject.persist.Transactional;
+import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Flavour;
 import eu.ill.visa.core.domain.FlavourLimit;
 import eu.ill.visa.persistence.repositories.FlavourLimitRepository;
@@ -14,7 +14,7 @@ import java.util.List;
 @Singleton
 public class FlavourLimitService {
 
-    private FlavourLimitRepository repository;
+    private final FlavourLimitRepository repository;
 
     @Inject
     public FlavourLimitService(final FlavourLimitRepository repository) {

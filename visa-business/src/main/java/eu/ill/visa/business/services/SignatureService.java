@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
-import com.google.common.base.Strings;
-import com.google.inject.Inject;
+import eu.ill.visa.business.SignatureConfiguration;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -36,18 +36,17 @@ public class SignatureService {
     private final String publicKeyPath;
 
     @Inject
-    public SignatureService(final String privateKeyPath,
-                            final String publicKeyPath) {
-        this.privateKeyPath = privateKeyPath;
-        this.publicKeyPath = publicKeyPath;
+    public SignatureService(SignatureConfiguration signatureConfiguration) {
+        this.privateKeyPath = signatureConfiguration.privateKeyPath().orElse("");
+        this.publicKeyPath = signatureConfiguration.publicKeyPath().orElse("");
 
-        if (Strings.isNullOrEmpty(privateKeyPath)) {
+        if (privateKeyPath.isEmpty()) {
             logger.info("VISA not configured to generated signed VISA PAM token for remote desktop access");
         } else {
             logger.info("VISA configured to generated signed VISA PAM token for remote desktop access");
         }
 
-        if (Strings.isNullOrEmpty(publicKeyPath)) {
+        if (publicKeyPath.isEmpty()) {
             logger.info("VISA not configured to send VISA PAM public key to instances");
         } else {
             logger.info("VISA configured to send VISA PAM public key to instances");
@@ -116,7 +115,7 @@ public class SignatureService {
     }
 
     public String readPublicKey()  {
-        if (!Strings.isNullOrEmpty(publicKeyPath)) {
+        if (!publicKeyPath.isEmpty()) {
             try {
                 String publicKey = Files.readString(Paths.get(publicKeyPath));
                 return publicKey;

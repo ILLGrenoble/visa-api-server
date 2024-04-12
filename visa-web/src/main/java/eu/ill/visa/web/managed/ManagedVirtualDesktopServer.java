@@ -1,6 +1,6 @@
 package eu.ill.visa.web.managed;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import eu.ill.visa.vdi.VirtualDesktopApplication;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import io.dropwizard.lifecycle.Managed;

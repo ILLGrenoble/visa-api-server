@@ -1,6 +1,6 @@
 package eu.ill.visa.scheduler.tasks;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;

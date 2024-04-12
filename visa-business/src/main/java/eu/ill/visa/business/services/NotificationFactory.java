@@ -38,13 +38,13 @@ public class NotificationFactory {
     public NotificationAdapter createAdapter(final NotificationConfiguration configuration,
                                              final InstanceConfiguration instanceConfiguration,
                                              final String rootURL) {
-        final Map<String, String> parameters = configuration.getParameters();
-        if (configuration.getAdapter().equals("email")) {
-            if (configuration.isEnabled()) {
-                return createEmailNotificationAdapter(parameters, rootURL, instanceConfiguration.getUserMaxInactivityDurationHours(), instanceConfiguration.getStaffMaxInactivityDurationHours(), instanceConfiguration.getUserMaxLifetimeDurationHours(), instanceConfiguration.getStaffMaxLifetimeDurationHours());
+        final Map<String, String> parameters = configuration.parameters();
+        if (configuration.adapter().equals("email")) {
+            if (configuration.enabled()) {
+                return createEmailNotificationAdapter(parameters, rootURL, instanceConfiguration.userMaxInactivityDurationHours(), instanceConfiguration.staffMaxInactivityDurationHours(), instanceConfiguration.userMaxLifetimeDurationHours(), instanceConfiguration.staffMaxLifetimeDurationHours());
             }
         } else {
-            throw new IllegalArgumentException(format("Unknown notification adapter: %s", configuration.getAdapter()));
+            throw new IllegalArgumentException(format("Unknown notification adapter: %s", configuration.adapter()));
         }
         return null;
     }
