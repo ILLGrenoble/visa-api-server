@@ -1,20 +1,21 @@
 package eu.ill.visa.business.concurrent.actions;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceSession;
 import eu.ill.visa.core.domain.InstanceSessionMember;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.util.List;
 
-@Singleton
+@ApplicationScoped
 public class InstanceActionServiceProvider {
 
-    private final NotificationService notificationService;
+    private final EmailManager emailManager;
     private final InstanceService instanceService;
 
     private final InstanceSessionService instanceSessionService;
@@ -33,7 +34,7 @@ public class InstanceActionServiceProvider {
                                          final SecurityGroupService securityGroupService,
                                          final InstrumentService instrumentService,
                                          final CloudClientGateway cloudClientGateway,
-                                         final NotificationService notificationService,
+                                         final EmailManager emailManager,
                                          final SignatureService signatureService) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
@@ -41,7 +42,7 @@ public class InstanceActionServiceProvider {
         this.securityGroupService = securityGroupService;
         this.instrumentService = instrumentService;
         this.cloudClientGateway = cloudClientGateway;
-        this.notificationService = notificationService;
+        this.emailManager = emailManager;
         this.signatureService = signatureService;
     }
 
@@ -84,8 +85,8 @@ public class InstanceActionServiceProvider {
         return this.cloudClientGateway.getCloudClient(cloudClientId);
     }
 
-    public NotificationService getNotificationService() {
-        return notificationService;
+    public EmailManager getEmailManager() {
+        return emailManager;
     }
 
     public SignatureService getSignatureService() {

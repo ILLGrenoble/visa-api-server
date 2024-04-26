@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -10,7 +10,7 @@ import eu.ill.visa.core.domain.Flavour;
 import graphql.kickstart.tools.GraphQLResolver;
 
 
-@Singleton
+@ApplicationScoped
 public class FlavourResolver implements GraphQLResolver<Flavour> {
 
     private final CloudClientGateway cloudClientGateway;

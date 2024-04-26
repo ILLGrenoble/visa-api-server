@@ -1,7 +1,7 @@
 package eu.ill.visa.security.authenticators;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.services.ApplicationCredentialService;
 import eu.ill.visa.core.domain.ApplicationCredential;
 import eu.ill.visa.security.tokens.ApplicationToken;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.Optional;
 
-@Singleton
+@ApplicationScoped
 public class ApplicationCredentialAuthenticator implements Authenticator<BasicCredentials, ApplicationToken> {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationCredentialAuthenticator.class);
 

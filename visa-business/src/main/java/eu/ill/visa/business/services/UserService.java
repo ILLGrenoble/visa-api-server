@@ -2,7 +2,7 @@ package eu.ill.visa.business.services;
 
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.*;
@@ -14,7 +14,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNullElseGet;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class UserService {
 
     private final UserRepository repository;

@@ -1,20 +1,39 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public class Proposal implements Serializable {
+@Entity
+@Table(name = "proposal")
+public class Proposal {
 
+    @Id
+    @Column(name = "id", nullable = false)
     private Long   id;
+
+    @Column(name = "identifier", length = 100, nullable = false)
     private String identifier;
+
+    @Column(name = "title", length = 2000, nullable = true)
     private String title;
-    private Date   publicAt;
+
+    @Column(name = "public_at", nullable = true)
+    private Date publicAt;
+
+    @Column(name = "summary", length = 5000, nullable = true)
     private String summary;
+
+    @Column(name = "url", length = 2000, nullable = true)
     private String url;
+
+    @Column(name = "doi", length = 2000, nullable = true)
     private String doi;
 
     public Long getId() {

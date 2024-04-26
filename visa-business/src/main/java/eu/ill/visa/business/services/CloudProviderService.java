@@ -1,20 +1,23 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.cloud.ProviderConfigurationImpl;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.cloud.ProviderConfiguration;
+import eu.ill.visa.cloud.ProviderConfigurationImpl;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.CloudProviderConfiguration;
 import eu.ill.visa.persistence.repositories.CloudProviderRepository;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
-import java.util.*;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class CloudProviderService {
 
     private final CloudProviderRepository repository;

@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.domain.Experiment;
@@ -11,7 +11,7 @@ import graphql.kickstart.tools.GraphQLResolver;
 
 import java.util.List;
 
-@Singleton
+@ApplicationScoped
 public class UserResolver implements GraphQLResolver<User> {
 
     private final InstanceService instanceService;

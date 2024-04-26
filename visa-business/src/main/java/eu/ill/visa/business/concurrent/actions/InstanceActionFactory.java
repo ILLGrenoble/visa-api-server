@@ -1,11 +1,11 @@
 package eu.ill.visa.business.concurrent.actions;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.core.domain.InstanceCommand;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 
-@Singleton
+@ApplicationScoped
 public class InstanceActionFactory {
 
     private InstanceActionServiceProvider serviceProvider;

@@ -1,13 +1,15 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public class Role implements Serializable {
+@Entity
+@Table(name = "role")
+public class Role {
 
     public static final String ADMIN_ROLE = "ADMIN";
     public static final String STAFF_ROLE = "STAFF";
@@ -17,17 +19,25 @@ public class Role implements Serializable {
     public static final String SCIENTIFIC_COMPUTING_ROLE = "SCIENTIFIC_COMPUTING";
     public static final String GUEST_ROLE = "GUEST";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "description")
     private String description;
 
+    @Column(name = "group_created_at")
     private Date groupCreatedAt;
+
+    @Column(name = "group_deleted_at")
     private Date groupDeletedAt;
 
 
-    Role() {
+    public Role() {
 
     }
 

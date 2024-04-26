@@ -1,22 +1,24 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandState;
 import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.persistence.repositories.UserRepository;
+import io.quarkus.test.TestTransaction;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(BusinessExtension.class)
+@QuarkusTest
+@TestTransaction
 public class InstanceCommandServiceTest {
 
     @Inject

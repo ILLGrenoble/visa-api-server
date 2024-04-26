@@ -1,9 +1,9 @@
 package eu.ill.visa.vdi;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 
-@Singleton
+@ApplicationScoped
 public class VirtualDesktopApplication {
 
     private final RemoteDesktopServer remoteDesktopServer;

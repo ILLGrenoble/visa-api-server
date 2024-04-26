@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import eu.ill.visa.business.SecurityGroupServiceClientConfiguration;
 import eu.ill.visa.business.services.SecurityGroupService;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.SecurityGroup;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-@Singleton
+@ApplicationScoped
 public class SecurityGroupServiceClient {
     private static final Logger logger = LoggerFactory.getLogger(SecurityGroupService.class);
 
@@ -41,15 +40,19 @@ public class SecurityGroupServiceClient {
     }
 
     public String requestSecurityGroups(Long instanceId, String instanceAsJson) {
-        final RequestBody body = RequestBody.create(JSON_CONTENT_TYPE, instanceAsJson);
+        final RequestBody body = RequestBody.create(instanceAsJson, JSON_CONTENT_TYPE);
+
+        if (this.configuration.url().isEmpty()) {
+            return null;
+        }
 
         final Request request = new Request.Builder()
-            .url(this.configuration.getUrl())
-            .addHeader("x-auth-token", this.configuration.getAuthToken())
+            .url(this.configuration.url().get())
+            .addHeader("x-auth-token", this.configuration.authToken().orElse(""))
             .post(body)
             .build();
 
-        logger.info("Requesting security groups for instance {} from {}...", instanceId, this.configuration.getUrl());
+        logger.info("Requesting security groups for instance {} from {}...", instanceId, this.configuration.url().get());
         try (final Response response = this.securityGroupServiceClient.newCall(request).execute()) {
             if (response.body() == null) {
                 logger.warn("Received empty response for security groups for instance {}", instanceId);
@@ -74,7 +77,7 @@ public class SecurityGroupServiceClient {
         List<String> securityGroupNames = new ArrayList<>();
 
         // Verify that the application is configured to use the security group service
-        if (this.configuration == null || !this.configuration.isEnabled() || this.configuration.getUrl() == null || this.configuration.getUrl().equals("")) {
+        if (this.configuration == null || !this.configuration.enabled() || this.configuration.url().isEmpty()) {
             return securityGroupNames;
         }
 
@@ -87,7 +90,7 @@ public class SecurityGroupServiceClient {
             if (jsonString != null) {
                 List<SecurityGroup> securityGroups = this.objectMapper.readValue(jsonString,  new TypeReference<>(){});
 
-                securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).collect(Collectors.toUnmodifiableList());
+                securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).toList();
                 logger.info("... got security groups [{}] for instance {}", String.join(", ", securityGroupNames), instance.getId());
             }
 

@@ -2,7 +2,7 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.SignatureConfiguration;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -21,7 +21,7 @@ import java.util.Base64;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@Singleton
+@ApplicationScoped
 public class SignatureService {
 
     private static final Logger logger              = LoggerFactory.getLogger(SignatureService.class);

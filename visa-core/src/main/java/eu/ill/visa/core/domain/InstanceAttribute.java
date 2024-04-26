@@ -1,11 +1,22 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+@Entity
+@Table(name = "instance_attribute")
 public class InstanceAttribute extends Timestampable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long   id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "value", nullable = false)
     private String value;
 
     public InstanceAttribute(final String name, final String value) {

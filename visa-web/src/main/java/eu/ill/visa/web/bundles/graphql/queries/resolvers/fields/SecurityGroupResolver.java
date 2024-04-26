@@ -1,14 +1,14 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.SecurityGroup;
 import graphql.kickstart.tools.GraphQLResolver;
 
 
-@Singleton
+@ApplicationScoped
 public class SecurityGroupResolver implements GraphQLResolver<SecurityGroup> {
 
     private final CloudClientGateway cloudClientGateway;

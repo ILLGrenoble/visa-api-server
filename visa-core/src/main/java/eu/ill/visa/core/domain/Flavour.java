@@ -1,24 +1,35 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import jakarta.persistence.Transient;
-
+@Entity
+@Table(name = "flavour")
 public class Flavour extends Timestampable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name", length = 250, nullable = false)
     private String name;
 
+    @Column(name = "memory", nullable = false)
     private Integer memory;
 
+    @Column(name = "cpu", precision = 2, nullable = false)
     private Float cpu;
 
+    @Column(name = "compute_id", length = 250, nullable = false)
     private String computeId;
 
+    @Column(name = "deleted", nullable = false, columnDefinition = "")
     private Boolean deleted = false;
 
+    @ManyToOne
+    @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = true)
     private CloudProviderConfiguration cloudProviderConfiguration;
 
     public Long getId() {

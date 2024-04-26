@@ -1,7 +1,7 @@
 package eu.ill.visa.web;
 
 import com.google.inject.Provides;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.BusinessConfiguration;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.persistence.PersistenceModule;
@@ -106,7 +106,7 @@ public class WebModule extends DropwizardAwareModule<WebConfiguration> {
     }
 
     @Provides
-    @Singleton
+    @ApplicationScoped
     public Mapper providesMapper() {
         final DozerBeanMapper mapper = new DozerBeanMapper();
         final InputStream mappings = getSystemResourceAsStream("dozer/mappings.xml");

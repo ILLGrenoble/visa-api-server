@@ -3,7 +3,7 @@ package eu.ill.visa.persistence.repositories;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.providers.PlanFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -11,7 +11,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Singleton
+@ApplicationScoped
 public class PlanRepository extends AbstractRepository<Plan> {
 
 

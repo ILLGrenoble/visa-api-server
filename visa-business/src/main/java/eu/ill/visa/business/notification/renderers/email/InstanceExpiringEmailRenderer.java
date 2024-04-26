@@ -1,7 +1,7 @@
 package eu.ill.visa.business.notification.renderers.email;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 import eu.ill.visa.business.NotificationRendererException;
 import eu.ill.visa.business.notification.NotificationRenderer;
 import eu.ill.visa.core.domain.Instance;

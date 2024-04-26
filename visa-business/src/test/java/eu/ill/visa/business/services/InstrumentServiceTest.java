@@ -1,5 +1,7 @@
 package eu.ill.visa.business.services;
 
+import io.quarkus.test.TestTransaction;
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import eu.ill.visa.core.domain.Instrument;
 import eu.ill.visa.core.domain.User;
@@ -13,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 
-@ExtendWith(BusinessExtension.class)
+@QuarkusTest
+@TestTransaction
 public class InstrumentServiceTest {
 
     @Inject

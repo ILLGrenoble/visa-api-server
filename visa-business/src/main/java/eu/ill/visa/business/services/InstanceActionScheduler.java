@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.User;
@@ -9,7 +9,7 @@ import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class InstanceActionScheduler {
 
     private final InstanceService instanceService;

@@ -1,12 +1,12 @@
 package eu.ill.visa.scheduler.tasks;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
-@Singleton
+@ApplicationScoped
 public class TaskManager {
 
     private final ThreadPoolExecutor threadPoolExecutor;

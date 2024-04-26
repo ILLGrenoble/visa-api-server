@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.core.domain.ApplicationCredential;
 import eu.ill.visa.persistence.repositories.ApplicationCredentialRepository;
 import jakarta.transaction.Transactional;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class ApplicationCredentialService {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationCredentialService.class);

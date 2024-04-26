@@ -69,7 +69,7 @@ public class OkHttpClientAdapter implements HttpClient {
     }
 
     private HttpResponse doPost(final String url, final Headers headers, final String data) throws CloudException {
-        final RequestBody body = data == null ? Util.EMPTY_REQUEST : RequestBody.create(JSON_CONTENT_TYPE, data);
+        final RequestBody body = data == null ? Util.EMPTY_REQUEST : RequestBody.create(data, JSON_CONTENT_TYPE);
         final Request request = new Request.Builder()
             .url(url)
             .headers(headers)

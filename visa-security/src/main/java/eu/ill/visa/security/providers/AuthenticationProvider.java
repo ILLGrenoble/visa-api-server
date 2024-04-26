@@ -3,7 +3,7 @@ package eu.ill.visa.security.providers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.security.authenticators.ApplicationCredentialAuthenticator;
 import eu.ill.visa.security.authenticators.TokenAuthenticator;
 import eu.ill.visa.security.authorizers.ApplicationAuthorizer;
@@ -27,7 +27,7 @@ import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
 import java.security.Principal;
 
-@Singleton
+@ApplicationScoped
 @Provider
 public class AuthenticationProvider extends PolymorphicAuthDynamicFeature<Principal> {
 

@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import static java.util.Objects.requireNonNullElse;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class InstanceService {
     private static final Logger logger = LoggerFactory.getLogger(InstanceService.class);
 

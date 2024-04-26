@@ -7,7 +7,7 @@ import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.persistence.providers.ImageFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -16,7 +16,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-@Singleton
+@ApplicationScoped
 public class ImageRepository extends AbstractRepository<Image> {
 
 

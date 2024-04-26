@@ -3,14 +3,14 @@ package eu.ill.visa.persistence.repositories;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceExtensionRequest;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-@Singleton
+@ApplicationScoped
 public class InstanceExtensionRequestRepository extends AbstractRepository<InstanceExtensionRequest> {
 
     @Inject

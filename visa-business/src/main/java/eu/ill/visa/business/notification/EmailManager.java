@@ -1,30 +1,30 @@
 package eu.ill.visa.business.notification;
 
+import eu.ill.visa.business.InstanceConfiguration;
+import eu.ill.visa.business.MailerConfiguration;
 import eu.ill.visa.business.NotificationRendererException;
 import eu.ill.visa.business.notification.renderers.email.*;
 import eu.ill.visa.core.domain.*;
-import org.simplejavamail.MailException;
-import org.simplejavamail.api.email.Email;
-import org.simplejavamail.api.email.EmailPopulatingBuilder;
-import org.simplejavamail.api.mailer.Mailer;
-import org.simplejavamail.email.EmailBuilder;
-import org.simplejavamail.mailer.MailerBuilder;
+import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
+import io.quarkus.mailer.Mail;
+import io.quarkus.mailer.Mailer;
+import jakarta.enterprise.context.ApplicationScoped;
+
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.Optional;
-
-import static eu.ill.visa.core.domain.enumerations.InstanceMemberRole.OWNER;
 import static java.lang.String.format;
-import static org.simplejavamail.api.mailer.config.TransportStrategy.SMTP;
 
-public class EmailNotificationAdapter implements NotificationAdapter {
+@ApplicationScoped
+public class EmailManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailNotificationAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailManager.class);
+
     private final Mailer mailer;
-    private final String host;
-    private final Integer port;
+
     private final String fromEmailAddress;
     private final String bccEmailAddress;
     private final String adminEmailAddress;
@@ -36,164 +36,143 @@ public class EmailNotificationAdapter implements NotificationAdapter {
     private final Integer userMaxLifetimeDurationHours;
     private final Integer staffMaxLifetimeDurationHours;
 
-    public EmailNotificationAdapter(final String host,
-                                    final Integer port,
-                                    final String fromEmailAddress,
-                                    final String bccEmailAddress,
-                                    final String adminEmailAddress,
-                                    final String devEmailAddress,
-                                    final String emailTemplatesDirectory,
-                                    final String rootURL,
-                                    final Integer userMaxInactivityDurationHours,
-                                    final Integer staffMaxInactivityDurationHours,
-                                    final Integer userMaxLifetimeDurationHours,
-                                    final Integer staffMaxLifetimeDurationHours) {
-        this.host = host;
-        this.port = port;
-        this.fromEmailAddress = fromEmailAddress;
-        this.bccEmailAddress = bccEmailAddress;
-        this.adminEmailAddress = adminEmailAddress;
-        this.devEmailAddress = devEmailAddress;
-        this.emailTemplatesDirectory = emailTemplatesDirectory;
-        this.rootURL = rootURL;
-        this.userMaxInactivityDurationHours = userMaxInactivityDurationHours;
-        this.staffMaxInactivityDurationHours = staffMaxInactivityDurationHours;
-        this.userMaxLifetimeDurationHours = userMaxLifetimeDurationHours;
-        this.staffMaxLifetimeDurationHours = staffMaxLifetimeDurationHours;
-        this.mailer = createMailer();
+    @Inject
+    public EmailManager(final MailerConfiguration mailerConfiguration,
+                        final InstanceConfiguration instanceConfiguration,
+                        final Mailer mailer) {
+
+        this.rootURL = mailerConfiguration.rootURL().orElse(null);
+        this.fromEmailAddress = mailerConfiguration.fromEmailAddress().orElse(null);
+        this.bccEmailAddress = mailerConfiguration.bccEmailAddress().orElse(null);
+        this.adminEmailAddress = mailerConfiguration.adminEmailAddress().orElse(null);
+        this.devEmailAddress = mailerConfiguration.devEmailAddress().orElse(null);
+
+        // Ensure email templates directory has a trailing /
+        if (!mailerConfiguration.emailTemplatesDirectory().endsWith("/")) {
+            emailTemplatesDirectory = mailerConfiguration.emailTemplatesDirectory() + "/";
+        } else {
+            emailTemplatesDirectory = mailerConfiguration.emailTemplatesDirectory();
+        }
+
+        this.userMaxInactivityDurationHours = instanceConfiguration.userMaxInactivityDurationHours();
+        this.staffMaxInactivityDurationHours = instanceConfiguration.staffMaxInactivityDurationHours();
+        this.userMaxLifetimeDurationHours = instanceConfiguration.userMaxLifetimeDurationHours();
+        this.staffMaxLifetimeDurationHours = instanceConfiguration.staffMaxLifetimeDurationHours();
+
+        this.mailer = mailer;
     }
 
-    private Mailer createMailer() {
-        return MailerBuilder
-            .withSMTPServer(host, port)
-            .withTransportStrategy(SMTP)
-            .withSessionTimeout(10 * 1000)
-            .clearEmailAddressCriteria()
-            .buildMailer();
-    }
-
-    private Email buildEmail(final String recipient, final String subject, final String html) {
-        final EmailPopulatingBuilder emailBuilder = EmailBuilder.startingBlank()
-            .from(fromEmailAddress)
-            .to(recipient)
-            .withSubject(subject)
-            .withHTMLText(html);
+    private Mail buildEmail(final String recipient, final String subject, final String html) {
+        final Mail email = Mail.withHtml(recipient, subject,  html);
+        email.setFrom(this.fromEmailAddress);
 
         if (this.bccEmailAddress != null) {
-            emailBuilder.bcc(this.bccEmailAddress);
+            email.addBcc(this.bccEmailAddress);
         }
-        return emailBuilder.buildEmail();
+        return email;
     }
 
-    private Email buildEmail(final String recipient, final String cc, final String subject, final String html) {
-        final EmailPopulatingBuilder emailBuilder = EmailBuilder.startingBlank()
-            .from(fromEmailAddress)
-            .to(recipient)
-            .cc(cc)
-            .withSubject(subject)
-            .withHTMLText(html);
+    private Mail buildEmail(final String recipient, final String cc, final String subject, final String html) {
+        final Mail email = Mail.withHtml(recipient, subject,  html);
+        email.addCc(cc);
+        email.setFrom(this.fromEmailAddress);
 
         if (this.bccEmailAddress != null) {
-            emailBuilder.bcc(this.bccEmailAddress);
+            email.addBcc(this.bccEmailAddress);
         }
-        return emailBuilder.buildEmail();
+        return email;
     }
 
-    @Override
     public void sendInstanceExpiringNotification(final Instance instance, final Date expirationDate) {
         try {
             final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(OWNER))
+                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
                 .findFirst();
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = "[VISA] Your instance will soon expire due to inactivity";
                 final NotificationRenderer renderer = new InstanceExpiringEmailRenderer(instance, expirationDate, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
-                final Email email = buildEmail(user.getEmail(), subject, renderer.render());
-                mailer.sendMail(email);
+                final Mail email = buildEmail(user.getEmail(), subject, renderer.render());
+                mailer.send(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
             }
         } catch (NotificationRendererException exception) {
             logger.error("Error rendering email : {}", exception.getMessage());
-        } catch (MailException exception) {
+        } catch (Exception exception) {
             logger.error("Error sending email: {}", exception.getMessage());
         }
     }
 
-    @Override
     public void sendInstanceDeletedNotification(Instance instance, InstanceExpiration instanceExpiration) {
         try {
             final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(OWNER))
+                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
                 .findFirst();
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = "[VISA] Your instance has been deleted";
                 final NotificationRenderer renderer = new InstanceDeletedEmailRenderer(instance, instanceExpiration, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
-                final Email email = buildEmail(user.getEmail(), subject, renderer.render());
-                mailer.sendMail(email);
+                final Mail email = buildEmail(user.getEmail(), subject, renderer.render());
+                mailer.send(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
             }
         } catch (NotificationRendererException exception) {
             logger.error("Error rendering email : {}", exception.getMessage());
-        } catch (MailException exception) {
+        } catch (Exception exception) {
             logger.error("Error sending email: {}", exception.getMessage());
         }
     }
 
-    @Override
     public void sendInstanceLifetimeNotification(Instance instance) {
         try {
             final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(OWNER))
+                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
                 .findFirst();
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = "[VISA] Your instance will soon be deleted due to reaching its maximum lifetime";
                 final NotificationRenderer renderer = new InstanceLifetimeEmailRenderer(instance, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
-                final Email email = buildEmail(user.getEmail(), subject, renderer.render());
-                mailer.sendMail(email);
+                final Mail email = buildEmail(user.getEmail(), subject, renderer.render());
+                mailer.send(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
             }
         } catch (NotificationRendererException exception) {
             logger.error("Error rendering email : {}", exception.getMessage());
-        } catch (MailException exception) {
+        } catch (Exception exception) {
             logger.error("Error sending email: {}", exception.getMessage());
         }
     }
 
-    @Override
     public void sendInstanceMemberAddedNotification(Instance instance, InstanceMember member) {
         try {
-            if (!member.isRole(OWNER)) {
+            if (!member.isRole(InstanceMemberRole.OWNER)) {
                 final Optional<InstanceMember> owner = instance.getMembers().stream()
-                    .filter(object -> object.isRole(OWNER))
+                    .filter(object -> object.isRole(InstanceMemberRole.OWNER))
                     .findFirst();
                 if (owner.isPresent()) {
                     final String subject = "[VISA] You have been added as a member to an instance";
                     final NotificationRenderer renderer = new InstanceMemberAddedRenderer(instance, emailTemplatesDirectory, owner.get().getUser(), member, rootURL, adminEmailAddress);
-                    final Email email = buildEmail(member.getUser().getEmail(), subject, renderer.render());
-                    mailer.sendMail(email);
+                    final Mail email = buildEmail(member.getUser().getEmail(), subject, renderer.render());
+                    mailer.send(email);
                 } else {
                     logger.error("Unable to find owner for instance: {}", instance.getId());
                 }
             }
         } catch (NotificationRendererException exception) {
             logger.error("Error rendering email : {}", exception.getMessage());
-        } catch (MailException exception) {
+        } catch (Exception exception) {
             logger.error("Error sending email: {}", exception.getMessage());
         }
     }
 
-    @Override
     public void sendInstanceCreatedNotification(final Instance instance) {
         if (!devEmailAddress.isEmpty()) {
             try {
                 final Optional<InstanceMember> member = instance.getMembers().stream()
-                    .filter(object -> object.isRole(OWNER))
+                    .filter(object -> object.isRole(InstanceMemberRole.OWNER))
                     .findFirst();
                 if (member.isPresent()) {
                     final User user = member.get().getUser();
@@ -205,17 +184,15 @@ public class EmailNotificationAdapter implements NotificationAdapter {
                         instance.getId(),
                         flavour.getName()
                     );
-                    final Email email = EmailBuilder.startingBlank()
-                        .from(fromEmailAddress)
-                        .to(devEmailAddress)
-                        .withSubject("[VISA] A new instance has been created")
-                        .withPlainText(text)
-                        .buildEmail();
-                    mailer.sendMail(email);
+
+                    final Mail email = Mail.withText(this.devEmailAddress, "[VISA] A new instance has been created", text);
+                    email.setFrom(this.fromEmailAddress);
+
+                    mailer.send(email);
                 } else {
                     logger.error("Unable to find owner for instance: {}", instance.getId());
                 }
-            } catch (MailException exception) {
+            } catch (Exception exception) {
                 logger.error("Error sending email: {}", exception.getMessage());
             }
         } else {
@@ -223,53 +200,52 @@ public class EmailNotificationAdapter implements NotificationAdapter {
         }
     }
 
-    @Override
     public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments) {
         if (!adminEmailAddress.isEmpty()) {
             try {
                 final Optional<InstanceMember> member = instance.getMembers().stream()
-                    .filter(object -> object.isRole(OWNER))
+                    .filter(object -> object.isRole(InstanceMemberRole.OWNER))
                     .findFirst();
                 if (member.isPresent()) {
                     final User owner = member.get().getUser();
 
                     final String subject = "[VISA] An instance extension request has been made";
                     final NotificationRenderer renderer = new InstanceExtensionRequestRenderer(instance, emailTemplatesDirectory, owner, comments, rootURL);
-                    final Email email = buildEmail(adminEmailAddress, subject, renderer.render());
-                    mailer.sendMail(email);
+                    final Mail email = buildEmail(adminEmailAddress, subject, renderer.render());
+                    mailer.send(email);
 
                 } else {
                     logger.error("Unable to find owner for instance: {}", instance.getId());
                 }
-            } catch (MailException exception) {
-                logger.error("Error sending email: {}", exception.getMessage());
-
             } catch (NotificationRendererException exception) {
                 logger.error("Error rendering email : {}", exception.getMessage());
+
+            } catch (Exception exception) {
+                logger.error("Error sending email: {}", exception.getMessage());
             }
         } else {
             logger.warn("Unable to send instance created email, $VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS is not configured");
         }
     }
 
-    @Override
     public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {
         try {
             final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(OWNER))
+                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
                 .findFirst();
             if (member.isPresent()) {
                 final User user = member.get().getUser();
                 final String subject = extensionGranted ? "[VISA] Your instance has been granted an extended lifetime" : "[VISA] Your instance has been refused an extended lifetime";
                 final NotificationRenderer renderer = new InstanceExtensionRenderer(instance, extensionGranted, handlerComments, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours);
-                final Email email = buildEmail(user.getEmail(), adminEmailAddress, subject, renderer.render());
-                mailer.sendMail(email);
+                final Mail email = buildEmail(user.getEmail(), adminEmailAddress, subject, renderer.render());
+                mailer.send(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
             }
         } catch (NotificationRendererException exception) {
             logger.error("Error rendering email : {}", exception.getMessage());
-        } catch (MailException exception) {
+
+        } catch (Exception exception) {
             logger.error("Error sending email: {}", exception.getMessage());
         }
     }

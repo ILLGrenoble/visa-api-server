@@ -2,7 +2,7 @@ package eu.ill.visa.business.services;
 
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Experiment;
 import eu.ill.visa.core.domain.Instrument;
@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class InstrumentService {
 
     private final InstrumentRepository repository;

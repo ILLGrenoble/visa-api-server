@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Configuration;
 import eu.ill.visa.persistence.repositories.ConfigurationRepository;
@@ -9,7 +9,7 @@ import eu.ill.visa.persistence.repositories.ConfigurationRepository;
 import java.util.List;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class ConfigurationService {
 
     private final ConfigurationRepository repository;

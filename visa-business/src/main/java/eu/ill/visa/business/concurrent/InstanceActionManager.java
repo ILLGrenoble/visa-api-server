@@ -1,7 +1,7 @@
 package eu.ill.visa.business.concurrent;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.concurrent.actions.InstanceAction;
 import eu.ill.visa.business.concurrent.actions.InstanceActionFactory;
 import eu.ill.visa.business.services.InstanceCommandService;
@@ -14,7 +14,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Optional;
 
-@Singleton
+@ApplicationScoped
 public class InstanceActionManager implements InstanceActionListener {
 
     private final InstanceActionDispatcher dispatcher;

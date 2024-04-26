@@ -4,7 +4,7 @@ import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.providers.InstanceJupyterSessionFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-@Singleton
+@ApplicationScoped
 public class InstanceJupyterSessionRepository extends AbstractRepository<InstanceJupyterSession> {
 
     @Inject

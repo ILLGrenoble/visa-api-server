@@ -1,23 +1,44 @@
 package eu.ill.visa.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
-public class Experiment implements Serializable {
 
+@Entity
+@Table(name = "experiment")
+public class Experiment {
+
+    @Id
+    @Column(name = "id", nullable = false)
     private String id;
+
+    @ManyToOne
+    @JoinColumn(name = "instrument_id", foreignKey = @ForeignKey(name = "fk_instrument_id"), nullable = false)
     private Instrument instrument;
+
+    @ManyToOne
+    @JoinColumn(name = "proposal_id", foreignKey = @ForeignKey(name = "fk_proposal_id"), nullable = false)
     private Proposal proposal;
+
+    @Column(name = "title", length = 2000, nullable = true)
     private String title;
+
+    @Column(name = "url", length = 2000, nullable = true)
     private String url;
+
+    @Column(name = "doi", length = 2000, nullable = true)
     private String doi;
+
+    @Column(name = "start_date", nullable = true)
     private Date startDate;
+
+    @Column(name = "end_date", nullable = true)
     private Date endDate;
 
     @JsonIgnore

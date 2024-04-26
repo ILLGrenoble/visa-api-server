@@ -3,7 +3,7 @@ package eu.ill.visa.security.authenticators;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.security.configuration.TokenConfiguration;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
 
-@Singleton
+@ApplicationScoped
 public class TokenAuthenticator implements Authenticator<String, AccountToken> {
     private static final Logger logger = LoggerFactory.getLogger(TokenAuthenticator.class);
     private final UserService userService;

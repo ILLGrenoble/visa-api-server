@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.business.http.SecurityGroupServiceClient;
 import eu.ill.visa.core.domain.*;
@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class SecurityGroupService {
 
     private final SecurityGroupRepository repository;

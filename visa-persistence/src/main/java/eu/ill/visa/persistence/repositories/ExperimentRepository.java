@@ -3,7 +3,7 @@ package eu.ill.visa.persistence.repositories;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.providers.ExperimentFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-@Singleton
+@ApplicationScoped
 public class ExperimentRepository extends AbstractRepository<Experiment> {
     private static final Logger logger = LoggerFactory.getLogger(ExperimentRepository.class);
 

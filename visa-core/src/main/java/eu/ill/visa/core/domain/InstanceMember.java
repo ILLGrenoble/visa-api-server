@@ -1,14 +1,26 @@
 package eu.ill.visa.core.domain;
 
 import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+@Entity
+@Table(name = "instance_member")
 public class InstanceMember extends Timestampable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"))
     private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", length = 50, nullable = false)
     private InstanceMemberRole role;
 
     private InstanceMember(Builder builder) {

@@ -6,7 +6,7 @@ import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.persistence.providers.InstanceFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -20,7 +20,7 @@ import java.util.Map.Entry;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-@Singleton
+@ApplicationScoped
 public class InstanceRepository extends AbstractRepository<Instance> {
 
     @Inject

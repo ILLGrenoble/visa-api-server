@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -15,7 +15,7 @@ import eu.ill.visa.core.domain.enumerations.HealthStatus;
 import java.util.List;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class HealthService {
 
     private final CloudClientGateway cloudClientGateway;

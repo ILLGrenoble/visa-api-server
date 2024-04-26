@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceAuthenticationToken;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class InstanceAuthenticationTokenService {
 
     private final InstanceAuthenticationTokenRepository repository;

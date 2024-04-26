@@ -1,7 +1,8 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.business.notification.EmailManager;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceExpiration;
@@ -15,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class InstanceExtensionRequestService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceExtensionRequestService.class);
@@ -23,17 +24,17 @@ public class InstanceExtensionRequestService {
     private final InstanceExtensionRequestRepository repository;
     private final InstanceService instanceService;
     private final InstanceExpirationService instanceExpirationService;
-    private final NotificationService notificationService;
+    private final EmailManager emailManager;
 
     @Inject
     public InstanceExtensionRequestService(final InstanceExtensionRequestRepository repository,
                                            final InstanceService instanceService,
                                            final InstanceExpirationService instanceExpirationService,
-                                           final NotificationService notificationService) {
+                                           final EmailManager emailManager) {
         this.repository = repository;
         this.instanceService = instanceService;
         this.instanceExpirationService = instanceExpirationService;
-        this.notificationService = notificationService;
+        this.emailManager = emailManager;
     }
 
     public InstanceExtensionRequest getById(Long id) {
@@ -57,7 +58,7 @@ public class InstanceExtensionRequestService {
         this.save(request);
 
         // Send email to admin
-        this.notificationService.sendInstanceExtensionRequestNotification(instance, comments);
+        this.emailManager.sendInstanceExtensionRequestNotification(instance, comments);
 
         return request;
     }
@@ -76,12 +77,12 @@ public class InstanceExtensionRequestService {
 
         // Email owner
         if (sendNotification) {
-            this.notificationService.sendInstanceExtensionNotification(instance, true, handlerComments);
+            this.emailManager.sendInstanceExtensionNotification(instance, true, handlerComments);
         }
     }
 
     public void refuseExtension(Instance instance, String handlerComments) {
         // Email owner
-        this.notificationService.sendInstanceExtensionNotification(instance, false, handlerComments);
+        this.emailManager.sendInstanceExtensionNotification(instance, false, handlerComments);
     }
 }

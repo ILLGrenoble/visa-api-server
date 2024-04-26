@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.cloud.domain.CloudInstance;
@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNullElseGet;
 import static java.util.concurrent.CompletableFuture.runAsync;
 
 
-@Singleton
+@ApplicationScoped
 public class InstanceResolver implements GraphQLResolver<Instance> {
 
     private final CloudClientGateway cloudClientGateway;

@@ -1,6 +1,6 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProvider;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.web.WebProvider;
@@ -10,7 +10,7 @@ import eu.ill.visa.cloud.services.CloudClientFactory;
 import graphql.kickstart.tools.GraphQLResolver;
 
 
-@Singleton
+@ApplicationScoped
 public class CloudClientResolver implements GraphQLResolver<CloudClient> {
 
     public OpenStackProviderConfiguration openStackProviderConfiguration(CloudClient cloudClient) {

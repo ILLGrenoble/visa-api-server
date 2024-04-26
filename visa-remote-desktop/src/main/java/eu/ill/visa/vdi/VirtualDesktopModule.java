@@ -8,7 +8,7 @@ import com.corundumstudio.socketio.store.RedissonStoreFactory;
 import com.corundumstudio.socketio.store.StoreFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.vdi.exceptions.DefaultExceptionListener;
 import org.redisson.Redisson;
 import org.redisson.config.Config;
@@ -24,7 +24,7 @@ public class VirtualDesktopModule extends AbstractModule {
 
     }
 
-    @Singleton
+    @ApplicationScoped
     @Provides
     public StoreFactory providesStoreFactory(final VirtualDesktopConfiguration configuration) {
         final boolean redisEnabled = configuration.isRedisEnabled();
@@ -47,7 +47,7 @@ public class VirtualDesktopModule extends AbstractModule {
         }
     }
 
-    @Singleton
+    @ApplicationScoped
     @Provides
     public Configuration providesConfiguration(final VirtualDesktopConfiguration configuration, final StoreFactory storeFactory) {
         final String host = configuration.getHost();
@@ -70,7 +70,7 @@ public class VirtualDesktopModule extends AbstractModule {
     }
 
     @Provides
-    @Singleton
+    @ApplicationScoped
     SocketIOServer providesSocketIOServer(final Configuration configuration) {
         return new SocketIOServer(configuration);
     }

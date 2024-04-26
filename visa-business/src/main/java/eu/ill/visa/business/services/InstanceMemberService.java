@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceMember;
@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class InstanceMemberService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceMemberService.class);

@@ -1,12 +1,12 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers.fields;
 
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.core.domain.InstanceSessionMember;
 import graphql.kickstart.tools.GraphQLResolver;
 
 import java.util.Date;
 
-@Singleton
+@ApplicationScoped
 public class InstanceSessionMemberResolver implements GraphQLResolver<InstanceSessionMember> {
 
     public Long duration(final InstanceSessionMember instanceSessionMember) {

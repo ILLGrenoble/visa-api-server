@@ -1,15 +1,27 @@
 package eu.ill.visa.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @JsonPropertyOrder({"id", "name", "port"})
+@Entity
+@Table(name = "image_protocol")
 public class ImageProtocol {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
+
+    @Column(name = "port", nullable = false)
     private Integer port;
+
+    @Column(name = "optional", nullable = true)
     private Boolean optional;
 
     public ImageProtocol() {

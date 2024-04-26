@@ -1,18 +1,30 @@
 package eu.ill.visa.core.domain;
 
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
+
 import java.util.Date;
 
+@Entity
+@Table(name = "plan")
 public class Plan extends Timestampable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "image_id", foreignKey = @ForeignKey(name = "fk_image_id"))
     private Image image;
 
+    @ManyToOne
+    @JoinColumn(name = "flavour_id", foreignKey = @ForeignKey(name = "fk_flavour_id"))
     private Flavour flavour;
 
+    @Column(name = "preset", nullable = false)
     private Boolean preset;
 
+    @Column(name = "deleted_at", nullable = true)
     private Date deletedAt;
 
     public Long getId() {

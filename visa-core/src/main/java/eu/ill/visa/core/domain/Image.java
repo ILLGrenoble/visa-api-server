@@ -1,38 +1,60 @@
 package eu.ill.visa.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import jakarta.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonPropertyOrder({"id", "name", "version", "description", "url", "icon", "computeId", "createdAt", "deletedAt"})
+@Entity
+@Table(name = "image")
 public class Image extends Timestampable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name", length = 250, nullable = false)
     private String name;
 
+    @Column(name = "description", length = 2500, nullable = true)
     private String description;
 
+    @Column(name = "icon", length = 100, nullable = false)
     private String icon;
 
+    @Column(name = "compute_id", length = 250, nullable = true)
     private String computeId;
 
+    @Column(name = "version", length = 100, nullable = true)
     private String version;
 
+    @Column(name = "deleted", nullable = false, columnDefinition = "")
     private boolean deleted = false;
 
+    @Column(name = "visible", nullable = false, columnDefinition = "")
     private boolean visible = false;
 
+    @Column(name = "boot_command", nullable = true, columnDefinition = "TEXT")
     private String bootCommand;
 
+    @Column(name = "auto_login", nullable = true)
     private String autologin;
 
+    @ManyToMany()
+    @JoinTable(
+        name = "image_protocol",
+        joinColumns = @JoinColumn(name = "image_id", foreignKey = @ForeignKey(name = "fk_image_id")),
+        inverseJoinColumns = @JoinColumn(name = "protocol_id", foreignKey = @ForeignKey(name = "fk_protocol_id"))
+    )
     private List<ImageProtocol> protocols = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = true)
     private CloudProviderConfiguration cloudProviderConfiguration;
 
     public Image() {

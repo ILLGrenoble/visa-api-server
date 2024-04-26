@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
-@Singleton
+@ApplicationScoped
 public class InstanceNameGeneratorService {
     private static final Random RANDOM = new Random();
 

@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.concurrency;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.User;
 import eu.ill.visa.vdi.domain.Role;
@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
 
-@Singleton
+@ApplicationScoped
 public class ConnectionThreadExecutor {
 
     private final ExecutorService executorService = newCachedThreadPool(new ConnectionThreadFactory());

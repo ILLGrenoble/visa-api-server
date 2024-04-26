@@ -79,7 +79,7 @@ public class CreateInstanceAction extends InstanceAction {
             instance.setState(instanceState);
 
             this.getInstanceService().save(instance);
-            this.getNotificationService().sendInstanceCreationEmail(instance);
+            this.getEmailManager().sendInstanceCreatedNotification(instance);
 
         } catch (CloudException exception) {
             this.updateInstanceState(InstanceState.ERROR);

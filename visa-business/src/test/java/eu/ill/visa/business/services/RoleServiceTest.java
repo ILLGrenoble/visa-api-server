@@ -1,5 +1,7 @@
 package eu.ill.visa.business.services;
 
+import io.quarkus.test.TestTransaction;
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import eu.ill.visa.core.domain.Role;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +13,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@ExtendWith(BusinessExtension.class)
+@QuarkusTest
+@TestTransaction
 public class RoleServiceTest {
 
     @Inject

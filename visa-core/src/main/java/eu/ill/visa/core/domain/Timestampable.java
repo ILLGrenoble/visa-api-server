@@ -1,11 +1,19 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.Column;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.util.Date;
 
 public abstract class Timestampable {
 
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
     protected Date createdAt;
 
+    @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
     protected Date updatedAt;
 
     public Date getCreatedAt() {

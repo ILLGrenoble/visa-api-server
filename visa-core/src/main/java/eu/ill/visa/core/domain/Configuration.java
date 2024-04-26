@@ -1,15 +1,23 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
+@Entity
+@Table(name = "configuration")
+public class Configuration {
 
-public class Configuration implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
 
-    private Long   id;
+    @Column(name = "key", length = 256, nullable = false)
     private String key;
+
+    @Column(name = "value", length = 8192, nullable = false)
     private String value;
 
     public Long getId() {

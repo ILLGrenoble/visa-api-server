@@ -1,40 +1,99 @@
 package eu.ill.visa.core.domain;
 
+import eu.ill.visa.core.domain.converter.CommaSeparatedListConverter;
 import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import jakarta.persistence.Transient;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table(name = "instance")
 public class Instance extends Timestampable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "uid", length = 16, nullable = false)
     private String uid;
+
+    @Column(name = "compute_id", length = 250, nullable = true)
     private String computeId;
+
+    @Column(name = "name", length = 250, nullable = false)
     private String name;
+
+    @Column(name = "comments", length = 2500, nullable = true)
     private String comments;
+
+    @ManyToOne
+    @JoinColumn(name = "plan_id", foreignKey = @ForeignKey(name = "fk_plan_id"))
     private Plan plan;
+
+    @Column(name = "username", length = 100, nullable = true)
     private String username;
+
+    @Column(name = "ip_address", nullable = true)
     private String ipAddress;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state", length = 50, nullable = false)
     private InstanceState state = InstanceState.UNKNOWN;
+
+    @Column(name = "screen_width", nullable = false)
     private Integer screenWidth;
+
+    @Column(name = "screen_height", nullable = false)
     private Integer screenHeight;
+
+    @Column(name = "last_seen_at", nullable = true)
     private Date lastSeenAt = new Date();
+
+    @Column(name = "last_interaction_at", nullable = true)
     private Date lastInteractionAt = new Date();
+
+    @Column(name = "termination_date", nullable = true)
     private Date terminationDate;
+
+    @Column(name = "deleted_at", nullable = true)
     private Date deletedAt;
+
+    @Column(name = "delete_requested", nullable = false, columnDefinition = "")
     private Boolean deleteRequested = false;
+
+    @Column(name = "unrestricted_member_access", nullable = true)
     private Date unrestrictedMemberAccess = null;
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_member_id"), nullable = false)
     private List<InstanceMember> members = new ArrayList<>();
+
+    @ManyToMany()
+    @JoinTable(
+        name = "instance_experiments",
+        joinColumns = @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id")),
+        inverseJoinColumns = @JoinColumn(name = "experiment_id", foreignKey = @ForeignKey(name = "fk_experiment_id"))
+    )
     private List<Experiment>        experiments = new ArrayList<>();
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
     private List<InstanceAttribute> attributes  = new ArrayList<>();
-    private String                  keyboardLayout;
+
+    @Column(name = "keyboard_layout", nullable = false)
+    private String keyboardLayout;
+
+    @Convert(converter = CommaSeparatedListConverter.class)
     private List<String> securityGroups = new ArrayList<>();
+
+    @Convert(converter = CommaSeparatedListConverter.class)
     private List<String> activeProtocols = new ArrayList<>();
 
     public Instance() {

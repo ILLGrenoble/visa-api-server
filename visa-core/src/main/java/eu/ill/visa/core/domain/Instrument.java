@@ -1,16 +1,29 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class Instrument implements Serializable {
+@Entity
+@Table(name = "instrument")
+public class Instrument {
 
-    private Long   id;
-    private String     name;
+    @Id
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @Column(name = "name", length = 250, nullable = false)
+    private String name;
+
+    @ManyToMany()
+    @JoinTable(
+        name = "instrument_scientist",
+        joinColumns = @JoinColumn(name = "instrument_id", foreignKey = @ForeignKey(name = "fk_instrument_id")),
+        inverseJoinColumns = @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"))
+    )
     private List<User> scientists;
 
     public Long getId() {

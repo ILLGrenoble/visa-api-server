@@ -4,13 +4,13 @@ import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
 import eu.ill.visa.core.domain.User;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-@Singleton
+@ApplicationScoped
 public class InstanceCommandRepository extends AbstractRepository<InstanceCommand> {
 
     @Inject

@@ -1,6 +1,7 @@
 package eu.ill.visa.business.concurrent.actions;
 
 import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionException;
+import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.ImageProtocol;
@@ -16,8 +17,8 @@ import java.util.stream.Collectors;
 
 public abstract class InstanceAction {
 
-    private InstanceActionServiceProvider serviceProvider;
-    private InstanceCommand command;
+    private final InstanceActionServiceProvider serviceProvider;
+    private final InstanceCommand command;
 
     public InstanceAction(InstanceActionServiceProvider serviceProvider, InstanceCommand command) {
         this.serviceProvider = serviceProvider;
@@ -28,8 +29,8 @@ public abstract class InstanceAction {
         return this.serviceProvider.getCloudClient(cloudClientId);
     }
 
-    public NotificationService getNotificationService() {
-        return this.serviceProvider.getNotificationService();
+    public EmailManager getEmailManager() {
+        return this.serviceProvider.getEmailManager();
     }
 
     public InstanceService getInstanceService() {

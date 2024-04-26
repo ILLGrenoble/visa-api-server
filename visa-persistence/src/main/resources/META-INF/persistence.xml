@@ -70,6 +70,11 @@
         <class>eu.ill.visa.core.domain.CloudProviderConfiguration</class>
         <class>eu.ill.visa.core.domain.CloudProviderConfiguration$CloudProviderConfigurationParameter</class>
 
+        <properties>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.show_sql" value="false"/>
+        </properties>
+
     </persistence-unit>
 
 </persistence>

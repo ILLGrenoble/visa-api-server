@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.queries.resolvers;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;
@@ -36,7 +36,7 @@ import static java.util.Objects.requireNonNullElseGet;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.stream.Collectors.toList;
 
-@Singleton
+@ApplicationScoped
 public class QueryResolver implements GraphQLQueryResolver {
 
     private final InstrumentService                 instrumentService;

@@ -1,11 +1,27 @@
 package eu.ill.visa.core.domain;
 
 import eu.ill.visa.core.domain.enumerations.InstanceActivityType;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "instance_activity")
 public class InstanceActivity extends Timestampable {
-    private Long   id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = true)
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
     private Instance instance;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "instance_activity_type", length = 50, nullable = false)
     private InstanceActivityType instanceActivityType;
 
     public InstanceActivity() {

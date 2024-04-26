@@ -1,19 +1,29 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import static java.util.Objects.requireNonNull;
 
+@Entity
+@Table(name = "flavour_limit")
 public class FlavourLimit {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "object_id", nullable = false)
     private Long objectId;
 
+    @Column(name = "object_type", nullable = false)
     private String objectType;
 
+    @ManyToOne
+    @JoinColumn(name = "flavour_id", foreignKey = @ForeignKey(name = "fk_flavour_id"), nullable = false)
     private Flavour flavour;
 
     public FlavourLimit() {

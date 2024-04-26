@@ -1,18 +1,37 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table(name = "cloud_provider_configuration")
 public class CloudProviderConfiguration extends Timestampable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "type", length = 100, nullable = false)
     private String type;
+
+    @Column(name = "name", length = 100, nullable = true)
     private String name;
+
+    @Column(name = "server_name_prefix", length = 100, nullable = false)
     private String serverNamePrefix;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = false)
     private List<CloudProviderConfigurationParameter> parameters = new ArrayList<>();
 
+    @Column(name = "visible", nullable = false, columnDefinition = "")
     private boolean visible = false;
+
+    @Column(name = "deleted_at", nullable = true)
     private Date deletedAt;
 
     public CloudProviderConfiguration() {
@@ -91,9 +110,19 @@ public class CloudProviderConfiguration extends Timestampable {
         }
     }
 
+    @Entity
+    @Table(name = "cloud_provider_configuration_parameter")
     public static class CloudProviderConfigurationParameter extends Timestampable {
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "id", nullable = false)
         private Long id;
+
+        @Column(name = "key", length = 256, nullable = false)
         private String key;
+
+        @Column(name = "value", length = 8192, nullable = false)
         private String value;
 
         public CloudProviderConfigurationParameter() {

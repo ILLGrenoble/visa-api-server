@@ -9,7 +9,7 @@ public interface BusinessConfiguration {
 
     Integer numberInstanceActionThreads();
 
-    List<NotificationConfiguration> notificationConfiguration();
+    List<MailerConfiguration> notificationConfiguration();
 
     InstanceConfiguration instanceConfiguration();
 

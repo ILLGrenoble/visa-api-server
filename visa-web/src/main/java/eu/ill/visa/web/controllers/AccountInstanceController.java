@@ -60,7 +60,7 @@ public class AccountInstanceController extends AbstractController {
     private final PlanService planService;
     private final UserService userService;
     private final ExperimentService experimentService;
-    private final NotificationService notificationService;
+    private final EmailManager emailManager;
     private final DesktopConfiguration desktopConfiguration;
     private final ClientConfiguration clientConfiguration;
     private final Mapper mapper;
@@ -76,7 +76,7 @@ public class AccountInstanceController extends AbstractController {
                                      final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
                                      final PlanService planService,
                                      final ExperimentService experimentService,
-                                     final NotificationService notificationService,
+                                     final EmailManager emailManager,
                                      final DesktopConfiguration desktopConfiguration,
                                      final ClientConfiguration clientConfiguration,
                                      final Mapper mapper) {
@@ -90,7 +90,7 @@ public class AccountInstanceController extends AbstractController {
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
         this.planService = planService;
         this.experimentService = experimentService;
-        this.notificationService = notificationService;
+        this.emailManager = emailManager;
         this.desktopConfiguration = desktopConfiguration;
         this.clientConfiguration = clientConfiguration;
         this.mapper = mapper;
@@ -451,7 +451,7 @@ public class AccountInstanceController extends AbstractController {
 
                 this.instanceService.save(instance);
 
-                notificationService.sendInstanceMemberAddedNotification(instance, instanceMember);
+                emailManager.sendInstanceMemberAddedNotification(instance, instanceMember);
 
                 return createResponse(mapper.map(instanceMember, InstanceMemberDto.class));
 

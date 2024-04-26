@@ -1,17 +1,31 @@
 package eu.ill.visa.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.io.Serializable;
 import java.util.Date;
 
+@Entity
+@Table(name = "user_role")
 public class UserRole {
+
+    @EmbeddedId
     private UserRoleKey id;
 
+    @ManyToOne
+    @MapsId("userId")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"))
     private User user;
+
+    @ManyToOne
+    @MapsId("roleId")
+    @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role_id"))
     private Role role;
+
+    @Column(name = "expires_at", nullable = true)
     private Date expiresAt;
 
     public UserRole() {

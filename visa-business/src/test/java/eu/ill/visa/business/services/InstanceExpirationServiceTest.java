@@ -1,13 +1,14 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceExpiration;
+import io.quarkus.test.TestTransaction;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Date;
 import java.util.List;
@@ -15,7 +16,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@ExtendWith(BusinessExtension.class)
+@QuarkusTest
+@TestTransaction
 public class InstanceExpirationServiceTest {
 
     @Inject
@@ -138,7 +140,7 @@ public class InstanceExpirationServiceTest {
         instanceExpirationService.createExpirationForAllInactiveInstances();
         assertEquals(initialExpirations.size(), instanceExpirationService.getAll().size());
 
-        Date lastActiveTime = DateUtils.addHours(new Date(), -this.instanceConfiguration.getUserMaxInactivityDurationHours() + 24);
+        Date lastActiveTime = DateUtils.addHours(new Date(), -this.instanceConfiguration.userMaxInactivityDurationHours() + 24);
         Instance instance = instanceService.getById(1002L);
         instance.setLastSeenAt(lastActiveTime);
         instanceService.save(instance);
@@ -187,7 +189,7 @@ public class InstanceExpirationServiceTest {
         instanceExpirationService.createExpirationForAllInactiveInstances();
         assertEquals(initialExpirations.size(), instanceExpirationService.getAll().size());
 
-        Date lastActiveTime = DateUtils.addHours(new Date(), -this.instanceConfiguration.getUserMaxInactivityDurationHours() + InstanceExpirationService.HOURS_BEFORE_EXPIRATION_INACTIVITY);
+        Date lastActiveTime = DateUtils.addHours(new Date(), -this.instanceConfiguration.userMaxInactivityDurationHours() + InstanceExpirationService.HOURS_BEFORE_EXPIRATION_INACTIVITY);
         Instance instance = instanceService.getById(1002L);
         instance.setLastSeenAt(lastActiveTime);
         instance.setTerminationDate(null);

@@ -1,15 +1,34 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
+
 import java.util.Date;
 
+@Entity
+@Table(name = "application_credential")
 public class ApplicationCredential {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "name", length = 250, nullable = false)
     private String name;
+
+    @Column(name = "salt", nullable = false)
     private String salt;
+
+    @Column(name = "application_id", nullable = false)
     private String applicationId;
+
+    @Column(name = "application_secret", nullable = false)
     private String applicationSecret;
+
+    @Column(name = "last_used_at")
     private Date lastUsedAt;
+
+    @Column(name = "deleted_at")
     private Date deletedAt;
 
     public ApplicationCredential() {

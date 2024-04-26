@@ -6,7 +6,7 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.store.StoreFactory;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.services.InstanceExpirationService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.domain.Instance;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import static eu.ill.visa.vdi.events.Event.ACCESS_REVOKED_EVENT;
 import static eu.ill.visa.vdi.events.Event.OWNER_AWAY_EVENT;
 
-@Singleton
+@ApplicationScoped
 public class DesktopConnectionService {
     private final static String PROTOCOL_PARAMETER = "protocol";
     private final static Logger logger = LoggerFactory.getLogger(DesktopConnectionService.class);

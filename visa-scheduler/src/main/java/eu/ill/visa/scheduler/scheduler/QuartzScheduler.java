@@ -5,9 +5,9 @@ import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 
-@Singleton
+@ApplicationScoped
 public class QuartzScheduler {
 
     private final Scheduler scheduler;

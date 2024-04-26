@@ -1,7 +1,7 @@
 package eu.ill.visa.web.bundles.graphql.directives;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.security.authorizers.ApplicationAuthorizer;
 import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.bundles.graphql.context.AuthenticationContext;
@@ -12,7 +12,7 @@ import graphql.schema.GraphQLFieldsContainer;
 import graphql.schema.idl.SchemaDirectiveWiring;
 import graphql.schema.idl.SchemaDirectiveWiringEnvironment;
 
-@Singleton
+@ApplicationScoped
 public class RoleDirective implements SchemaDirectiveWiring {
 
     private final ApplicationAuthorizer authorizer;

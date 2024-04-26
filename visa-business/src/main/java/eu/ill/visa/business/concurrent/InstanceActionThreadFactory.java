@@ -1,5 +1,6 @@
 package eu.ill.visa.business.concurrent;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class InstanceActionThreadFactory implements ThreadFactory {
 
         public static String getThreadName() {
             if (threadName.get() == null) {
-                threadName.set("InstanceActionThread-" + Thread.currentThread().getId());
+                threadName.set("InstanceActionThread-" + Thread.currentThread().getName());
                 log.debug("Creating new thread " + threadName.get());
             }
 
@@ -36,7 +37,7 @@ public class InstanceActionThreadFactory implements ThreadFactory {
     }
 
     @Override
-    public Thread newThread(Runnable runnable) {
+    public Thread newThread(@NotNull Runnable runnable) {
         return new TaskThread(runnable);
     }
 }

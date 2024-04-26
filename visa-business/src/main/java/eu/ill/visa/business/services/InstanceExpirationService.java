@@ -1,6 +1,7 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.InstanceConfiguration;
+import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.core.domain.Instance;
 import eu.ill.visa.core.domain.InstanceCommand;
 import eu.ill.visa.core.domain.InstanceExpiration;
@@ -9,7 +10,7 @@ import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
 import eu.ill.visa.core.domain.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceExpirationRepository;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.time.DateUtils;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Transactional
-@Singleton
+@ApplicationScoped
 public class InstanceExpirationService {
 
     public static final  int                          HOURS_BEFORE_EXPIRATION_INACTIVITY = 24;
@@ -32,19 +33,19 @@ public class InstanceExpirationService {
     private final InstanceService instanceService;
     private final InstanceCommandService instanceCommandService;
     private final InstanceConfiguration configuration;
-    private final NotificationService notificationService;
+    private final EmailManager emailManager;
 
     @Inject
     public InstanceExpirationService(InstanceExpirationRepository repository,
                                      InstanceService instanceService,
                                      InstanceCommandService instanceCommandService,
                                      InstanceConfiguration configuration,
-                                     NotificationService notificationService) {
+                                     EmailManager emailManager) {
         this.repository = repository;
         this.instanceService = instanceService;
         this.instanceCommandService = instanceCommandService;
         this.configuration = configuration;
-        this.notificationService = notificationService;
+        this.emailManager = emailManager;
     }
 
     public List<InstanceExpiration> getAll() {
@@ -100,7 +101,7 @@ public class InstanceExpirationService {
                         this.delete(instanceExpiration);
 
                         // Email user
-                        notificationService.sendInstanceDeletedNotification(instance, instanceExpiration);
+                        emailManager.sendInstanceDeletedNotification(instance, instanceExpiration);
 
                     } else {
                         logger.error("Failed to delete expired instance {}, current state is {}", instance.getId(), instance.getState().toString());
@@ -163,7 +164,7 @@ public class InstanceExpirationService {
             logger.info("Scheduled expiration for instance {} due to inactivity", instance.getId());
 
             // Email user
-            notificationService.sendInstanceExpiringNotification(instance, expirationDate);
+            emailManager.sendInstanceExpiringNotification(instance, expirationDate);
         }
     }
 
@@ -175,7 +176,7 @@ public class InstanceExpirationService {
                 logger.info("Scheduled expiration for instance {} as it is reaching its lifetime limit", instance.getId());
 
                 // Email user
-                notificationService.sendInstanceLifetimeNotification(instance);
+                emailManager.sendInstanceLifetimeNotification(instance);
             }
         }
     }

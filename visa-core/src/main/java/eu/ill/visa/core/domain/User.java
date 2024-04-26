@@ -1,36 +1,49 @@
 package eu.ill.visa.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import jakarta.persistence.Transient;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class User implements Serializable {
+@Entity
+@Table(name = "users")
+public class User {
 
+    @Id
+    @Column(name = "id", nullable = false)
     private String id;
 
+    @Column(name = "first_name", length = 100, nullable = true)
     private String firstName;
 
+    @Column(name = "last_name", length = 100, nullable = false)
     private String lastName;
 
     @JsonIgnore
+    @Column(name = "email", length = 100, nullable = true)
     private String email;
 
+    @ManyToOne
+    @JoinColumn(name = "affiliation_id", foreignKey = @ForeignKey(name = "fk_affiliation_id"), nullable = true)
     private Employer affiliation;
 
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = false, insertable = false, updatable = false)
     private List<UserRole> userRoles = new ArrayList<>();
 
+    @Column(name = "last_seen_at", nullable = true)
     private Date lastSeenAt;
 
+    @Column(name = "activated_at", nullable = true)
     private Date activatedAt;
 
+    @Column(name = "instance_quota", nullable = false)
     private Integer instanceQuota;
 
     public User() {
@@ -52,6 +65,7 @@ public class User implements Serializable {
         this.email = email;
     }
 
+    @Transient
     public String getFullName() {
         return String.format("%s %s", this.firstName, this.lastName);
     }

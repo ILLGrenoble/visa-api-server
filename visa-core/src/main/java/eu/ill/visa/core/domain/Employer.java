@@ -1,19 +1,25 @@
 package eu.ill.visa.core.domain;
 
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
+@Entity
+@Table(name = "employer")
+public class Employer {
 
-public class Employer implements Serializable {
-
+    @Id
+    @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name", length = 200, nullable = true)
     private String name;
 
+    @Column(name = "town", length = 100, nullable = true)
     private String town;
 
+    @Column(name = "country_code", length = 10, nullable = true)
     private String countryCode;
 
     public Employer() {
