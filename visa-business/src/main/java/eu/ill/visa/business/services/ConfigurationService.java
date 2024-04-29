@@ -3,7 +3,7 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.Configuration;
+import eu.ill.visa.core.entity.Configuration;
 import eu.ill.visa.persistence.repositories.ConfigurationRepository;
 
 import java.util.List;

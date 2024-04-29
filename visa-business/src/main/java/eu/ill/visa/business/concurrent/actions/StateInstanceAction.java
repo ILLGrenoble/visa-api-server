@@ -5,8 +5,8 @@ import eu.ill.visa.business.services.PortService;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceState;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.domain.*;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

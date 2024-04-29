@@ -4,7 +4,7 @@ import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.ProviderConfigurationImpl;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.CloudProviderConfiguration;
+import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.persistence.repositories.CloudProviderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

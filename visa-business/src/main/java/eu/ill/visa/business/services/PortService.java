@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.ImageProtocol;
+import eu.ill.visa.core.entity.ImageProtocol;
 
 import java.io.IOException;
 import java.net.Socket;

@@ -1,5 +1,7 @@
 package eu.ill.visa.core.domain;
 
+import eu.ill.visa.core.entity.ImageProtocol;
+
 public class ProtocolStatus {
 
     private ImageProtocol protocol;

@@ -1,7 +1,8 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.domain.*;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
+import eu.ill.visa.core.entity.*;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -11,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static eu.ill.visa.core.domain.enumerations.InstanceMemberRole.OWNER;
+import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 

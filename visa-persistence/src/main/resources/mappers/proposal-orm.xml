@@ -12,7 +12,7 @@
         <query>SELECT p FROM Proposal p ORDER BY p.identifier ASC</query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.Proposal">
+    <entity class="eu.ill.visa.core.entity.Proposal">
         <table name="proposal"/>
         <attributes>
             <id name="id">

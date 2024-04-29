@@ -12,14 +12,14 @@
         </query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.InstanceThumbnail">
+    <entity class="eu.ill.visa.core.entity.InstanceThumbnail">
 
         <table name="instance_thumbnail">
             <unique-constraint name="uk_instance_thumbnail_instance_id">
                 <column-name>instance_id</column-name>
             </unique-constraint>
         </table>
-        <convert converter="eu.ill.visa.persistence.converter.Base64Converter"  attribute-name="data"/>
+        <convert converter="eu.ill.visa.core.entity.converter.Base64Converter" attribute-name="data"/>
 
         <attributes>
             <id name="id">

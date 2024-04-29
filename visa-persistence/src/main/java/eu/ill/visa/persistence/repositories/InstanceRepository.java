@@ -2,8 +2,12 @@ package eu.ill.visa.persistence.repositories;
 
 import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
-import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.InstanceThumbnail;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.providers.InstanceFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;

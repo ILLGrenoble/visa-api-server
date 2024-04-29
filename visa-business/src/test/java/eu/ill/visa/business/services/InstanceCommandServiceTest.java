@@ -1,10 +1,10 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.User;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandState;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandState;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.persistence.repositories.UserRepository;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;

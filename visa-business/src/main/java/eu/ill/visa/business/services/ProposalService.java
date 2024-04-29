@@ -2,7 +2,7 @@ package eu.ill.visa.business.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.Proposal;
+import eu.ill.visa.core.entity.Proposal;
 import eu.ill.visa.persistence.repositories.ProposalRepository;
 
 import jakarta.inject.Inject;

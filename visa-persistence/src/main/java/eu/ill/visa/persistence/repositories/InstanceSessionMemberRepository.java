@@ -2,6 +2,9 @@ package eu.ill.visa.persistence.repositories;
 
 import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.persistence.providers.InstanceSessionMemberFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;

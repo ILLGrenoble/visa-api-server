@@ -1,7 +1,7 @@
 package eu.ill.visa.persistence.providers;
 
 import eu.ill.preql.AbstractFilterQueryProvider;
-import eu.ill.visa.core.domain.FlavourLimit;
+import eu.ill.visa.core.entity.FlavourLimit;
 
 import jakarta.persistence.EntityManager;
 

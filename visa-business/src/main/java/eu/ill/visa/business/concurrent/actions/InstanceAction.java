@@ -4,11 +4,11 @@ import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionExceptio
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.domain.ImageProtocol;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandState;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.ImageProtocol;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandState;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

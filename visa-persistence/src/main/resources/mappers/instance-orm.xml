@@ -241,10 +241,10 @@
         </constructor-result>
     </sql-result-set-mapping>
 
-    <entity class="eu.ill.visa.core.domain.Instance">
+    <entity class="eu.ill.visa.core.entity.Instance">
         <table name="instance"/>
-        <convert converter="eu.ill.visa.persistence.converter.CommaSeparatedListConverter" attribute-name="securityGroups"/>
-        <convert converter="eu.ill.visa.persistence.converter.CommaSeparatedListConverter" attribute-name="activeProtocols"/>
+        <convert converter="eu.ill.visa.core.entity.converter.CommaSeparatedListConverter" attribute-name="securityGroups"/>
+        <convert converter="eu.ill.visa.core.entity.converter.CommaSeparatedListConverter" attribute-name="activeProtocols"/>
 
         <attributes>
             <id name="id">
@@ -330,7 +330,7 @@
                     <cascade-refresh/>
                 </cascade>
             </one-to-many>
-            <many-to-many name="experiments" target-entity="eu.ill.visa.core.domain.Experiment">
+            <many-to-many name="experiments" target-entity="eu.ill.visa.core.entity.Experiment">
                 <join-table name="instance_experiment">
                     <join-column name="instance_id"/>
                     <foreign-key name="fk_instance_id"/>

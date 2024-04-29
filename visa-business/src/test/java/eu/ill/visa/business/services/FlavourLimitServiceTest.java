@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.Flavour;
-import eu.ill.visa.core.domain.FlavourLimit;
+import eu.ill.visa.core.entity.Flavour;
+import eu.ill.visa.core.entity.FlavourLimit;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;

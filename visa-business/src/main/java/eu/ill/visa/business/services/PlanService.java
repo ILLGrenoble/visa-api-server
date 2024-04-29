@@ -1,5 +1,9 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.core.entity.Experiment;
+import eu.ill.visa.core.entity.Instrument;
+import eu.ill.visa.core.entity.Plan;
+import eu.ill.visa.core.entity.User;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;

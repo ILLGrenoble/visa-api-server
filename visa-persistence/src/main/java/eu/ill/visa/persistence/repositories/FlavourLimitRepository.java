@@ -1,7 +1,7 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.Flavour;
-import eu.ill.visa.core.domain.FlavourLimit;
+import eu.ill.visa.core.entity.Flavour;
+import eu.ill.visa.core.entity.FlavourLimit;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;

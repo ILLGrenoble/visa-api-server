@@ -3,10 +3,9 @@ package eu.ill.visa.business.services;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import eu.ill.visa.core.domain.InstanceMember;
+import eu.ill.visa.core.entity.InstanceMember;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 

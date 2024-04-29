@@ -3,7 +3,7 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.Role;
+import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.persistence.repositories.RoleRepository;
 
 import jakarta.validation.constraints.NotNull;

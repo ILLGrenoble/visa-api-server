@@ -1,6 +1,11 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.entity.SecurityGroup;
+import eu.ill.visa.core.entity.CloudProviderConfiguration;
+import eu.ill.visa.core.entity.Flavour;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.providers.SecurityGroupFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,7 +30,7 @@ public class SecurityGroupRepository extends AbstractRepository<SecurityGroup> {
         return query.getResultList();
     }
 
-    public List<SecurityGroup> getAll(QueryFilter filter,  OrderBy orderBy) {
+    public List<SecurityGroup> getAll(QueryFilter filter, OrderBy orderBy) {
         final SecurityGroupFilterProvider provider = new SecurityGroupFilterProvider(getEntityManager());
         List<SecurityGroup> allSecurityGroups = super.getAll(provider, filter, orderBy);
 

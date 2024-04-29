@@ -1,6 +1,6 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.ApplicationCredential;
+import eu.ill.visa.core.entity.ApplicationCredential;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;

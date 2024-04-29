@@ -9,7 +9,7 @@ import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.HealthReport;
 import eu.ill.visa.core.domain.HealthState;
-import eu.ill.visa.core.domain.Image;
+import eu.ill.visa.core.entity.Image;
 import eu.ill.visa.core.domain.enumerations.HealthStatus;
 
 import java.util.List;

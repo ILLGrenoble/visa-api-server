@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.Image;
-import eu.ill.visa.core.domain.ImageProtocol;
+import eu.ill.visa.core.entity.Image;
+import eu.ill.visa.core.entity.ImageProtocol;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;

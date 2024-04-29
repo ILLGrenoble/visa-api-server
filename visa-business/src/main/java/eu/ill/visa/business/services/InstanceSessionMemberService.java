@@ -3,7 +3,7 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.InstanceSessionMember;
+import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;

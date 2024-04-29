@@ -3,8 +3,8 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.Flavour;
-import eu.ill.visa.core.domain.FlavourLimit;
+import eu.ill.visa.core.entity.Flavour;
+import eu.ill.visa.core.entity.FlavourLimit;
 import eu.ill.visa.persistence.repositories.FlavourLimitRepository;
 
 import jakarta.validation.constraints.NotNull;

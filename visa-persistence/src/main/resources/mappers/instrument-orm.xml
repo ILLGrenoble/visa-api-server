@@ -22,7 +22,7 @@
         </query>
     </named-query>
 
-    <named-native-query name="instrument.getAll" result-class="eu.ill.visa.core.domain.Instrument">
+    <named-native-query name="instrument.getAll" result-class="eu.ill.visa.core.entity.Instrument">
         <query>
             <![CDATA[
                 SELECT i.id, i.name
@@ -37,7 +37,7 @@
         </query>
     </named-native-query>
 
-    <named-native-query name="instrument.getAllForExperimentsAndInstrumentScientist" result-class="eu.ill.visa.core.domain.Instrument">
+    <named-native-query name="instrument.getAllForExperimentsAndInstrumentScientist" result-class="eu.ill.visa.core.entity.Instrument">
         <query>
             <![CDATA[
                 SELECT DISTINCT i.id, i.name
@@ -53,7 +53,7 @@
         </query>
     </named-native-query>
 
-    <named-native-query name="instrument.getAllForInstrumentScientist" result-class="eu.ill.visa.core.domain.Instrument">
+    <named-native-query name="instrument.getAllForInstrumentScientist" result-class="eu.ill.visa.core.entity.Instrument">
         <query>
             <![CDATA[
                 select DISTINCT i.id, i.name
@@ -64,7 +64,7 @@
         </query>
     </named-native-query>
 
-    <entity class="eu.ill.visa.core.domain.Instrument">
+    <entity class="eu.ill.visa.core.entity.Instrument">
         <table name="instrument"/>
         <attributes>
             <id name="id">
@@ -73,7 +73,7 @@
             <basic name="name">
                 <column name="name" nullable="false" length="250"/>
             </basic>
-            <many-to-many name="scientists" target-entity="eu.ill.visa.core.domain.User">
+            <many-to-many name="scientists" target-entity="eu.ill.visa.core.entity.User">
                 <join-table name="instrument_scientist">
                     <join-column name="instrument_id"/>
                     <foreign-key name="fk_instrument_id"/>

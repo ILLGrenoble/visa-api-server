@@ -24,7 +24,7 @@
         <query>SELECT count(sgf.id) FROM SecurityGroupFilter sgf</query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.SecurityGroupFilter">
+    <entity class="eu.ill.visa.core.entity.SecurityGroupFilter">
         <table name="security_group_filter"/>
         <attributes>
             <id name="id">

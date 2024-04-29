@@ -28,7 +28,7 @@
         <query>SELECT a FROM InstanceCommand a where a.instance = :instance order by a.id</query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.InstanceCommand">
+    <entity class="eu.ill.visa.core.entity.InstanceCommand">
         <table name="instance_command"/>
         <attributes>
             <id name="id">

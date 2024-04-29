@@ -4,10 +4,10 @@ import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.ClientNotification;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceExtensionRequest;
-import eu.ill.visa.core.domain.SystemNotification;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceExtensionRequest;
+import eu.ill.visa.core.entity.SystemNotification;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.SystemNotificationRepository;
 
 import jakarta.validation.constraints.NotNull;

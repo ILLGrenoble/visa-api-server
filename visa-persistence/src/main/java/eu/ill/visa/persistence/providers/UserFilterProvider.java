@@ -1,7 +1,7 @@
 package eu.ill.visa.persistence.providers;
 
 import eu.ill.preql.AbstractFilterQueryProvider;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.User;
 
 import jakarta.persistence.EntityManager;
 

@@ -1,6 +1,10 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.entity.Experiment;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.Instrument;
+import eu.ill.visa.core.entity.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;

@@ -1,7 +1,7 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceSession;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceSession;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;

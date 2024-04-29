@@ -1,6 +1,6 @@
 package eu.ill.visa.business.concurrent;
 
-import eu.ill.visa.core.domain.Instance;
+import eu.ill.visa.core.entity.Instance;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

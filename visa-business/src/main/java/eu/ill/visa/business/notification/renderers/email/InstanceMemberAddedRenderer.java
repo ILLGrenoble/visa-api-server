@@ -4,9 +4,9 @@ import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 import eu.ill.visa.business.NotificationRendererException;
 import eu.ill.visa.business.notification.NotificationRenderer;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceMember;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.User;
 
 import java.io.IOException;
 import java.io.StringWriter;

@@ -16,7 +16,7 @@
         <query>SELECT i FROM ImageProtocol i ORDER BY i.name ASC</query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.ImageProtocol">
+    <entity class="eu.ill.visa.core.entity.ImageProtocol">
         <table name="protocol"/>
         <attributes>
             <id name="id">

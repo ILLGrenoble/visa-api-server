@@ -112,7 +112,7 @@
         </query>
     </named-query>
 
-    <named-native-query name="user.getExperimentalTeamForInstance" result-class="eu.ill.visa.core.domain.User">
+    <named-native-query name="user.getExperimentalTeamForInstance" result-class="eu.ill.visa.core.entity.User">
         <query>
             SELECT DISTINCT u.id, u.affiliation_id, u.email, u.first_name, u.last_name, u.activated_at, u.last_seen_at, u.instance_quota
             FROM users u
@@ -126,7 +126,7 @@
         </query>
     </named-native-query>
 
-    <entity class="eu.ill.visa.core.domain.User">
+    <entity class="eu.ill.visa.core.entity.User">
         <table name="users"/>
         <attributes>
             <id name="id">

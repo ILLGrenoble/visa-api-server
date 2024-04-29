@@ -55,7 +55,7 @@
     </named-query>
 
     <named-native-query name="securityGroup.getRoleBasedSecurityGroups"
-                        result-class="eu.ill.visa.core.domain.SecurityGroup">
+                        result-class="eu.ill.visa.core.entity.SecurityGroup">
         <query>
             <![CDATA[
                 SELECT DISTINCT sg.id, sg.name, sg.cloud_provider_configuration_id
@@ -74,7 +74,7 @@
     </named-native-query>
 
     <named-native-query name="securityGroup.getFlavourBasedSecurityGroups"
-                        result-class="eu.ill.visa.core.domain.SecurityGroup">
+                        result-class="eu.ill.visa.core.entity.SecurityGroup">
         <query>
             <![CDATA[
                 SELECT DISTINCT sg.id, sg.name, sg.cloud_provider_configuration_id
@@ -90,7 +90,7 @@
         </query>
     </named-native-query>
 
-    <entity class="eu.ill.visa.core.domain.SecurityGroup">
+    <entity class="eu.ill.visa.core.entity.SecurityGroup">
         <table name="security_group"/>
         <attributes>
             <id name="id">

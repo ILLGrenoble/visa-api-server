@@ -23,7 +23,7 @@
         </query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.InstanceExpiration">
+    <entity class="eu.ill.visa.core.entity.InstanceExpiration">
         <table name="instance_expiration">
             <unique-constraint name="uk_instance_expiration_instance_id">
                 <column-name>instance_id</column-name>

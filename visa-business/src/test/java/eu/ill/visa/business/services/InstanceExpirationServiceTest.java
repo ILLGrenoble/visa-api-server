@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.InstanceConfiguration;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceExpiration;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceExpiration;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;

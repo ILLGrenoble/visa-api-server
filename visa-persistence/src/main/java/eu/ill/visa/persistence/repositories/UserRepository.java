@@ -1,6 +1,8 @@
 package eu.ill.visa.persistence.repositories;
 
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.providers.UserFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;

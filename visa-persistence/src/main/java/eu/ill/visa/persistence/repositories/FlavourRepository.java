@@ -1,6 +1,6 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.Flavour;
+import eu.ill.visa.core.entity.Flavour;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;

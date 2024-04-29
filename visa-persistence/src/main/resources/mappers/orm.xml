@@ -3,7 +3,7 @@
                  xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
                  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
                  version="2.2">
-    <mapped-superclass class="eu.ill.visa.core.domain.Timestampable">
+    <mapped-superclass class="eu.ill.visa.core.entity.Timestampable">
         <entity-listeners>
             <entity-listener class="eu.ill.visa.persistence.listeners.TimestampableEntityListener">
                 <pre-persist method-name="onCreate"/>

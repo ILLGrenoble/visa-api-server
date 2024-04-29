@@ -3,9 +3,9 @@ package eu.ill.visa.persistence.providers;
 import eu.ill.preql.AbstractFilterQueryProvider;
 import eu.ill.preql.parser.FieldValueParser;
 import eu.ill.preql.parser.value.StringValueParser;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 
 import jakarta.persistence.EntityManager;
 

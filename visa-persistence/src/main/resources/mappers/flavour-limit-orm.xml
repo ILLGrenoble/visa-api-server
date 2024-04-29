@@ -32,7 +32,7 @@
         </query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.FlavourLimit">
+    <entity class="eu.ill.visa.core.entity.FlavourLimit">
         <table name="flavour_limit"/>
         <attributes>
             <id name="id">

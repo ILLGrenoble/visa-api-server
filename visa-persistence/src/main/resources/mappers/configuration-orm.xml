@@ -8,7 +8,7 @@
         <query>SELECT c FROM Configuration c</query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.Configuration">
+    <entity class="eu.ill.visa.core.entity.Configuration">
         <table name="configuration"/>
         <attributes>
             <id name="id">

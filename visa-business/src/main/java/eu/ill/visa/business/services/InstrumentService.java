@@ -4,9 +4,9 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.Experiment;
-import eu.ill.visa.core.domain.Instrument;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Experiment;
+import eu.ill.visa.core.entity.Instrument;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.InstrumentRepository;
 
 import jakarta.validation.constraints.NotNull;

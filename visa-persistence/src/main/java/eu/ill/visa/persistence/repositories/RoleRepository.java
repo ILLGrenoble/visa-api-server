@@ -1,6 +1,6 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.Role;
+import eu.ill.visa.core.entity.Role;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;

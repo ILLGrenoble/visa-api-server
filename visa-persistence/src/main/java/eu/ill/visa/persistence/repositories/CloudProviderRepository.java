@@ -1,6 +1,6 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.CloudProviderConfiguration;
+import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;

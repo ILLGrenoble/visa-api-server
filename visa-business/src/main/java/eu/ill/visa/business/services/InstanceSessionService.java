@@ -1,9 +1,9 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.core.entity.*;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.InstanceSessionMemberRepository;
 import eu.ill.visa.persistence.repositories.InstanceSessionRepository;
 import org.slf4j.Logger;

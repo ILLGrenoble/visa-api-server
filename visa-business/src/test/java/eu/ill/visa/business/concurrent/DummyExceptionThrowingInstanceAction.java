@@ -2,8 +2,8 @@ package eu.ill.visa.business.concurrent;
 
 import eu.ill.visa.business.concurrent.actions.InstanceAction;
 import eu.ill.visa.business.concurrent.actions.InstanceActionServiceProvider;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandState;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

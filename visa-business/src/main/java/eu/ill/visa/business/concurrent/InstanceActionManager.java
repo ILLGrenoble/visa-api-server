@@ -5,9 +5,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.concurrent.actions.InstanceAction;
 import eu.ill.visa.business.concurrent.actions.InstanceActionFactory;
 import eu.ill.visa.business.services.InstanceCommandService;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandState;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandState;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

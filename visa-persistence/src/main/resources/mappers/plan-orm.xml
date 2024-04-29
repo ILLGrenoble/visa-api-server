@@ -171,7 +171,7 @@
         </query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.Plan">
+    <entity class="eu.ill.visa.core.entity.Plan">
         <table name="plan"/>
         <attributes>
             <id name="id">

@@ -24,7 +24,7 @@
         </query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.InstanceMember">
+    <entity class="eu.ill.visa.core.entity.InstanceMember">
         <table name="instance_member"/>
         <attributes>
             <id name="id">

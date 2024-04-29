@@ -5,7 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
-import eu.ill.visa.core.domain.SecurityGroupFilter;
+import eu.ill.visa.core.entity.SecurityGroupFilter;
 import eu.ill.visa.persistence.repositories.SecurityGroupFilterRepository;
 
 import jakarta.validation.constraints.NotNull;

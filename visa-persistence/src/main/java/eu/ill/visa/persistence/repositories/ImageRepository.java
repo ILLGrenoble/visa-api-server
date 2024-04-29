@@ -1,7 +1,7 @@
 package eu.ill.visa.persistence.repositories;
 
 import eu.ill.preql.FilterQuery;
-import eu.ill.visa.core.domain.Image;
+import eu.ill.visa.core.entity.Image;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;

@@ -34,7 +34,7 @@
         </query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.InstanceExtensionRequest">
+    <entity class="eu.ill.visa.core.entity.InstanceExtensionRequest">
 
         <table name="instance_extension_request"/>
 

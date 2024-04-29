@@ -1,7 +1,7 @@
 package eu.ill.visa.business.concurrent;
 
 import eu.ill.visa.business.BusinessConfiguration;
-import eu.ill.visa.core.domain.Instance;
+import eu.ill.visa.core.entity.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

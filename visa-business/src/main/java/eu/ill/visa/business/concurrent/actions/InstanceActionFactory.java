@@ -2,8 +2,8 @@ package eu.ill.visa.business.concurrent.actions;
 
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 
 @ApplicationScoped
 public class InstanceActionFactory {

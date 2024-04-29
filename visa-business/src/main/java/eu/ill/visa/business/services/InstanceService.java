@@ -1,5 +1,6 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.core.entity.*;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -7,8 +8,8 @@ import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
-import eu.ill.visa.core.domain.enumerations.InstanceMemberRole;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;

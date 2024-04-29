@@ -48,7 +48,7 @@
             ORDER BY r.name ASC</query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.Role">
+    <entity class="eu.ill.visa.core.entity.Role">
         <table name="role">
             <unique-constraint name="uk_role_name">
                 <column-name>name</column-name>

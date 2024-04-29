@@ -3,9 +3,9 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceAuthenticationToken;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceAuthenticationToken;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.InstanceAuthenticationTokenRepository;
 
 import java.util.List;

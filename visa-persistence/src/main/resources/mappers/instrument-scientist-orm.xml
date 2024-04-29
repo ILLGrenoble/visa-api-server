@@ -4,7 +4,7 @@
                  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_2.xsd"
                  version="2.2">
 
-    <entity class="eu.ill.visa.core.domain.InstrumentScientist">
+    <entity class="eu.ill.visa.core.entity.InstrumentScientist">
         <table name="instrument_scientist"/>
         <attributes>
             <embedded-id name="id"/>

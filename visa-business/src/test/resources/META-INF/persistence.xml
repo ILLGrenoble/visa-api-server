@@ -41,36 +41,36 @@
         <mapping-file>mappers/cloud-provider-configuration-orm.xml</mapping-file>
         <mapping-file>mappers/cloud-provider-configuration-parameter-orm.xml</mapping-file>
 
-        <class>eu.ill.visa.core.domain.ApplicationCredential</class>
-        <class>eu.ill.visa.core.domain.Configuration</class>
-        <class>eu.ill.visa.core.domain.Experiment</class>
+        <class>eu.ill.visa.core.entity.ApplicationCredential</class>
+        <class>eu.ill.visa.core.entity.Configuration</class>
+        <class>eu.ill.visa.core.entity.Experiment</class>
         <class>eu.ill.visa.core.domain.Flavour</class>
-        <class>eu.ill.visa.core.domain.FlavourLimit</class>
-        <class>eu.ill.visa.core.domain.Image</class>
-        <class>eu.ill.visa.core.domain.ImageProtocol</class>
-        <class>eu.ill.visa.core.domain.Plan</class>
-        <class>eu.ill.visa.core.domain.Instrument</class>
-        <class>eu.ill.visa.core.domain.Proposal</class>
-        <class>eu.ill.visa.core.domain.Instance</class>
-        <class>eu.ill.visa.core.domain.InstanceAuthenticationToken</class>
-        <class>eu.ill.visa.core.domain.InstanceCommand</class>
-        <class>eu.ill.visa.core.domain.InstanceAttribute</class>
-        <class>eu.ill.visa.core.domain.InstanceMember</class>
-        <class>eu.ill.visa.core.domain.InstanceSession</class>
-        <class>eu.ill.visa.core.domain.InstanceSessionMember</class>
-        <class>eu.ill.visa.core.domain.InstanceJupyterSession</class>
-        <class>eu.ill.visa.core.domain.InstanceExpiration</class>
-        <class>eu.ill.visa.core.domain.InstanceThumbnail</class>
-        <class>eu.ill.visa.core.domain.InstanceActivity</class>
-        <class>eu.ill.visa.core.domain.Role</class>
-        <class>eu.ill.visa.core.domain.User</class>
-        <class>eu.ill.visa.core.domain.Employer</class>
-        <class>eu.ill.visa.core.domain.SecurityGroup</class>
-        <class>eu.ill.visa.core.domain.SecurityGroupFilter</class>
-        <class>eu.ill.visa.core.domain.SystemNotification</class>
-        <class>eu.ill.visa.core.domain.InstrumentScientist</class>
-        <class>eu.ill.visa.core.domain.CloudProviderConfiguration</class>
-        <class>eu.ill.visa.core.domain.CloudProviderConfiguration$CloudProviderConfigurationParameter</class>
+        <class>eu.ill.visa.core.entity.FlavourLimit</class>
+        <class>eu.ill.visa.core.entity.Image</class>
+        <class>eu.ill.visa.core.entity.ImageProtocol</class>
+        <class>eu.ill.visa.core.entity.Plan</class>
+        <class>eu.ill.visa.core.entity.Instrument</class>
+        <class>eu.ill.visa.core.entity.Proposal</class>
+        <class>eu.ill.visa.core.entity.Instance</class>
+        <class>eu.ill.visa.core.entity.InstanceAuthenticationToken</class>
+        <class>eu.ill.visa.core.entity.InstanceCommand</class>
+        <class>eu.ill.visa.core.entity.InstanceAttribute</class>
+        <class>eu.ill.visa.core.entity.InstanceMember</class>
+        <class>eu.ill.visa.core.entity.InstanceSession</class>
+        <class>eu.ill.visa.core.entity.InstanceSessionMember</class>
+        <class>eu.ill.visa.core.entity.InstanceJupyterSession</class>
+        <class>eu.ill.visa.core.entity.InstanceExpiration</class>
+        <class>eu.ill.visa.core.entity.InstanceThumbnail</class>
+        <class>eu.ill.visa.core.entity.InstanceActivity</class>
+        <class>eu.ill.visa.core.entity.Role</class>
+        <class>eu.ill.visa.core.entity.User</class>
+        <class>eu.ill.visa.core.entity.Employer</class>
+        <class>eu.ill.visa.core.entity.SecurityGroup</class>
+        <class>eu.ill.visa.core.entity.SecurityGroupFilter</class>
+        <class>eu.ill.visa.core.entity.SystemNotification</class>
+        <class>eu.ill.visa.core.entity.InstrumentScientist</class>
+        <class>eu.ill.visa.core.entity.CloudProviderConfiguration</class>
+        <class>eu.ill.visa.core.entity.CloudProviderConfiguration$CloudProviderConfigurationParameter</class>
 
         <properties>
             <property name="hibernate.hbm2ddl.auto" value="create"/>

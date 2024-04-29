@@ -1,6 +1,6 @@
 package eu.ill.visa.persistence.listeners;
 
-import eu.ill.visa.core.domain.Timestampable;
+import eu.ill.visa.core.entity.Timestampable;
 
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;

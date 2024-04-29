@@ -3,7 +3,7 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.ImageProtocol;
+import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.persistence.repositories.ImageProtocolRepository;
 
 import jakarta.validation.constraints.NotNull;

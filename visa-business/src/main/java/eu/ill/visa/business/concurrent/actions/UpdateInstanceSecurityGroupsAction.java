@@ -2,8 +2,8 @@ package eu.ill.visa.business.concurrent.actions;
 
 import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

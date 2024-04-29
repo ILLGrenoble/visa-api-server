@@ -4,9 +4,9 @@ import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceSession;
-import eu.ill.visa.core.domain.InstanceSessionMember;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.InstanceSessionMember;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

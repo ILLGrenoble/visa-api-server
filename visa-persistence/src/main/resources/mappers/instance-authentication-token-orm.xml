@@ -17,7 +17,7 @@
         </query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.InstanceAuthenticationToken">
+    <entity class="eu.ill.visa.core.entity.InstanceAuthenticationToken">
         <table name="instance_authentication_token"/>
         <attributes>
             <id name="id">

@@ -2,12 +2,12 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.business.notification.EmailManager;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.InstanceExpiration;
-import eu.ill.visa.core.domain.Role;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.InstanceExpiration;
+import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceExpirationRepository;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;

@@ -3,10 +3,10 @@ package eu.ill.visa.business.services;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.User;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 
 @Transactional
 @ApplicationScoped

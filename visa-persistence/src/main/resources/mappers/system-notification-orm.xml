@@ -16,7 +16,7 @@
         <query>SELECT s FROM SystemNotification s WHERE s.deletedAt IS NULL AND s.activatedAt IS NOT NULL ORDER BY s.id DESC</query>
     </named-query>
 
-    <entity class="eu.ill.visa.core.domain.SystemNotification">
+    <entity class="eu.ill.visa.core.entity.SystemNotification">
         <table name="system_notification"/>
         <attributes>
             <id name="id">

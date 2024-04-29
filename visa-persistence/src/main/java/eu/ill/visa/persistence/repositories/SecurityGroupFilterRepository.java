@@ -1,9 +1,9 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.CloudProviderConfiguration;
+import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
-import eu.ill.visa.core.domain.SecurityGroupFilter;
+import eu.ill.visa.core.entity.SecurityGroupFilter;
 import eu.ill.visa.persistence.providers.SecurityGroupFilterFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;

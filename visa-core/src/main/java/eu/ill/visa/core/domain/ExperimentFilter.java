@@ -1,5 +1,7 @@
 package eu.ill.visa.core.domain;
 
+import eu.ill.visa.core.entity.Instrument;
+
 import java.util.Date;
 import java.util.Set;
 
