@@ -38,13 +38,12 @@
         <mapping-file>mappers/instance-activity-orm.xml</mapping-file>
         <mapping-file>mappers/security-group-orm.xml</mapping-file>
         <mapping-file>mappers/security-group-filter-orm.xml</mapping-file>
-
         <mapping-file>mappers/system-notification-orm.xml</mapping-file>
 
         <class>eu.ill.visa.core.entity.ApplicationCredential</class>
         <class>eu.ill.visa.core.entity.Configuration</class>
         <class>eu.ill.visa.core.entity.Experiment</class>
-        <class>eu.ill.visa.core.domain.Flavour</class>
+        <class>eu.ill.visa.core.entity.Flavour</class>
         <class>eu.ill.visa.core.entity.FlavourLimit</class>
         <class>eu.ill.visa.core.entity.Image</class>
         <class>eu.ill.visa.core.entity.Plan</class>

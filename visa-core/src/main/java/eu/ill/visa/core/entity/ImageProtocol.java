@@ -7,6 +7,23 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @JsonPropertyOrder({"id", "name", "port"})
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "imageProtocol.getById", query = """
+            SELECT i
+            FROM ImageProtocol i
+            WHERE i.id = :id
+    """),
+    @NamedQuery(name = "imageProtocol.getByName", query = """
+            SELECT i
+            FROM ImageProtocol i
+            WHERE i.name = :name
+    """),
+    @NamedQuery(name = "imageProtocol.getAll", query = """
+            SELECT i
+            FROM ImageProtocol i
+            ORDER BY i.name ASC
+    """),
+})
 @Table(name = "image_protocol")
 public class ImageProtocol {
 

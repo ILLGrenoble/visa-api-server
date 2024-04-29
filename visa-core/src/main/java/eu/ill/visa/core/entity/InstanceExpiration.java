@@ -8,6 +8,20 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.Date;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceExpiration.getById", query = """
+            SELECT i FROM InstanceExpiration i WHERE i.id = :id
+    """),
+    @NamedQuery(name = "instanceExpiration.getAll", query = """
+            SELECT i FROM InstanceExpiration i ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instanceExpiration.getByInstance", query = """
+            SELECT i FROM InstanceExpiration i WHERE i.instance = :instance
+    """),
+    @NamedQuery(name = "instanceExpiration.getAllExpired", query = """
+            SELECT i FROM InstanceExpiration i WHERE i.expirationDate <= :expirationDate
+    """),
+})
 @Table(name = "instance_expiration")
 public class InstanceExpiration extends Timestampable {
 

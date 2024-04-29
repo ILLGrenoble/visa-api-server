@@ -5,6 +5,40 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceSessionMember.getAll", query = """
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.active = true
+    """),
+    @NamedQuery(name = "instanceSessionMember.getByInstanceSessionAndSessionId", query = """
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.instanceSession = :instanceSession
+            AND i.sessionId = :sessionId
+            AND i.active = true
+    """),
+    @NamedQuery(name = "instanceSessionMember.getAllForInstanceSession", query = """
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.instanceSession = :instanceSession
+            AND i.active = true
+    """),
+    @NamedQuery(name = "instanceSessionMember.getAllForInstance", query = """
+            SELECT i FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            WHERE instanceSession.instance = :instance
+            AND i.active = true
+    """),
+    @NamedQuery(name = "instanceSessionMember.getAllHistoryForInstance", query = """
+            SELECT i FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            WHERE instanceSession.instance = :instance
+            ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instanceSessionMember.getBySessionId", query = """
+            SELECT i FROM InstanceSessionMember i
+            WHERE i.sessionId = :sessionId
+            AND i.active = true
+    """),
+})
 @Table(name = "instance_session_member")
 public class InstanceSessionMember extends Timestampable {
 

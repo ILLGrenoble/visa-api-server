@@ -1,12 +1,10 @@
-package eu.ill.visa.core.entity;
+package eu.ill.visa.test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import eu.ill.visa.core.entity.Timestampable;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonPropertyOrder({"id", "name", "version", "description", "url", "icon", "computeId", "createdAt", "deletedAt"})
 @Entity
@@ -15,31 +13,6 @@ import java.util.List;
             SELECT i FROM Image i
             WHERE i.id = :id
             AND i.deleted = false
-    """),
-    @NamedQuery(name = "image.getAll", query = """
-            SELECT i
-            FROM Image i
-            LEFT JOIN i.cloudProviderConfiguration cpc
-            WHERE i.deleted = false
-            AND i.visible = true
-            AND cpc.deletedAt IS NULL
-            AND COALESCE(cpc.visible, true) = true
-            ORDER BY i.id
-    """),
-    @NamedQuery(name = "image.getAllForAdmin", query = """
-            SELECT i
-            FROM Image i
-            LEFT JOIN i.cloudProviderConfiguration cpc
-            WHERE i.deleted = false
-            AND cpc.deletedAt IS NULL
-            ORDER BY i.id
-    """),
-    @NamedQuery(name = "image.countAllForAdmin", query = """
-            SELECT count(distinct im.id)
-            FROM Image im, Plan p, Instance i
-            where p.image = im
-            and i.plan = p
-            and i.deletedAt IS NULL
     """),
 })
 @Table(name = "image")
@@ -76,18 +49,6 @@ public class Image extends Timestampable {
 
     @Column(name = "auto_login", nullable = true)
     private String autologin;
-
-    @ManyToMany()
-    @JoinTable(
-        name = "image_protocol",
-        joinColumns = @JoinColumn(name = "image_id", foreignKey = @ForeignKey(name = "fk_image_id")),
-        inverseJoinColumns = @JoinColumn(name = "protocol_id", foreignKey = @ForeignKey(name = "fk_protocol_id"))
-    )
-    private List<ImageProtocol> protocols = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = true)
-    private CloudProviderConfiguration cloudProviderConfiguration;
 
     public Image() {
     }
@@ -166,19 +127,6 @@ public class Image extends Timestampable {
         this.visible = visible;
     }
 
-    public CloudProviderConfiguration getCloudProviderConfiguration() {
-        return cloudProviderConfiguration;
-    }
-
-    public void setCloudProviderConfiguration(CloudProviderConfiguration cloudProviderConfiguration) {
-        this.cloudProviderConfiguration = cloudProviderConfiguration;
-    }
-
-    @Transient
-    public Long getCloudId() {
-        return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -197,18 +145,6 @@ public class Image extends Timestampable {
         return new HashCodeBuilder(17, 37)
             .append(id)
             .toHashCode();
-    }
-
-    public List<ImageProtocol> getProtocols() {
-        return protocols;
-    }
-
-    public void setProtocols(List<ImageProtocol> protocols) {
-        this.protocols = protocols;
-    }
-
-    public void addProtocol(ImageProtocol protocol) {
-        this.protocols.add(protocol);
     }
 
     public String getBootCommand() {

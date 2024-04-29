@@ -6,6 +6,15 @@ import java.util.Calendar;
 import java.util.Date;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceAuthenticationToken.getByToken", query = """
+            SELECT i FROM InstanceAuthenticationToken i
+            WHERE i.token = :token
+    """),
+    @NamedQuery(name = "instanceAuthenticationToken.getAll", query = """
+            SELECT i FROM InstanceAuthenticationToken i
+    """),
+})
 @Table(name = "instance_authentication_token")
 public class InstanceAuthenticationToken extends Timestampable {
 

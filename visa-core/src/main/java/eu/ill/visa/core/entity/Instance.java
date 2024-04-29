@@ -1,5 +1,8 @@
 package eu.ill.visa.core.entity;
 
+import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
+import eu.ill.visa.core.domain.NumberInstancesByFlavour;
+import eu.ill.visa.core.domain.NumberInstancesByImage;
 import eu.ill.visa.core.entity.converter.CommaSeparatedListConverter;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
@@ -13,6 +16,183 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instance.getById", query = """
+            SELECT i FROM Instance i
+            LEFT JOIN i.members m
+            WHERE i.id = :id
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getByUID", query = """
+            SELECT i FROM Instance i
+            LEFT JOIN i.members m
+            WHERE i.uid = :uid
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getAll", query = """
+            SELECT DISTINCT i FROM Instance i
+            LEFT JOIN i.members m
+            WHERE i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getAllInactive", query = """
+            SELECT DISTINCT i FROM Instance i
+            LEFT JOIN i.members m
+            WHERE i.deletedAt IS NULL
+            AND i.terminationDate IS NOT NULL
+            AND i.lastSeenAt < :date
+    """),
+    @NamedQuery(name = "instance.getAllNewInactive", query = """
+            SELECT DISTINCT i FROM Instance i
+            LEFT JOIN i.members m
+            LEFT OUTER JOIN InstanceExpiration ie on ie.instance = i
+            WHERE i.deletedAt IS NULL
+            AND i.terminationDate IS NOT NULL
+            AND i.lastSeenAt < :date
+            AND ie IS NULL
+    """),
+    @NamedQuery(name = "instance.getAllNewTerminations", query = """
+            SELECT DISTINCT i FROM Instance i
+            LEFT JOIN i.members m
+            LEFT OUTER JOIN InstanceExpiration ie on ie.instance = i
+            WHERE i.deletedAt IS NULL
+            AND i.terminationDate IS NOT NULL
+            AND i.terminationDate < :date
+            AND ie IS NULL
+    """),
+    @NamedQuery(name = "instance.countAll", query = """
+            SELECT COUNT(i) FROM Instance i
+            WHERE i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.countAllForState", query = """
+            SELECT COUNT(i) FROM Instance i
+            WHERE i.state = :state
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getAllForUser", query = """
+            SELECT i FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND i.deletedAt IS NULL
+            ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instance.countAllForUser", query = """
+            SELECT COUNT(i) FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getAllForUserAndRole", query = """
+            SELECT i FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND m.role = :role
+            AND i.deletedAt IS NULL
+            ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instance.countAllForUserAndRole", query = """
+            SELECT COUNT(i) FROM Instance i
+            JOIN i.members m
+            WHERE m.user = :user
+            AND m.role = :role
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getAllWithStates", query = """
+            SELECT i FROM Instance i
+            WHERE i.state in :states
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getAllToDelete", query = """
+            SELECT i FROM Instance i
+            WHERE i.state = 'STOPPED'
+            AND i.deleteRequested = true
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getInstanceForMember", query = """
+            SELECT i FROM Instance i
+            JOIN i.members m
+            WHERE m = :member
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getByIdForInstrumentScientist", query = """
+            SELECT DISTINCT i FROM Instance i
+            LEFT JOIN i.experiments e
+            LEFT JOIN e.instrument instr
+            LEFT JOIN InstrumentScientist ir on ir.instrument = instr
+            WHERE ir.user = :user
+            AND i.id = :instanceId
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getByIdForExperimentBetweenDates", query = """
+            SELECT DISTINCT i FROM Instance i
+            LEFT JOIN i.experiments e
+            WHERE i.id = :id
+            AND e.startDate <= :periodEnd
+            AND e.endDate >= :periodStart
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getDeletedByComputeId", query = """
+            SELECT i FROM Instance i
+            WHERE i.computeId = :computeId
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getDeletedByComputeId", query = """
+            SELECT i FROM Instance i
+            WHERE i.computeId = :computeId
+            AND i.deletedAt IS NULL
+    """),
+})
+@NamedNativeQueries({
+    @NamedNativeQuery(name = "instance.countByFlavour", resultSetMapping = "countByFlavourMapping", query = """
+            SELECT f.id as id, f.name as name, COUNT(i.id) as total
+            FROM instance i
+            JOIN plan p on i.plan_id = p.id
+            JOIN flavour f on p.flavour_id = f.id AND i.deleted_at IS NULL
+            GROUP BY f.id, f.name
+            ORDER BY f.name
+    """),
+    @NamedNativeQuery(name = "instance.countByImage", resultSetMapping = "countByImageMapping", query = """
+            SELECT im.id as id, im.name as name, im.version as version, COUNT(i.id) as total
+            FROM instance i
+            JOIN plan p on i.plan_id = p.id
+            JOIN image im on p.image_id = im.id AND i.deleted_at IS NULL
+            GROUP BY im.id, im.name, im.version
+            ORDER BY im.name, im.version desc
+    """),
+    @NamedNativeQuery(name = "instance.countByCloudClient", resultSetMapping = "countByCloudClientMapping", query = """
+            SELECT cpc.id as id, cpc.name as name, COUNT(i.id) as total
+            FROM instance i
+            JOIN plan p on i.plan_id = p.id
+            JOIN image im on p.image_id = im.id
+            LEFT JOIN cloud_provider_configuration cpc on im.cloud_provider_configuration_id = cpc.id
+            WHERE i.deleted_at IS NULL
+            GROUP BY cpc.id, cpc.name
+            ORDER BY cpc.name
+    """),
+})
+@SqlResultSetMappings({
+    @SqlResultSetMapping(name = "countByFlavourMapping", classes = {
+        @ConstructorResult(targetClass = NumberInstancesByFlavour.class, columns = {
+            @ColumnResult(name = "id", type = Long.class),
+            @ColumnResult(name = "name", type = String.class),
+            @ColumnResult(name = "total", type = Long.class),
+        })
+    }),
+    @SqlResultSetMapping(name = "countByImageMapping", classes = {
+        @ConstructorResult(targetClass = NumberInstancesByImage.class, columns = {
+            @ColumnResult(name = "id", type = Long.class),
+            @ColumnResult(name = "name", type = String.class),
+            @ColumnResult(name = "version", type = String.class),
+            @ColumnResult(name = "total", type = Long.class),
+        })
+    }),
+    @SqlResultSetMapping(name = "countByCloudClientMapping", classes = {
+        @ConstructorResult(targetClass = NumberInstancesByCloudClient.class, columns = {
+            @ColumnResult(name = "id", type = Long.class),
+            @ColumnResult(name = "name", type = String.class),
+            @ColumnResult(name = "total", type = Long.class),
+        })
+    }),
+})
 @Table(name = "instance")
 public class Instance extends Timestampable {
 
@@ -77,7 +257,7 @@ public class Instance extends Timestampable {
 
     @ManyToMany()
     @JoinTable(
-        name = "instance_experiments",
+        name = "instance_experiment",
         joinColumns = @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id")),
         inverseJoinColumns = @JoinColumn(name = "experiment_id", foreignKey = @ForeignKey(name = "fk_experiment_id"))
     )

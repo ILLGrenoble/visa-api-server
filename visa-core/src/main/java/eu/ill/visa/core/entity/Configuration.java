@@ -6,6 +6,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "configuration.getAll", query = """
+            SELECT c FROM Configuration c
+    """),
+})
 @Table(name = "configuration")
 public class Configuration {
 

@@ -5,6 +5,26 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "applicationCredential.getAll", query = """
+            SELECT ac
+            FROM ApplicationCredential ac
+            WHERE ac.deletedAt IS NULL
+            ORDER BY ac.id
+    """),
+    @NamedQuery(name = "applicationCredential.getById", query = """
+            SELECT ac
+            FROM ApplicationCredential ac
+            WHERE ac.deletedAt IS NULL
+            AND ac.id = :id
+    """),
+    @NamedQuery(name = "applicationCredential.getByApplicationId", query = """
+            SELECT ac
+            FROM ApplicationCredential ac
+            WHERE ac.deletedAt IS NULL
+            AND ac.applicationId = :applicationId
+    """),
+})
 @Table(name = "application_credential")
 public class ApplicationCredential {
 

@@ -5,6 +5,40 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "flavour.getById", query = """
+            SELECT f
+            FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
+            WHERE f.id = :id
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "flavour.getAll", query = """
+            SELECT f
+            FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
+            WHERE f.deleted = false
+            AND cpc.deletedAt IS NULL
+            AND COALESCE(cpc.visible, true) = true
+            ORDER BY f.cpu, f.memory, f.id
+    """),
+    @NamedQuery(name = "flavour.getAllForAdmin", query = """
+            SELECT f
+            FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
+            WHERE f.deleted = false
+            AND cpc.deletedAt IS NULL
+            ORDER BY f.cpu, f.memory, f.id
+    """),
+    @NamedQuery(name = "flavour.countAllForAdmin", query = """
+            SELECT count(distinct f.id)
+            FROM Flavour f, Plan p, Instance i
+            where p.flavour = f
+            and i.plan = p
+            and i.deletedAt IS NULL
+    """),
+})
 @Table(name = "flavour")
 public class Flavour extends Timestampable {
 

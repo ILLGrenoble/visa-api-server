@@ -4,6 +4,26 @@ import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import jakarta.persistence.*;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceActivity.getAll", query = """
+            SELECT a FROM InstanceActivity a
+            ORDER BY a.id
+    """),
+    @NamedQuery(name = "instanceActivity.getAllForUser", query = """
+            SELECT a FROM InstanceActivity a
+            WHERE a.user = :user
+            ORDER BY a.id
+    """),
+    @NamedQuery(name = "instanceActivity.getAllForInstance", query = """
+            SELECT a FROM InstanceActivity a
+            WHERE a.instance = :instance
+            ORDER BY a.id
+    """),
+    @NamedQuery(name = "instanceActivity.cleanup", query = """
+            DELETE FROM InstanceActivity a
+            WHERE a.createdAt < :date
+    """),
+})
 @Table(name = "instance_activity")
 public class InstanceActivity extends Timestampable {
 

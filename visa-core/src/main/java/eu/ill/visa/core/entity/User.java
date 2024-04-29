@@ -12,6 +12,92 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "user.getById", query = """
+            SELECT u
+            FROM User u
+            WHERE u.id = :id
+    """),
+    @NamedQuery(name = "user.getAll", query = """
+            SELECT u
+            FROM User u
+            ORDER BY u.lastName ASC
+    """),
+    @NamedQuery(name = "user.getAllActivated", query = """
+            SELECT u
+            FROM User u
+            WHERE u.activatedAt IS NOT NULL
+            ORDER BY u.lastName ASC
+    """),
+    @NamedQuery(name = "user.countAll", query = """
+            SELECT COUNT(u)
+            FROM User u
+    """),
+    @NamedQuery(name = "user.countAllUsersForRole", query = """
+            SELECT COUNT(u) FROM User u
+            JOIN u.userRoles ur
+            JOIN ur.role r
+            WHERE r.name = :role
+    """),
+    @NamedQuery(name = "user.getAllLikeLastName", query = """
+            SELECT DISTINCT(u)
+            FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            ORDER BY u.lastName, u.firstName ASC
+    """),
+    @NamedQuery(name = "user.getAllActivatedLikeLastName", query = """
+            SELECT DISTINCT(u)
+            FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            AND u.activatedAt IS NOT NULL
+            ORDER BY u.lastName, u.firstName ASC
+    """),
+    @NamedQuery(name = "user.countAllLikeLastName", query = """
+            SELECT COUNT(u)
+            FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+    """),
+    @NamedQuery(name = "user.countAllActivatedLikeLastName", query = """
+            SELECT COUNT(u)
+            FROM User u
+            WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
+            AND u.activatedAt IS NOT NULL
+    """),
+    @NamedQuery(name = "user.getAllStaff", query = """
+            SELECT DISTINCT u
+            FROM User u
+            JOIN u.userRoles ur
+            JOIN ur.role r
+            WHERE r.name = 'STAFF'
+            ORDER BY u.lastName
+    """),
+    @NamedQuery(name = "user.getAllSupport", query = """
+            SELECT DISTINCT u
+            FROM User u
+            JOIN u.userRoles ur
+            JOIN ur.role r
+            WHERE r.name in ('INSTRUMENT_SCIENTIST', 'INSTRUMENT_CONTROL', 'IT_SUPPORT', 'SCIENTIFIC_COMPUTING')
+            ORDER BY u.lastName
+    """),
+    @NamedQuery(name = "user.countAllActivated", query = """
+            SELECT count(distinct u.id)
+            FROM User u
+            WHERE u.activatedAt IS NOT NULL
+    """),
+})
+@NamedNativeQueries({
+    @NamedNativeQuery(name = "user.getExperimentalTeamForInstance", resultClass = User.class, query = """
+            SELECT DISTINCT u.id, u.affiliation_id, u.email, u.first_name, u.last_name, u.activated_at, u.last_seen_at, u.instance_quota
+            FROM users u
+            LEFT JOIN experiment_user eu ON eu.user_id = u.id
+            WHERE eu.experiment_id IN (
+                SELECT i.experiment_id
+                FROM instance_experiment i
+                WHERE i.instance_id = ?1
+            )
+            ORDER BY u.last_name
+    """),
+})
 @Table(name = "users")
 public class User {
 

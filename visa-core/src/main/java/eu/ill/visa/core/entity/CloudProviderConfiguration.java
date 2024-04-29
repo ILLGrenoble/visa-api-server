@@ -7,6 +7,20 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "cloudProviderConfiguration.getAll", query = """
+            SELECT cp
+            FROM CloudProviderConfiguration cp
+            WHERE cp.deletedAt IS NULL
+            ORDER BY id
+    """),
+    @NamedQuery(name = "cloudProviderConfiguration.getById", query = """
+            SELECT cp
+            FROM CloudProviderConfiguration cp
+            WHERE cp.deletedAt IS NULL
+            AND cp.id = :id
+    """),
+})
 @Table(name = "cloud_provider_configuration")
 public class CloudProviderConfiguration extends Timestampable {
 

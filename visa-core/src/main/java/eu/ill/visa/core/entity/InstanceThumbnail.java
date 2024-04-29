@@ -3,6 +3,12 @@ package eu.ill.visa.core.entity;
 import jakarta.persistence.*;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceThumbnail.getForInstance", query = """
+            SELECT it FROM InstanceThumbnail it
+            WHERE it.instance = :instance
+    """),
+})
 @Table(name = "instance_thumbnail")
 public class InstanceThumbnail extends Timestampable {
 

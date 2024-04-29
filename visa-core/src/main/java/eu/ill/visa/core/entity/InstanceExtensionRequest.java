@@ -6,6 +6,28 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceExtensionRequest.getAll", query = """
+            SELECT r
+            FROM InstanceExtensionRequest r
+            WHERE r.state = 'PENDING'
+            AND r.instance.state != 'DELETED'
+            ORDER BY r.id
+    """),
+    @NamedQuery(name = "instanceExtensionRequest.getById", query = """
+            SELECT r
+            FROM InstanceExtensionRequest r
+            WHERE r.state = 'PENDING'
+            AND r.instance.state != 'DELETED'
+            AND r.id = :id
+    """),
+    @NamedQuery(name = "instanceExtensionRequest.getForInstance", query = """
+            SELECT r
+            FROM InstanceExtensionRequest r
+            WHERE r.state = 'PENDING'
+            AND r.instance = :instance
+    """),
+})
 @Table(name = "instance_thumbnail")
 public class InstanceExtensionRequest extends Timestampable {
 

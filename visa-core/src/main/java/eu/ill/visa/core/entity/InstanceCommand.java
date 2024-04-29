@@ -7,6 +7,36 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceCommand.getById", query = """
+            SELECT a FROM InstanceCommand a
+            WHERE a.id = :id
+    """),
+    @NamedQuery(name = "instanceCommand.getAll", query = """
+            SELECT a FROM InstanceCommand a
+            ORDER BY a.id
+    """),
+    @NamedQuery(name = "instanceCommand.getAllActive", query = """
+            SELECT a FROM InstanceCommand a
+            WHERE a.state IN ('PENDING', 'QUEUED', 'RUNNING')
+            ORDER BY a.id
+    """),
+    @NamedQuery(name = "instanceCommand.getAllPending", query = """
+            SELECT a FROM InstanceCommand a
+            WHERE a.state = 'PENDING'
+            ORDER BY a.id
+    """),
+    @NamedQuery(name = "instanceCommand.getAllForUser", query = """
+            SELECT a FROM InstanceCommand a
+            WHERE a.user = :user
+            ORDER BY a.id
+    """),
+    @NamedQuery(name = "instanceCommand.getAllForInstance", query = """
+            SELECT a FROM InstanceCommand a
+            WHERE a.instance = :instance
+            ORDER BY a.id
+    """),
+})
 @Table(name = "instance_command")
 public class InstanceCommand extends Timestampable {
 

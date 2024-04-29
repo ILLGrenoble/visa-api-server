@@ -8,6 +8,52 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.List;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instrument.getById", query = """
+            SELECT i FROM Instrument i WHERE i.id = :id
+    """),
+    @NamedQuery(name = "instrument.getAllForUser", query = """
+            SELECT i FROM Instrument i
+            WHERE i IN (
+                SELECT DISTINCT e.instrument
+                FROM Experiment e
+                JOIN e.users u
+                WHERE u = :user
+                AND e.startDate IS NOT NULL
+                AND e.endDate IS NOT NULL
+            )
+            ORDER BY i.name ASC
+    """),
+})
+@NamedNativeQueries({
+    @NamedNativeQuery(name = "instrument.getAll", resultClass = Instrument.class, query = """
+            SELECT i.id, i.name
+            FROM instrument i
+            WHERE i.id IN (SELECT DISTINCT e.instrument_id FROM experiment e)
+            UNION
+            SELECT i.id, i.name
+            FROM instrument i, instrument_scientist ins
+            WHERE ins.instrument_id = i.id
+            ORDER by name
+    """),
+    @NamedNativeQuery(name = "instrument.getAllForExperimentsAndInstrumentScientist", resultClass = Instrument.class, query = """
+            SELECT DISTINCT i.id, i.name
+            FROM instrument i, experiment e
+            WHERE e.instrument_id = i.id
+            AND e.id in :experimentIds
+            UNION
+            select DISTINCT i.id, i.name
+            FROM instrument i, instrument_scientist ir
+            WHERE ir.instrument_id = i.id
+            AND ir.user_id = :userId
+    """),
+    @NamedNativeQuery(name = "instrument.getAllForInstrumentScientist", resultClass = Instrument.class, query = """
+            select DISTINCT i.id, i.name
+            FROM instrument i, instrument_scientist ir
+            WHERE ir.instrument_id = i.id
+            AND ir.user_id = :userId
+    """),
+})
 @Table(name = "instrument")
 public class Instrument {
 

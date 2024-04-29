@@ -1,9 +1,6 @@
 package eu.ill.visa.core.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -11,6 +8,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.Date;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "proposal.getById", query = """
+            SELECT p FROM Proposal p WHERE p.id = :id
+    """),
+    @NamedQuery(name = "proposal.getAll", query = """
+            SELECT p FROM Proposal p ORDER BY p.identifier ASC
+    """),
+})
 @Table(name = "proposal")
 public class Proposal {
 

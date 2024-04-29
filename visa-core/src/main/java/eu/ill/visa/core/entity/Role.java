@@ -8,6 +8,34 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.Date;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "role.getById", query = """
+            SELECT r
+            FROM Role r
+            WHERE r.id = :id
+            AND r.groupDeletedAt IS NULL
+    """),
+    @NamedQuery(name = "role.getByName", query = """
+            SELECT r
+            FROM Role r
+            WHERE r.name = :name
+            AND r.groupDeletedAt IS NULL
+    """),
+    @NamedQuery(name = "role.getAllRoles", query = """
+            SELECT r
+            FROM Role r
+            WHERE r.groupDeletedAt IS NULL
+            AND r.groupCreatedAt IS NULL
+            ORDER BY r.name ASC
+    """),
+    @NamedQuery(name = "role.getAllGroups", query = """
+            SELECT r
+            FROM Role r
+            WHERE r.groupDeletedAt IS NULL
+            AND r.groupCreatedAt IS NOT NULL
+            ORDER BY r.name ASC
+    """),
+})
 @Table(name = "role")
 public class Role {
 

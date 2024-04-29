@@ -8,6 +8,17 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "systemNotification.getById", query = """
+            SELECT s FROM SystemNotification s WHERE s.id = :id AND s.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "systemNotification.getAll", query = """
+            SELECT s FROM SystemNotification s WHERE s.deletedAt IS NULL ORDER BY s.id
+    """),
+    @NamedQuery(name = "systemNotification.getAllActive", query = """
+            SELECT s FROM SystemNotification s WHERE s.deletedAt IS NULL AND s.activatedAt IS NOT NULL ORDER BY s.id DESC
+    """),
+})
 @Table(name = "system_notification")
 public class SystemNotification extends Timestampable {
 

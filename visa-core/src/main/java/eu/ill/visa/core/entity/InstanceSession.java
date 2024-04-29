@@ -6,6 +6,21 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceSession.getById", query = """
+            SELECT i FROM InstanceSession i WHERE i.id = :id
+    """),
+    @NamedQuery(name = "instanceSession.getAll", query = """
+            SELECT i FROM InstanceSession i WHERE i.current = true ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instanceSession.getAllByInstance", query = """
+            SELECT i
+            FROM InstanceSession i
+            WHERE i.instance = :instance
+            AND i.current = true
+            ORDER BY i.id DESC
+    """),
+})
 @Table(name = "instance_session")
 public class InstanceSession extends Timestampable {
 

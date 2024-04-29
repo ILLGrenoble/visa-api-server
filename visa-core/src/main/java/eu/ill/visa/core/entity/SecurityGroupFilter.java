@@ -8,6 +8,22 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import static java.util.Objects.requireNonNull;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "securityGroupFilter.getById", query = """
+            SELECT l FROM SecurityGroupFilter l WHERE l.id = :id
+    """),
+    @NamedQuery(name = "securityGroupFilter.securityGroupFilterBySecurityIdAndObjectIdAndType", query = """
+               SELECT l FROM SecurityGroupFilter l
+               JOIN l.securityGroup sg
+               WHERE sg.id = :securityGroupId AND l.objectId = :objectId AND l.objectType = :objectType
+    """),
+    @NamedQuery(name = "securityGroupFilter.getAll", query = """
+               SELECT l FROM SecurityGroupFilter l
+    """),
+    @NamedQuery(name = "securityGroupFilter.countAll", query = """
+               SELECT count(sgf.id) FROM SecurityGroupFilter sgf
+    """),
+})
 @Table(name = "security_group_filter")
 public class SecurityGroupFilter {
 

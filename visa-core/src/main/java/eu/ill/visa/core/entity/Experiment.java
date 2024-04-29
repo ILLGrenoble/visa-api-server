@@ -11,6 +11,63 @@ import java.util.Set;
 
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "experiment.getById", query = """
+            SELECT e
+            FROM Experiment e
+            WHERE e.id = :id
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+    """),
+    @NamedQuery(name = "experiment.getAll", query = """
+            SELECT e
+            FROM Experiment e
+            WHERE e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+            ORDER BY e.id ASC
+    """),
+    @NamedQuery(name = "experiment.getYearsForUser", query = """
+            SELECT distinct YEAR(e.startDate)
+            FROM Experiment e
+            JOIN e.users u
+            WHERE u = :user
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+    """),
+    @NamedQuery(name = "experiment.getYearsForOpenData", query = """
+            SELECT distinct YEAR(e.startDate)
+            FROM Experiment e
+            JOIN e.proposal p
+            WHERE p.publicAt <= :currentDate
+    """),
+    @NamedQuery(name = "experiment.getByIdAndUser", query = """
+            SELECT e
+            FROM Experiment e
+            JOIN e.users u
+            WHERE u = :user
+            AND e.id = :id
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+    """),
+    @NamedQuery(name = "experiment.getByIdForOpenData", query = """
+            SELECT e
+            FROM Experiment e
+            JOIN e.proposal p
+            WHERE p.publicAt <= :currentDate
+            AND e.id = :id
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+    """),
+    @NamedQuery(name = "experiment.getAllForInstance", query = """
+            SELECT e
+            FROM Experiment e
+            JOIN e.instances i
+            WHERE i = :instance
+            AND i.deletedAt IS NULL
+            AND e.startDate IS NOT NULL
+            AND e.endDate IS NOT NULL
+    """),
+})
 @Table(name = "experiment")
 public class Experiment {
 

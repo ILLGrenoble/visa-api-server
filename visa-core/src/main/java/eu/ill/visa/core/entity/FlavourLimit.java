@@ -8,6 +8,26 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import static java.util.Objects.requireNonNull;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "flavourLimit.getById", query = """
+            SELECT l
+            FROM FlavourLimit l
+            WHERE l.id = :id
+            AND l.flavour.deleted = false
+    """),
+    @NamedQuery(name = "flavourLimit.getAll", query = """
+            SELECT l
+            FROM FlavourLimit l
+            WHERE l.flavour.deleted = false
+    """),
+    @NamedQuery(name = "flavourLimit.getAllOfTypeForFlavour", query = """
+            SELECT l
+            FROM FlavourLimit l
+            WHERE l.flavour = :flavour
+            AND l.objectType = :type
+            AND l.flavour.deleted = false
+    """),
+})
 @Table(name = "flavour_limit")
 public class FlavourLimit {
 

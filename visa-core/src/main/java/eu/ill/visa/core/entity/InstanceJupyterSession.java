@@ -3,6 +3,32 @@ package eu.ill.visa.core.entity;
 import jakarta.persistence.*;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceJupyterSession.getAll", query = """
+            SELECT i FROM InstanceJupyterSession i WHERE i.active = true ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instanceJupyterSession.countAllInstances", query = """
+            SELECT count(distinct i.instance)
+            FROM InstanceJupyterSession i
+            WHERE i.active = true
+    """),
+    @NamedQuery(name = "instanceJupyterSession.getAllByInstance", query = """
+            SELECT i
+            FROM InstanceJupyterSession i
+            WHERE i.instance = :instance
+            AND i.active = true
+            ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instanceJupyterSession.getByInstanceKernelSession", query = """
+            SELECT i
+            FROM InstanceJupyterSession i
+            WHERE i.instance = :instance
+            AND i.kernelId = :kernelId
+            AND i.sessionId = :sessionId
+            AND i.active = true
+            ORDER BY i.id DESC
+    """),
+})
 @Table(name = "instance_jupyter_session")
 public class InstanceJupyterSession extends Timestampable {
 

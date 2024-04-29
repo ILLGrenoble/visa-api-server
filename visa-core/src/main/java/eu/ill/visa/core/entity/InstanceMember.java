@@ -7,6 +7,21 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceMember.getById", query = """
+            SELECT i FROM InstanceMember i WHERE i.id = :id
+    """),
+    @NamedQuery(name = "instanceMember.getAll", query = """
+            SELECT DISTINCT m FROM InstanceMember m
+    """),
+    @NamedQuery(name = "instanceMember.getByInstanceAndUser", query = """
+            SELECT DISTINCT m FROM Instance i
+            LEFT JOIN i.members m
+            where i.deletedAt IS NULL
+            and i = :instance
+            and m.user = :user
+    """),
+})
 @Table(name = "instance_member")
 public class InstanceMember extends Timestampable {
 
