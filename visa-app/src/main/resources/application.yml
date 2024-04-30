@@ -17,8 +17,8 @@ quarkus:
 
 cloud:
   serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
-  providerType: ${VISA_DEFAULT_CLOUD_PROVIDER_TYPE:'openstack'}
-  providerName: ${VISA_DEFAULT_CLOUD_PROVIDER_NAME:'Default'}
+  providerType: ${VISA_DEFAULT_CLOUD_PROVIDER_TYPE:openstack}
+  providerName: ${VISA_DEFAULT_CLOUD_PROVIDER_NAME:Default}
   providers:
     - name: openstack
       parameters:
@@ -34,7 +34,6 @@ cloud:
       parameters:
         url: ${VISA_CLOUD_WEB_PROVIDER_URL}
         authToken: ${VISA_CLOUD_WEB_PROVIDER_AUTH_TOKEN}
-
 
 business:
   numberInstanceActionThreads: 16
