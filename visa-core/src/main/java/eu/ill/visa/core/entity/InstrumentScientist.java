@@ -50,6 +50,7 @@ public class InstrumentScientist {
         this.user = user;
     }
 
+    @Embeddable
     public static class InstrumentScientistKey implements Serializable {
         private Long instrumentId;
         private String userId;

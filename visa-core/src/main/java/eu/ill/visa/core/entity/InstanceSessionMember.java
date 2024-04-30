@@ -51,7 +51,7 @@ public class InstanceSessionMember extends Timestampable {
     @JoinColumn(name = "instance_session_id", foreignKey = @ForeignKey(name = "fk_instance_session_id"), nullable = false)
     private InstanceSession instanceSession;
 
-    @Column(name = "connection_id", length = 150, nullable = false)
+    @Column(name = "session_id", length = 150, nullable = false)
     private String sessionId;
 
     @ManyToOne(optional = false)

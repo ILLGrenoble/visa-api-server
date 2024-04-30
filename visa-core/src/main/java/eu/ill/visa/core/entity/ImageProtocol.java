@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
             ORDER BY i.name ASC
     """),
 })
-@Table(name = "image_protocol")
+@Table(name = "protocol")
 public class ImageProtocol {
 
     @Id

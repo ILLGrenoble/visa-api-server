@@ -11,10 +11,13 @@ import java.util.List;
 public class ImageService {
 
     private final ImageRepository repository;
+    private final TestImageRepository testImageRepository;
 
     @Inject
-    public ImageService(final ImageRepository repository) {
+    public ImageService(final ImageRepository repository,
+                        final TestImageRepository testImageRepository) {
         this.repository = repository;
+        this.testImageRepository = testImageRepository;
     }
 
     public List<Image> getAll() {

@@ -2,18 +2,16 @@ package eu.ill.visa.business;
 
 import io.smallrye.config.ConfigMapping;
 
-import java.util.List;
-
-@ConfigMapping(prefix = "business")
+@ConfigMapping(prefix = "business", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface BusinessConfiguration {
 
     Integer numberInstanceActionThreads();
 
-    List<MailerConfiguration> notificationConfiguration();
-
-    InstanceConfiguration instanceConfiguration();
-
-    SignatureConfiguration signatureConfiguration();
-
-    SecurityGroupServiceClientConfiguration securityGroupServiceClientConfiguration();
+//    List<MailerConfiguration> notificationConfiguration();
+//
+//    InstanceConfiguration instanceConfiguration();
+//
+//    SignatureConfiguration signatureConfiguration();
+//
+//    SecurityGroupServiceClientConfiguration securityGroupServiceClientConfiguration();
 }

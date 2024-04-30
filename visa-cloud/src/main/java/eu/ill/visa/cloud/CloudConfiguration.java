@@ -4,7 +4,7 @@ import io.smallrye.config.ConfigMapping;
 
 import java.util.List;
 
-@ConfigMapping(prefix = "cloud")
+@ConfigMapping(prefix = "cloud", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface CloudConfiguration {
 
     String providerType();

@@ -9,14 +9,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @JsonPropertyOrder({"id", "name", "version", "description", "url", "icon", "computeId", "createdAt", "deletedAt"})
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "image.getById", query = """
-            SELECT i FROM Image i
+    @NamedQuery(name = "testImage.getById", query = """
+            SELECT i FROM TestImage i
             WHERE i.id = :id
             AND i.deleted = false
     """),
 })
-@Table(name = "image")
-public class Image extends Timestampable {
+@Table(name = "test_image")
+public class TestImage extends Timestampable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,14 +50,14 @@ public class Image extends Timestampable {
     @Column(name = "auto_login", nullable = true)
     private String autologin;
 
-    public Image() {
+    public TestImage() {
     }
 
-    public Image(final Long id, final String name) {
+    public TestImage(final Long id, final String name) {
         this(id, name, null);
     }
 
-    public Image(final Long id, final String name, final String description) {
+    public TestImage(final Long id, final String name, final String description) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -133,7 +133,7 @@ public class Image extends Timestampable {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        Image image = (Image) o;
+        TestImage image = (TestImage) o;
 
         return new EqualsBuilder()
             .append(id, image.id)
@@ -226,8 +226,8 @@ public class Image extends Timestampable {
             return this;
         }
 
-        public Image build() {
-            Image image = new Image();
+        public TestImage build() {
+            TestImage image = new TestImage();
             image.setId(id);
             image.setName(name);
             image.setDescription(description);

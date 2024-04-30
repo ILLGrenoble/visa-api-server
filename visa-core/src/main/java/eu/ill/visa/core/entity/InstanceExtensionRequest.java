@@ -28,7 +28,7 @@ import java.util.Date;
             AND r.instance = :instance
     """),
 })
-@Table(name = "instance_thumbnail")
+@Table(name = "instance_extension_request")
 public class InstanceExtensionRequest extends Timestampable {
 
     @Id
@@ -44,7 +44,7 @@ public class InstanceExtensionRequest extends Timestampable {
     private String comments;
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = true)
+    @JoinColumn(name = "handler_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = true)
     private User handler;
 
     @Column(name = "handled_on", nullable = true)
@@ -53,7 +53,7 @@ public class InstanceExtensionRequest extends Timestampable {
     @Column(name = "handler_comments", length = 4000, nullable = true)
     private String handlerComments;
 
-    @Column(name = "original_termination_ate", nullable = false)
+    @Column(name = "original_termination_date", nullable = false)
     private Date originalTerminationDate;
 
     @Column(name = "extension_date", nullable = true)

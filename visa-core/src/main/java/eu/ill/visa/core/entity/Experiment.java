@@ -99,9 +99,21 @@ public class Experiment {
     private Date endDate;
 
     @JsonIgnore
+    @ManyToMany()
+    @JoinTable(
+        name = "experiment_user",
+        joinColumns = @JoinColumn(name = "experiment_id", foreignKey = @ForeignKey(name = "fk_experiment_id")),
+        inverseJoinColumns = @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"))
+    )
     private Set<User> users;
 
     @JsonIgnore
+    @ManyToMany()
+    @JoinTable(
+        name = "instance_experiment",
+        joinColumns = @JoinColumn(name = "experiment_id", foreignKey = @ForeignKey(name = "fk_experiment_id")),
+        inverseJoinColumns = @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"))
+    )
     private Set<Instance> instances;
 
     public Experiment() {

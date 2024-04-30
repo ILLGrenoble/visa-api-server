@@ -41,7 +41,7 @@ public class InstanceActivity extends Timestampable {
     private Instance instance;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "instance_activity_type", length = 50, nullable = false)
+    @Column(name = "activity_type", length = 50, nullable = false)
     private InstanceActivityType instanceActivityType;
 
     public InstanceActivity() {

@@ -118,3 +118,7 @@ business:
     devservices:
       timeout: 5m
 
+  cloud:
+    serverNamePrefix: visa-instance
+    providerType: null
+    providerName: Default

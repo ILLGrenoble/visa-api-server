@@ -1,13 +1,13 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.core.entity.Flavour;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import eu.ill.visa.core.entity.Flavour;
+import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import jakarta.persistence.RollbackException;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +54,7 @@ public class FlavourServiceTest {
     @Test
     @DisplayName("Failed to delete a flavour because plans are associated to it")
     void testFailedToDeleteBecausePlansAreAssociatedToIt() {
-        assertThrows(RollbackException.class, () -> {
+        assertThrows(PersistenceException.class, () -> {
             Flavour flavour = flavourService.getById(1000L);
             flavourService.delete(flavour);
         });

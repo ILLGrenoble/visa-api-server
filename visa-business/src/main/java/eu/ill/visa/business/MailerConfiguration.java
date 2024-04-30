@@ -4,7 +4,7 @@ import io.smallrye.config.ConfigMapping;
 
 import java.util.Optional;
 
-@ConfigMapping(prefix = "business.mailer")
+@ConfigMapping(prefix = "business.mailer", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface MailerConfiguration {
 
     Boolean enabled();

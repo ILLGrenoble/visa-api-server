@@ -4,7 +4,7 @@ import io.smallrye.config.ConfigMapping;
 
 import java.util.Optional;
 
-@ConfigMapping(prefix = "business.securityGroupServiceClient")
+@ConfigMapping(prefix = "business.securityGroupServiceClient", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface SecurityGroupServiceClientConfiguration {
 
     Boolean enabled();

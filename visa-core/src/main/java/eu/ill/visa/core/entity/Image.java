@@ -74,7 +74,7 @@ public class Image extends Timestampable {
     @Column(name = "boot_command", nullable = true, columnDefinition = "TEXT")
     private String bootCommand;
 
-    @Column(name = "auto_login", nullable = true)
+    @Column(name = "autologin", nullable = true)
     private String autologin;
 
     @ManyToMany()

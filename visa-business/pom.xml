@@ -12,10 +12,6 @@
     <artifactId>visa-business</artifactId>
 
     <properties>
-        <junit-jupiter-api.version>5.0.0-M6</junit-jupiter-api.version>
-        <junit-platform-surefire-provider.version>1.0.0-M4</junit-platform-surefire-provider.version>
-        <simple-java-mail.version>6.0.3</simple-java-mail.version>
-        <commons-vfs2.version>2.9.0</commons-vfs2.version>
         <pebble.version>3.2.2</pebble.version>
         <bouncycastle.version>1.77</bouncycastle.version>
     </properties>
@@ -37,11 +33,6 @@
             <artifactId>visa-cloud</artifactId>
             <version>3.0.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.commons</groupId>-->
-<!--            <artifactId>commons-vfs2</artifactId>-->
-<!--            <version>${commons-vfs2.version}</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>io.pebbletemplates</groupId>
             <artifactId>pebble</artifactId>

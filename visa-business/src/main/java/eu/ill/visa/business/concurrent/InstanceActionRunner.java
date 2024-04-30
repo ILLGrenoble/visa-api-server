@@ -30,9 +30,10 @@ public class InstanceActionRunner implements Callable<Instance> {
 
     @Override
     public Instance call() throws Exception {
-        this.listener.onActionStart(this.action);
 
         try {
+            this.listener.onActionStart(this.action);
+
             this.action.run();
 
             this.listener.onActionTerminated(this.action);

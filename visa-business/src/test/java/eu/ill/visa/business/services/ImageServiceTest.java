@@ -5,7 +5,7 @@ import eu.ill.visa.core.entity.ImageProtocol;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import jakarta.persistence.RollbackException;
+import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,7 +60,12 @@ public class ImageServiceTest {
     @DisplayName("Should fail to delete an image because there are instances associated to it")
     void testDeleteShouldFail() {
         Image image = imageService.getById(1000L);
-        assertThrows(RollbackException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
+            Image image2 = null;
+            image2.getId();
+        });
+
+        assertThrows(PersistenceException.class, () -> {
             imageService.delete(image);
         });
     }

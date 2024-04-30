@@ -20,8 +20,12 @@ import static java.util.Objects.requireNonNullElseGet;
 
 abstract class AbstractRepository<T> {
 
-    private final EntityManager entityManager;
+    private EntityManager entityManager;
 
+    // Required for Quarkus CDI (must have no-args constructor)
+    // https://quarkus.io/guides/cdi-reference#simplified-constructor-injection
+    protected AbstractRepository() {
+    }
 
     protected AbstractRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -29,6 +33,7 @@ abstract class AbstractRepository<T> {
 
     public void persist(final T object) {
         entityManager.persist(object);
+        entityManager.flush();
     }
 
     public T merge(final T object) {
@@ -40,12 +45,17 @@ abstract class AbstractRepository<T> {
         EntityManager em = entityManager;
 
         em.remove(em.contains(object) ? object : em.merge(object));
+        em.flush();
     }
 
     public abstract List<T> getAll();
 
     public EntityManager getEntityManager() {
         return entityManager;
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     public FilterQuery<T> createFilterQuery(AbstractFilterQueryProvider<T> provider, QueryFilter filter, OrderBy orderBy, Pagination pagination) {

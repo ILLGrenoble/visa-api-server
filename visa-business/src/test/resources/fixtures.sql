@@ -176,11 +176,11 @@ VALUES ('0001-0005-000002', 3, 2, '2016-01-01', '2016-03-07');
 INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
 VALUES ('0002-0003-000003', 3, 3, '2016-04-01', '2016-04-07');
 INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0006-0001-000001', 1, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
+VALUES ('0006-0001-000001', 1, 1, CURRENT_DATE, CURRENT_DATE + 1);
 INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0006-0002-000001', 2, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
+VALUES ('0006-0002-000001', 2, 1, CURRENT_DATE, CURRENT_DATE + 1);
 INSERT INTO experiment (id, instrument_id, proposal_id, start_date, end_date)
-VALUES ('0006-0005-000001', 5, 1, CURRENT_DATE, dateadd(day, 1, CURRENT_DATE));
+VALUES ('0006-0005-000001', 5, 1, CURRENT_DATE, CURRENT_DATE + 1);
 
 INSERT INTO experiment_user (experiment_id, user_id)
 VALUES ('0001-0001-000001', '1');

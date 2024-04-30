@@ -4,7 +4,7 @@ import eu.ill.visa.core.entity.*;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import jakarta.persistence.RollbackException;
+import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -68,7 +68,7 @@ public class PlanServiceTest {
     @DisplayName("Should fail to delete an plan because there are instances associated to it")
     void testDeleteShouldFail() {
         Plan plan = planService.getById(1000L);
-        assertThrows(RollbackException.class, () -> {
+        assertThrows(PersistenceException.class, () -> {
             planService.delete(plan);
         });
     }

@@ -1,6 +1,7 @@
 package eu.ill.visa.business.concurrent;
 
 import eu.ill.visa.business.concurrent.actions.InstanceActionServiceProvider;
+import eu.ill.visa.business.profiles.ConcurrencyTestProfile;
 import eu.ill.visa.business.services.InstanceCommandService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.PlanService;
@@ -12,8 +13,8 @@ import eu.ill.visa.core.entity.enumerations.InstanceCommandState;
 import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.UserRepository;
-import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestTransaction
+@TestProfile(ConcurrencyTestProfile.class)
 public class InstanceActionManagerTest {
 
     @Inject

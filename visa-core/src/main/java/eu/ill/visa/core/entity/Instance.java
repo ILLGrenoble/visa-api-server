@@ -135,11 +135,6 @@ import java.util.List;
             WHERE i.computeId = :computeId
             AND i.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instance.getDeletedByComputeId", query = """
-            SELECT i FROM Instance i
-            WHERE i.computeId = :computeId
-            AND i.deletedAt IS NULL
-    """),
 })
 @NamedNativeQueries({
     @NamedNativeQuery(name = "instance.countByFlavour", resultSetMapping = "countByFlavourMapping", query = """

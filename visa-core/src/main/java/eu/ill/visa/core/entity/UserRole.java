@@ -77,6 +77,7 @@ public class UserRole {
         this.expiresAt = expiresAt;
     }
 
+    @Embeddable
     public static class UserRoleKey implements Serializable {
         private Long roleId;
         private String userId;
