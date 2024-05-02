@@ -12,8 +12,8 @@ quarkus:
     persistence-xml:
       ignore: true
   mailer:
-    host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST:capto.ill.fr}
-    port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT:1025}
+    host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST}
+    port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}
 
 cloud:
   serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
@@ -116,6 +116,12 @@ business:
       mock: true
     devservices:
       timeout: 5m
+
+  business:
+    securityGroupServiceClient:
+      enabled: false
+    mailer:
+      enabled: false
 
   cloud:
     serverNamePrefix: visa-instance

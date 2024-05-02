@@ -7,7 +7,7 @@ import java.util.Optional;
 @ConfigMapping(prefix = "business.mailer", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface MailerConfiguration {
 
-    Boolean enabled();
+    boolean enabled();
 
     Optional<String> rootURL();
 

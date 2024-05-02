@@ -13,10 +13,19 @@
     <artifactId>visa-core</artifactId>
 
     <dependencies>
+
         <dependency>
-            <groupId>eu.ill.visa</groupId>
-            <artifactId>visa-app</artifactId>
-            <version>3.0.0</version>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-config-yaml</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
+
     </dependencies>
 </project>
