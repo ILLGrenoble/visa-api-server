@@ -22,7 +22,9 @@ import java.util.Date;
             SELECT i FROM InstanceExpiration i WHERE i.expirationDate <= :expirationDate
     """),
 })
-@Table(name = "instance_expiration")
+@Table(name = "instance_expiration", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"instance_id"}, name = "uk_instance_expiration_instance_id")
+})
 public class InstanceExpiration extends Timestampable {
 
     @Id

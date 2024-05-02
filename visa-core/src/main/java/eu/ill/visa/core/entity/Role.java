@@ -36,7 +36,9 @@ import java.util.Date;
             ORDER BY r.name ASC
     """),
 })
-@Table(name = "role")
+@Table(name = "role", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name"}, name = "uk_role_name")
+})
 public class Role {
 
     public static final String ADMIN_ROLE = "ADMIN";
@@ -52,10 +54,10 @@ public class Role {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 250)
     private String description;
 
     @Column(name = "group_created_at")

@@ -266,9 +266,11 @@ public class Instance extends Timestampable {
     private String keyboardLayout;
 
     @Convert(converter = CommaSeparatedListConverter.class)
+    @Column(name = "security_groups", nullable = true, columnDefinition = "TEXT")
     private List<String> securityGroups = new ArrayList<>();
 
     @Convert(converter = CommaSeparatedListConverter.class)
+    @Column(name = "active_protocols", nullable = true, columnDefinition = "TEXT")
     private List<String> activeProtocols = new ArrayList<>();
 
     public Instance() {

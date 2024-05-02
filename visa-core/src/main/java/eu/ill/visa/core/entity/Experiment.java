@@ -72,7 +72,7 @@ import java.util.Set;
 public class Experiment {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", length = 32, nullable = false)
     private String id;
 
     @ManyToOne

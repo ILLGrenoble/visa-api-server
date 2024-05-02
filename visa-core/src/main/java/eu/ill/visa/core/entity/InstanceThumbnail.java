@@ -9,7 +9,9 @@ import jakarta.persistence.*;
             WHERE it.instance = :instance
     """),
 })
-@Table(name = "instance_thumbnail")
+@Table(name = "instance_thumbnail", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"instance_id"}, name = "uk_instance_thumbnail_instance_id")
+})
 public class InstanceThumbnail extends Timestampable {
 
     @Id

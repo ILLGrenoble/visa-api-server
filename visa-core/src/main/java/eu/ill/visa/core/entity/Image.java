@@ -59,7 +59,7 @@ public class Image extends Timestampable {
     @Column(name = "icon", length = 100, nullable = false)
     private String icon;
 
-    @Column(name = "compute_id", length = 250, nullable = true)
+    @Column(name = "compute_id", length = 250, nullable = false)
     private String computeId;
 
     @Column(name = "version", length = 100, nullable = true)

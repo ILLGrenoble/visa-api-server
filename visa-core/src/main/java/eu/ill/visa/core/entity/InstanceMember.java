@@ -35,7 +35,7 @@ public class InstanceMember extends Timestampable {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 50, nullable = false)
+    @Column(name = "role", length = 255, nullable = false)
     private InstanceMemberRole role;
 
     private InstanceMember(Builder builder) {
