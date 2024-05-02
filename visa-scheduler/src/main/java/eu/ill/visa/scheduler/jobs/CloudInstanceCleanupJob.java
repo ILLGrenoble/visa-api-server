@@ -1,14 +1,13 @@
 package eu.ill.visa.scheduler.jobs;
 
+import eu.ill.visa.core.entity.Instance;
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.domain.Instance;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@DisallowConcurrentExecution
-public class CloudInstanceCleanupJob implements Job {
+@ApplicationScoped
+public class CloudInstanceCleanupJob {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudInstanceCleanupJob.class);
 
@@ -28,8 +27,9 @@ public class CloudInstanceCleanupJob implements Job {
         this.instanceService = instanceService;
     }
 
-    @Override
-    public void execute(final JobExecutionContext context) {
+    // Run every day at 2am
+    @Scheduled(cron="0 0 2 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void execute() {
         logger.info("Executing cloud instance cleanup job");
 
         Map<CloudClient, List<Instance>> instancesByCloud = this.instanceService.getAllByCloud();

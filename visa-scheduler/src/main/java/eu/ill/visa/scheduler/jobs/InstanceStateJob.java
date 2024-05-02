@@ -1,30 +1,28 @@
 package eu.ill.visa.scheduler.jobs;
 
-import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceCommandService;
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
-@DisallowConcurrentExecution
-public class InstanceStateJob implements Job {
+@ApplicationScoped
+public class InstanceStateJob {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceStateJob.class);
 
-    private InstanceService instanceService;
-    private InstanceCommandService instanceCommandService;
+    private final InstanceService instanceService;
+    private final InstanceCommandService instanceCommandService;
 
     @Inject
     public InstanceStateJob(InstanceService instanceService, InstanceCommandService instanceCommandService) {
@@ -32,20 +30,27 @@ public class InstanceStateJob implements Job {
         this.instanceCommandService = instanceCommandService;
     }
 
-    @Override
-    public void execute(JobExecutionContext context) {
-        String statesString = context.getMergedJobDataMap().getString("states");
+    // Run every minute
+    @Scheduled(cron="0 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void updateAllInstancesStates() {
+        List<Instance> instances = this.instanceService.getAll();
+        logger.debug("Job running to update all instance states ({} instances)", instances.size());
 
-        List<Instance> instances;
-        if (statesString == null || statesString.length() == 0) {
-            instances = this.instanceService.getAll();
-            logger.debug("Job running to update all instance states ({} instances)", instances.size());
+        this.updateInstancesStates(instances);
+    }
 
-        } else {
-            List<InstanceState> states = Arrays.asList(statesString.split(",")).stream().map(stateString -> InstanceState.valueOf(stateString)).collect(Collectors.toList());
-            instances = this.instanceService.getAllWithStates(states);
-            logger.debug("Job running to update instance states which have states {} ({} instances)", statesString, instances.size());
-        }
+    // Run every 5 seconds
+    @Scheduled(cron="0/5 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void updateNonStableInstancesStates() {
+        String[] statesString = {"BUILDING","STARTING","PARTIALLY_ACTIVE","REBOOTING","STOPPING","DELETED"};
+        List<InstanceState> states = Arrays.stream(statesString).map(InstanceState::valueOf).toList();
+        List<Instance> instances = this.instanceService.getAllWithStates(states);
+        logger.debug("Job running to update instance states which have states {} ({} instances)", statesString, instances.size());
+
+        this.updateInstancesStates(instances);
+    }
+
+    private void updateInstancesStates(final List<Instance> instances) {
 
         // Cleanup all instances that have deleted state - set soft deleted flag
         List<Instance> runningInstances = instances.stream()
@@ -60,7 +65,7 @@ public class InstanceStateJob implements Job {
                     return true;
                 }
             })
-            .collect(Collectors.toList());
+            .toList();
 
         // Update states of all running instances
         runningInstances.forEach(instance -> {

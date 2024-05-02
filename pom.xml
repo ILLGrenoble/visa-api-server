@@ -12,6 +12,7 @@
         <module>visa-persistence</module>
         <module>visa-cloud</module>
         <module>visa-business</module>
+        <module>visa-scheduler</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -42,10 +43,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-scheduler</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>

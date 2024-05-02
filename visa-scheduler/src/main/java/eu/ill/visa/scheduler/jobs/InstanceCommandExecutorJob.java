@@ -1,33 +1,33 @@
 package eu.ill.visa.scheduler.jobs;
 
+import eu.ill.visa.core.entity.InstanceCommand;
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceCommandService;
-import eu.ill.visa.core.domain.InstanceCommand;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 
-@DisallowConcurrentExecution
-public class InstanceCommandExecutorJob implements Job {
+@ApplicationScoped
+public class InstanceCommandExecutorJob {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceCommandExecutorJob.class);
 
-    private InstanceCommandService instanceCommandService;
+    private final InstanceCommandService instanceCommandService;
 
     @Inject
     public InstanceCommandExecutorJob(InstanceCommandService instanceCommandService) {
         this.instanceCommandService = instanceCommandService;
     }
 
-    @Override
-    public synchronized void execute(JobExecutionContext context) {
+    // Run every 2 seconds
+    @Scheduled(cron="0/2 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public synchronized void execute() {
         List<InstanceCommand> pendingCommands = this.instanceCommandService.getAllPending();
-        if (pendingCommands.size() > 0) {
+        if (!pendingCommands.isEmpty()) {
             logger.info("Running instance command executor job: executing {} pending commands", pendingCommands.size());
         }
         pendingCommands.forEach(instanceCommand -> this.instanceCommandService.execute(instanceCommand));

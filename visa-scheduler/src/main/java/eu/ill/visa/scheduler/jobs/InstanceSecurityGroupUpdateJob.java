@@ -1,23 +1,22 @@
 package eu.ill.visa.scheduler.jobs;
 
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceCommandService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.SecurityGroupService;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 
-@DisallowConcurrentExecution
-public class InstanceSecurityGroupUpdateJob implements Job {
+@ApplicationScoped
+public class InstanceSecurityGroupUpdateJob {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceSecurityGroupUpdateJob.class);
 
@@ -34,8 +33,9 @@ public class InstanceSecurityGroupUpdateJob implements Job {
         this.instanceCommandService = instanceCommandService;
     }
 
-    @Override
-    public void execute(final JobExecutionContext context) {
+    // Run every day at 6am
+    @Scheduled(cron="0 0 6 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void execute() {
         logger.info("Executing instance security group update job");
 
         List<Instance> instances = this.instanceService.getAll();

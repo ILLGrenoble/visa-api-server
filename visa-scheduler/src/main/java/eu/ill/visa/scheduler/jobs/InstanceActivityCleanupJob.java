@@ -1,15 +1,14 @@
 package eu.ill.visa.scheduler.jobs;
 
-import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceActivityService;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@DisallowConcurrentExecution
-public class InstanceActivityCleanupJob implements Job {
+@ApplicationScoped
+public class InstanceActivityCleanupJob {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceActivityCleanupJob.class);
 
@@ -20,8 +19,9 @@ public class InstanceActivityCleanupJob implements Job {
         this.instanceActivityService = instanceActivityService;
     }
 
-    @Override
-    public void execute(final JobExecutionContext context) {
+    // Run every day at 1am
+    @Scheduled(cron="0 0 1 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void execute() {
 
         try {
             if (this.instanceActivityService.cleanupActive()) {

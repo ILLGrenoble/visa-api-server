@@ -11,6 +11,8 @@ quarkus:
       sql: false
     persistence-xml:
       ignore: true
+  scheduler:
+    enabled: ${VISA_SCHEDULER_ENABLED:true}
   mailer:
     host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST}
     port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}

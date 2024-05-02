@@ -1,22 +1,21 @@
 package eu.ill.visa.scheduler.jobs;
 
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceCommandService;
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceCommand;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-@DisallowConcurrentExecution
-public class InstanceDeleteJob implements Job {
+@ApplicationScoped
+public class InstanceDeleteJob {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceDeleteJob.class);
     private final InstanceService instanceService;
@@ -28,8 +27,9 @@ public class InstanceDeleteJob implements Job {
         this.instanceCommandService = instanceCommandService;
     }
 
-    @Override
-    public void execute(JobExecutionContext context) {
+    // Run every 10 seconds
+    @Scheduled(cron="0/10 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void execute() {
         logger.debug("Executing instance delete job");
 
         List<Instance> instances = this.instanceService.getAllToDelete();

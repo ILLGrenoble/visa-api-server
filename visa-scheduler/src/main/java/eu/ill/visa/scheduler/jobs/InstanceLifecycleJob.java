@@ -1,27 +1,27 @@
 package eu.ill.visa.scheduler.jobs;
 
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceExpirationService;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@DisallowConcurrentExecution
-public class InstanceLifecycleJob implements Job {
+@ApplicationScoped
+public class InstanceLifecycleJob {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceLifecycleJob.class);
 
-    private InstanceExpirationService instanceExpirationService;
+    private final InstanceExpirationService instanceExpirationService;
 
     @Inject
     public InstanceLifecycleJob(InstanceExpirationService instanceExpirationService) {
         this.instanceExpirationService = instanceExpirationService;
     }
 
-    @Override
-    public void execute(final JobExecutionContext context) {
+    // Run every 5 minutes
+    @Scheduled(cron="0 */5 * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    public void execute() {
         logger.info("Executing instance lifecycle job");
 
         // Find instances that are active but have been scheduled to be deleted due to inactivity
