@@ -7,11 +7,11 @@ public interface BusinessConfiguration {
 
     Integer numberInstanceActionThreads();
 
-//    List<MailerConfiguration> notificationConfiguration();
-//
-//    InstanceConfiguration instanceConfiguration();
-//
-//    SignatureConfiguration signatureConfiguration();
-//
-//    SecurityGroupServiceClientConfiguration securityGroupServiceClientConfiguration();
+    MailerConfiguration mailer();
+
+    InstanceConfiguration instance();
+
+    SignatureConfiguration signature();
+
+    SecurityGroupServiceClientConfiguration securityGroupServiceClient();
 }
