@@ -10,9 +10,9 @@ public class AccessCancellationEvent extends Event {
 
     private final static Logger logger = LoggerFactory.getLogger(AccessCancellationEvent.class);
 
-    private String userFullName;
+    private final String userFullName;
 
-    public AccessCancellationEvent(String userFullName) {
+    public AccessCancellationEvent(final String userFullName) {
         this.userFullName = userFullName;
     }
 

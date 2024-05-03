@@ -2,7 +2,7 @@ package eu.ill.visa.vdi.events;
 
 import com.corundumstudio.socketio.BroadcastOperations;
 import com.corundumstudio.socketio.SocketIOClient;
-import eu.ill.visa.core.domain.Instance;
+import eu.ill.visa.core.entity.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -157,6 +157,7 @@ business:
     enabled: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_ENABLED:-false}
     url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
     authToken: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_AUTH_TOKEN}
+
 graphql:
   tracing: ${VISA_GRAPHQL_TRACING_ENABLED:-false}
   resultsLimit: 50

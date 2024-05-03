@@ -4,8 +4,8 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceSession;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.domain.Role;
 import eu.ill.visa.vdi.events.UserDisconnectedEvent;
@@ -56,7 +56,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
                 instanceSessionService.removeInstanceSessionMember(session, client.getSessionId());
 
                 if (!this.desktopConnectionService.isOwnerConnected(instance) && !connection.getConnectedUser().getRole().equals(Role.SUPPORT)) {
-                    if (this.virtualDesktopConfiguration.getOwnerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
+                    if (this.virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
                         this.desktopConnectionService.lockRoom(client, connection.getRoomId(), instance);
 
                     } else {

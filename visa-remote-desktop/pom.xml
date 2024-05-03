@@ -5,25 +5,48 @@
     <parent>
         <artifactId>api</artifactId>
         <groupId>eu.ill.visa</groupId>
-        <version>2.11.0</version>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>visa-remote-desktop</artifactId>
+
     <properties>
-        <guacamole.version>1.3.0</guacamole.version>
-        <guice.version>4.1.0</guice.version>
-        <slf4j.version>1.6.1</slf4j.version>
-        <netty.socketio.version>1.7.18</netty.socketio.version>
-        <redisson.version>3.10.7</redisson.version>
-        <jeromq.version>0.5.2</jeromq.version>
+        <guacamole.version>1.5.5</guacamole.version>
+        <netty.socketio.version>2.0.9</netty.socketio.version>
+        <redisson.version>3.29.0</redisson.version>
+        <jeromq.version>0.6.0</jeromq.version>
+        <webx-relay.version>0.1.0</webx-relay.version>
+        <copy-rename-maven-plugin.version>1.0</copy-rename-maven-plugin.version>
+        <surefire-plugin.version>3.2.5</surefire-plugin.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-business</artifactId>
-            <version>2.11.0</version>
+            <version>3.0.0</version>
         </dependency>
+
+        <!--  temporary-->
+        <dependency>
+            <groupId>eu.ill.visa</groupId>
+            <artifactId>visa-scheduler</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.guacamole</groupId>
             <artifactId>guacamole-common</artifactId>
@@ -42,12 +65,119 @@
         <dependency>
             <groupId>eu.ill</groupId>
             <artifactId>webx-relay</artifactId>
-            <version>0.1.0</version>
+            <version>${webx-relay.version}</version>
         </dependency>
         <dependency>
             <groupId>org.zeromq</groupId>
             <artifactId>jeromq</artifactId>
             <version>${jeromq.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-imaging</artifactId>
+            <version>1.0.0-alpha5</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler-plugin.version}</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire-plugin.version}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>${copy-rename-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>copy-dotenv</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>../.env</sourceFile>
+                            <destinationFile>.env</destinationFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${surefire-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <systemPropertyVariables>
+                                        <native.image.path>
+                                            ${project.build.directory}/${project.build.finalName}-runner
+                                        </native.image.path>
+                                        <java.util.logging.manager>org.jboss.logmanager.LogManager
+                                        </java.util.logging.manager>
+                                        <maven.home>${maven.home}</maven.home>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>

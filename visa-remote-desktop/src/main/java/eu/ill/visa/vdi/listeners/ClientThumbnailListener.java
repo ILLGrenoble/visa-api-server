@@ -4,18 +4,16 @@ import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.DataListener;
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.core.domain.Instance;
+import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.domain.Role;
 import eu.ill.visa.vdi.models.DesktopConnection;
 import eu.ill.visa.vdi.services.DesktopConnectionService;
 import org.apache.commons.imaging.ImageFormat;
 import org.apache.commons.imaging.ImageFormats;
-import org.apache.commons.imaging.ImageReadException;
 import org.apache.commons.imaging.Imaging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ClientThumbnailListener extends AbstractListener implements DataListener<byte[]> {
@@ -46,7 +44,7 @@ public class ClientThumbnailListener extends AbstractListener implements DataLis
                     }
                 }
             }
-        } catch (IOException | ImageReadException exception) {
+        } catch (Exception exception) {
             logger.error("Error creating thumbnail for instance: {}", connection.getInstanceId(), exception);
         }
 

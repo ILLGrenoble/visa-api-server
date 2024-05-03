@@ -3,7 +3,7 @@ package eu.ill.visa.vdi.listeners;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.core.domain.enumerations.InstanceActivityType;
+import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.services.DesktopConnectionService;
 

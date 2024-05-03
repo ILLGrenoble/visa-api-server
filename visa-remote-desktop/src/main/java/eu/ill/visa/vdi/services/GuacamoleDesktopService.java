@@ -1,16 +1,15 @@
 package eu.ill.visa.vdi.services;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import jakarta.inject.Inject;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.ImageProtocol;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceSession;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.ImageProtocol;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.concurrency.ConnectionThreadExecutor;
@@ -43,9 +42,7 @@ public class GuacamoleDesktopService extends DesktopService {
     private final VirtualDesktopConfiguration configuration;
     private final ConnectionThreadExecutor executorService;
 
-
-    @Inject
-    GuacamoleDesktopService(final InstanceSessionService instanceSessionService,
+    public GuacamoleDesktopService(final InstanceSessionService instanceSessionService,
                             final CloudClientGateway cloudClientGateway,
                             final SignatureService signatureService,
                             final ImageProtocolService imageProtocolService,
@@ -73,7 +70,7 @@ public class GuacamoleDesktopService extends DesktopService {
     private GuacamoleConfiguration createConfiguration(InstanceSession session, Instance instance, String ip) {
         final GuacamoleConfiguration config = new GuacamoleConfiguration();
         config.setParameter("hostname", ip);
-        config.setProtocol(configuration.getProtocol());
+        config.setProtocol(configuration.protocol());
         if (session == null) {
             String username = instance.getUsername();
             logger.info("Creating new guacamole session on instance {} with username {}", instance.getId(), username);
@@ -84,7 +81,7 @@ public class GuacamoleDesktopService extends DesktopService {
             }
             config.setParameter("server-layout", instance.getKeyboardLayout());
             // merge guacamole configuration parameters
-            final Map<String, String> guacamoleParameters = configuration.getGuacdConfiguration();
+            final Map<String, String> guacamoleParameters = configuration.guacdConfiguration();
             guacamoleParameters.forEach(config::setParameter);
         } else {
             config.setConnectionID(session.getConnectionId());

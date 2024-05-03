@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.listeners;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import eu.ill.visa.core.domain.Instance;
+import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.events.Event;
 import eu.ill.visa.vdi.models.ConnectedUser;
 import eu.ill.visa.vdi.models.DesktopConnection;

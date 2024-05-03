@@ -1,12 +1,10 @@
 package eu.ill.visa.vdi;
 
-import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.store.RedissonStoreFactory;
 import com.corundumstudio.socketio.store.StoreFactory;
 import com.corundumstudio.socketio.store.pubsub.DispatchMessage;
 import com.corundumstudio.socketio.store.pubsub.PubSubType;
-import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
@@ -18,15 +16,17 @@ import eu.ill.visa.vdi.services.DesktopAccessService;
 import eu.ill.visa.vdi.services.DesktopConnectionService;
 import eu.ill.visa.vdi.services.RoleService;
 import eu.ill.visa.vdi.services.TokenAuthenticatorService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ApplicationScoped
 public class RemoteDesktopServer {
 
     private final static Logger logger = LoggerFactory.getLogger(RemoteDesktopServer.class);
 
     private final SocketIOServer server;
-    private final Configuration configuration;
     private final DesktopConnectionService desktopConnectionService;
     private final InstanceService instanceService;
     private final TokenAuthenticatorService authenticator;
@@ -44,11 +44,9 @@ public class RemoteDesktopServer {
                                final TokenAuthenticatorService authenticator,
                                final RoleService roleService,
                                final DesktopAccessService desktopAccessService,
-                               final Configuration configuration,
                                final VirtualDesktopConfiguration virtualDesktopConfiguration,
                                final InstanceActivityService instanceActivityService) {
         this.server = server;
-        this.configuration = configuration;
         this.instanceSessionService = instanceSessionService;
         this.desktopConnectionService = desktopConnectionService;
         this.instanceService = instanceService;
@@ -60,7 +58,7 @@ public class RemoteDesktopServer {
     }
 
     public void startServer() {
-        if (this.virtualDesktopConfiguration.isCleanupSessionsOnStartup()) {
+        if (this.virtualDesktopConfiguration.cleanupSessionsOnStartup()) {
             this.cleanupSessions();
         }
 
@@ -72,7 +70,7 @@ public class RemoteDesktopServer {
     public void stopServer() {
         this.server.stop();
         // make sure the store factory has been shutdown
-        configuration.getStoreFactory().shutdown();
+        this.server.getConfiguration().getStoreFactory().shutdown();
     }
 
     private void bindListeners(final SocketIOServer server) {
@@ -86,7 +84,7 @@ public class RemoteDesktopServer {
     }
 
     private void bindStoreFactorySubscriptions() {
-        final StoreFactory storeFactory = configuration.getStoreFactory();
+        final StoreFactory storeFactory = this.server.getConfiguration().getStoreFactory();
         if (storeFactory instanceof RedissonStoreFactory) {
             logger.info("Binding pub-sub store subscriptions");
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomClosedListener(this.server), DispatchMessage.class);

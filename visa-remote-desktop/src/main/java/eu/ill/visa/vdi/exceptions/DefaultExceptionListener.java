@@ -38,4 +38,9 @@ public class DefaultExceptionListener extends ExceptionListenerAdapter {
         return true;
     }
 
+    @Override
+    public void onAuthException(Throwable e, SocketIOClient socketIOClient) {
+        log.error("onAuthException: {}", e.getMessage(), e);
+    }
+
 }

@@ -4,15 +4,12 @@ import com.corundumstudio.socketio.BroadcastOperations;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
-import com.corundumstudio.socketio.store.StoreFactory;
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.services.InstanceExpirationService;
 import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceSession;
-import eu.ill.visa.core.domain.InstanceSessionMember;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.InstanceSessionMember;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.domain.Role;
@@ -22,8 +19,9 @@ import eu.ill.visa.vdi.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.models.ConnectedUser;
 import eu.ill.visa.vdi.models.DesktopConnection;
-import eu.ill.visa.vdi.socketio.RoomBroadcastOperations;
 import eu.ill.visa.vdi.support.HttpRequest;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +33,7 @@ import static eu.ill.visa.vdi.events.Event.OWNER_AWAY_EVENT;
 
 @ApplicationScoped
 public class DesktopConnectionService {
+
     private final static String PROTOCOL_PARAMETER = "protocol";
     private final static Logger logger = LoggerFactory.getLogger(DesktopConnectionService.class);
 
@@ -44,21 +43,18 @@ public class DesktopConnectionService {
     private final InstanceExpirationService instanceExpirationService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
     private final Map<UUID, DesktopConnection> desktopConnections = new HashMap<>();
-    private final StoreFactory storeFactory;
 
     @Inject
     public DesktopConnectionService(final InstanceSessionService instanceSessionService,
                                     final GuacamoleDesktopService guacamoleDesktopService,
                                     final WebXDesktopService webXDesktopService,
                                     final InstanceExpirationService instanceExpirationService,
-                                    final VirtualDesktopConfiguration virtualDesktopConfiguration,
-                                    final StoreFactory storeFactory) {
+                                    final VirtualDesktopConfiguration virtualDesktopConfiguration) {
         this.instanceSessionService = instanceSessionService;
         this.guacamoleDesktopService = guacamoleDesktopService;
         this.webXDesktopService = webXDesktopService;
         this.instanceExpirationService = instanceExpirationService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
-        this.storeFactory = storeFactory;
     }
 
     public void broadcast(final SocketIOClient client, final Event ...events) {
@@ -70,10 +66,8 @@ public class DesktopConnectionService {
         final SocketIONamespace namespace = client.getNamespace();
         final BroadcastOperations operations = namespace.getRoomOperations(roomId);
 
-        final RoomBroadcastOperations roomBroadcastOperations = new RoomBroadcastOperations(operations.getClients(), this.storeFactory, roomId);
-
         for (Event event : events) {
-            event.broadcast(client, roomBroadcastOperations);
+            event.broadcast(client, operations);
         }
     }
 
@@ -104,7 +98,7 @@ public class DesktopConnectionService {
         client.joinRoom(desktopConnection.getRoomId());
 
         InstanceSession instanceSession = this.instanceSessionService.getByInstance(instance);
-        boolean unlockRoom = virtualDesktopConfiguration.getOwnerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
+        boolean unlockRoom = virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
             && role.equals(Role.OWNER)
             && !this.isOwnerConnected(instance);
 

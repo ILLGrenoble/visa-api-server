@@ -10,9 +10,9 @@ public class AccessCandidateEvent extends Event {
 
     private final static Logger logger = LoggerFactory.getLogger(AccessCandidateEvent.class);
 
-    private String userFullName;
+    private final String userFullName;
 
-    public AccessCandidateEvent(String userFullName) {
+    public AccessCandidateEvent(final String userFullName) {
         this.userFullName = userFullName;
     }
 

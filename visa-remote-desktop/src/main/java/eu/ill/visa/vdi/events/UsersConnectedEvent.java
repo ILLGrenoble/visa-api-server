@@ -2,13 +2,12 @@ package eu.ill.visa.vdi.events;
 
 import com.corundumstudio.socketio.BroadcastOperations;
 import com.corundumstudio.socketio.SocketIOClient;
-import eu.ill.visa.core.domain.Instance;
+import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.models.ConnectedUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UsersConnectedEvent extends Event {
 
@@ -24,9 +23,9 @@ public class UsersConnectedEvent extends Event {
 
     @Override
     public void broadcast(SocketIOClient client, BroadcastOperations operations) {
-        if (users.size() > 0) {
+        if (!users.isEmpty()) {
             logger.info("Instance {} has the following users connected: {}", instance.getId(), users.stream().map(user ->
-                user.getFullName() + " (" + user.getId() + ", " + user.getRole().toString() + ")").collect(Collectors.toUnmodifiableList()));
+                user.getFullName() + " (" + user.getId() + ", " + user.getRole().toString() + ")").toList());
         }
         operations.sendEvent(USERS_CONNECTED_EVENT, users);
     }

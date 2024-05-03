@@ -1,6 +1,6 @@
 package eu.ill.visa.vdi.models;
 
-import eu.ill.visa.core.domain.enumerations.InstanceActivityType;
+import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.concurrency.ConnectionThread;
 
 import java.util.Date;

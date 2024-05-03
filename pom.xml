@@ -13,6 +13,7 @@
         <module>visa-cloud</module>
         <module>visa-business</module>
         <module>visa-scheduler</module>
+        <module>visa-remote-desktop</module>
     </modules>
 
     <packaging>pom</packaging>

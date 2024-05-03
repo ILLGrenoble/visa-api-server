@@ -2,8 +2,8 @@ package eu.ill.visa.vdi.concurrency;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import jakarta.enterprise.context.ApplicationScoped;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.domain.Role;
 import eu.ill.webx.WebXTunnel;
 import org.apache.guacamole.net.GuacamoleTunnel;

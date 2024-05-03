@@ -1,9 +1,10 @@
 package eu.ill.visa.vdi.services;
 
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceMember;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.domain.Role;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Service to check if a  user has access to the instance
  */
+@ApplicationScoped
 public class RoleService {
 
     public Role getRole(final Instance instance, final User user) {

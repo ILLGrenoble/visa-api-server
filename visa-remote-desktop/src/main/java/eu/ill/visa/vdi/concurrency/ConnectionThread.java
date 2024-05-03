@@ -1,8 +1,8 @@
 package eu.ill.visa.vdi.concurrency;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.domain.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

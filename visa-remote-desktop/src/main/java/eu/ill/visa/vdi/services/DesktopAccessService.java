@@ -3,13 +3,14 @@ package eu.ill.visa.vdi.services;
 import com.corundumstudio.socketio.BroadcastOperations;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.InstanceMember;
-import eu.ill.visa.core.domain.InstanceSessionMember;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.InstanceSessionMember;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.domain.AccessCancellation;
 import eu.ill.visa.vdi.domain.AccessReply;
 import eu.ill.visa.vdi.domain.AccessRequest;
@@ -29,6 +30,7 @@ import java.util.*;
 
 import static eu.ill.visa.vdi.events.Event.ACCESS_DENIED;
 
+@ApplicationScoped
 public class DesktopAccessService {
     private static final Logger logger = LoggerFactory.getLogger(DesktopAccessService.class);
 
@@ -191,7 +193,7 @@ public class DesktopAccessService {
     private Role convertAccessReplyRole(Role replyRole, Instance instance, User user) {
         if (replyRole.equals(Role.SUPPORT)) {
             InstanceMember owner = instance.getOwner();
-            boolean ownerIsExternalUser = !owner.getUser().hasRole(eu.ill.visa.core.domain.Role.STAFF_ROLE);
+            boolean ownerIsExternalUser = !owner.getUser().hasRole(eu.ill.visa.core.entity.Role.STAFF_ROLE);
             if (ownerIsExternalUser) {
                 // See if user has right to access instance when owner away (support role, otherwise user role)
                 if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {

@@ -1,176 +1,43 @@
 package eu.ill.visa.vdi;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithName;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-public class VirtualDesktopConfiguration {
+@ConfigMapping(prefix = "vdi", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
+public interface VirtualDesktopConfiguration {
 
     public static String OWNER_DISCONNECTION_POLICY_DISCONNECT_ALL = "DISCONNECT_ALL";
     public static String OWNER_DISCONNECTION_POLICY_LOCK_ROOM = "LOCK_ROOM";
 
+    boolean enabled();
 
-    @NotNull
-    private Integer port = 8087;
+    Integer port();
 
-    @NotNull
-    private String host = "localhost";
+    String host();
 
-    @NotNull
-    private String corsOrigin;
+    String corsOrigin();
 
-    @NotNull
-    private boolean redisEnabled;
+    boolean redisEnabled();
 
-    @NotNull
-    private String redisURL;
+    Optional<String> redisURL();
 
-    @NotNull
-    private String redisPassword;
+    Optional<String> redisPassword();
 
-    @NotNull
-    private Integer redisDatabase;
+    Integer redisDatabase();
 
-    @NotNull
-    private String ownerDisconnectionPolicy = OWNER_DISCONNECTION_POLICY_DISCONNECT_ALL;
+    String ownerDisconnectionPolicy();
 
-    @NotNull
-    private boolean cleanupSessionsOnStartup = false;
+    boolean cleanupSessionsOnStartup();
 
-    @NotNull
-    private boolean enabled = true;
+    int pingTimeout();
 
-    @NotNull
-    private int pingTimeout;
+    int pingInterval();
 
-    @NotNull
-    private int pingInterval;
+    String protocol();
 
-    @NotNull
-    @Valid
-    private Map<String, String> guacdConfiguration = new HashMap<>();
-
-    @NotNull
-    @Valid
-    private String protocol;
-
-    public VirtualDesktopConfiguration() {
-
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
-    }
-
-    public String getCorsOrigin() {
-        return corsOrigin;
-    }
-
-    public void setCorsOrigin(String corsOrigin) {
-        this.corsOrigin = corsOrigin;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public boolean isRedisEnabled() {
-        return redisEnabled;
-    }
-
-    public void setRedisEnabled(boolean redisEnabled) {
-        this.redisEnabled = redisEnabled;
-    }
-
-    public String getRedisURL() {
-        return redisURL;
-    }
-
-    public void setRedisURL(String redisURL) {
-        this.redisURL = redisURL;
-    }
-
-    public String getRedisPassword() {
-        return redisPassword;
-    }
-
-    public void setRedisPassword(String redisPassword) {
-        this.redisPassword = redisPassword;
-    }
-
-    public Integer getRedisDatabase() {
-        return redisDatabase;
-    }
-
-    public void setRedisDatabase(Integer redisDatabase) {
-        this.redisDatabase = redisDatabase;
-    }
-
-    public String getOwnerDisconnectionPolicy() {
-        return ownerDisconnectionPolicy;
-    }
-
-    public void setOwnerDisconnectionPolicy(String ownerDisconnectionPolicy) {
-        this.ownerDisconnectionPolicy = ownerDisconnectionPolicy;
-    }
-
-    public boolean isCleanupSessionsOnStartup() {
-        return cleanupSessionsOnStartup;
-    }
-
-    public void setCleanupSessionsOnStartup(boolean cleanupSessionsOnStartup) {
-        this.cleanupSessionsOnStartup = cleanupSessionsOnStartup;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public int getPingTimeout() {
-        return pingTimeout;
-    }
-
-    public void setPingTimeout(int pingTimeout) {
-        this.pingTimeout = pingTimeout;
-    }
-
-    public int getPingInterval() {
-        return pingInterval;
-    }
-
-    public void setPingInterval(int pingInterval) {
-        this.pingInterval = pingInterval;
-    }
-
-    @JsonProperty("guacd")
-    public Map<String, String> getGuacdConfiguration() {
-        return guacdConfiguration;
-    }
-
-    public void setGuacdConfiguration(Map<String, String> guacdConfiguration) {
-        this.guacdConfiguration = guacdConfiguration;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
+    @WithName("guacd")
+    Map<String, String> guacdConfiguration();
 }

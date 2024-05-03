@@ -11,10 +11,10 @@ public class AccessRevokedEvent extends Event {
 
     private final static Logger logger = LoggerFactory.getLogger(AccessRevokedEvent.class);
 
-    private String room;
-    private UUID clientSessionId;
+    private final String room;
+    private final UUID clientSessionId;
 
-    public AccessRevokedEvent(String room, UUID clientSessionId) {
+    public AccessRevokedEvent(final String room, final UUID clientSessionId) {
         this.room = room;
         this.clientSessionId = clientSessionId;
     }

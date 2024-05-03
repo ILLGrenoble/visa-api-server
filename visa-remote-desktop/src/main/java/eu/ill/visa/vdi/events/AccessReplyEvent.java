@@ -10,9 +10,9 @@ public class AccessReplyEvent extends Event {
 
     private final static Logger logger = LoggerFactory.getLogger(AccessReplyEvent.class);
 
-    private AccessReply accessReply;
+    private final AccessReply accessReply;
 
-    public AccessReplyEvent(AccessReply accessReply) {
+    public AccessReplyEvent(final AccessReply accessReply) {
         this.accessReply = accessReply;
     }
 

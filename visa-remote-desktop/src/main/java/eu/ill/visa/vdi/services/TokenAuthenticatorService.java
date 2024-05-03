@@ -2,13 +2,16 @@ package eu.ill.visa.vdi.services;
 
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIOClient;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
-import eu.ill.visa.core.domain.InstanceAuthenticationToken;
+import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.vdi.exceptions.InvalidTokenException;
 import eu.ill.visa.vdi.support.HttpRequest;
 
+@ApplicationScoped
 public class TokenAuthenticatorService {
+
     private final static String TOKEN_PARAMETER = "token";
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
 

@@ -66,6 +66,25 @@ business:
     url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
     authToken: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_AUTH_TOKEN}
 
+vdi:
+  enabled: ${VISA_VDI_ENABLED:true}
+  host: ${VISA_VDI_HOST:localhost}
+  port: ${VISA_VDI_PORT:8087}
+  corsOrigin: ${VISA_VDI_CORS_ORIGIN:*}
+  redisEnabled: ${VISA_VDI_REDIS_ENABLED:false}
+  redisURL: ${VISA_VDI_REDIS_URL}
+  redisPassword: ${VISA_VDI_REDIS_PASSWORD}
+  redisDatabase: ${VISA_VDI_REDIS_DATABASE:0}
+  ownerDisconnectionPolicy: ${VISA_VDI_OWNER_DISCONNECTION_POLICY:DISCONNECT_ALL}
+  cleanupSessionsOnStartup: ${VISA_VDI_CLEANUP_SESSIONS_ON_STARTUP:false}
+  # in milliseconds....
+  pingTimeout: ${VISA_VDI_PING_TIMEOUT:15000}
+  # in milliseconds...
+  pingInterval: ${VISA_VDI_PING_INTERVAL:3000}
+  protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}
+  guacd:
+    ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
+    port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
 
 "%prod":
   quarkus:

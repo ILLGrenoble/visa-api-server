@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.models;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.User;
 
 public class DesktopCandidate {
 
