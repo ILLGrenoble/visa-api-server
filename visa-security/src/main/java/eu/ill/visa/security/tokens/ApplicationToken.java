@@ -1,7 +1,7 @@
 package eu.ill.visa.security.tokens;
 
 
-import eu.ill.visa.core.domain.ApplicationCredential;
+import eu.ill.visa.core.entity.ApplicationCredential;
 
 import java.security.Principal;
 

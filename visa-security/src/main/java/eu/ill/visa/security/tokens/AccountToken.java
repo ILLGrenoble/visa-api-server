@@ -2,7 +2,7 @@ package eu.ill.visa.security.tokens;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.User;
 
 import java.security.Principal;
 import java.util.Map;

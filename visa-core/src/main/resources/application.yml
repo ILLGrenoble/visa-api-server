@@ -86,6 +86,10 @@ vdi:
     ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
     port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
 
+security:
+  token:
+    accountsUrl: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
+
 "%prod":
   quarkus:
     datasource:

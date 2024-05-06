@@ -1,21 +1,12 @@
 package eu.ill.visa.security;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.ill.visa.security.configuration.TokenConfiguration;
+import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithName;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+@ConfigMapping(prefix = "security", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
+public interface SecurityConfiguration {
 
-public class SecurityConfiguration {
-
-    @NotNull
-    @Valid
-    private TokenConfiguration tokenConfiguration;
-
-
-    @JsonProperty("token")
-    public TokenConfiguration getTokenConfiguration() {
-        return tokenConfiguration;
-    }
+    @WithName("token")
+    TokenConfiguration tokenConfiguration();
 
 }

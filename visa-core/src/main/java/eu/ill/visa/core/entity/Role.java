@@ -48,6 +48,7 @@ public class Role {
     public static final String IT_SUPPORT_ROLE           = "IT_SUPPORT";
     public static final String SCIENTIFIC_COMPUTING_ROLE = "SCIENTIFIC_COMPUTING";
     public static final String GUEST_ROLE = "GUEST";
+    public static final String APPLICATION_CREDENTIAL_ROLE = "APPLICATION_CREDENTIAL";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
