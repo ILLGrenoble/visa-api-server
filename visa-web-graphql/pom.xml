@@ -8,9 +8,12 @@
         <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>visa-security</artifactId>
+
+    <artifactId>visa-web-graphql</artifactId>
 
     <properties>
+        <graphql-java-servlet.version>9.0.1</graphql-java-servlet.version>
+        <graphql-java-tools.version>6.0.0</graphql-java-tools.version>
     </properties>
 
     <dependencies>
@@ -21,13 +24,16 @@
         </dependency>
 
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-jwt</artifactId>
+            <groupId>com.graphql-java-kickstart</groupId>
+            <artifactId>graphql-java-servlet</artifactId>
+            <version>${graphql-java-servlet.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client-jackson</artifactId>
+            <groupId>com.graphql-java-kickstart</groupId>
+            <artifactId>graphql-java-tools</artifactId>
+            <version>${graphql-java-tools.version}</version>
         </dependency>
 
     </dependencies>
+
 </project>

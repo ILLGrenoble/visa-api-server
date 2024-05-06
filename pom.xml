@@ -15,6 +15,9 @@
         <module>visa-scheduler</module>
         <module>visa-security</module>
         <module>visa-remote-desktop</module>
+<!--        <module>visa-web-rest</module>-->
+<!--        <module>visa-web-graphql</module>-->
+        <module>visa-app</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -67,11 +70,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
