@@ -4,6 +4,11 @@ quarkus:
     root-path: /api
     test-port: 8081
     test-ssl-port: 8446
+    cors:
+      ~: true
+      origins:  ${VISA_CORS_ORIGIN:*}
+      methods: GET,POST,PATCH,PUT,DELETE,OPTIONS
+#      headers: Authorisation,Content-Type
   hibernate-orm:
     database:
       generation: update
@@ -89,6 +94,25 @@ vdi:
 security:
   token:
     accountsUrl: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
+
+client:
+  login:
+    issuer: ${VISA_CLIENT_CONFIG_LOGIN_ISSUER}
+    clientId: ${VISA_CLIENT_CONFIG_LOGIN_CLIENT_ID}
+    scope: ${VISA_CLIENT_CONFIG_LOGIN_SCOPE:openid offline_access}
+    showDebugInformation: ${VISA_CLIENT_CONFIG_LOGIN_SHOW_DEBUG_INFORMATION:false}
+    sessionChecksEnabled: ${VISA_CLIENT_CONFIG_LOGIN_SESSION_CHECKS_ENABLED:true}
+  analytics:
+    enabled: ${VISA_CLIENT_CONFIG_ANALYTICS_ENABLED:false}
+    url: ${VISA_CLIENT_CONFIG_ANALYTICS_URL}
+    siteId: ${VISA_CLIENT_CONFIG_ANALYTICS_SITE_ID}
+  desktop:
+    allowedClipboardUrlHosts: ${VISA_CLIENT_CONFIG_DESKTOP_ALLOWED_CLIPBOARD_URL_HOSTS:[]}
+    keyboardLayouts: ${VISA_CLIENT_CONFIG_DESKTOP_KEYBOARD_LAYOUTS:[]}
+  contactEmail: ${VISA_CLIENT_CONFIG_CONTACT_EMAIL}
+  experiments:
+    openDataIncluded: ${VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA:false}
+
 
 "%prod":
   quarkus:

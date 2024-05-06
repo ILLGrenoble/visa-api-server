@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xmlns="http://dozer.sourceforge.net"
-          xsi:schemaLocation="http://dozer.sourceforge.net
-                              http://dozer.sourceforge.net/schema/beanmapping.xsd">
+<mappings xmlns="http://dozermapper.github.io/schema/bean-mapping"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://dozermapper.github.io/schema/bean-mapping http://dozermapper.github.io/schema/bean-mapping.xsd">
 
     <configuration>
         <custom-converters>
-            <converter type="eu.ill.visa.web.converters.dozer.DateTimeCustomConverter">
+            <converter type="eu.ill.visa.web.rest.converters.dozer.DateTimeCustomConverter">
                 <class-a>org.joda.time.DateTime</class-a>
                 <class-b>org.joda.time.DateTime</class-b>
             </converter>

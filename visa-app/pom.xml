@@ -29,11 +29,11 @@
     </dependencyManagement>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>eu.ill.visa</groupId>-->
-<!--            <artifactId>visa-web-rest</artifactId>-->
-<!--            <version>3.0.0</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>eu.ill.visa</groupId>
+            <artifactId>visa-web-rest</artifactId>
+            <version>3.0.0</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>eu.ill.visa</groupId>-->
 <!--            <artifactId>visa-web-graphql</artifactId>-->

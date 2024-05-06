@@ -12,9 +12,8 @@
     <artifactId>visa-web-rest</artifactId>
     <properties>
         <dozer.version>7.0.0</dozer.version>
-        <graphql-java-servlet.version>9.0.1</graphql-java-servlet.version>
-        <graphql-java-tools.version>6.0.0</graphql-java-tools.version>
         <maven-model.version>3.9.6</maven-model.version>
+        <jackson-datatype-joda.version>2.17.1</jackson-datatype-joda.version>
     </properties>
 
     <dependencies>
@@ -22,6 +21,16 @@
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-business</artifactId>
             <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.ill.visa</groupId>
+            <artifactId>visa-security</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-multipart</artifactId>
         </dependency>
 
         <dependency>
@@ -34,7 +43,11 @@
             <artifactId>dozer-core</artifactId>
             <version>${dozer.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>${jackson-datatype-joda.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

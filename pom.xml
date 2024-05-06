@@ -15,7 +15,7 @@
         <module>visa-scheduler</module>
         <module>visa-security</module>
         <module>visa-remote-desktop</module>
-<!--        <module>visa-web-rest</module>-->
+        <module>visa-web-rest</module>
 <!--        <module>visa-web-graphql</module>-->
         <module>visa-app</module>
     </modules>
@@ -65,7 +65,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-imaging</artifactId>
+            <version>1.0.0-alpha5</version>
+        </dependency>
 
         <dependency>
             <groupId>io.quarkus</groupId>
