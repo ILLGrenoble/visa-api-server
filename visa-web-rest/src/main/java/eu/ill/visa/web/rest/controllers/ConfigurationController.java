@@ -3,6 +3,7 @@ package eu.ill.visa.web.rest.controllers;
 import eu.ill.visa.business.services.ConfigurationService;
 import eu.ill.visa.core.entity.Configuration;
 import eu.ill.visa.web.rest.ClientConfiguration;
+import eu.ill.visa.web.rest.DesktopConfigurationImpl;
 import eu.ill.visa.web.rest.dtos.ConfigurationDto;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import jakarta.inject.Inject;
@@ -30,12 +31,15 @@ public class ConfigurationController extends AbstractController {
     private final Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
 
     private final ClientConfiguration clientConfiguration;
+    final DesktopConfigurationImpl desktopConfiguration;
     private final ConfigurationService configurationService;
 
     @Inject
     ConfigurationController(final ClientConfiguration clientConfiguration,
+                            final DesktopConfigurationImpl desktopConfiguration,
                             final ConfigurationService configurationService) {
         this.clientConfiguration = clientConfiguration;
+        this.desktopConfiguration = desktopConfiguration;
         this.configurationService = configurationService;
     }
 
@@ -57,7 +61,7 @@ public class ConfigurationController extends AbstractController {
         configurationDto.setContactEmail(this.clientConfiguration.contactEmail().orElse(null));
         configurationDto.setLogin(this.clientConfiguration.loginConfiguration());
         configurationDto.setAnalytics(this.clientConfiguration.analyticsConfiguration());
-        configurationDto.setDesktop(this.clientConfiguration.desktopConfiguration());
+        configurationDto.setDesktop(this.desktopConfiguration);
         configurationDto.setExperiments(this.clientConfiguration.experimentsConfiguration());
         configurationDto.setMetadata(metadata);
         return createResponse(configurationDto);

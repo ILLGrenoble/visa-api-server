@@ -1,9 +1,6 @@
 package eu.ill.visa.web.rest.dtos;
 
-import eu.ill.visa.web.rest.AnalyticsConfiguration;
-import eu.ill.visa.web.rest.DesktopConfiguration;
-import eu.ill.visa.web.rest.ExperimentsConfiguration;
-import eu.ill.visa.web.rest.LoginConfiguration;
+import eu.ill.visa.web.rest.*;
 
 import java.util.Map;
 
@@ -12,7 +9,7 @@ public class ConfigurationDto {
     private String version;
     private LoginConfiguration login;
     private AnalyticsConfiguration analytics;
-    private DesktopConfiguration desktop;
+    private DesktopConfigurationImpl desktop;
     private ExperimentsConfiguration experiments;
     private Map<String, String> metadata;
 
@@ -42,11 +39,11 @@ public class ConfigurationDto {
         this.analytics = analytics;
     }
 
-    public DesktopConfiguration getDesktop() {
+    public DesktopConfigurationImpl getDesktop() {
         return desktop;
     }
 
-    public void setDesktop(DesktopConfiguration desktop) {
+    public void setDesktop(DesktopConfigurationImpl desktop) {
         this.desktop = desktop;
     }
 

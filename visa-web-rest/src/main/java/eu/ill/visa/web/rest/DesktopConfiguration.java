@@ -1,22 +1,13 @@
 package eu.ill.visa.web.rest;
 
-import java.util.List;
+import io.smallrye.config.WithName;
 
 public interface DesktopConfiguration {
 
-    List<Host> allowedClipboardUrlHosts();
-    List<KeyboardLayout> keyboardLayouts();
+    @WithName("allowedClipboardUrlHosts")
+    String allowedClipboardUrlHostsJson();
 
-
-    interface Host {
-        String host();
-        boolean https();
-    }
-
-    interface KeyboardLayout {
-        String layout();
-        String name();
-        boolean selected();
-    }
+    @WithName("keyboardLayouts")
+    String keyboardLayoutsJson();
 
 }

@@ -11,7 +11,7 @@ import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.rest.ClientConfiguration;
-import eu.ill.visa.web.rest.DesktopConfiguration;
+import eu.ill.visa.web.rest.DesktopConfigurationImpl;
 import eu.ill.visa.web.rest.dtos.*;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.Authenticated;
@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.imaging.ImageFormat;
 import org.apache.commons.imaging.ImageFormats;
 import org.apache.commons.imaging.Imaging;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class AccountInstanceController extends AbstractController {
     private final UserService userService;
     private final ExperimentService experimentService;
     private final EmailManager emailManager;
-    private final DesktopConfiguration desktopConfiguration;
+    private final DesktopConfigurationImpl desktopConfiguration;
     private final ClientConfiguration clientConfiguration;
     private final Mapper mapper;
 
@@ -79,7 +79,7 @@ public class AccountInstanceController extends AbstractController {
                                      final PlanService planService,
                                      final ExperimentService experimentService,
                                      final EmailManager emailManager,
-                                     final DesktopConfiguration desktopConfiguration,
+                                     final DesktopConfigurationImpl desktopConfiguration,
                                      final ClientConfiguration clientConfiguration,
                                      final Mapper mapper) {
         this.userService = userService;
@@ -244,7 +244,7 @@ public class AccountInstanceController extends AbstractController {
             }
         }
 
-        if (this.getKeyboardLayoutForLayout(dto.getKeyboardLayout()) == null) {
+        if (this.desktopConfiguration.getKeyboardLayoutForLayout(dto.getKeyboardLayout()) == null) {
             throw new BadRequestException("Invalid keyboard layout provided");
         }
 
@@ -320,7 +320,7 @@ public class AccountInstanceController extends AbstractController {
                                             @Valid @NotNull final InstanceUpdatorDto instanceUpdatorDto) {
         final User user = this.getUserPrincipal(securityContext);
         if (this.instanceService.isOwnerOrAdmin(user, instance)) {
-            if (this.getKeyboardLayoutForLayout(instanceUpdatorDto.getKeyboardLayout()) == null) {
+            if (this.desktopConfiguration.getKeyboardLayoutForLayout(instanceUpdatorDto.getKeyboardLayout()) == null) {
                 throw new BadRequestException("Invalid keyboard layout provided");
             }
 
@@ -589,11 +589,10 @@ public class AccountInstanceController extends AbstractController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public void createThumbnail(@Context final SecurityContext securityContext,
                                 @PathParam("instance") final Instance instance,
-                                @NotNull @MultipartForm final ThumbnailMultipartBody thumbnail) {
+                                @NotNull @RestForm("file") final InputStream is) {
         try {
             final User user = this.getUserPrincipal(securityContext);
             if (this.instanceService.isOwnerOrAdmin(user, instance)) {
-                final InputStream is = thumbnail.file;
                 final byte[] data = is.readAllBytes();
                 final ImageFormat mimeType = Imaging.guessFormat(data);
                 if (mimeType == ImageFormats.JPEG) {
@@ -665,18 +664,4 @@ public class AccountInstanceController extends AbstractController {
         }
     }
 
-
-    /**
-     * Get a keyboard layout for a given layout
-     * i.e. en-gb-qwerty
-     *
-     * @param layout the keyboard layout identifier
-     * @return a keyboard layout if found, otherwise null
-     */
-    private DesktopConfiguration.KeyboardLayout getKeyboardLayoutForLayout(final String layout) {
-        return this.desktopConfiguration.keyboardLayouts().stream()
-            .filter(keyboardLayout -> keyboardLayout.layout().equals(layout))
-            .findAny()
-            .orElse(null);
-    }
 }
