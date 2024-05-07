@@ -77,7 +77,7 @@ public class Image extends Timestampable {
     @Column(name = "autologin", nullable = true)
     private String autologin;
 
-    @ManyToMany()
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "image_protocol",
         joinColumns = @JoinColumn(name = "image_id", foreignKey = @ForeignKey(name = "fk_image_id")),

@@ -12,6 +12,8 @@ quarkus:
       methods: GET,POST,PATCH,PUT,DELETE,OPTIONS
 #      headers: Authorisation,Content-Type
   hibernate-orm:
+#    unsupported-properties:
+#      enable_lazy_load_no_trans: true
     database:
       generation: update
     log:

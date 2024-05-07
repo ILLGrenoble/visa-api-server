@@ -47,8 +47,7 @@ public class NotificationController extends AbstractController {
         notificationPayload.setSystemNotifications(systemNotifications);
 
         // Check for auth and admin user
-        if (securityContext.isSecure()) {
-            AccountToken accountToken = (AccountToken)securityContext.getUserPrincipal();
+        if (securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal() instanceof AccountToken accountToken) {
             User user = accountToken.getUser();
             if (user.hasRole(Role.ADMIN_ROLE)) {
 

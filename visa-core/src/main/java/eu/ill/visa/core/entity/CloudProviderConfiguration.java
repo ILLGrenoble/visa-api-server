@@ -38,7 +38,7 @@ public class CloudProviderConfiguration extends Timestampable {
     @Column(name = "server_name_prefix", length = 100, nullable = false)
     private String serverNamePrefix;
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = false)
     private List<CloudProviderConfigurationParameter> parameters = new ArrayList<>();
 
