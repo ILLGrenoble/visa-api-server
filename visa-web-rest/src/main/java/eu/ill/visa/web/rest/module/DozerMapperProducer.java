@@ -5,16 +5,11 @@ import com.github.dozermapper.core.Mapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
-import java.io.InputStream;
-
-import static java.lang.ClassLoader.getSystemResourceAsStream;
-
 @ApplicationScoped
 public class DozerMapperProducer {
 
     @Produces
     public Mapper getMapper() {
-        final InputStream mappings = getSystemResourceAsStream("dozer/mappings.xml");
-        return DozerBeanMapperBuilder.create().withXmlMapping(() -> mappings).build();
+        return DozerBeanMapperBuilder.create().withMappingFiles("dozer/mappings.xml").build();
     }
 }

@@ -31,7 +31,7 @@ public class ConfigurationController extends AbstractController {
     private final Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
 
     private final ClientConfiguration clientConfiguration;
-    final DesktopConfigurationImpl desktopConfiguration;
+    private final DesktopConfigurationImpl desktopConfiguration;
     private final ConfigurationService configurationService;
 
     @Inject
@@ -45,7 +45,6 @@ public class ConfigurationController extends AbstractController {
 
     @GET
     public MetaResponse<ConfigurationDto> getConfiguration() {
-        ConfigurationDto configurationDto = new ConfigurationDto();
         String version = getClass().getPackage().getImplementationVersion();
         if (version == null) {
             version = this.getVersionFromPom();
@@ -57,13 +56,8 @@ public class ConfigurationController extends AbstractController {
                 Configuration::getValue
             ));
 
-        configurationDto.setVersion(version);
-        configurationDto.setContactEmail(this.clientConfiguration.contactEmail().orElse(null));
-        configurationDto.setLogin(this.clientConfiguration.loginConfiguration());
-        configurationDto.setAnalytics(this.clientConfiguration.analyticsConfiguration());
-        configurationDto.setDesktop(this.desktopConfiguration);
-        configurationDto.setExperiments(this.clientConfiguration.experimentsConfiguration());
-        configurationDto.setMetadata(metadata);
+        ConfigurationDto configurationDto = new ConfigurationDto(this.clientConfiguration, this.desktopConfiguration, version, metadata);
+
         return createResponse(configurationDto);
     }
 
@@ -71,7 +65,12 @@ public class ConfigurationController extends AbstractController {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         try {
             Model model = reader.read(new FileReader("pom.xml"));
-            return model.getVersion();
+            String version = model.getVersion();
+            if (version == null && model.getParent() != null) {
+                version = model.getParent().getVersion();
+            }
+
+            return version;
 
         } catch (Exception e) {
             logger.warn("Got an exception while trying to get application version: {}", e.getMessage());
