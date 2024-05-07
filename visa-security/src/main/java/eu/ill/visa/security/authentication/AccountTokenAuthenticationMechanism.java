@@ -13,6 +13,8 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -21,6 +23,8 @@ import java.util.Optional;
 //@Priority(1)
 @ApplicationScoped
 public class AccountTokenAuthenticationMechanism implements HttpAuthenticationMechanism {
+
+    private static final Logger logger = LoggerFactory.getLogger(AccountTokenAuthenticationMechanism.class);
 
     private static final String BEARER = "Bearer";
     private static final String BEARER_PREFIX = "bearer ";
@@ -73,6 +77,7 @@ public class AccountTokenAuthenticationMechanism implements HttpAuthenticationMe
         String authHeader = request.headers().get(HttpHeaderNames.AUTHORIZATION);
         if (authHeader != null) {
             if (authHeader.toLowerCase(Locale.ENGLISH).startsWith(LOWERCASE_BASIC_PREFIX)) {
+                logger.debug("[AccountToken] Obtained account token from request Authorization header for URI {}", request.uri());
                 return new TokenCredential(authHeader.substring(PREFIX_LENGTH), BEARER);
             }
         }
@@ -82,6 +87,8 @@ public class AccountTokenAuthenticationMechanism implements HttpAuthenticationMe
     private TokenCredential getTokenFromRequestCookies(final HttpServerRequest request) {
         final Cookie cookie = request.getCookie(ACCESS_TOKEN_COOKIE);
         if (cookie != null) {
+            logger.debug("[AccountToken] Obtained account token from request access_token cookie for URI {}", request.uri());
+
             return new TokenCredential(cookie.getValue(), ACCESS_TOKEN_COOKIE);
         }
         return null;

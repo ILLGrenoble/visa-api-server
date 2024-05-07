@@ -13,6 +13,7 @@ import io.quarkus.security.runtime.QuarkusSecurityIdentity;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ public class AccountTokenIdentitySupplier implements Supplier<SecurityIdentity> 
     }
 
     @ActivateRequestContext
+    @Transactional
     public SecurityIdentity get() {
         if (token != null) {
             logger.debug("[Token] Authenticating token");

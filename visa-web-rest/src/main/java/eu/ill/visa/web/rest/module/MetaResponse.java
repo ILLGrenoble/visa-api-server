@@ -1,15 +1,24 @@
 package eu.ill.visa.web.rest.module;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public record MetaResponse<T>(T data, MetaData metaData, List<String> errors) {
 
     @Override
     @JsonProperty("_metadata")
+    @JsonInclude(NON_NULL)
     public MetaData metaData() {
         return metaData;
+    }
+
+    @JsonInclude(NON_NULL)
+    public List<String> errors() {
+        return errors;
     }
 
     public static class MetaData {
