@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
             FROM User u
             WHERE u.id = :id
     """),
+    @NamedQuery(name = "user.getByIdWithRoles", query = """
+            SELECT u
+            FROM User u
+            LEFT OUTER JOIN FETCH u.userRoles
+            WHERE u.id = :id
+    """),
     @NamedQuery(name = "user.getAll", query = """
             SELECT u
             FROM User u
@@ -74,7 +80,7 @@ import java.util.stream.Collectors;
     @NamedQuery(name = "user.getAllSupport", query = """
             SELECT DISTINCT u
             FROM User u
-            JOIN u.userRoles ur
+            LEFT OUTER JOIN FETCH u.userRoles ur
             JOIN ur.role r
             WHERE r.name in ('INSTRUMENT_SCIENTIST', 'INSTRUMENT_CONTROL', 'IT_SUPPORT', 'SCIENTIFIC_COMPUTING')
             ORDER BY u.lastName

@@ -23,14 +23,14 @@ public class InstanceParamConverter implements ParamConverter<Instance> {
     public Instance fromString(final String value) {
         if (value.matches("\\d+")) {
             final Long id = Long.parseLong(value);
-            final Instance instance = instanceService.getById(id);
+            final Instance instance = instanceService.getFullById(id);
             if (instance == null) {
                 throw new NotFoundException("Instance not found");
             }
             return instance;
 
         } else if (value.matches("[a-zA-Z0-9]+")) {
-            final Instance instance = instanceService.getByUID(value);
+            final Instance instance = instanceService.getFullByUID(value);
             if (instance == null) {
                 throw new NotFoundException("Instance not found");
             }

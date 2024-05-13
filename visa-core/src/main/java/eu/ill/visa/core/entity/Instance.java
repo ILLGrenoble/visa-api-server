@@ -81,14 +81,6 @@ import java.util.List;
             WHERE m.user = :user
             AND i.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instance.getAllForUserAndRole", query = """
-            SELECT i FROM Instance i
-            JOIN i.members m
-            WHERE m.user = :user
-            AND m.role = :role
-            AND i.deletedAt IS NULL
-            ORDER BY i.id DESC
-    """),
     @NamedQuery(name = "instance.countAllForUserAndRole", query = """
             SELECT COUNT(i) FROM Instance i
             JOIN i.members m
@@ -105,12 +97,6 @@ import java.util.List;
             SELECT i FROM Instance i
             WHERE i.state = 'STOPPED'
             AND i.deleteRequested = true
-            AND i.deletedAt IS NULL
-    """),
-    @NamedQuery(name = "instance.getInstanceForMember", query = """
-            SELECT i FROM Instance i
-            JOIN i.members m
-            WHERE m = :member
             AND i.deletedAt IS NULL
     """),
     @NamedQuery(name = "instance.getByIdForInstrumentScientist", query = """
@@ -664,6 +650,13 @@ public class Instance extends Timestampable {
         this.addMember(instanceMember);
 
         return instanceMember;
+    }
+
+    public Instance lazyLoadInit() {
+        this.getExperiments().size();
+        this.getAttributes().size();
+        this.getMembers().size();
+        return this;
     }
 
     public static final class Builder {

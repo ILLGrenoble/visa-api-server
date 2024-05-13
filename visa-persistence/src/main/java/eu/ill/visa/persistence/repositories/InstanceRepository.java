@@ -2,15 +2,14 @@ package eu.ill.visa.persistence.repositories;
 
 import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceThumbnail;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceMember;
-import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.providers.InstanceFilterProvider;
-import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -49,18 +48,6 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         query.setParameter("states", states);
 
         return query.getResultList();
-    }
-
-    public Instance getInstanceForMember(InstanceMember member) {
-        try {
-            final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getInstanceForMember", Instance.class);
-            query.setParameter("member", member);
-
-            return query.getSingleResult();
-
-        } catch (NoResultException exception) {
-            return null;
-        }
     }
 
     public Instance getById(final Long id) {
@@ -431,13 +418,6 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         } catch (NoResultException exception) {
             return null;
         }
-    }
-
-    public List<Instance> getAllForUserAndRole(User user, InstanceMemberRole role) {
-        final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getAllForUserAndRole", Instance.class);
-        query.setParameter("user", user)
-            .setParameter("role", role);
-        return query.getResultList();
     }
 
     public Long countAllForUserAndRole(User user, InstanceMemberRole role) {

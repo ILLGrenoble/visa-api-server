@@ -56,7 +56,9 @@ public class InstanceService {
     }
 
     public List<Instance> getAllForUser(User user) {
-        return this.repository.getAllForUser(user);
+        return this.repository.getAllForUser(user).stream()
+            .map(Instance::lazyLoadInit)
+            .toList();
     }
 
     public Long countAllForUser(User user) {
@@ -67,16 +69,20 @@ public class InstanceService {
         return this.repository.getAllWithStates(states);
     }
 
-    public Instance getInstanceForMember(InstanceMember member) {
-        return this.repository.getInstanceForMember(member);
-    }
-
     public Instance getById(Long id) {
         return this.repository.getById(id);
     }
 
+    public Instance getFullById(Long id) {
+        return this.repository.getById(id).lazyLoadInit();
+    }
+
     public Instance getByUID(String uid) {
         return this.repository.getByUID(uid);
+    }
+
+    public Instance getFullByUID(String uid) {
+        return this.repository.getByUID(uid).lazyLoadInit();
     }
 
     public Instance create(Instance.Builder instanceBuilder) {
@@ -263,7 +269,7 @@ public class InstanceService {
         return this.repository.countByCloudClient();
     }
 
-    public List<Instance> getAllForSupportUser(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
+    private List<Instance> getAllForSupportByUserRole(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
         if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
             return this.getAllForInstrumentControlSupport(filter, orderBy, pagination);
 
@@ -277,8 +283,10 @@ public class InstanceService {
         return new ArrayList<>();
     }
 
-    public List<Instance> getAllForUserAndRole(User user, InstanceMemberRole role) {
-        return repository.getAllForUserAndRole(user, role);
+    public List<Instance> getAllForSupportUser(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
+        return this.getAllForSupportByUserRole(user, filter, orderBy, pagination).stream()
+            .map(Instance::lazyLoadInit)
+            .toList();
     }
 
     public Long countAllForUserAndRole(User user, InstanceMemberRole role) {
