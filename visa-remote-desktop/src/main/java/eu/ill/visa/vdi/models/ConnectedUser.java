@@ -3,10 +3,9 @@ package eu.ill.visa.vdi.models;
 import eu.ill.visa.vdi.domain.Role;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class ConnectedUser implements Serializable {
+public class ConnectedUser {
 
     private String id;
     private String fullName;

@@ -67,7 +67,7 @@ public class AccountTokenIdentitySupplier implements Supplier<SecurityIdentity> 
                         logger.warn("[Token] User {} with login {} has an invalid user id (0)", user.getFullName(), accountToken.getName());
 
                     } else {
-                        logger.info("[Token] Successfully authenticated user: {} ({})", accountToken.getName(), user.getId());
+                        logger.debug("[Token] Successfully authenticated user: {} ({})", accountToken.getName(), user.getId());
                     }
 
                     // Create SecurityIdentity with AccountToken as Principal and User Roles

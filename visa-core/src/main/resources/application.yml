@@ -2,7 +2,7 @@
 quarkus:
   http:
     root-path: /api
-    port: ${VISA_SERVER_PORT:8080}
+    port: ${VISA_SERVER_PORT:8086}
     host: ${VISA_SERVER_HOST:localhost}
     test-port: 8081
     test-ssl-port: 8446
@@ -129,7 +129,7 @@ client:
     log:
       category:
         "eu.ill":
-          level: DEBUG
+          level: ${VISA_LOGGING_LEVEL:INFO}
 
 "%dev":
   quarkus:
@@ -144,7 +144,7 @@ client:
     log:
       category:
         "eu.ill":
-          level: DEBUG
+          level: ${VISA_LOGGING_LEVEL:INFO}
 
 "%test":
   quarkus:

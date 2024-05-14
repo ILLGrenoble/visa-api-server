@@ -47,7 +47,7 @@ public class ApplicationTokenIdentitySupplier implements Supplier<SecurityIdenti
             if (applicationCredential != null) {
                 applicationCredential.setLastUsedAt(new Date());
                 this.applicationCredentialService.save(applicationCredential);
-                logger.info("Successfully authenticated application: {}", applicationCredential.getName());
+                logger.debug("Successfully authenticated application: {}", applicationCredential.getName());
 
                 ApplicationToken applicationToken = new ApplicationToken(applicationCredential);
 

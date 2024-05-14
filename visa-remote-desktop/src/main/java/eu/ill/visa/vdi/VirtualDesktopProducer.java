@@ -18,6 +18,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import org.redisson.Redisson;
+import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,7 @@ public class VirtualDesktopProducer {
             final Integer redisDatabase = configuration.redisDatabase();
             logger.info("Enabling load-balanced web-sockets with redis at {}, using db {}", redisURL, redisDatabase);
             final Config config = new Config();
+            config.setCodec(new JsonJacksonCodec());
             config
                 .useSingleServer()
                 .setAddress(redisURL)
