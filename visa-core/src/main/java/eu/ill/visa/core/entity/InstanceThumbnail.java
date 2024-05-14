@@ -1,5 +1,6 @@
 package eu.ill.visa.core.entity;
 
+import eu.ill.visa.core.entity.converter.Base64Converter;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,6 +20,7 @@ public class InstanceThumbnail extends Timestampable {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Convert(converter = Base64Converter.class)
     @Column(name = "data", nullable = false, columnDefinition = "TEXT")
     private byte[] data;
 

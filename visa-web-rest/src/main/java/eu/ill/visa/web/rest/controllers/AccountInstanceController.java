@@ -22,14 +22,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.commons.imaging.ImageFormat;
-import org.apache.commons.imaging.ImageFormats;
-import org.apache.commons.imaging.Imaging;
-import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -576,26 +571,6 @@ public class AccountInstanceController extends AbstractController {
         return mapper.map(user, UserSimpleDto.class);
     }
 
-
-    @POST
-    @Path("/{instance}/thumbnail")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public void createThumbnail(@Context final SecurityContext securityContext,
-                                @PathParam("instance") final Instance instance,
-                                @NotNull @RestForm("file") final InputStream is) {
-        try {
-            final User user = this.getUserPrincipal(securityContext);
-            if (this.instanceService.isOwnerOrAdmin(user, instance)) {
-                final byte[] data = is.readAllBytes();
-                final ImageFormat mimeType = Imaging.guessFormat(data);
-                if (mimeType == ImageFormats.JPEG) {
-                    instanceService.createOrUpdateThumbnail(instance, data);
-                }
-            }
-        } catch (Exception exception) {
-            logger.error("Error creating thumbnail for instance: {}", instance.getId(), exception);
-        }
-    }
 
     @GET
     @Path("/{instance}/thumbnail")
