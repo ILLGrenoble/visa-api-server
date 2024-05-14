@@ -1,18 +1,18 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.InstanceAuthenticationTokenRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceAuthenticationTokenService {
 
     private final InstanceAuthenticationTokenRepository repository;
@@ -27,7 +27,7 @@ public class InstanceAuthenticationTokenService {
     }
 
     public InstanceAuthenticationToken getByToken(String token) {
-        return this.repository.getByToken(token);
+        return this.repository.getByToken(token).lazyLoadInit();
     }
 
     public InstanceAuthenticationToken create(User user, Instance instance) {
