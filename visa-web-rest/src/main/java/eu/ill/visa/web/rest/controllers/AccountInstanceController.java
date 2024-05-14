@@ -373,7 +373,7 @@ public class AccountInstanceController extends AbstractController {
                 }
             }
 
-            return createResponse(team.stream().map(this::mapUserSimpler).collect(toList()));
+            return createResponse(team.stream().map(this::mapUserSimple).collect(toList()));
         }
 
         throw new NotFoundException();
@@ -560,10 +560,10 @@ public class AccountInstanceController extends AbstractController {
             instanceDto.setMembership(mapper.map(instanceMember, InstanceMemberDto.class));
 
         } else if (user.hasRole(Role.ADMIN_ROLE)) {
-            instanceDto.setMembership(new InstanceMemberDto(this.mapUserSimpler(user), SUPPORT));
+            instanceDto.setMembership(new InstanceMemberDto(this.mapUserSimple(user), SUPPORT));
 
         } else if (user.hasAnyRole(List.of(Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
-            instanceDto.setMembership(new InstanceMemberDto(this.mapUserSimpler(user), SUPPORT));
+            instanceDto.setMembership(new InstanceMemberDto(this.mapUserSimple(user), SUPPORT));
         }
         instanceDto.setExpirationDate(instanceExpirationService.getExpirationDate(instance));
         instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));
@@ -572,15 +572,8 @@ public class AccountInstanceController extends AbstractController {
         return instanceDto;
     }
 
-    private UserSimpleDto mapUserSimpler(User user) {
-        UserSimpleDto userSimpleDto = mapper.map(user, UserSimpleDto.class);
-        for (UserRole userRole : user.getActiveUserRoles()) {
-            userSimpleDto.addActiveUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
-        }
-        for (Role group : user.getGroups()) {
-            userSimpleDto.addGroup(group.getName());
-        }
-        return userSimpleDto;
+    private UserSimpleDto mapUserSimple(User user) {
+        return mapper.map(user, UserSimpleDto.class);
     }
 
 

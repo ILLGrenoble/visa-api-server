@@ -123,7 +123,7 @@ public class AccountController extends AbstractController {
                                 @QueryParam("descending") @DefaultValue("false") final boolean descending) {
 
         try {
-            final Instrument instrument = instrumentService.getById(instrumentId);
+            final Instrument instrument = instrumentId == null ? null : instrumentService.getById(instrumentId);
             final User user = this.getUserPrincipal(securityContext);
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -200,7 +200,7 @@ public class AccountController extends AbstractController {
             return createResponse(users);
         }
         for (final User user : userService.getAllLikeLastName(name, true, new Pagination(250, 0))) {
-            users.add(this.mapUserSimpler(user));
+            users.add(this.mapUserSimple(user));
         }
         return createResponse(users);
     }
@@ -210,7 +210,7 @@ public class AccountController extends AbstractController {
     public MetaResponse<List<UserSimpleDto>> search() {
         final List<UserSimpleDto> users = new ArrayList<>();
         for (final User user : userService.getAllSupport()) {
-            users.add(this.mapUserSimpler(user));
+            users.add(this.mapUserSimpleWithRoles(user));
         }
         return createResponse(users);
     }
@@ -219,11 +219,15 @@ public class AccountController extends AbstractController {
     @Path("/users/{user}")
     @RolesAllowed({ADMIN_ROLE, INSTRUMENT_CONTROL_ROLE, INSTRUMENT_SCIENTIST_ROLE, IT_SUPPORT_ROLE, STAFF_ROLE})
     public MetaResponse<UserSimpleDto> get(@PathParam("user") final User user) {
-        return createResponse(this.mapUserSimpler(user));
+        return createResponse(this.mapUserSimpleWithRoles(user));
     }
 
-    private UserSimpleDto mapUserSimpler(User user) {
-        UserSimpleDto userSimpleDto = mapper.map(user, UserSimpleDto.class);
+    private UserSimpleDto mapUserSimple(User user) {
+        return mapper.map(user, UserSimpleDto.class);
+    }
+
+    private UserSimpleDto mapUserSimpleWithRoles(User user) {
+        UserSimpleDto userSimpleDto = this.mapUserSimple(user);
         for (UserRole userRole : user.getActiveUserRoles()) {
             userSimpleDto.addActiveUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
         }

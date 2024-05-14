@@ -655,7 +655,7 @@ public class Instance extends Timestampable {
     public Instance lazyLoadInit() {
         this.getExperiments().size();
         this.getAttributes().size();
-        this.getMembers().size();
+        this.getMembers().stream().peek(member -> member.getUser().lazyLoadInit()).toList().size();
         return this;
     }
 

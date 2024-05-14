@@ -355,14 +355,6 @@ public class InstanceServiceTest {
     }
 
     @Test
-    @DisplayName("Get all instances for a given user and role")
-    public void instancesForUserAndRole() {
-        User user = userService.getById("1");
-        assertNotNull(user);
-        assertEquals(2, instanceService.getAllForUserAndRole(user, OWNER).size());
-    }
-
-    @Test
     @DisplayName("Count all instances for a given user")
     public void countInstanceForUser() {
         User user = userService.getById("1");

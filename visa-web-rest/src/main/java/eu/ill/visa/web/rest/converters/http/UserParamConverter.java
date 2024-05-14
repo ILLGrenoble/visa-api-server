@@ -21,7 +21,7 @@ public class UserParamConverter implements ParamConverter<User> {
     @Override
     public User fromString(final String value) {
         if (value.matches("\\d+")) {
-            final User user = userService.getById(value);
+            final User user = userService.getByIdWithRoles(value);
             if (user == null) {
                 throw new NotFoundException("User not found");
             }
