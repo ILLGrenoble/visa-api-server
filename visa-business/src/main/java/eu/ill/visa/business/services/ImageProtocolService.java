@@ -2,6 +2,7 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.persistence.repositories.ImageProtocolRepository;
+import io.quarkus.runtime.Startup;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
@@ -18,7 +19,10 @@ public class ImageProtocolService {
     @Inject
     public ImageProtocolService(ImageProtocolRepository repository) {
         this.repository = repository;
+    }
 
+    @Startup
+    public void initImageProtocols() {
         // Initialise data if empty
         if (this.getAll().isEmpty()) {
             this.repository.initialise();

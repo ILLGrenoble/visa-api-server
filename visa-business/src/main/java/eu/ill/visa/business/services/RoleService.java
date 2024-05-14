@@ -2,6 +2,7 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.persistence.repositories.RoleRepository;
+import io.quarkus.runtime.Startup;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
@@ -18,7 +19,10 @@ public class RoleService {
     @Inject
     public RoleService(RoleRepository repository) {
         this.repository = repository;
+    }
 
+    @Startup
+    public void initRoles() {
         // Initialise data if empty
         if (this.getAllRoles().isEmpty()) {
             this.repository.initialise();
