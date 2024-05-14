@@ -1,8 +1,5 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.business.concurrent.InstanceActionFuture;
 import eu.ill.visa.business.concurrent.InstanceActionManager;
 import eu.ill.visa.core.entity.Instance;
@@ -10,13 +7,16 @@ import eu.ill.visa.core.entity.InstanceCommand;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.persistence.repositories.InstanceCommandRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceCommandService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceCommandService.class);

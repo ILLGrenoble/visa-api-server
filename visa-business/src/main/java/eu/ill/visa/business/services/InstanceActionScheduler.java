@@ -1,15 +1,15 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceActionScheduler {
 
     private final InstanceService instanceService;

@@ -1,13 +1,16 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.ExperimentFilter;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Experiment;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.providers.ExperimentFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -17,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-@ApplicationScoped
+@Singleton
 public class ExperimentRepository extends AbstractRepository<Experiment> {
     private static final Logger logger = LoggerFactory.getLogger(ExperimentRepository.class);
 

@@ -1,22 +1,24 @@
 package eu.ill.visa.business.services;
 
 
+import eu.ill.visa.business.InstanceConfiguration;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.User;
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
-import eu.ill.visa.business.InstanceConfiguration;
-import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.UserRepository;
-
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 import static java.util.Objects.requireNonNullElseGet;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class UserService {
 
     private final UserRepository repository;

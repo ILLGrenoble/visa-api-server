@@ -1,20 +1,20 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.entity.*;
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.persistence.repositories.InstanceSessionMemberRepository;
 import eu.ill.visa.persistence.repositories.InstanceSessionRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceSessionService.class);

@@ -1,22 +1,22 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.core.domain.ClientNotification;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceExtensionRequest;
 import eu.ill.visa.core.entity.SystemNotification;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.SystemNotificationRepository;
-
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class ClientNotificationService {
 
     private final SystemNotificationRepository systemNotificationRepository;

@@ -8,8 +8,8 @@ import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.providers.InstanceFilterProvider;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-@ApplicationScoped
+@Singleton
 public class InstanceRepository extends AbstractRepository<Instance> {
 
     @Inject

@@ -1,12 +1,12 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.SecurityGroupFilter;
 import eu.ill.visa.persistence.providers.SecurityGroupFilterFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -14,7 +14,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
+@Singleton
 public class SecurityGroupFilterRepository extends AbstractRepository<SecurityGroupFilter> {
 
     @Inject

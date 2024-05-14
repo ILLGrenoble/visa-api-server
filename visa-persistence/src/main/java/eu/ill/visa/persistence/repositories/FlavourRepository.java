@@ -1,19 +1,19 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.entity.Flavour;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.entity.Flavour;
 import eu.ill.visa.persistence.providers.FlavourFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-@ApplicationScoped
+@Singleton
 public class FlavourRepository extends AbstractRepository<Flavour> {
 
     @Inject

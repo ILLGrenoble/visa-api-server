@@ -1,13 +1,13 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
-import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.persistence.repositories.InstanceSessionMemberRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNullElseGet;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceSessionMemberService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceSessionMemberService.class);

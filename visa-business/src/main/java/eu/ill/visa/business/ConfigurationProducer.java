@@ -1,10 +1,10 @@
 package eu.ill.visa.business;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-@ApplicationScoped
+@Singleton
 public class ConfigurationProducer {
 
     private final BusinessConfiguration businessConfiguration;

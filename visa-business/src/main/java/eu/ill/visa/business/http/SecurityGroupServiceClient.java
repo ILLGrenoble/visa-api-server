@@ -8,8 +8,8 @@ import eu.ill.visa.business.SecurityGroupServiceClientConfiguration;
 import eu.ill.visa.business.services.SecurityGroupService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.SecurityGroup;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ApplicationScoped
+@Singleton
 public class SecurityGroupServiceClient {
     private static final Logger logger = LoggerFactory.getLogger(SecurityGroupService.class);
 

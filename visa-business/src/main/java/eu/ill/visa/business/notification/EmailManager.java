@@ -4,21 +4,21 @@ import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.business.MailerConfiguration;
 import eu.ill.visa.business.NotificationRendererException;
 import eu.ill.visa.business.notification.renderers.email.*;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
-import jakarta.enterprise.context.ApplicationScoped;
-
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.Optional;
+
 import static java.lang.String.format;
 
-@ApplicationScoped
+@Singleton
 public class EmailManager {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailManager.class);

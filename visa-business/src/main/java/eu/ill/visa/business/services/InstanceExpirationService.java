@@ -10,7 +10,7 @@ import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceExpirationRepository;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.time.DateUtils;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceExpirationService {
 
     public static final  int                          HOURS_BEFORE_EXPIRATION_INACTIVITY = 24;

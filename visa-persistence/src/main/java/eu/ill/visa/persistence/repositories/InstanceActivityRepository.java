@@ -4,7 +4,7 @@ import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceActivity;
 import eu.ill.visa.core.entity.User;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -13,7 +13,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import java.util.Date;
 import java.util.List;
 
-@ApplicationScoped
+@Singleton
 public class InstanceActivityRepository extends AbstractRepository<InstanceActivity> {
 
     @Inject

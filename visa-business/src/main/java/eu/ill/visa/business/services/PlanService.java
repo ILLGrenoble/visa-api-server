@@ -1,23 +1,25 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Experiment;
 import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.Plan;
 import eu.ill.visa.core.entity.User;
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
-import eu.ill.visa.core.domain.*;
 import eu.ill.visa.persistence.repositories.PlanRepository;
-
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNullElseGet;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class PlanService {
 
     private final PlanRepository repository;

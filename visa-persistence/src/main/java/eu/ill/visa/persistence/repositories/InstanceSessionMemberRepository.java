@@ -1,13 +1,15 @@
 package eu.ill.visa.persistence.repositories;
 
 import eu.ill.preql.FilterQuery;
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.persistence.providers.InstanceSessionMemberFilterProvider;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -17,7 +19,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-@ApplicationScoped
+@Singleton
 public class InstanceSessionMemberRepository extends AbstractRepository<InstanceSessionMember> {
 
     @Inject

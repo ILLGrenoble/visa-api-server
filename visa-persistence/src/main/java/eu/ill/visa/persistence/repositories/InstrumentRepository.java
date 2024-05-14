@@ -4,7 +4,7 @@ import eu.ill.visa.core.entity.Experiment;
 import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.User;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
@@ -12,7 +12,7 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
+@Singleton
 public class InstrumentRepository extends AbstractRepository<Instrument> {
 
     @Inject

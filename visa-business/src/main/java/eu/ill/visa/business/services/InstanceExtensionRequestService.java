@@ -1,22 +1,22 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.notification.EmailManager;
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceExpiration;
 import eu.ill.visa.core.entity.InstanceExtensionRequest;
 import eu.ill.visa.persistence.repositories.InstanceExtensionRequestRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceExtensionRequestService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceExtensionRequestService.class);

@@ -2,14 +2,14 @@ package eu.ill.visa.persistence.repositories;
 
 import eu.ill.visa.core.entity.ImageProtocol;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-@ApplicationScoped
+@Singleton
 public class ImageProtocolRepository extends AbstractRepository<ImageProtocol> {
 
     private static final String FIXTURES_FILE = "fixtures/protocols.sql";

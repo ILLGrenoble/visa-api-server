@@ -6,8 +6,8 @@ import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.persistence.repositories.CloudProviderRepository;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class CloudProviderService {
 
     private final CloudProviderRepository repository;

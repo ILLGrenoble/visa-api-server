@@ -1,16 +1,16 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.entity.*;
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.persistence.repositories.InstanceRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 import static java.util.Objects.requireNonNullElse;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class InstanceService {
     private static final Logger logger = LoggerFactory.getLogger(InstanceService.class);
 

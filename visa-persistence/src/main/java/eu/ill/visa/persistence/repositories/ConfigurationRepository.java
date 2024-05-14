@@ -2,13 +2,13 @@ package eu.ill.visa.persistence.repositories;
 
 import eu.ill.visa.core.entity.Configuration;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-@ApplicationScoped
+@Singleton
 public class ConfigurationRepository extends AbstractRepository<Configuration> {
 
     @Inject

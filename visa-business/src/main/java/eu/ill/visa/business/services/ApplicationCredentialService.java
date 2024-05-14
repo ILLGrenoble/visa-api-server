@@ -1,22 +1,22 @@
 package eu.ill.visa.business.services;
 
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.core.entity.ApplicationCredential;
 import eu.ill.visa.persistence.repositories.ApplicationCredentialRepository;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bouncycastle.crypto.generators.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Transactional
-@ApplicationScoped
+@Singleton
 public class ApplicationCredentialService {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationCredentialService.class);

@@ -3,14 +3,14 @@ package eu.ill.visa.persistence.repositories;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-@ApplicationScoped
+@Singleton
 public class InstanceSessionRepository extends AbstractRepository<InstanceSession> {
 
     @Inject
