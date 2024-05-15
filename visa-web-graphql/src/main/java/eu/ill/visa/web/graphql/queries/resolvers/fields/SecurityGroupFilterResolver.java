@@ -3,14 +3,13 @@ package eu.ill.visa.web.graphql.queries.resolvers.fields;
 import eu.ill.visa.business.services.FlavourService;
 import eu.ill.visa.business.services.InstrumentService;
 import eu.ill.visa.business.services.RoleService;
-import eu.ill.visa.core.domain.Flavour;
-import eu.ill.visa.core.domain.Instrument;
-import eu.ill.visa.core.domain.Role;
-import eu.ill.visa.core.domain.SecurityGroupFilter;
+import eu.ill.visa.core.entity.Flavour;
+import eu.ill.visa.core.entity.Instrument;
+import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.SecurityGroupFilter;
 import graphql.kickstart.tools.GraphQLResolver;
 import jakarta.enterprise.context.ApplicationScoped;
-
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class SecurityGroupFilterResolver implements GraphQLResolver<SecurityGroupFilter> {

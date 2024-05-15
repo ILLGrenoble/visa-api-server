@@ -4,9 +4,9 @@ import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.core.domain.Experiment;
-import eu.ill.visa.core.domain.Instance;
-import eu.ill.visa.core.domain.User;
+import eu.ill.visa.core.entity.Experiment;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.User;
 import graphql.kickstart.tools.GraphQLResolver;
 
 import java.util.List;

@@ -16,7 +16,7 @@
         <module>visa-security</module>
         <module>visa-remote-desktop</module>
         <module>visa-web-rest</module>
-<!--        <module>visa-web-graphql</module>-->
+        <module>visa-web-graphql</module>
         <module>visa-app</module>
     </modules>
 
@@ -60,7 +60,10 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-undertow</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>

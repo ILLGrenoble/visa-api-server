@@ -12,14 +12,20 @@
     <artifactId>visa-web-graphql</artifactId>
 
     <properties>
-        <graphql-java-servlet.version>9.0.1</graphql-java-servlet.version>
-        <graphql-java-tools.version>6.0.0</graphql-java-tools.version>
+        <graphql-java-servlet.version>15.2.0</graphql-java-servlet.version>
+        <graphql-java-tools.version>13.1.1</graphql-java-tools.version>
+        <dozer.version>7.0.0</dozer.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-business</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.ill.visa</groupId>
+            <artifactId>visa-security</artifactId>
             <version>3.0.0</version>
         </dependency>
 
@@ -32,6 +38,19 @@
             <groupId>com.graphql-java-kickstart</groupId>
             <artifactId>graphql-java-tools</artifactId>
             <version>${graphql-java-tools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-undertow</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-websockets</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dozermapper</groupId>
+            <artifactId>dozer-core</artifactId>
+            <version>${dozer.version}</version>
         </dependency>
 
     </dependencies>

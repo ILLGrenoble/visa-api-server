@@ -1,6 +1,6 @@
 package eu.ill.visa.web.graphql.queries.inputs;
 
-import eu.ill.visa.core.domain.enumerations.SystemNotificationLevel;
+import eu.ill.visa.core.entity.enumerations.SystemNotificationLevel;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

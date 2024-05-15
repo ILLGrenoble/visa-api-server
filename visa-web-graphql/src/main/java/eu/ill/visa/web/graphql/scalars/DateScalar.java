@@ -7,11 +7,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class DateScalar extends GraphQLScalarType {
+public class DateScalar {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-    public DateScalar() {
-        super("Date", "Date type", new Coercing() {
+    public static final GraphQLScalarType DATE = GraphQLScalarType.newScalar()
+        .name("Date")
+        .description("Date type")
+        .coercing(new Coercing() {
+
             @Override
             public String serialize(Object o) {
                 if (o instanceof Date) {
@@ -35,6 +38,6 @@ public class DateScalar extends GraphQLScalarType {
                 }
                 return null;
             }
-        });
-    }
+        })
+        .build();
 }

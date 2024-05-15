@@ -1,9 +1,7 @@
 package eu.ill.visa.web.graphql.queries.resolvers;
 
-import eu.ill.visa.web.graphql.context.AuthenticationContext;
-import eu.ill.visa.web.graphql.queries.inputs.*;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import com.github.dozermapper.core.DozerBeanMapperBuilder;
+import com.github.dozermapper.core.Mapper;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.domain.CloudImage;
@@ -11,25 +9,27 @@ import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.*;
-import eu.ill.visa.core.domain.enumerations.InstanceCommandType;
-import eu.ill.visa.core.domain.enumerations.InstanceExtensionRequestState;
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
+import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
+import eu.ill.visa.core.entity.enumerations.InstanceExtensionRequestState;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.security.tokens.AccountToken;
+import eu.ill.visa.web.graphql.context.AuthenticationContext;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.exceptions.ValidationException;
 import eu.ill.visa.web.graphql.queries.domain.ApplicationCredentialDetail;
 import eu.ill.visa.web.graphql.queries.domain.Message;
-import eu.ill.visa.web.bundles.graphql.queries.inputs.*;
+import eu.ill.visa.web.graphql.queries.inputs.*;
 import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
-import org.apache.bval.guice.Validate;
-import org.dozer.Mapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -65,8 +65,7 @@ public class MutationResolver implements GraphQLMutationResolver {
 
 
     @Inject
-    public MutationResolver(final Mapper mapper,
-                            final FlavourService flavourService,
+    public MutationResolver(final FlavourService flavourService,
                             final InstanceService instanceService,
                             final ImageService imageService,
                             final PlanService planService,
@@ -83,7 +82,7 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final ClientNotificationService clientNotificationService,
                             final ApplicationCredentialService applicationCredentialService,
                             final InstanceExtensionRequestService instanceExtensionRequestService) {
-        this.mapper = mapper;
+        this.mapper = DozerBeanMapperBuilder.create().build();
         this.flavourService = flavourService;
         this.instanceService = instanceService;
         this.imageService = imageService;
@@ -109,7 +108,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the image properties
      * @return the newly created image
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public Image createImage(@Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
         // Validate the image input
         this.validateImageInput(input);
@@ -147,7 +145,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the image properties
      * @return the newly created image
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public Image updateImage(Long id, @Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
         // Validate the image input
         this.validateImageInput(input);
@@ -216,7 +213,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the flavour properties
      * @return the newly created flavour
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public Flavour createFlavour(@Valid FlavourInput input) throws InvalidInputException {
         // Validate the flavour input
         this.validateFlavourInput(input);
@@ -239,7 +235,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the updated created flavour
      * @throws EntityNotFoundException thrown if the given the flavour id was not found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public Flavour updateFlavour(Long id, @Valid FlavourInput input) throws EntityNotFoundException, InvalidInputException  {
         // Validate the flavour input
         this.validateFlavourInput(input);
@@ -345,7 +340,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the securityGroup name
      * @return the newly created securityGroup
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SecurityGroup createSecurityGroup(SecurityGroupInput input) throws InvalidInputException {
         // Validate the security group
         this.validateSecurityGroupInput(input);
@@ -382,7 +376,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the updated created securityGroup
      * @throws EntityNotFoundException thrown if the given the securityGroup id was not found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SecurityGroup updateSecurityGroup(Long id, SecurityGroupInput input) throws EntityNotFoundException, InvalidInputException {
         final SecurityGroup securityGroup = this.securityGroupService.getById(id);
         if (securityGroup == null) {
@@ -451,7 +444,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the securityGroupFilter properties
      * @return the newly created securityGroupFilter
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SecurityGroupFilter createSecurityGroupFilter(@Valid SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
         if (securityGroupFilterService.securityGroupFilterBySecurityIdAndObjectIdAndType(input.getSecurityGroupId(), input.getObjectId(), input.getObjectType()) == null) {
 
@@ -473,7 +465,6 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the updated created securityGroupFilter
      * @throws EntityNotFoundException thrown if the given the securityGroupFilter id was not found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SecurityGroupFilter updateSecurityGroupFilter(Long id, @Valid SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
         final SecurityGroupFilter securityGroupFilter = this.securityGroupFilterService.getById(id);
         if (securityGroupFilter == null) {
@@ -541,7 +532,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the given flavour is not found
      * @throws EntityNotFoundException thrown if the given image is not found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public Plan createPlan(@Valid PlanInput input) throws EntityNotFoundException {
         final Flavour flavour = this.flavourService.getById(input.getFlavourId());
         if (flavour == null) {
@@ -576,7 +567,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @throws EntityNotFoundException thrown if the given image is not found
      * @throws EntityNotFoundException thrown if the given plan is not found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public Plan updatePlan(Long id, @Valid PlanInput input) throws EntityNotFoundException {
         final Flavour flavour = this.flavourService.getById(input.getFlavourId());
         if (flavour == null) {
@@ -630,7 +621,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the cloudClient properties
      * @return the newly created cloudClient
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public CloudClient createCloudClient(@Valid CloudClientInput input) throws InvalidInputException {
         CloudProviderConfiguration.Builder builder = new CloudProviderConfiguration.Builder();
         CloudProviderConfiguration configuration = builder
@@ -653,7 +644,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the updated created cloudClient
      * @throws EntityNotFoundException thrown if the given the cloudClient id was not found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public CloudClient updateCloudClient(Long id, @Valid CloudClientInput input) throws EntityNotFoundException, InvalidInputException  {
         if (id == -1) {
             throw new InvalidInputException("The default cloud provider cannot be modified");
@@ -862,7 +853,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the systemNotification properties
      * @return the newly created systemNotification
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SystemNotification createSystemNotification(@Valid SystemNotificationInput input) {
         final SystemNotification systemNotification = mapper.map(input, SystemNotification.class);
         clientNotificationService.saveSystemNotification(systemNotification);
@@ -876,7 +867,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the updated systemNotification
      * @throws EntityNotFoundException thrown if the systemNotification has not been found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public SystemNotification updateSystemNotification(Long id, @Valid SystemNotificationInput input) throws EntityNotFoundException, InvalidInputException {
         final SystemNotification systemNotification = this.clientNotificationService.getSystemNotificationById(id);
         if (systemNotification == null) {
@@ -991,7 +982,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @param input the application credential properties
      * @return the newly created application credential
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public ApplicationCredential createApplicationCredential(@Valid ApplicationCredentialInput input) {
         final ApplicationCredential applicationCredential = applicationCredentialService.create(input.getName());
         return applicationCredential;
@@ -1004,7 +995,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the updated application credential
      * @throws EntityNotFoundException thrown if the applicationCredential has not been found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public ApplicationCredentialDetail updateApplicationCredential(Long id, @Valid ApplicationCredentialInput input) throws EntityNotFoundException {
         final ApplicationCredential applicationCredential = this.applicationCredentialService.getById(id);
         if (applicationCredential == null) {
@@ -1040,7 +1031,7 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the updated user
      * @throws EntityNotFoundException thrown if the applicationCredential has not been found
      */
-    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
+//    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
     public User updateUser(String id, @Valid UserInput input) throws EntityNotFoundException {
         final User user = userService.getById(id);
         if (user == null) {

@@ -6,7 +6,7 @@ import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.Flavour;
+import eu.ill.visa.core.entity.Flavour;
 import graphql.kickstart.tools.GraphQLResolver;
 
 

@@ -1,5 +1,6 @@
 package eu.ill.visa.web.graphql.queries.resolvers.fields;
 
+import eu.ill.visa.core.domain.ProtocolStatus;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.preql.exception.InvalidQueryException;
@@ -8,7 +9,7 @@ import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.entity.*;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import graphql.kickstart.tools.GraphQLResolver;
 
@@ -18,7 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static eu.ill.visa.business.services.PortService.isPortOpen;
-import static eu.ill.visa.core.domain.enumerations.InstanceMemberRole.OWNER;
+import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
 import static java.util.Objects.requireNonNullElseGet;
 import static java.util.concurrent.CompletableFuture.runAsync;
 

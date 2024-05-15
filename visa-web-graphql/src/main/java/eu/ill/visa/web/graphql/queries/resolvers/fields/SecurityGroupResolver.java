@@ -4,7 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.SecurityGroup;
+import eu.ill.visa.core.entity.SecurityGroup;
 import graphql.kickstart.tools.GraphQLResolver;
 
 

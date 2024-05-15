@@ -11,14 +11,14 @@ import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation;
 import graphql.execution.instrumentation.tracing.TracingInstrumentation;
 import graphql.kickstart.execution.GraphQLQueryInvoker;
+import graphql.kickstart.servlet.GraphQLConfiguration;
+import graphql.kickstart.servlet.GraphQLHttpServlet;
 import graphql.kickstart.tools.SchemaParser;
 import graphql.kickstart.tools.SchemaParserOptions;
 import graphql.schema.GraphQLSchema;
-import graphql.servlet.GraphQLConfiguration;
-import graphql.servlet.GraphQLHttpServlet;
 import jakarta.inject.Inject;
+import jakarta.servlet.annotation.WebServlet;
 
-import javax.servlet.annotation.WebServlet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,7 +131,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
             )
             .directive("isAuthorised", roleDirective)
 
-            .scalars(new DateScalar())
+            .scalars(DateScalar.DATE)
             .build()
             .makeExecutableSchema();
     }

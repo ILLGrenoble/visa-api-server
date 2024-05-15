@@ -1,6 +1,6 @@
 package eu.ill.visa.web.graphql.queries.domain;
 
-import eu.ill.visa.core.domain.ApplicationCredential;
+import eu.ill.visa.core.entity.ApplicationCredential;
 
 import java.util.Date;
 

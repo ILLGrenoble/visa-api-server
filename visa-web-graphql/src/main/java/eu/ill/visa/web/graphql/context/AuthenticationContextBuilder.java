@@ -1,26 +1,26 @@
 package eu.ill.visa.web.graphql.context;
 
+import eu.ill.visa.security.authenticator.AccountTokenAuthenticator;
+import eu.ill.visa.security.tokens.AccountToken;
+import graphql.kickstart.execution.context.GraphQLKickstartContext;
+import graphql.kickstart.servlet.context.DefaultGraphQLServletContextBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import eu.ill.visa.security.authenticators.TokenAuthenticator;
-import eu.ill.visa.security.tokens.AccountToken;
-import graphql.kickstart.execution.context.GraphQLContext;
-import graphql.servlet.context.DefaultGraphQLServletContextBuilder;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.HandshakeRequest;
 import org.dataloader.DataLoaderRegistry;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.Session;
-import javax.websocket.server.HandshakeRequest;
 import java.util.Optional;
 
 @ApplicationScoped
 public class AuthenticationContextBuilder extends DefaultGraphQLServletContextBuilder {
 
-    private final TokenAuthenticator authenticator;
+    private final AccountTokenAuthenticator authenticator;
 
     @Inject
-    public AuthenticationContextBuilder(final TokenAuthenticator authenticator) {
+    public AuthenticationContextBuilder(final AccountTokenAuthenticator authenticator) {
         this.authenticator = authenticator;
     }
 
@@ -43,20 +43,20 @@ public class AuthenticationContextBuilder extends DefaultGraphQLServletContextBu
         if (token.isPresent()) {
             final Optional<AccountToken> accountToken = authenticator.authenticate(token.get());
             if (accountToken.isPresent()) {
-                return new AuthenticationContext(buildDataLoaderRegistry(), null, accountToken.get());
+                return new AuthenticationContext(buildDataLoaderRegistry(), accountToken.get());
             }
         }
-        return new AuthenticationContext(buildDataLoaderRegistry(), null, null);
+        return new AuthenticationContext(buildDataLoaderRegistry(), null);
     }
 
     @Override
-    public GraphQLContext build(HttpServletRequest request, HttpServletResponse response) {
+    public GraphQLKickstartContext build(HttpServletRequest request, HttpServletResponse response) {
         return getAuthenticationContext(request.getHeader("Authorization"));
     }
 
     @Override
-    public GraphQLContext build(Session session, HandshakeRequest handshakeRequest) {
-        return new AuthenticationContext(buildDataLoaderRegistry(), null, null);
+    public GraphQLKickstartContext build(Session session, HandshakeRequest handshakeRequest) {
+        return new AuthenticationContext(buildDataLoaderRegistry(), null);
     }
 
     private DataLoaderRegistry buildDataLoaderRegistry() {

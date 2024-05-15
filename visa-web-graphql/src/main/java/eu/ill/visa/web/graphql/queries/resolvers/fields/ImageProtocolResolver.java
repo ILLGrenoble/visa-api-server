@@ -2,7 +2,7 @@ package eu.ill.visa.web.graphql.queries.resolvers.fields;
 
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
-import eu.ill.visa.core.domain.ImageProtocol;
+import eu.ill.visa.core.entity.ImageProtocol;
 import graphql.kickstart.tools.GraphQLResolver;
 
 import static eu.ill.visa.business.services.PortService.isPortOpen;

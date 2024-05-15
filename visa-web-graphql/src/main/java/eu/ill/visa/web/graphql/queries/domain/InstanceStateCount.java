@@ -1,6 +1,6 @@
 package eu.ill.visa.web.graphql.queries.domain;
 
-import eu.ill.visa.core.domain.enumerations.InstanceState;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 
 public class InstanceStateCount {
 
