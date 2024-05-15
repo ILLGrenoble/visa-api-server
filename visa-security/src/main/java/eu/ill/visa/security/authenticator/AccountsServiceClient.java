@@ -1,8 +1,9 @@
-package eu.ill.visa.security.suppliers;
+package eu.ill.visa.security.authenticator;
 
 import eu.ill.visa.security.tokens.AccountToken;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -13,7 +14,7 @@ public interface AccountsServiceClient {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    AccountToken getAccountToken();
+    AccountToken getAccountToken(@HeaderParam("x-access-token") String token);
 
     @ClientExceptionMapper
     static RuntimeException toException(Response response) {
