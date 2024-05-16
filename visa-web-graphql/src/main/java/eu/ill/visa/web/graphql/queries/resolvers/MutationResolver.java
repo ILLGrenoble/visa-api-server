@@ -1,7 +1,5 @@
 package eu.ill.visa.web.graphql.queries.resolvers;
 
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.domain.CloudImage;
@@ -42,7 +40,6 @@ public class MutationResolver implements GraphQLMutationResolver {
 
     private final static Logger logger = LoggerFactory.getLogger(MutationResolver.class);
 
-    private final Mapper                     mapper;
     private final FlavourService             flavourService;
     private final InstanceService            instanceService;
     private final ImageService               imageService;
@@ -82,7 +79,6 @@ public class MutationResolver implements GraphQLMutationResolver {
                             final ClientNotificationService clientNotificationService,
                             final ApplicationCredentialService applicationCredentialService,
                             final InstanceExtensionRequestService instanceExtensionRequestService) {
-        this.mapper = DozerBeanMapperBuilder.create().build();
         this.flavourService = flavourService;
         this.instanceService = instanceService;
         this.imageService = imageService;
@@ -113,27 +109,8 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.validateImageInput(input);
 
         final Image image = new Image();
-        image.setName(input.getName());
-        image.setVersion(input.getVersion());
-        image.setDescription(input.getDescription());
-        image.setIcon(input.getIcon());
-        image.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
-        image.setComputeId(input.getComputeId());
-        image.setVisible(input.getVisible());
+        this.mapToImage(input, image);
         image.setDeleted(false);
-        image.setBootCommand(input.getBootCommand());
-        image.setAutologin(input.getAutologin());
-        final List<Long> protocolsId = input.getProtocolIds();
-        final List<ImageProtocol> protocols = new ArrayList<>();
-        for (Long protocolId : protocolsId) {
-            final ImageProtocol protocol = imageProtocolService.getById(protocolId);
-            if (protocol == null) {
-                throw new EntityNotFoundException("Protocol not found for the given id");
-            }
-            protocols.add(protocol);
-        }
-        image.setProtocols(protocols);
-        // final Image image = mapper.map(input, Image.class);
         imageService.save(image);
         return image;
     }
@@ -150,6 +127,15 @@ public class MutationResolver implements GraphQLMutationResolver {
         this.validateImageInput(input);
 
         final Image image = imageService.getById(id);
+        if (image == null) {
+            throw new EntityNotFoundException("Image was not found for the given id");
+        }
+        this.mapToImage(input, image);
+        imageService.save(image);
+        return image;
+    }
+
+    private void mapToImage(ImageInput input, Image image) throws EntityNotFoundException {
         image.setName(input.getName());
         image.setVersion(input.getVersion());
         image.setDescription(input.getDescription());
@@ -169,8 +155,6 @@ public class MutationResolver implements GraphQLMutationResolver {
             protocols.add(protocol);
         }
         image.setProtocols(protocols);
-        imageService.save(image);
-        return image;
     }
 
     /**
@@ -216,9 +200,8 @@ public class MutationResolver implements GraphQLMutationResolver {
     public Flavour createFlavour(@Valid FlavourInput input) throws InvalidInputException {
         // Validate the flavour input
         this.validateFlavourInput(input);
-
-        final Flavour flavour = mapper.map(input, Flavour.class);
-        flavour.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
+        final Flavour flavour = new Flavour();
+        this.mapToFlavour(input, flavour);
         flavourService.create(flavour);
 
         // Handle flavour limits
@@ -243,11 +226,7 @@ public class MutationResolver implements GraphQLMutationResolver {
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour was not found for the given id");
         }
-        flavour.setName(input.getName());
-        flavour.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
-        flavour.setComputeId(input.getComputeId());
-        flavour.setCpu(input.getCpu());
-        flavour.setMemory(input.getMemory());
+        this.mapToFlavour(input, flavour);
         flavourService.save(flavour);
 
         // Handle flavour limits
@@ -256,10 +235,18 @@ public class MutationResolver implements GraphQLMutationResolver {
         return flavour;
     }
 
+    private void mapToFlavour(FlavourInput input, Flavour flavour) {
+        flavour.setName(input.getName());
+        flavour.setMemory(input.getMemory());
+        flavour.setCpu(input.getCpu());
+        flavour.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
+        flavour.setComputeId(input.getComputeId());
+    }
+
     private void updateFlavourLimits(Flavour flavour, FlavourInput input) {
         // Handle instrument limits
         List<FlavourLimit> currentInstrumentFlavourLimits = this.flavourLimitService.getAllOfTypeForFlavour(flavour, "INSTRUMENT");
-        List<Long> currentInstrumentIds = currentInstrumentFlavourLimits.stream().map(FlavourLimit::getObjectId).collect(Collectors.toList());
+        List<Long> currentInstrumentIds = currentInstrumentFlavourLimits.stream().map(FlavourLimit::getObjectId).toList();
         List<Long> instrumentIds = input.getInstrumentIds();
         List<Long> allInstrumentIds = this.instrumentService.getAll().stream().map(Instrument::getId).collect(Collectors.toList());
 
@@ -272,7 +259,7 @@ public class MutationResolver implements GraphQLMutationResolver {
 
         // Handle role limits
         List<FlavourLimit> currentRoleFlavourLimits = this.flavourLimitService.getAllOfTypeForFlavour(flavour, "ROLE");
-        List<Long> currentRoleIds = currentRoleFlavourLimits.stream().map(FlavourLimit::getObjectId).collect(Collectors.toList());
+        List<Long> currentRoleIds = currentRoleFlavourLimits.stream().map(FlavourLimit::getObjectId).toList();
         List<Long> roleIds = input.getRoleIds();
         List<Long> allRoleIds = this.roleService.getAllRolesAndGroups().stream().map(Role::getId).collect(Collectors.toList());
 
@@ -854,8 +841,9 @@ public class MutationResolver implements GraphQLMutationResolver {
      * @return the newly created systemNotification
      */
 //    @Validate(rethrowExceptionsAs = ValidationException.class, validateReturnedValue = true)
-    public SystemNotification createSystemNotification(@Valid SystemNotificationInput input) {
-        final SystemNotification systemNotification = mapper.map(input, SystemNotification.class);
+    public SystemNotification createSystemNotification(@Valid SystemNotificationInput input) throws InvalidInputException{
+        final SystemNotification systemNotification = new SystemNotification();
+        this.mapToSystemNotification(input, systemNotification);
         clientNotificationService.saveSystemNotification(systemNotification);
         return systemNotification;
     }
@@ -873,16 +861,19 @@ public class MutationResolver implements GraphQLMutationResolver {
         if (systemNotification == null) {
             throw new EntityNotFoundException("systemNotification not found for the given id");
         }
-        systemNotification.setLevel(input.getLevel());
-        systemNotification.setMessage(input.getMessage());
+        this.mapToSystemNotification(input, systemNotification);
+        clientNotificationService.saveSystemNotification(systemNotification);
+        return systemNotification;
+    }
 
+    private void mapToSystemNotification(SystemNotificationInput input, SystemNotification systemNotification) throws InvalidInputException {
+        systemNotification.setMessage(input.getMessage());
+        systemNotification.setLevel(input.getLevel());
         try {
             systemNotification.setActivatedAt(input.getActivatedAt() == null ? null : SystemNotificationInput.DATE_FORMAT.parse(input.getActivatedAt()));
         } catch (ParseException e) {
             throw new InvalidInputException("The activation date does not have a coherent format");
         }
-        clientNotificationService.saveSystemNotification(systemNotification);
-        return systemNotification;
     }
 
     /**

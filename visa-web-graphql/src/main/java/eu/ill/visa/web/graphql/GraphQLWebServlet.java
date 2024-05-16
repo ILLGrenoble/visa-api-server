@@ -7,6 +7,7 @@ import eu.ill.visa.web.graphql.queries.resolvers.MutationResolver;
 import eu.ill.visa.web.graphql.queries.resolvers.QueryResolver;
 import eu.ill.visa.web.graphql.queries.resolvers.fields.*;
 import eu.ill.visa.web.graphql.scalars.DateScalar;
+import eu.ill.visa.web.graphql.utils.ResourceFileReader;
 import graphql.execution.instrumentation.Instrumentation;
 import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation;
 import graphql.execution.instrumentation.tracing.TracingInstrumentation;
@@ -18,27 +19,32 @@ import graphql.kickstart.tools.SchemaParserOptions;
 import graphql.schema.GraphQLSchema;
 import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @WebServlet(urlPatterns = "/graphql/*", loadOnStartup = 0, name = "graphql", asyncSupported = true)
 public class GraphQLWebServlet extends GraphQLHttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(GraphQLWebServlet.class);
 
     private final GraphQLWebServletConfiguration configuration;
-    private final QueryResolver                  queryResolver;
-    private final MutationResolver               mutationResolver;
-    private final InstanceResolver               instanceResolver;
+    private final QueryResolver queryResolver;
+    private final MutationResolver mutationResolver;
+    private final InstanceResolver instanceResolver;
     private final InstanceSessionMemberResolver instanceSessionMemberResolver;
     private final InstanceJupyterSessionResolver instanceJupyterSessionResolver;
-    private final ImageResolver                  imageResolver;
+    private final ImageResolver imageResolver;
     private final FlavourResolver flavourResolver;
     private final CloudImageResolver cloudImageResolver;
-    private final CloudClientResolver            cloudClientResolver;
-    private final ImageProtocolResolver          imageProtocolResolver;
-    private final UserResolver                   userResolver;
-    private final RoleDirective                  roleDirective;
+    private final CloudClientResolver cloudClientResolver;
+    private final ImageProtocolResolver imageProtocolResolver;
+    private final UserResolver userResolver;
+    private final RoleDirective roleDirective;
     private final AuthenticationContextBuilder authenticationContext;
     private final SecurityGroupFilterResolver securityGroupFilterResolver;
     private final SecurityGroupResolver securityGroupResolver;
@@ -101,9 +107,11 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         return builder.build();
     }
 
-    private String[] getSchemaFiles() {
-        final List<String> files = configuration.files();
-        return files.toArray(new String[0]);
+    private String getSchemaString() {
+        return configuration.files().stream()
+            .map(ResourceFileReader::readResource)
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining());
     }
 
     private GraphQLSchema buildSchema() {
@@ -112,7 +120,7 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
         final SchemaParserOptions options = builder.build();
         return SchemaParser.newParser()
             .options(options)
-            .files(getSchemaFiles())
+            .schemaString(getSchemaString())
             .resolvers(
                 queryResolver,
                 mutationResolver,
@@ -130,7 +138,6 @@ public class GraphQLWebServlet extends GraphQLHttpServlet {
                 securityGroupFilterResolver
             )
             .directive("isAuthorised", roleDirective)
-
             .scalars(DateScalar.DATE)
             .build()
             .makeExecutableSchema();

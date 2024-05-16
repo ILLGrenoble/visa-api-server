@@ -38,7 +38,7 @@ public class AuthenticationContextBuilder extends DefaultGraphQLServletContextBu
         return Optional.empty();
     }
 
-    public AuthenticationContext getAuthenticationContext(final String header) {
+    private AuthenticationContext getAuthenticationContext(final String header) {
         final Optional<String> token = getTokenFromHeader(header);
         if (token.isPresent()) {
             final Optional<AccountToken> accountToken = authenticator.authenticate(token.get());

@@ -306,7 +306,7 @@ type InstanceSessionMember {
     user: User!
     role: String
     active: Boolean
-    duration: Long!
+    duration: Int!
 }
 
 type InstanceSessionMemberConnection {
@@ -323,7 +323,7 @@ type InstanceJupyterSession {
     kernelId: String!
     user: User!
     active: Boolean
-    duration: Long!
+    duration: Int!
 }
 
 type InstanceJupyterSessionConnection {

@@ -1,14 +1,14 @@
 package eu.ill.visa.web.graphql.directives;
 
+import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.graphql.context.AuthenticationContext;
 import eu.ill.visa.web.graphql.exceptions.UnauthorisedException;
-import jakarta.enterprise.context.ApplicationScoped;
-import eu.ill.visa.security.tokens.AccountToken;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLFieldsContainer;
 import graphql.schema.idl.SchemaDirectiveWiring;
 import graphql.schema.idl.SchemaDirectiveWiringEnvironment;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class RoleDirective implements SchemaDirectiveWiring {
@@ -22,9 +22,8 @@ public class RoleDirective implements SchemaDirectiveWiring {
         final DataFetcher<?> dataFetcher = dataFetchingEnvironment -> {
             final AuthenticationContext context = dataFetchingEnvironment.getContext();
             final AccountToken token = context.getAccountToken();
-
-            if (token.getUser() != null) {
-                return token.getUser().hasRole(targetAuthRole);
+            if (isAuthorised(token, targetAuthRole)) {
+                return originalDataFetcher.get(dataFetchingEnvironment);
             }
 
             throw new UnauthorisedException("You are not authorised to access this resource");
@@ -32,6 +31,13 @@ public class RoleDirective implements SchemaDirectiveWiring {
 
         environment.getCodeRegistry().dataFetcher(parentType, field, dataFetcher);
         return field;
+    }
+
+    private boolean isAuthorised(final AccountToken accountToken, String targetAuthRole) {
+        if (accountToken.getUser() != null) {
+            return accountToken.getUser().hasRole(targetAuthRole);
+        }
+        return false;
     }
 }
 
