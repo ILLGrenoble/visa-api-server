@@ -21,6 +21,12 @@ import java.util.Date;
             WHERE r.name = :name
             AND r.groupDeletedAt IS NULL
     """),
+    @NamedQuery(name = "role.getAll", query = """
+            SELECT r
+            FROM Role r
+            WHERE r.groupDeletedAt IS NULL
+            ORDER BY r.groupCreatedAt DESC, r.name ASC
+    """),
     @NamedQuery(name = "role.getAllRoles", query = """
             SELECT r
             FROM Role r

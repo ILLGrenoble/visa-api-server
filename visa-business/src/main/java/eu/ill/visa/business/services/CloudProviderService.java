@@ -6,6 +6,7 @@ import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.persistence.repositories.CloudProviderRepository;
+import io.quarkus.runtime.Startup;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
@@ -28,11 +29,10 @@ public class CloudProviderService {
                                 final CloudClientGateway cloudClientGateway) {
         this.repository = repository;
         this.cloudClientGateway = cloudClientGateway;
-
-        this.init();
     }
 
-    private void init() {
+    @Startup
+    public void init() {
         List<CloudProviderConfiguration> cloudProviderConfigurations = this.getAll();
         for (CloudProviderConfiguration cloudProviderConfiguration : cloudProviderConfigurations) {
             this.addCloudClient(cloudProviderConfiguration);

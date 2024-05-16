@@ -29,12 +29,6 @@ import java.util.stream.Collectors;
             FROM User u
             ORDER BY u.lastName ASC
     """),
-    @NamedQuery(name = "user.getAllActivated", query = """
-            SELECT u
-            FROM User u
-            WHERE u.activatedAt IS NOT NULL
-            ORDER BY u.lastName ASC
-    """),
     @NamedQuery(name = "user.countAll", query = """
             SELECT COUNT(u)
             FROM User u
@@ -125,7 +119,7 @@ public class User {
     @JoinColumn(name = "affiliation_id", foreignKey = @ForeignKey(name = "fk_affiliation_id"), nullable = true)
     private Employer affiliation;
 
-    @OneToMany(orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = false, insertable = false, updatable = false)
     private List<UserRole> userRoles = new ArrayList<>();
 

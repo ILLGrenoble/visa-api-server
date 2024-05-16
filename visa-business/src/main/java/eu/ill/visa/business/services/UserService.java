@@ -47,10 +47,6 @@ public class UserService {
         return this.repository.getAll(filter, orderBy, pagination);
     }
 
-    public List<User> getAllActivated() {
-        return repository.getAllActivated();
-    }
-
     public List<User> getAllLikeLastName(@NotNull final String lastName, boolean onlyActivatedUsers) {
         return repository.getAllLikeLastName(lastName, onlyActivatedUsers);
     }

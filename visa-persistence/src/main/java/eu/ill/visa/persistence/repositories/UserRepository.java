@@ -27,11 +27,6 @@ public class UserRepository extends AbstractRepository<User> {
         return query.getResultList();
     }
 
-    public List<User> getAllActivated() {
-        final TypedQuery<User> query = getEntityManager().createNamedQuery("user.getAllActivated", User.class);
-        return query.getResultList();
-    }
-
     public User getById(String id) {
         try {
             final TypedQuery<User> query = getEntityManager().createNamedQuery("user.getById", User.class);
