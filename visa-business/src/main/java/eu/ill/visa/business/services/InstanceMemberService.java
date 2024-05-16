@@ -3,6 +3,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.persistence.repositories.InstanceMemberRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -36,6 +37,10 @@ public class InstanceMemberService {
 
     public InstanceMember getByInstanceAndUser(Instance instance, User user) {
         return this.repository.getByInstanceAndUser(instance, user);
+    }
+
+    public List<InstanceMember> getAllByInstanceAndRole(Instance instance, InstanceMemberRole role) {
+        return this.repository.getAllByInstanceAndRole(instance, role);
     }
 
     public void save(@NotNull InstanceMember instanceMember) {

@@ -21,6 +21,13 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
             and i = :instance
             and m.user = :user
     """),
+    @NamedQuery(name = "instanceMember.getAllByInstanceAndRole", query = """
+            SELECT DISTINCT m FROM Instance i
+            LEFT JOIN i.members m
+            where i.deletedAt IS NULL
+            and i = :instance
+            and m.role = :role
+    """),
 })
 @Table(name = "instance_member")
 public class InstanceMember extends Timestampable {

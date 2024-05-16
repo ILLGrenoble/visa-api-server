@@ -254,7 +254,7 @@ public class QueryResolver implements GraphQLQueryResolver {
     }
 
     public Instance instance(final Long id) throws EntityNotFoundException {
-        final Instance instance = instanceService.getById(id);
+        final Instance instance = instanceService.getFullById(id);
         if (instance == null) {
             throw new EntityNotFoundException("Instance not found for the given id");
         }
