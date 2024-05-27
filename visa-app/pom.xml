@@ -51,8 +51,8 @@
         </dependency>
     </dependencies>
 
-
     <build>
+        <finalName>visa-app</finalName>
         <plugins>
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>

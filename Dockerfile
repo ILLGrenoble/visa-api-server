@@ -1,4 +1,4 @@
-FROM maven:3.6-openjdk-14 as builder
+FROM openjdk:21-jdk as builder
 
 ARG MAVEN_OPTS
 
@@ -8,19 +8,18 @@ WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 
-RUN mvn package -B -DskipTests=true $MAVEN_OPTS
+RUN ./mvnw clean package -B -Dquarkus.package.type=uber-jar -DskipTests=true $MAVEN_OPTS
 
-FROM openjdk:14-alpine
+FROM amazoncorretto:21-alpine
 
 RUN mkdir -p /app
 
 WORKDIR /app
 
 # copy built application
-COPY --from=builder /usr/src/app/visa-app/configuration.yml /app
-COPY --from=builder /usr/src/app/visa-app/target/visa-app.jar /app
+COPY --from=builder /usr/src/app/visa-app/target/visa-app-runner.jar /app/visa-app.jar
 COPY --from=builder /usr/src/app/db /app/db
 
-CMD java -jar /app/visa-app.jar server /app/configuration.yml
+CMD java -jar /app/visa-app.jar
 
 EXPOSE 8086 8087

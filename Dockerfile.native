@@ -1,0 +1,48 @@
+#FROM ghcr.io/graalvm/graalvm-ce:22.3.1 as builder
+FROM debian:buster-slim as builder
+
+RUN apt update -y
+RUN apt install -y wget build-essential libz-dev zlib1g-dev
+
+# Install the graalVM, which will be used to compile a native executable
+RUN wget -cq https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
+
+RUN tar -xvzf graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz -C /opt
+
+## Pass maven config for the build if necessary
+ARG MAVEN_OPTS
+
+# Update path to use the GraalVM
+ENV JAVA_HOME=/opt/graalvm-community-openjdk-21.0.2+13.1
+ENV PATH=$PATH:$JAVA_HOME/bin
+
+# Create application path and copy code over
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+# Copy files
+COPY . .
+
+ENV TZ="Europe/Paris"
+
+# Build a native package with the graalVM that can run the code as an executable without the need of a JVM
+RUN ./mvnw package -Pnative -DskipTests=true $MAVEN_OPTS
+
+#  "quarkus-micro-image" - small container image providing dependencies to run the native application
+FROM quay.io/quarkus/quarkus-micro-image:2.0
+
+# Create application dir
+WORKDIR /work/
+RUN chown 1001 /work \
+    && chmod "g+rwX" /work \
+    && chown 1001:root /work
+
+# Copy application executable from previous image, and makes sure the 1001 user has rights
+COPY --from=builder --chown=1001:root /usr/src/app/visa-app/target/*-runner /work/application
+
+EXPOSE 8086 8087
+
+# Run as user with privalages to run the application
+USER 1001
+
+CMD ["./application"]
