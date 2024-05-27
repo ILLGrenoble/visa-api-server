@@ -148,6 +148,7 @@
                 </plugins>
             </build>
             <properties>
+                <quarkus.native.additional-build-args>--initialize-at-run-time=eu.ill.visa.business.services.InstanceNameGeneratorService</quarkus.native.additional-build-args>
                 <quarkus.package.type>native</quarkus.package.type>
             </properties>
         </profile>

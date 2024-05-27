@@ -1,7 +1,6 @@
 package eu.ill.visa.web.rest.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import io.quarkus.jackson.ObjectMapperCustomizer;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -14,7 +13,6 @@ public class RegisterObjectMapperCustomizer implements ObjectMapperCustomizer {
 
     @Override
     public void customize(ObjectMapper objectMapper) {
-        objectMapper.registerModule(new JodaModule());
         objectMapper.setSerializationInclusion(ALWAYS);
         objectMapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.enable(STRICT_DUPLICATE_DETECTION);

@@ -13,7 +13,6 @@
     <properties>
         <dozer.version>7.0.0</dozer.version>
         <maven-model.version>3.9.6</maven-model.version>
-        <jackson-datatype-joda.version>2.17.1</jackson-datatype-joda.version>
     </properties>
 
     <dependencies>
@@ -32,11 +31,6 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
             <version>${maven-model.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
-            <version>${jackson-datatype-joda.version}</version>
         </dependency>
     </dependencies>
 
