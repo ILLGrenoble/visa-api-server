@@ -15,7 +15,6 @@
         <guacamole.version>1.5.5</guacamole.version>
         <netty.socketio.version>2.0.9</netty.socketio.version>
         <redisson.version>3.29.0</redisson.version>
-        <jeromq.version>0.6.0</jeromq.version>
         <webx-relay.version>0.1.0</webx-relay.version>
     </properties>
 
@@ -45,11 +44,12 @@
             <groupId>eu.ill</groupId>
             <artifactId>webx-relay</artifactId>
             <version>${webx-relay.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zeromq</groupId>
-            <artifactId>jeromq</artifactId>
-            <version>${jeromq.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
