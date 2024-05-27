@@ -1,44 +1,34 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.InstanceSession;
+
 public class InstanceSessionDto {
 
-    private Long id;
-    private String connectionId;
-    private InstanceDto instance;
-    private boolean current;
+    private final Long id;
+    private final String connectionId;
+    private final InstanceDto instance;
+    private final boolean current;
 
-    public InstanceSessionDto() {
+    public InstanceSessionDto(final InstanceSession instanceSession) {
+        this.id = instanceSession.getId();
+        this.connectionId = instanceSession.getConnectionId();
+        this.instance = new InstanceDto(instanceSession.getInstance());
+        this.current = instanceSession.getCurrent();
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getConnectionId() {
         return connectionId;
-    }
-
-    public void setConnectionId(String connectionId) {
-        this.connectionId = connectionId;
     }
 
     public InstanceDto getInstance() {
         return instance;
     }
 
-    public void setInstance(InstanceDto instance) {
-        this.instance = instance;
-    }
-
     public boolean isCurrent() {
         return current;
-    }
-
-    public void setCurrent(boolean current) {
-        this.current = current;
     }
 }

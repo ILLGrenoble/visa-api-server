@@ -1,6 +1,5 @@
 package eu.ill.visa.web.rest.controllers;
 
-import com.github.dozermapper.core.Mapper;
 import eu.ill.visa.business.services.ClientNotificationService;
 import eu.ill.visa.core.domain.ClientNotification;
 import eu.ill.visa.core.entity.Role;
@@ -27,12 +26,10 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 @Consumes(APPLICATION_JSON)
 public class NotificationController extends AbstractController {
 
-    private final Mapper mapper;
     private final ClientNotificationService clientNotificationService;
 
     @Inject
-    NotificationController(final Mapper mapper, final ClientNotificationService clientNotificationService) {
-        this.mapper = mapper;
+    NotificationController(final ClientNotificationService clientNotificationService) {
         this.clientNotificationService = clientNotificationService;
     }
 
@@ -40,7 +37,7 @@ public class NotificationController extends AbstractController {
     public MetaResponse<NotificationPayloadDto> getNotifications(@Context final SecurityContext securityContext) {
         List<SystemNotificationDto> systemNotifications = this.clientNotificationService.getAllActiveSystemNotifications()
             .stream()
-            .map(systemNotification -> mapper.map(systemNotification, SystemNotificationDto.class))
+            .map(SystemNotificationDto::new)
             .toList();
 
         NotificationPayloadDto notificationPayload = new NotificationPayloadDto();

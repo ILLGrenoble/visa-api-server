@@ -1,54 +1,40 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.Proposal;
+
 public class ProposalDto {
-    private Long id;
-    private String identifier;
-    private String title;
-    private String url;
-    private String doi;
+    private final Long id;
+    private final String identifier;
+    private final String title;
+    private final String url;
+    private final String doi;
 
-    public ProposalDto() {
-
+    public ProposalDto(final Proposal proposal) {
+        this.id = proposal.getId();
+        this.identifier = proposal.getIdentifier();
+        this.title = proposal.getTitle();
+        this.url = proposal.getUrl();
+        this.doi = proposal.getDoi();
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getIdentifier() {
         return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public String getDoi() {
         return doi;
-    }
-
-    public void setDoi(String doi) {
-        this.doi = doi;
     }
 }
 

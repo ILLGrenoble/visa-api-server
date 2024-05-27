@@ -1,40 +1,33 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.Employer;
+
 public class EmployerDto {
-    private Long id;
-    private String name;
-    private String town;
-    private String countryCode;
+    private final Long id;
+    private final String name;
+    private final String town;
+    private final String countryCode;
+
+    public EmployerDto(final Employer employer) {
+        this.id = employer.getId();
+        this.name = employer.getName();
+        this.town = employer.getTown();
+        this.countryCode = employer.getCountryCode();
+    }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getTown() {
         return town;
     }
 
-    public void setTown(String town) {
-        this.town = town;
-    }
-
     public String getCountryCode() {
         return countryCode;
-    }
-
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
     }
 }

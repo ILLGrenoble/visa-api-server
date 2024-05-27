@@ -1,26 +1,22 @@
 package eu.ill.visa.web.rest.dtos;
 
-public class InstrumentDto {
-    private Long id;
-    private String name;
+import eu.ill.visa.core.entity.Instrument;
 
-    public InstrumentDto() {
+public class InstrumentDto {
+    private final Long id;
+    private final String name;
+
+    public InstrumentDto(final Instrument instrument) {
+        this.id = instrument.getId();
+        this.name = instrument.getName();
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
 }

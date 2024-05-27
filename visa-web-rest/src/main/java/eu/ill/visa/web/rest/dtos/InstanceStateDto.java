@@ -1,33 +1,32 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class InstanceStateDto {
 
-    private InstanceState state;
-    private Date terminationDate;
+    private final InstanceState state;
+    private final Date terminationDate;
     private Date expirationDate;
-    private boolean deleteRequested;
-    private List<String> activeProtocols = new ArrayList<>();
+    private final boolean deleteRequested;
+    private final List<String> activeProtocols;
+
+    public InstanceStateDto(final Instance instance) {
+        this.state = instance.getState();
+        this.terminationDate = instance.getTerminationDate();
+        this.deleteRequested = instance.getDeleteRequested();
+        this.activeProtocols = instance.getActiveProtocols();
+    }
 
     public InstanceState getState() {
         return state;
     }
 
-    public void setState(InstanceState state) {
-        this.state = state;
-    }
-
     public Date getTerminationDate() {
         return terminationDate;
-    }
-
-    public void setTerminationDate(Date terminationDate) {
-        this.terminationDate = terminationDate;
     }
 
     public Date getExpirationDate() {
@@ -42,15 +41,7 @@ public class InstanceStateDto {
         return deleteRequested;
     }
 
-    public void setDeleteRequested(boolean deleteRequested) {
-        this.deleteRequested = deleteRequested;
-    }
-
     public List<String> getActiveProtocols() {
         return activeProtocols;
-    }
-
-    public void setActiveProtocols(List<String> activeProtocols) {
-        this.activeProtocols = activeProtocols;
     }
 }

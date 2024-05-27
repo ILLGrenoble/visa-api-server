@@ -1,132 +1,105 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class InstanceDto {
 
-    private Long id;
-    private String uid;
-    private String computeId;
-    private String ipAddress;
-    private String name;
-    private String comments;
-    private PlanDto plan;
-    private InstanceState state = InstanceState.UNKNOWN;
-    private Integer screenWidth;
-    private Integer screenHeight;
-    private List<InstanceMemberDto> members = new ArrayList<>();
-    private List<ExperimentDto> experiments = new ArrayList<>();
+    private final Long id;
+    private final String uid;
+    private final String computeId;
+    private final String ipAddress;
+    private final String name;
+    private final String comments;
+    private final PlanDto plan;
+    private final InstanceState state;
+    private final Integer screenWidth;
+    private final Integer screenHeight;
+    private final List<InstanceMemberDto> members;
+    private final List<ExperimentDto> experiments;
     private InstanceMemberDto membership;
-    private Date lastSeenAt;
-    private Date lastInteractionAt;
-    private Date terminationDate;
+    private final Date lastSeenAt;
+    private final Date lastInteractionAt;
+    private final Date terminationDate;
     private Date expirationDate;
-    private boolean deleteRequested;
+    private final boolean deleteRequested;
     private boolean canConnectWhileOwnerAway;
-    private String keyboardLayout;
+    private final String keyboardLayout;
     private boolean unrestrictedAccess;
-    private List<String> activeProtocols = new ArrayList<>();
+    private final List<String> activeProtocols;
 
     private Date createdAt;
 
-    public Long getId() {
-        return id;
+    public InstanceDto(Instance instance) {
+        this.id = instance.getId();
+        this.uid = instance.getUid();
+        this.computeId = instance.getComputeId();
+        this.ipAddress = instance.getIpAddress();
+        this.name = instance.getName();
+        this.comments = instance.getComments();
+        this.plan = new PlanDto(instance.getPlan());
+        this.state = instance.getState();
+        this.screenWidth = instance.getScreenWidth();
+        this.screenHeight = instance.getScreenHeight();
+        this.members = instance.getMembers().stream().map(InstanceMemberDto::new).toList();
+        this.experiments = instance.getExperiments().stream().map(ExperimentDto::new).toList();
+        this.lastSeenAt = instance.getLastSeenAt();
+        this.lastInteractionAt = instance.getLastInteractionAt();
+        this.terminationDate = instance.getTerminationDate();
+        this.deleteRequested = instance.getDeleteRequested();
+        this.keyboardLayout = instance.getKeyboardLayout();
+        this.activeProtocols = instance.getActiveProtocols();
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getId() {
+        return id;
     }
 
     public String getUid() {
         return uid;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
     public String getComputeId() {
         return computeId;
-    }
-
-    public void setComputeId(String computeId) {
-        this.computeId = computeId;
     }
 
     public String getIpAddress() {
         return ipAddress;
     }
 
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getComments() {
         return comments;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
     public PlanDto getPlan() {
         return plan;
-    }
-
-    public void setPlan(PlanDto plan) {
-        this.plan = plan;
     }
 
     public InstanceState getState() {
         return state;
     }
 
-    public void setState(InstanceState state) {
-        this.state = state;
-    }
-
     public Integer getScreenWidth() {
         return screenWidth;
-    }
-
-    public void setScreenWidth(Integer screenWidth) {
-        this.screenWidth = screenWidth;
     }
 
     public Integer getScreenHeight() {
         return screenHeight;
     }
 
-    public void setScreenHeight(Integer screenHeight) {
-        this.screenHeight = screenHeight;
-    }
-
     public List<InstanceMemberDto> getMembers() {
         return members;
     }
 
-    public void setMembers(List<InstanceMemberDto> members) {
-        this.members = members;
-    }
-
     public List<ExperimentDto> getExperiments() {
         return experiments;
-    }
-
-    public void setExperiments(List<ExperimentDto> experiments) {
-        this.experiments = experiments;
     }
 
     public InstanceMemberDto getMembership() {
@@ -141,24 +114,12 @@ public class InstanceDto {
         return terminationDate;
     }
 
-    public void setTerminationDate(Date terminationDate) {
-        this.terminationDate = terminationDate;
-    }
-
     public Date getLastSeenAt() {
         return lastSeenAt;
     }
 
-    public void setLastSeenAt(Date lastSeenAt) {
-        this.lastSeenAt = lastSeenAt;
-    }
-
     public Date getLastInteractionAt() {
         return lastInteractionAt;
-    }
-
-    public void setLastInteractionAt(Date lastInteractionAt) {
-        this.lastInteractionAt = lastInteractionAt;
     }
 
     public Date getExpirationDate() {
@@ -173,16 +134,8 @@ public class InstanceDto {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public boolean isDeleteRequested() {
         return deleteRequested;
-    }
-
-    public void setDeleteRequested(boolean deleteRequested) {
-        this.deleteRequested = deleteRequested;
     }
 
     public boolean isCanConnectWhileOwnerAway() {
@@ -197,10 +150,6 @@ public class InstanceDto {
         return keyboardLayout;
     }
 
-    public void setKeyboardLayout(String keyboardLayout) {
-        this.keyboardLayout = keyboardLayout;
-    }
-
     public boolean isUnrestrictedAccess() {
         return unrestrictedAccess;
     }
@@ -211,9 +160,5 @@ public class InstanceDto {
 
     public List<String> getActiveProtocols() {
         return activeProtocols;
-    }
-
-    public void setActiveProtocols(List<String> activeProtocols) {
-        this.activeProtocols = activeProtocols;
     }
 }

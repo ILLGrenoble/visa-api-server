@@ -1,6 +1,5 @@
 package eu.ill.visa.web.rest.controllers;
 
-import com.github.dozermapper.core.Mapper;
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.domain.InstanceFilter;
@@ -60,7 +59,6 @@ public class AccountInstanceController extends AbstractController {
     private final EmailManager emailManager;
     private final DesktopConfigurationImpl desktopConfiguration;
     private final ClientConfiguration clientConfiguration;
-    private final Mapper mapper;
 
     @Inject
     public AccountInstanceController(final UserService userService,
@@ -75,8 +73,7 @@ public class AccountInstanceController extends AbstractController {
                                      final ExperimentService experimentService,
                                      final EmailManager emailManager,
                                      final DesktopConfigurationImpl desktopConfiguration,
-                                     final ClientConfiguration clientConfiguration,
-                                     final Mapper mapper) {
+                                     final ClientConfiguration clientConfiguration) {
         this.userService = userService;
         this.instanceService = instanceService;
         this.instanceMemberService = instanceMemberService;
@@ -90,7 +87,6 @@ public class AccountInstanceController extends AbstractController {
         this.emailManager = emailManager;
         this.desktopConfiguration = desktopConfiguration;
         this.clientConfiguration = clientConfiguration;
-        this.mapper = mapper;
     }
 
     @GET
@@ -144,7 +140,7 @@ public class AccountInstanceController extends AbstractController {
         }
         final List<ExperimentDto> data = experiments
             .stream()
-            .map(experiment -> mapper.map(experiment, ExperimentDto.class))
+            .map(ExperimentDto::new)
             .collect(toList());
 
         return createResponse(data);
@@ -202,7 +198,7 @@ public class AccountInstanceController extends AbstractController {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
-            InstanceStateDto instanceStateDto = mapper.map(instance, InstanceStateDto.class);
+            InstanceStateDto instanceStateDto = new InstanceStateDto(instance);
             instanceStateDto.setExpirationDate(instanceExpirationService.getExpirationDate(instance));
             return createResponse(instanceStateDto);
         }
@@ -357,7 +353,7 @@ public class AccountInstanceController extends AbstractController {
 
     @GET
     @Path("/{instance}/experiments/team")
-    public MetaResponse<List<UserSimpleDto>> getTeam(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+    public MetaResponse<List<UserDto>> getTeam(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
         final User user = this.getUserPrincipal(securityContext);
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
             List<User> team = userService.getExperimentalTeamForInstance(instance);
@@ -368,7 +364,7 @@ public class AccountInstanceController extends AbstractController {
                 }
             }
 
-            return createResponse(team.stream().map(this::mapUserSimple).collect(toList()));
+            return createResponse(team.stream().map(this::mapUser).collect(toList()));
         }
 
         throw new NotFoundException();
@@ -380,8 +376,8 @@ public class AccountInstanceController extends AbstractController {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
-            return createResponse(instance.getMembers().stream().map(member -> mapper
-                .map(member, InstanceMemberDto.class))
+            return createResponse(instance.getMembers().stream()
+                .map(InstanceMemberDto::new)
                 .sorted()
                 .collect(toList()));
         }
@@ -397,8 +393,8 @@ public class AccountInstanceController extends AbstractController {
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
             List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembers(instance);
 
-            return createResponse(sessionMembers.stream().map(sessionMember -> mapper
-                .map(sessionMember, InstanceSessionMemberDto.class))
+            return createResponse(sessionMembers.stream()
+                .map(InstanceSessionMemberDto::new)
                 .collect(toList()));
         }
 
@@ -446,7 +442,7 @@ public class AccountInstanceController extends AbstractController {
 
                 emailManager.sendInstanceMemberAddedNotification(instance, instanceMember);
 
-                return createResponse(mapper.map(instanceMember, InstanceMemberDto.class));
+                return createResponse(new InstanceMemberDto(instanceMember));
 
             } else {
                 throw new BadRequestException("User not found");
@@ -473,7 +469,7 @@ public class AccountInstanceController extends AbstractController {
                 }
                 instanceMember.setRole(memberUpdateDto.getRole());
                 instanceMemberService.save(instanceMember);
-                return createResponse(mapper.map(instanceMember, InstanceMemberDto.class));
+                return createResponse(new InstanceMemberDto(instanceMember));
             }
         }
         throw new NotFoundException();
@@ -507,8 +503,8 @@ public class AccountInstanceController extends AbstractController {
         if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             List<InstanceCommand> commands = instanceCommandService.getAllForInstance(instance);
 
-            List<InstanceCommandDto> history = commands.stream().map(instanceCommand -> mapper
-                .map(instanceCommand, InstanceCommandDto.class))
+            List<InstanceCommandDto> history = commands.stream()
+                .map(InstanceCommandDto::new)
                 .collect(toList());
 
             return createResponse(history);
@@ -549,16 +545,16 @@ public class AccountInstanceController extends AbstractController {
     }
 
     private InstanceDto mapInstance(Instance instance, User user) {
-        InstanceDto instanceDto = mapper.map(instance, InstanceDto.class);
+        InstanceDto instanceDto = new InstanceDto(instance);
         InstanceMember instanceMember = instanceMemberService.getByInstanceAndUser(instance, user);
         if (instanceMember != null) {
-            instanceDto.setMembership(mapper.map(instanceMember, InstanceMemberDto.class));
+            instanceDto.setMembership(new InstanceMemberDto(instanceMember));
 
         } else if (user.hasRole(Role.ADMIN_ROLE)) {
-            instanceDto.setMembership(new InstanceMemberDto(this.mapUserSimple(user), SUPPORT));
+            instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
 
         } else if (user.hasAnyRole(List.of(Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
-            instanceDto.setMembership(new InstanceMemberDto(this.mapUserSimple(user), SUPPORT));
+            instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
         }
         instanceDto.setExpirationDate(instanceExpirationService.getExpirationDate(instance));
         instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));
@@ -567,8 +563,8 @@ public class AccountInstanceController extends AbstractController {
         return instanceDto;
     }
 
-    private UserSimpleDto mapUserSimple(User user) {
-        return mapper.map(user, UserSimpleDto.class);
+    private UserDto mapUser(User user) {
+        return new UserDto(user);
     }
 
 
@@ -599,7 +595,7 @@ public class AccountInstanceController extends AbstractController {
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
             InstanceExtensionRequest request = this.instanceExtensionRequestService.getForInstance(instance);
             if (request != null) {
-                InstanceExtensionRequestDto requestDto = mapper.map(request, InstanceExtensionRequestDto.class);
+                InstanceExtensionRequestDto requestDto = new InstanceExtensionRequestDto(request);
                 return createResponse(requestDto);
 
             } else {
@@ -624,7 +620,7 @@ public class AccountInstanceController extends AbstractController {
             if (request == null) {
                 request = this.instanceExtensionRequestService.create(instance, instanceExtensionRequestDto.getComments());
             }
-            InstanceExtensionRequestDto requestDto = mapper.map(request, InstanceExtensionRequestDto.class);
+            InstanceExtensionRequestDto requestDto = new InstanceExtensionRequestDto(request);
             return createResponse(requestDto);
 
         } else{

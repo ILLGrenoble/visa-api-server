@@ -2,84 +2,64 @@ package eu.ill.visa.web.rest.dtos;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import eu.ill.visa.core.entity.Experiment;
 
 import java.util.Date;
 
 public class ExperimentDto {
-    private String id;
-    private InstrumentDto instrument;
-    private ProposalDto proposal;
-    private String title;
-    private String url;
-    private String doi;
+    private final String id;
+    private final InstrumentDto instrument;
+    private final ProposalDto proposal;
+    private final String title;
+    private final String url;
+    private final String doi;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date startDate;
+    private final Date startDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date endDate;
+    private final Date endDate;
+
+    public ExperimentDto(final Experiment experiment) {
+        this.id = experiment.getId();
+        this.instrument = new InstrumentDto(experiment.getInstrument());
+        this.proposal = new ProposalDto(experiment.getProposal());
+        this.title = experiment.getTitle();
+        this.url = experiment.getUrl();
+        this.doi = experiment.getDoi();
+        this.startDate = experiment.getStartDate();
+        this.endDate = experiment.getEndDate();
+    }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public InstrumentDto getInstrument() {
         return instrument;
     }
 
-    public void setInstrument(InstrumentDto instrument) {
-        this.instrument = instrument;
-    }
-
     public ProposalDto getProposal() {
         return proposal;
-    }
-
-    public void setProposal(ProposalDto proposal) {
-        this.proposal = proposal;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getUrl() {
         return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getDoi() {
         return doi;
     }
 
-    public void setDoi(String doi) {
-        this.doi = doi;
-    }
-
     public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
     public Date getEndDate() {
         return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
     }
 }

@@ -1,6 +1,5 @@
 package eu.ill.visa.web.rest.controllers;
 
-import com.github.dozermapper.core.Mapper;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.PlanService;
 import eu.ill.visa.core.entity.*;
@@ -31,18 +30,16 @@ public class PlanController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(PlanController.class);
 
     private final PlanService planService;
-    private final Mapper mapper;
     final ExperimentService experimentService;
 
     @Inject
-    PlanController(final PlanService planService, final Mapper mapper, final ExperimentService experimentService) {
+    PlanController(final PlanService planService, final ExperimentService experimentService) {
         this.planService = planService;
-        this.mapper = mapper;
         this.experimentService = experimentService;
     }
 
     @GET
-    public MetaResponse<List<Plan>> getAll(@Context final SecurityContext securityContext, @QueryParam("experiments") String experimentIds) {
+    public MetaResponse<List<PlanDto>> getAll(@Context final SecurityContext securityContext, @QueryParam("experiments") String experimentIds) {
         final User user = this.getUserPrincipal(securityContext);
 
         List<Plan> plans = null;
@@ -70,7 +67,7 @@ public class PlanController extends AbstractController {
             }
         }
 
-        plans = plans.stream()
+        List<PlanDto> planDtos = plans.stream()
             .sorted((p1, p2) -> {
                 Flavour f1 = p1.getFlavour();
                 Flavour f2 = p2.getFlavour();
@@ -80,13 +77,14 @@ public class PlanController extends AbstractController {
                     return 1;
                 } else return f1.getMemory().compareTo(f2.getMemory());
             })
-            .collect(Collectors.toList());
-        return createResponse(plans);
+            .map(PlanDto::new)
+            .toList();
+        return createResponse(planDtos);
     }
 
     @Path("/{plan}")
     @GET
     public MetaResponse<PlanDto> get(@PathParam("plan") final Plan plan) {
-        return createResponse(mapper.map(plan, PlanDto.class));
+        return createResponse(new PlanDto(plan));
     }
 }

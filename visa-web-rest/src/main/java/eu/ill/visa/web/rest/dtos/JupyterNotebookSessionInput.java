@@ -2,7 +2,7 @@ package eu.ill.visa.web.rest.dtos;
 
 import jakarta.validation.constraints.Size;
 
-public class JupyterNotebookSessionDto {
+public class JupyterNotebookSessionInput {
 
     @Size(max = 150)
     private String kernelId;
@@ -10,7 +10,7 @@ public class JupyterNotebookSessionDto {
     @Size(max = 150)
     private String sessionId;
 
-    public JupyterNotebookSessionDto() {
+    public JupyterNotebookSessionInput() {
     }
 
     public String getKernelId() {

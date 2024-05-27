@@ -1,6 +1,5 @@
 package eu.ill.visa.web.rest.controllers;
 
-import com.github.dozermapper.core.Mapper;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstrumentService;
@@ -39,7 +38,6 @@ public class AccountController extends AbstractController {
     private final UserService userService;
     private final InstrumentService instrumentService;
     private final ExperimentService experimentService;
-    private final Mapper mapper;
     private final InstanceService instanceService;
     private final ClientConfiguration clientConfiguration;
 
@@ -48,20 +46,18 @@ public class AccountController extends AbstractController {
                              final InstrumentService instrumentService,
                              final InstanceService instanceService,
                              final ExperimentService experimentService,
-                             final Mapper mapper,
                              final ClientConfiguration clientConfiguration) {
         this.userService = userService;
         this.instrumentService = instrumentService;
         this.instanceService = instanceService;
         this.experimentService = experimentService;
         this.clientConfiguration = clientConfiguration;
-        this.mapper = mapper;
     }
 
     @GET
-    public MetaResponse<UserFullDto> get(@Context SecurityContext securityContext) {
+    public MetaResponse<UserDto> get(@Context SecurityContext securityContext) {
         final User user = this.getUserPrincipal(securityContext);
-        final UserFullDto userDto = mapper.map(user, UserFullDto.class);
+        final UserDto userDto = new UserDto(user);
         for (UserRole userRole : user.getActiveUserRoles()) {
             userDto.addActiveUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
         }
@@ -78,7 +74,7 @@ public class AccountController extends AbstractController {
         final User user = this.getUserPrincipal(securityContext);
         final List<Instrument> instruments = instrumentService.getAllForUser(user);
         return createResponse(instruments.stream()
-            .map(instrument -> mapper.map(instrument, InstrumentDto.class)).toList());
+            .map(InstrumentDto::new).toList());
     }
 
     @GET
@@ -137,7 +133,6 @@ public class AccountController extends AbstractController {
 
             final ExperimentFilter filter = new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers, dois, includeOpenData);
 
-            final List<ExperimentDto> experiments = new ArrayList<>();
             final Long total = experimentService.getAllCountForUser(user, filter);
             final int offset = (page - 1) * limit;
 
@@ -152,9 +147,9 @@ public class AccountController extends AbstractController {
                 .page(page)
                 .limit(limit);
 
-            for (Experiment experiment : experimentService.getAllForUser(user, filter, pagination, orderBy)) {
-                experiments.add(mapper.map(experiment, ExperimentDto.class));
-            }
+            final List<ExperimentDto> experiments = experimentService.getAllForUser(user, filter, pagination, orderBy).stream()
+                .map(ExperimentDto::new)
+                .toList();
 
             // Check if proposals was specified whether all the proposals have associated experiments
             List<String> errors = new ArrayList<>();
@@ -194,23 +189,23 @@ public class AccountController extends AbstractController {
 
     @GET
     @Path("/users/_search")
-    public MetaResponse<List<UserSimpleDto>> search(@QueryParam("name") final String name) {
-        final List<UserSimpleDto> users = new ArrayList<>();
+    public MetaResponse<List<UserDto>> search(@QueryParam("name") final String name) {
+        final List<UserDto> users = new ArrayList<>();
         if (Objects.isNull(name) || name.isEmpty()) {
             return createResponse(users);
         }
         for (final User user : userService.getAllLikeLastName(name, true, new Pagination(250, 0))) {
-            users.add(this.mapUserSimple(user));
+            users.add(this.mapUser(user));
         }
         return createResponse(users);
     }
 
     @GET
     @Path("/users/support")
-    public MetaResponse<List<UserSimpleDto>> search() {
-        final List<UserSimpleDto> users = new ArrayList<>();
+    public MetaResponse<List<UserDto>> search() {
+        final List<UserDto> users = new ArrayList<>();
         for (final User user : userService.getAllSupport()) {
-            users.add(this.mapUserSimpleWithRoles(user));
+            users.add(this.mapUserWithRoles(user));
         }
         return createResponse(users);
     }
@@ -218,22 +213,22 @@ public class AccountController extends AbstractController {
     @GET
     @Path("/users/{user}")
     @RolesAllowed({ADMIN_ROLE, INSTRUMENT_CONTROL_ROLE, INSTRUMENT_SCIENTIST_ROLE, IT_SUPPORT_ROLE, STAFF_ROLE})
-    public MetaResponse<UserSimpleDto> get(@PathParam("user") final User user) {
-        return createResponse(this.mapUserSimpleWithRoles(user));
+    public MetaResponse<UserDto> get(@PathParam("user") final User user) {
+        return createResponse(this.mapUserWithRoles(user));
     }
 
-    private UserSimpleDto mapUserSimple(User user) {
-        return mapper.map(user, UserSimpleDto.class);
+    private UserDto mapUser(User user) {
+        return new UserDto(user);
     }
 
-    private UserSimpleDto mapUserSimpleWithRoles(User user) {
-        UserSimpleDto userSimpleDto = this.mapUserSimple(user);
+    private UserDto mapUserWithRoles(User user) {
+        UserDto userDto = this.mapUser(user);
         for (UserRole userRole : user.getActiveUserRoles()) {
-            userSimpleDto.addActiveUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
+            userDto.addActiveUserRole(new RoleDto(userRole.getRole().getName(), userRole.getExpiresAt()));
         }
         for (Role group : user.getGroups()) {
-            userSimpleDto.addGroup(group.getName());
+            userDto.addGroup(group.getName());
         }
-        return userSimpleDto;
+        return userDto;
     }
 }

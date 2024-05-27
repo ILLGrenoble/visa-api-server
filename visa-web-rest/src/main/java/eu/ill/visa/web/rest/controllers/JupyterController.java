@@ -1,6 +1,5 @@
 package eu.ill.visa.web.rest.controllers;
 
-import com.github.dozermapper.core.Mapper;
 import eu.ill.visa.business.services.InstanceExpirationService;
 import eu.ill.visa.business.services.InstanceJupyterSessionService;
 import eu.ill.visa.business.services.InstanceService;
@@ -9,7 +8,7 @@ import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.web.rest.dtos.InstanceDto;
-import eu.ill.visa.web.rest.dtos.JupyterNotebookSessionDto;
+import eu.ill.visa.web.rest.dtos.JupyterNotebookSessionInput;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
@@ -33,17 +32,14 @@ public class JupyterController extends AbstractController {
     private final InstanceService instanceService;
     private final InstanceJupyterSessionService instanceJupyterSessionService;
     private final InstanceExpirationService instanceExpirationService;
-    private final Mapper mapper;
 
     @Inject
     public JupyterController(final InstanceService instanceService,
                              final InstanceJupyterSessionService instanceJupyterSessionService,
-                             final InstanceExpirationService instanceExpirationService,
-                             final Mapper mapper) {
+                             final InstanceExpirationService instanceExpirationService) {
         this.instanceService = instanceService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.instanceExpirationService = instanceExpirationService;
-        this.mapper = mapper;
     }
 
     @GET
@@ -53,7 +49,7 @@ public class JupyterController extends AbstractController {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.isAuthorisedForJupyter(user, instance)) {
-            InstanceDto instanceDto = mapper.map(instance, InstanceDto.class);
+            InstanceDto instanceDto = new InstanceDto(instance);
 
             // Update last seen at
             instance.updateLastSeenAt();
@@ -71,11 +67,11 @@ public class JupyterController extends AbstractController {
     @POST
     @Path("/{instance}/notebook/open")
     @Authenticated
-    public void jupyterSessionOpen(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionDto jupyterNotebookSessionDto) {
+    public void jupyterSessionOpen(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionInput input) {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
-            this.instanceJupyterSessionService.create(instance, user, jupyterNotebookSessionDto.getKernelId(), jupyterNotebookSessionDto.getSessionId());
+            this.instanceJupyterSessionService.create(instance, user, input.getKernelId(), input.getSessionId());
         }
 
         throw new NotFoundException();
@@ -83,9 +79,9 @@ public class JupyterController extends AbstractController {
 
     @POST
     @Path("/{instance}/notebook/close")
-    public void jupyterSessionClose(@PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionDto jupyterNotebookSessionDto) {
+    public void jupyterSessionClose(@PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionInput input) {
         // Allow any access this endpoint: allows the visa-jupyter-proxy to remove zombie sessions without authentication (needs to know both kernelId and sessionId so security risk is low)
-        this.instanceJupyterSessionService.destroy(instance, jupyterNotebookSessionDto.getKernelId(), jupyterNotebookSessionDto.getSessionId());
+        this.instanceJupyterSessionService.destroy(instance, input.getKernelId(), input.getSessionId());
     }
 
     private boolean isAuthorisedForJupyter(User user, Instance instance) {

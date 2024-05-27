@@ -1,45 +1,36 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 
 public class InstanceMemberDto implements Comparable<InstanceMemberDto> {
 
-    private Long id;
+    private final Long id;
+    private final UserDto user;
+    private final InstanceMemberRole role;
 
-    private UserSimpleDto user;
-
-    private InstanceMemberRole role;
-
-    public InstanceMemberDto() {
+    public InstanceMemberDto(final InstanceMember instanceMember) {
+        this.id = instanceMember.getId();
+        this.user = new UserDto(instanceMember.getUser());
+        this.role = instanceMember.getRole();
     }
 
-    public InstanceMemberDto(UserSimpleDto user, InstanceMemberRole role) {
+    public InstanceMemberDto(final UserDto user, final InstanceMemberRole role) {
+        this.id = null;
         this.user = user;
         this.role = role;
     }
 
-    public UserSimpleDto getUser() {
+    public UserDto getUser() {
         return user;
-    }
-
-    public void setUser(UserSimpleDto user) {
-        this.user = user;
     }
 
     public InstanceMemberRole getRole() {
         return role;
     }
 
-    public void setRole(InstanceMemberRole role) {
-        this.role = role;
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     @Override

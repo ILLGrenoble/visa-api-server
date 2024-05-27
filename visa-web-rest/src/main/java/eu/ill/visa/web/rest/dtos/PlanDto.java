@@ -1,41 +1,34 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.Plan;
+
 public class PlanDto {
 
-    private Long id;
-    private ImageDto image;
-    private FlavourDto flavour;
-    private Boolean preset;
+    private final Long id;
+    private final ImageDto image;
+    private final FlavourDto flavour;
+    private final Boolean preset;
+
+    public PlanDto(final Plan plan) {
+        this.id = plan.getId();
+        this.image = new ImageDto(plan.getImage());
+        this.flavour = new FlavourDto(plan.getFlavour());
+        this.preset = plan.getPreset();
+    }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public ImageDto getImage() {
         return image;
     }
 
-    public void setImage(ImageDto image) {
-        this.image = image;
-    }
-
     public FlavourDto getFlavour() {
         return flavour;
     }
 
-    public void setFlavour(FlavourDto flavour) {
-        this.flavour = flavour;
-    }
-
     public Boolean getPreset() {
         return preset;
-    }
-
-    public void setPreset(Boolean preset) {
-        this.preset = preset;
     }
 }
