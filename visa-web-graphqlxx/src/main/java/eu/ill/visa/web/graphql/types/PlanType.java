@@ -3,7 +3,9 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.Plan;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("Plan")
 public class PlanType {
 
     @AdaptToScalar(Scalar.Int.class)

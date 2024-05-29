@@ -3,9 +3,11 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.Role;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 
+@Type("Role")
 public class RoleType {
 
     @AdaptToScalar(Scalar.Int.class)

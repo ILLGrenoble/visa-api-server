@@ -3,7 +3,9 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.FlavourLimit;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("FlavourLimit")
 public class FlavourLimitType {
 
     @AdaptToScalar(Scalar.Int.class)

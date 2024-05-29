@@ -1,10 +1,13 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.Experiment;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 
+@Type("Experiment")
 public class ExperimentType {
+
     private final String id;
     private final InstrumentType instrument;
     private final ProposalType proposal;

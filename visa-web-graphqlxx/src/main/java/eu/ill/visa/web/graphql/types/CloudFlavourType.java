@@ -1,7 +1,9 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudFlavour;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("CloudFlavour")
 public class CloudFlavourType {
 
     private final String id;

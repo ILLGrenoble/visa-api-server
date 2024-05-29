@@ -1,10 +1,12 @@
 package eu.ill.visa.web.graphql.types;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import eu.ill.visa.core.entity.Flavour;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("Flavour")
 public class FlavourType {
 
     @AdaptToScalar(Scalar.Int.class)

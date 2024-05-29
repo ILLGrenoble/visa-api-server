@@ -3,7 +3,9 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.InstanceSession;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("InstanceSession")
 public class InstanceSessionType {
 
     @AdaptToScalar(Scalar.Int.class)

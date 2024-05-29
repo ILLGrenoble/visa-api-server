@@ -1,9 +1,11 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.UserRole;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 
+@Type("UserRole")
 public class UserRoleType {
 
     private final RoleType role;

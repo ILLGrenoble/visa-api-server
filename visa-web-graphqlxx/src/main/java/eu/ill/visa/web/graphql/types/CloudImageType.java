@@ -3,9 +3,11 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.cloud.domain.CloudImage;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
 import static java.lang.Math.toIntExact;
 
+@Type("CloudImage")
 public class CloudImageType {
 
     private final String id;

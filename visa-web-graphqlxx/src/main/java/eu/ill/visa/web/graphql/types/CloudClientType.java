@@ -3,7 +3,9 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.cloud.services.CloudClient;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("CloudClient")
 public class CloudClientType {
 
     @AdaptToScalar(Scalar.Int.class)

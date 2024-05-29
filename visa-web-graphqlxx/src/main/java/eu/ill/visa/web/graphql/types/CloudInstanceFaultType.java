@@ -1,7 +1,9 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudInstanceFault;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("CloudInstanceFault")
 public class CloudInstanceFaultType {
     private final String message;
     private final Integer code;

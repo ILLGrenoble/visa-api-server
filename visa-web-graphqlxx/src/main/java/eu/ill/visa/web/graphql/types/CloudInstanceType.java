@@ -1,9 +1,11 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudInstance;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.List;
 
+@Type("CloudInstance")
 public class CloudInstanceType {
 
     private final String id;

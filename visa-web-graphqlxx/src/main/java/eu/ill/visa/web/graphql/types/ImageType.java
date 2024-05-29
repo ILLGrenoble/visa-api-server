@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.Image;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.List;
 
+@Type("Image")
 public class ImageType {
 
     @AdaptToScalar(Scalar.Int.class)

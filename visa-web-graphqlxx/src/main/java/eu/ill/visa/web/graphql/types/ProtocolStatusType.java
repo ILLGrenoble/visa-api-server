@@ -1,7 +1,9 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.domain.ProtocolStatus;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("ProtocolStatus")
 public class ProtocolStatusType {
 
     private final ImageProtocolType protocol;

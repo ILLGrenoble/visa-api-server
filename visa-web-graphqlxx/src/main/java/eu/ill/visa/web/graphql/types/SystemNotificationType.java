@@ -4,9 +4,11 @@ import eu.ill.visa.core.entity.SystemNotification;
 import eu.ill.visa.core.entity.enumerations.SystemNotificationLevel;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 
+@Type("SystemNotification")
 public class SystemNotificationType {
 
     @AdaptToScalar(Scalar.Int.class)

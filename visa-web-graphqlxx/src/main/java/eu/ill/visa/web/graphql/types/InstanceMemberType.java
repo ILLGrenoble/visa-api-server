@@ -4,9 +4,11 @@ import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 
+@Type("InstanceMember")
 public class InstanceMemberType {
 
     @AdaptToScalar(Scalar.Int.class)

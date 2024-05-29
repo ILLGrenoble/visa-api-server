@@ -12,8 +12,7 @@ import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.relay.Connection;
 import eu.ill.visa.web.graphql.relay.PageInfo;
-import eu.ill.visa.web.graphql.types.InstanceStateCount;
-import eu.ill.visa.web.graphql.types.InstanceType;
+import eu.ill.visa.web.graphql.types.*;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
@@ -137,31 +136,36 @@ public class InstanceResource {
     }
 
     @Query
-    public List<NumberInstancesByFlavour> countInstancesByFlavours() throws DataFetchingException {
+    public List<NumberInstancesByFlavourType> countInstancesByFlavours() throws DataFetchingException {
         try {
-            return instanceService.countByFlavour();
+            return instanceService.countByFlavour().stream()
+                .map(NumberInstancesByFlavourType::new)
+                .toList();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
     }
 
     @Query
-    public List<NumberInstancesByImage> countInstancesByImages() throws DataFetchingException {
+    public List<NumberInstancesByImageType> countInstancesByImages() throws DataFetchingException {
         try {
-            return instanceService.countByImage();
+            return instanceService.countByImage().stream()
+                .map(NumberInstancesByImageType::new)
+                .toList();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
     }
 
     @Query
-    public List<NumberInstancesByCloudClient> countInstancesByCloudClients() throws DataFetchingException {
+    public List<NumberInstancesByCloudClientType> countInstancesByCloudClients() throws DataFetchingException {
         try {
             return instanceService.countByCloudClient().stream()
                 .map(countByCloudClient -> {
                     CloudClient cloudClient = this.cloudClientGateway.getCloudClient(countByCloudClient.getId());
                     return new NumberInstancesByCloudClient(cloudClient.getId(), cloudClient.getName(), countByCloudClient.getTotal());
                 })
+                .map(NumberInstancesByCloudClientType::new)
                 .toList();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());

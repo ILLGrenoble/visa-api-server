@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.SecurityGroup;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("SecurityGroup")
 public class SecurityGroupType {
 
     @AdaptToScalar(Scalar.Int.class)

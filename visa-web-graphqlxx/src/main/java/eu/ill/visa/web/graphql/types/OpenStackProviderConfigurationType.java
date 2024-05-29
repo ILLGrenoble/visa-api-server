@@ -1,7 +1,9 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("OpenStackProviderConfiguration")
 public class OpenStackProviderConfigurationType {
     private final String applicationId;
     private final String applicationSecret;

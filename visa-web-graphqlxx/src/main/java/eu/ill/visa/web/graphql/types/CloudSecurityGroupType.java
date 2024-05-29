@@ -1,5 +1,8 @@
 package eu.ill.visa.web.graphql.types;
 
+import org.eclipse.microprofile.graphql.Type;
+
+@Type("CloudSecurityGroup")
 public class CloudSecurityGroupType {
 
     private final String name;

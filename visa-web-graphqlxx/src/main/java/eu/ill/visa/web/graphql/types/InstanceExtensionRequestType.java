@@ -4,9 +4,11 @@ import eu.ill.visa.core.entity.InstanceExtensionRequest;
 import eu.ill.visa.core.entity.enumerations.InstanceExtensionRequestState;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 
+@Type("InstanceExtensionRequest")
 public class InstanceExtensionRequestType {
 
     @AdaptToScalar(Scalar.Int.class)

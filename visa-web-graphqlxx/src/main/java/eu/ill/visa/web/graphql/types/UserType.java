@@ -1,11 +1,14 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.User;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 import java.util.List;
 
+@Type("User")
 public class UserType {
+
     private final String id;
     private final String firstName;
     private final String lastName;
@@ -17,7 +20,6 @@ public class UserType {
     private final List<RoleType> groups;
     private final Date lastSeenAt;
     private final Date activatedAt;
-
 
     public UserType(final User user) {
         this.id = user.getId();

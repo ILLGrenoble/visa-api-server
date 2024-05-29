@@ -1,8 +1,11 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.providers.web.WebProviderConfiguration;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type("WebProviderConfiguration")
 public class WebProviderConfigurationType {
+
     private final String url;
     private final String authToken;
 

@@ -5,10 +5,12 @@ import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
 import java.util.List;
 
+@Type("Instance")
 public class InstanceType {
 
     @AdaptToScalar(Scalar.Int.class)
