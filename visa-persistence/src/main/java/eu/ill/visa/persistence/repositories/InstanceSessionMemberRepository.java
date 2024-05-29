@@ -82,9 +82,15 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         return query.getResultList();
     }
 
-    public List<InstanceSessionMember> getAllHistorySessionMembers(final Instance instance) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllHistoryForInstance", InstanceSessionMember.class);
-        query.setParameter("instance", instance);
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceId(final Long instanceId) {
+        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceByInstanceId", InstanceSessionMember.class);
+        query.setParameter("instanceId", instanceId);
+        return query.getResultList();
+    }
+
+    public List<InstanceSessionMember> getAllHistorySessionMembersByInstanceId(final Long instanceId) {
+        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllHistoryForInstanceByInstanceId", InstanceSessionMember.class);
+        query.setParameter("instanceId", instanceId);
         return query.getResultList();
     }
 

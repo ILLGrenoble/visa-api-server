@@ -92,13 +92,16 @@ public class InstanceSessionService {
         return this.instanceSessionMemberRepository.getAllSessionMembers(instanceSession);
     }
 
-    public List<InstanceSessionMember> getAllHistorySessionMembers(final Instance instance) {
-        return this.instanceSessionMemberRepository.getAllHistorySessionMembers(instance);
-
+    public List<InstanceSessionMember> getAllHistorySessionMembersByInstanceId(final Long instanceId) {
+        return this.instanceSessionMemberRepository.getAllHistorySessionMembersByInstanceId(instanceId);
     }
 
     public List<InstanceSessionMember> getAllSessionMembers(@NotNull Instance instance) {
         return this.instanceSessionMemberRepository.getAllSessionMembers(instance);
+    }
+
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceId(@NotNull Long instanceId) {
+        return this.instanceSessionMemberRepository.getAllSessionMembersByInstanceId(instanceId);
     }
 
     public InstanceSessionMember getSessionMemberBySessionId(UUID sessionId) {

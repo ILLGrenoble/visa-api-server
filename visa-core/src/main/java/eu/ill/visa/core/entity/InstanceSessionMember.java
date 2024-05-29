@@ -27,10 +27,16 @@ import java.util.Date;
             WHERE instanceSession.instance = :instance
             AND i.active = true
     """),
-    @NamedQuery(name = "instanceSessionMember.getAllHistoryForInstance", query = """
+    @NamedQuery(name = "instanceSessionMember.getAllForInstanceByInstanceId", query = """
             SELECT i FROM InstanceSessionMember i
             LEFT JOIN i.instanceSession instanceSession
-            WHERE instanceSession.instance = :instance
+            WHERE instanceSession.instance.id = :instanceId
+            AND i.active = true
+    """),
+    @NamedQuery(name = "instanceSessionMember.getAllHistoryForInstanceByInstanceId", query = """
+            SELECT i FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            WHERE instanceSession.instance.id = :instanceId
             ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getBySessionId", query = """

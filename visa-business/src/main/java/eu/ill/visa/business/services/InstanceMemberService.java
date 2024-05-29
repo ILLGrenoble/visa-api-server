@@ -39,8 +39,8 @@ public class InstanceMemberService {
         return this.repository.getByInstanceAndUser(instance, user);
     }
 
-    public List<InstanceMember> getAllByInstanceAndRole(Instance instance, InstanceMemberRole role) {
-        return this.repository.getAllByInstanceAndRole(instance, role);
+    public List<InstanceMember> getAllByInstanceIdAndRole(Long instanceId, InstanceMemberRole role) {
+        return this.repository.getAllByInstanceIdAndRole(instanceId, role);
     }
 
     public void save(@NotNull InstanceMember instanceMember) {

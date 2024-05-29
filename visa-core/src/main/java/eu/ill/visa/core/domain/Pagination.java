@@ -6,7 +6,6 @@ public class Pagination {
     private int offset;
 
     public Pagination() {
-
     }
 
     public Pagination(int offset) {
@@ -22,8 +21,16 @@ public class Pagination {
         return limit;
     }
 
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
     public int getOffset() {
         return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 
     public boolean isLimitBetween(int min, int max) {
