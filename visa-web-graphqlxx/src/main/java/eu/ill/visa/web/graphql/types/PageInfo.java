@@ -1,4 +1,4 @@
-package eu.ill.visa.web.graphql.relay;
+package eu.ill.visa.web.graphql.types;
 
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;

@@ -1,4 +1,4 @@
-package eu.ill.visa.web.graphql.validation;
+package eu.ill.visa.web.graphql.exceptions;
 
 public class ValidationError {
 

@@ -1,4 +1,4 @@
-package eu.ill.visa.web.graphql.relay;
+package eu.ill.visa.web.graphql.types;
 
 import java.util.List;
 
