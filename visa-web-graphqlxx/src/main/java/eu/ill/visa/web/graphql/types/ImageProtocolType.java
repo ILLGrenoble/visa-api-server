@@ -3,16 +3,17 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.ImageProtocol;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("ImageProtocol")
 public class ImageProtocolType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String name;
-    private final Integer port;
-    private final Boolean optional;
+    private final @NotNull Long id;
+    private final @NotNull String name;
+    private final @NotNull Integer port;
+    private final @NotNull Boolean optional;
 
     public ImageProtocolType(final ImageProtocol imageProtocol) {
         this.id = imageProtocol.getId();

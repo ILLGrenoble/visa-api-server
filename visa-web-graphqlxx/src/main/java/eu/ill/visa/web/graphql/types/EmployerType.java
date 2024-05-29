@@ -3,13 +3,14 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.Employer;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("Employer")
 public class EmployerType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
+    private final @NotNull Long id;
     private final String name;
     private final String town;
     private final String countryCode;

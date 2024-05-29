@@ -1,10 +1,11 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudLimit;
+import jakarta.validation.constraints.NotNull;
 
 public class DetailedCloudLimit {
 
-    private final CloudClientType cloudClient;
+    private final @NotNull CloudClientType cloudClient;
     private final CloudLimit cloudLimit;
     private final String error;
 

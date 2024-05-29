@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.SecurityGroup;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("SecurityGroup")
 public class SecurityGroupType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String name;
+    private final @NotNull Long id;
+    private final @NotNull String name;
     private final Long cloudId;
 
     public SecurityGroupType(final SecurityGroup securityGroup) {

@@ -3,17 +3,18 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.cloud.services.CloudClient;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("CloudClient")
 public class CloudClientType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String name;
-    private final String type;
-    private final String serverNamePrefix;
-    private final Boolean visible;
+    private final @NotNull Long id;
+    private final @NotNull String name;
+    private final @NotNull String type;
+    private final @NotNull String serverNamePrefix;
+    private final @NotNull Boolean visible;
 
     public CloudClientType(final CloudClient cloudClient) {
         this.id = cloudClient.getId();

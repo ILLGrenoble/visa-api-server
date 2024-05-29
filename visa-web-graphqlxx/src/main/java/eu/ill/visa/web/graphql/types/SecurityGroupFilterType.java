@@ -3,23 +3,24 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.SecurityGroupFilter;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("SecurityGroupFilter")
 public class SecurityGroupFilterType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
+    private final @NotNull Long id;
     @AdaptToScalar(Scalar.Int.class)
-    private final Long objectId;
-    private final String objectType;
-    private final SecurityGroupType securityGroup;
+    private final @NotNull Long objectId;
+    private final @NotNull String objectType;
+    private final @NotNull SecurityGroupType securityGroup;
 
     public SecurityGroupFilterType(final SecurityGroupFilter filter) {
         this.id = filter.getId();
         this.objectId = filter.getObjectId();
         this.objectType = filter.getObjectType();
-        this.securityGroup = filter.getSecurityGroup() == null ? null : new SecurityGroupType(filter.getSecurityGroup());
+        this.securityGroup = new SecurityGroupType(filter.getSecurityGroup());
     }
 
     public Long getId() {

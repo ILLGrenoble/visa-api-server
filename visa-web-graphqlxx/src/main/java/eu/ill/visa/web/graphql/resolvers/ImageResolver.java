@@ -7,6 +7,7 @@ import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.CloudImageType;
 import eu.ill.visa.web.graphql.types.ImageType;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
@@ -20,7 +21,7 @@ public class ImageResolver {
     }
 
 
-    public CloudClientType cloudClient(@Source ImageType image) {
+    public @NotNull CloudClientType cloudClient(@Source ImageType image) {
         CloudClient cloudClient = this.cloudClientGateway.getCloudClient(image.getCloudId());
         if (cloudClient != null) {
             return new CloudClientType(cloudClient);

@@ -5,6 +5,7 @@ import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.SecurityGroupType;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
@@ -19,7 +20,7 @@ public class SecurityGroupResolver {
         this.cloudClientGateway = cloudClientGateway;
     }
 
-    public CloudClientType cloudClient(@Source SecurityGroupType securityGroup) {
+    public @NotNull CloudClientType cloudClient(@Source SecurityGroupType securityGroup) {
         CloudClient cloudClient = this.cloudClientGateway.getCloudClient(securityGroup.getCloudId());
         if (cloudClient != null) {
             return new CloudClientType(cloudClient);

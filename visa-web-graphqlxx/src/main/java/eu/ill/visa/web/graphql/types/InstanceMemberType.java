@@ -4,6 +4,7 @@ import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -12,14 +13,14 @@ import java.util.Date;
 public class InstanceMemberType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final UserType user;
-    private final InstanceMemberRole role;
-    private final Date createdAt;
+    private final @NotNull Long id;
+    private final @NotNull UserType user;
+    private final @NotNull InstanceMemberRole role;
+    private final @NotNull Date createdAt;
 
     public InstanceMemberType(final InstanceMember member) {
         this.id = member.getId();
-        this.user = member.getUser() == null ? null : new UserType(member.getUser());
+        this.user = new UserType(member.getUser());
         this.role = member.getRole();
         this.createdAt = member.getCreatedAt();
     }

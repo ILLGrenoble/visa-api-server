@@ -6,20 +6,22 @@ import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
-@Type("ApplicationCredential")
-public class ApplicationCredentialType {
+import java.util.Date;
+
+@Type("ApplicationCredentialDetail")
+public class ApplicationCredentialDetailType {
 
     @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long id;
     private final @NotNull String name;
     private final @NotNull String applicationId;
-    private final @NotNull String applicationSecret;
+    private final Date lastUsedAt;
 
-    public ApplicationCredentialType(ApplicationCredential applicationCredential) {
+    public ApplicationCredentialDetailType(ApplicationCredential applicationCredential) {
         this.id = applicationCredential.getId();
         this.name = applicationCredential.getName();
         this.applicationId = applicationCredential.getApplicationId();
-        this.applicationSecret = applicationCredential.getApplicationSecret();
+        this.lastUsedAt = applicationCredential.getLastUsedAt();
     }
 
     public Long getId() {
@@ -34,7 +36,7 @@ public class ApplicationCredentialType {
         return applicationId;
     }
 
-    public String getApplicationSecret() {
-        return applicationSecret;
+    public Date getLastUsedAt() {
+        return lastUsedAt;
     }
 }

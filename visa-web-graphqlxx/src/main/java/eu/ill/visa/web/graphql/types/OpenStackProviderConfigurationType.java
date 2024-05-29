@@ -1,18 +1,19 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("OpenStackProviderConfiguration")
 public class OpenStackProviderConfigurationType {
-    private final String applicationId;
-    private final String applicationSecret;
-    private final String computeEndpoint;
-    private final String imageEndpoint;
-    private final String networkEndpoint;
-    private final String identityEndpoint;
-    private final String addressProvider;
-    private final String addressProviderUUID;
+    private final @NotNull String applicationId;
+    private final @NotNull String applicationSecret;
+    private final @NotNull String computeEndpoint;
+    private final @NotNull String imageEndpoint;
+    private final @NotNull String networkEndpoint;
+    private final @NotNull String identityEndpoint;
+    private final @NotNull String addressProvider;
+    private final @NotNull String addressProviderUUID;
 
     public OpenStackProviderConfigurationType(final OpenStackProviderConfiguration configuration) {
         this.applicationId = configuration.getApplicationId();

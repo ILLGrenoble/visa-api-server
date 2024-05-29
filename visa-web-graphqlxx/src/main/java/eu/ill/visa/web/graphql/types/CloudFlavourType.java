@@ -1,16 +1,17 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudFlavour;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("CloudFlavour")
 public class CloudFlavourType {
 
-    private final String id;
-    private final String name;
-    private final Integer cpus;
-    private final Integer disk;
-    private final Integer ram;
+    private final @NotNull String id;
+    private final @NotNull String name;
+    private final @NotNull Integer cpus;
+    private final @NotNull Integer disk;
+    private final @NotNull Integer ram;
 
     public CloudFlavourType(final CloudFlavour cloudFlavour) {
         this.id = cloudFlavour.getId();

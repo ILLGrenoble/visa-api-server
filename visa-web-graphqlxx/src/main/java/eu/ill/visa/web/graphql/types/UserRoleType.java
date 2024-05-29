@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.UserRole;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -8,11 +9,11 @@ import java.util.Date;
 @Type("UserRole")
 public class UserRoleType {
 
-    private final RoleType role;
+    private final @NotNull RoleType role;
     private final Date expiresAt;
 
     public UserRoleType(final UserRole userRole) {
-        this.role = userRole.getRole() == null ? null : new RoleType(userRole.getRole());
+        this.role = new RoleType(userRole.getRole());
         this.expiresAt = userRole.getExpiresAt();
     }
 

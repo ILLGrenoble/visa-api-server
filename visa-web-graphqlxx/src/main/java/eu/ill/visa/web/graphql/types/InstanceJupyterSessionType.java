@@ -3,6 +3,7 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.InstanceJupyterSession;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -11,13 +12,13 @@ import java.util.Date;
 public class InstanceJupyterSessionType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final InstanceType instance;
-    private final UserType user;
-    private final String kernelId;
-    private final String sessionId;
+    private final @NotNull Long id;
+    private final @NotNull InstanceType instance;
+    private final @NotNull UserType user;
+    private final @NotNull String kernelId;
+    private final @NotNull String sessionId;
     private final Boolean active;
-    private final Date createdAt;
+    private final @NotNull Date createdAt;
     private final Date updatedAt;
 
     public InstanceJupyterSessionType(final InstanceJupyterSession session) {

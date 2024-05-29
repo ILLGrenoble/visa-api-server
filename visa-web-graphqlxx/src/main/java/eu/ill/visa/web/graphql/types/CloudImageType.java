@@ -3,6 +3,7 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.cloud.domain.CloudImage;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import static java.lang.Math.toIntExact;
@@ -10,11 +11,11 @@ import static java.lang.Math.toIntExact;
 @Type("CloudImage")
 public class CloudImageType {
 
-    private final String id;
-    private final String name;
-    private final Integer size;
+    private final @NotNull String id;
+    private final @NotNull String name;
+    private final @NotNull Integer size;
     @AdaptToScalar(Scalar.DateTime.class)
-    private final String createdAt;
+    private final @NotNull String createdAt;
 
     public CloudImageType(final CloudImage cloudImage) {
         this.id = cloudImage.getId();

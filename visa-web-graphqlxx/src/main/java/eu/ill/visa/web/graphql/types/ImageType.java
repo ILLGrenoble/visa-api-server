@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.Image;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.List;
@@ -12,13 +13,13 @@ import java.util.List;
 public class ImageType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String name;
+    private final @NotNull Long id;
+    private final @NotNull String name;
     private final String version;
     private final String description;
     private final String icon;
-    private final String computeId;
-    private final Boolean visible;
+    private final @NotNull String computeId;
+    private final @NotNull Boolean visible;
     private final List<ImageProtocolType> protocols;
     private final String bootCommand;
     private final String autologin;

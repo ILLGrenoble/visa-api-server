@@ -4,6 +4,7 @@ import eu.ill.visa.core.entity.InstanceExtensionRequest;
 import eu.ill.visa.core.entity.enumerations.InstanceExtensionRequestState;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -12,25 +13,17 @@ import java.util.Date;
 public class InstanceExtensionRequestType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final InstanceType instance;
-    private final String comments;
-    private final UserType handler;
-    private final Date handledOn;
-    private final String handlerComments;
-    private final Date originalTerminationDate;
-    private final Date extensionDate;
-    private final InstanceExtensionRequestState state;
+    private final @NotNull Long id;
+    private final @NotNull InstanceType instance;
+    private final @NotNull String comments;
+    private final @NotNull Date createdAt;
+    private final @NotNull InstanceExtensionRequestState state;
 
     public InstanceExtensionRequestType(final InstanceExtensionRequest request) {
         this.id = request.getId();
-        this.instance = request.getInstance() == null ? null : new InstanceType(request.getInstance());
+        this.instance = new InstanceType(request.getInstance());
         this.comments = request.getComments();
-        this.handler = new UserType(request.getHandler());
-        this.handledOn = request.getHandledOn();
-        this.handlerComments = request.getHandlerComments();
-        this.originalTerminationDate = request.getOriginalTerminationDate();
-        this.extensionDate = request.getExtensionDate();
+        this.createdAt = request.getCreatedAt();
         this.state = request.getState();
     }
 
@@ -46,24 +39,8 @@ public class InstanceExtensionRequestType {
         return comments;
     }
 
-    public UserType getHandler() {
-        return handler;
-    }
-
-    public Date getHandledOn() {
-        return handledOn;
-    }
-
-    public String getHandlerComments() {
-        return handlerComments;
-    }
-
-    public Date getOriginalTerminationDate() {
-        return originalTerminationDate;
-    }
-
-    public Date getExtensionDate() {
-        return extensionDate;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     public InstanceExtensionRequestState getState() {

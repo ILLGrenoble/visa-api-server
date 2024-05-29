@@ -4,7 +4,7 @@ import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.ApplicationCredentialService;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
-import eu.ill.visa.web.graphql.types.ApplicationCredentialType;
+import eu.ill.visa.web.graphql.types.ApplicationCredentialDetailType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
@@ -26,10 +26,10 @@ public class ApplicationCredentialResource {
 
 
     @Query
-    public @NotNull List<ApplicationCredentialType> applicationCredentials() throws DataFetchingException {
+    public @NotNull List<ApplicationCredentialDetailType> applicationCredentials() throws DataFetchingException {
         try {
             return applicationCredentialService.getAll().stream()
-                .map(ApplicationCredentialType::new)
+                .map(ApplicationCredentialDetailType::new)
                 .toList();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());

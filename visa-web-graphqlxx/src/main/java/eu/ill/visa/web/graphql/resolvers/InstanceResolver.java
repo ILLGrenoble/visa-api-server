@@ -13,6 +13,7 @@ import eu.ill.visa.persistence.repositories.InstanceAttributeRepository;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.*;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
@@ -157,7 +158,7 @@ public class InstanceResolver {
         }
     }
 
-    public CloudClientType cloudClient(@Source final InstanceType instance) {
+    public @NotNull CloudClientType cloudClient(@Source final InstanceType instance) {
         CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
         if (cloudClient != null) {
             return new CloudClientType(cloudClient);

@@ -7,6 +7,7 @@ import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.CloudFlavourType;
 import eu.ill.visa.web.graphql.types.FlavourType;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
@@ -19,7 +20,7 @@ public class FlavourResolver {
         this.cloudClientGateway = cloudClientGateway;
     }
 
-    public CloudClientType cloudClient(@Source FlavourType flavour) {
+    public @NotNull CloudClientType cloudClient(@Source FlavourType flavour) {
         CloudClient cloudClient = this.cloudClientGateway.getCloudClient(flavour.getCloudId());
         if (cloudClient != null) {
             return new CloudClientType(cloudClient);

@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.User;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -9,13 +10,13 @@ import java.util.List;
 @Type("User")
 public class UserType {
 
-    private final String id;
+    private final @NotNull String id;
     private final String firstName;
     private final String lastName;
     private final String fullName;
     private final String email;
     private final EmployerType affiliation;
-    private final Integer instanceQuota;
+    private final @NotNull Integer instanceQuota;
     private final List<UserRoleType> activeUserRoles;
     private final List<RoleType> groups;
     private final Date lastSeenAt;

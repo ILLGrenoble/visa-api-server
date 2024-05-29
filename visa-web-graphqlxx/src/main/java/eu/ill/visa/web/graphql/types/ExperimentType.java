@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.Experiment;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -8,17 +9,17 @@ import java.util.Date;
 @Type("Experiment")
 public class ExperimentType {
 
-    private final String id;
-    private final InstrumentType instrument;
-    private final ProposalType proposal;
+    private final @NotNull String id;
+    private final @NotNull InstrumentType instrument;
+    private final @NotNull ProposalType proposal;
     private final String title;
-    private final Date startDate;
-    private final Date endDate;
+    private final @NotNull Date startDate;
+    private final @NotNull Date endDate;
 
     public ExperimentType(final Experiment experiment) {
         this.id = experiment.getId();
-        this.instrument = experiment.getInstrument() == null ? null : new InstrumentType(experiment.getInstrument());
-        this.proposal = experiment.getProposal() == null ? null : new ProposalType(experiment.getProposal());
+        this.instrument = new InstrumentType(experiment.getInstrument());
+        this.proposal = new ProposalType(experiment.getProposal());
         this.title = experiment.getTitle();
         this.startDate = experiment.getStartDate();
         this.endDate = experiment.getEndDate();

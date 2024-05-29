@@ -3,21 +3,22 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.InstanceSession;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("InstanceSession")
 public class InstanceSessionType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String connectionId;
-    private final InstanceType instance;
-    private final boolean current;
+    private final @NotNull Long id;
+    private final @NotNull String connectionId;
+    private final @NotNull InstanceType instance;
+    private final @NotNull boolean current;
 
     public InstanceSessionType(final InstanceSession session) {
         this.id = session.getId();
         this.connectionId = session.getConnectionId();
-        this.instance = session.getInstance() == null ? null : new InstanceType(session.getInstance());
+        this.instance = new InstanceType(session.getInstance());
         this.current = session.getCurrent();
     }
 

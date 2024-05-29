@@ -5,6 +5,7 @@ import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -13,18 +14,18 @@ import java.util.Date;
 public class InstanceType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String uid;
-    private final String name;
+    private final @NotNull Long id;
+    private final @NotNull String uid;
+    private final @NotNull String name;
     private final String comments;
-    private final InstanceState state;
+    private final @NotNull InstanceState state;
     private final PlanType plan;
-    private final Date createdAt;
+    private final @NotNull Date createdAt;
     private final Date lastSeenAt;
     private final Date lastInteractionAt;
     private final Date terminationDate;
-    private final String username;
-    private final String keyboardLayout;
+    private final @NotNull String username;
+    private final @NotNull String keyboardLayout;
     private final Long cloudId;
     private final String computeId;
 

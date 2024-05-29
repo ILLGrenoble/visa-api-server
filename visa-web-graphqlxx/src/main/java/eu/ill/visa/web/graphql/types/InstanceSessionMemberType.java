@@ -3,6 +3,7 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -11,13 +12,13 @@ import java.util.Date;
 public class InstanceSessionMemberType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final Date createdAt;
+    private final @NotNull Long id;
+    private final @NotNull Date createdAt;
     private final Date updatedAt;
     private final Date lastInteractionAt;
-    private final InstanceSessionType instanceSession;
-    private final String sessionId;
-    private final UserType user;
+    private final @NotNull InstanceSessionType instanceSession;
+    private final @NotNull String sessionId;
+    private final @NotNull UserType user;
     private final String role;
     private final Boolean active;
 
@@ -26,9 +27,9 @@ public class InstanceSessionMemberType {
         this.createdAt = member.getCreatedAt();
         this.updatedAt = member.getUpdatedAt();
         this.lastInteractionAt = member.getLastInteractionAt();
-        this.instanceSession = member.getInstanceSession() == null ? null : new InstanceSessionType(member.getInstanceSession());
+        this.instanceSession = new InstanceSessionType(member.getInstanceSession());
         this.sessionId = member.getSessionId();
-        this.user = member.getUser() == null ? null : new UserType(member.getUser());
+        this.user = new UserType(member.getUser());
         this.role = member.getRole();
         this.active = member.isActive();
     }
@@ -70,7 +71,7 @@ public class InstanceSessionMemberType {
     }
 
     @AdaptToScalar(Scalar.Int.class)
-    public Long getDuration() {
+    public @NotNull Long getDuration() {
         final long now = new Date().getTime();
         final long createdAt = this.getCreatedAt().getTime();
         final long updatedAt = this.getUpdatedAt().getTime();

@@ -3,17 +3,18 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.domain.NumberInstancesByImage;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("NumberInstancesByImage")
 public class NumberInstancesByImageType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String name;
+    private final @NotNull Long id;
+    private final @NotNull String name;
     private final String version;
     @AdaptToScalar(Scalar.Int.class)
-    private final Long total ;
+    private final @NotNull Long total ;
 
     public NumberInstancesByImageType(final NumberInstancesByImage numberInstancesByImage) {
         this.id = numberInstancesByImage.getId();

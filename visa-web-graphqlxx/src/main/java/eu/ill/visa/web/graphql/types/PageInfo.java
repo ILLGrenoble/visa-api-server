@@ -2,15 +2,16 @@ package eu.ill.visa.web.graphql.types;
 
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 
 public class PageInfo {
 
-    private final Integer currentPage;
-    private final Integer totalPages;
+    private final @NotNull Integer currentPage;
+    private final @NotNull Integer totalPages;
     @AdaptToScalar(Scalar.Int.class)
-    private final Long count;
-    private final Integer offset;
-    private final Integer limit;
+    private final @NotNull Long count;
+    private final @NotNull Integer offset;
+    private final @NotNull Integer limit;
 
     public PageInfo(final Long count, final Integer limit, final Integer offset) {
         this.count = count;
@@ -20,11 +21,11 @@ public class PageInfo {
         this.totalPages = (int) Math.ceil((float) count / limit);
     }
 
-    public Boolean getHasNextPage() {
+    public @NotNull Boolean getHasNextPage() {
         return currentPage < totalPages;
     }
 
-    public Boolean getHasPrevPage() {
+    public @NotNull Boolean getHasPrevPage() {
         return currentPage > 1;
     }
 

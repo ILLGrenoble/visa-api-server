@@ -3,6 +3,7 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.Role;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
@@ -11,8 +12,8 @@ import java.util.Date;
 public class RoleType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String name;
+    private final @NotNull Long id;
+    private final @NotNull String name;
     private final String description;
     private final Date groupCreatedAt;
 

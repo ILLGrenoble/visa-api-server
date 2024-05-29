@@ -1,13 +1,14 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.domain.ProtocolStatus;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("ProtocolStatus")
 public class ProtocolStatusType {
 
-    private final ImageProtocolType protocol;
-    private final Boolean active;
+    private final @NotNull ImageProtocolType protocol;
+    private final @NotNull Boolean active;
 
     public ProtocolStatusType(final ProtocolStatus status) {
         this.protocol = status.getProtocol() == null ? null : new ImageProtocolType(status.getProtocol());

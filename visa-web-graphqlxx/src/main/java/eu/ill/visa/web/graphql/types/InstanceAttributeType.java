@@ -3,15 +3,16 @@ package eu.ill.visa.web.graphql.types;
 import eu.ill.visa.core.entity.InstanceAttribute;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type("InstanceAttribute")
 public class InstanceAttributeType {
 
     @AdaptToScalar(Scalar.Int.class)
-    private final Long id;
-    private final String name;
-    private final String value;
+    private final @NotNull Long id;
+    private final @NotNull String name;
+    private final @NotNull String value;
 
     public InstanceAttributeType(final InstanceAttribute attribute) {
         this.id = attribute.getId();
