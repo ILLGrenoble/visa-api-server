@@ -10,7 +10,6 @@ public class QueryFilter {
     private List<Parameter> parameters = new ArrayList<>();
 
     public QueryFilter() {
-
     }
 
     public QueryFilter(String query) {

@@ -1,14 +1,17 @@
-package eu.ill.visa.core.domain;
+package eu.ill.visa.web.graphql.inputs;
 
-public class OrderBy {
+import eu.ill.visa.core.domain.OrderBy;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input("OrderBy")
+public class OrderByInput {
     private String name;
     private Boolean ascending = true;
 
-    public OrderBy() {
+    public OrderByInput() {
     }
 
-    public OrderBy(String name, Boolean ascending) {
+    public OrderByInput(String name, Boolean ascending) {
         this.name = name;
         this.ascending = ascending;
     }
@@ -27,5 +30,9 @@ public class OrderBy {
 
     public void setAscending(Boolean ascending) {
         this.ascending = ascending;
+    }
+
+    public OrderBy toOrderBy() {
+        return new OrderBy(this.name, this.ascending);
     }
 }

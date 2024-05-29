@@ -3,10 +3,12 @@ package eu.ill.visa.web.graphql.resources;
 import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.InstanceJupyterSessionService;
 import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
+import eu.ill.visa.web.graphql.inputs.OrderByInput;
+import eu.ill.visa.web.graphql.inputs.PaginationInput;
+import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.relay.Connection;
 import eu.ill.visa.web.graphql.relay.PageInfo;
 import eu.ill.visa.web.graphql.types.InstanceJupyterSessionType;
@@ -43,15 +45,15 @@ public class InstanceJupyterSessionResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<InstanceJupyterSessionType> jupyterSessions(final QueryFilter filter, final OrderBy orderBy, Pagination pagination) throws DataFetchingException {
+    public Connection<InstanceJupyterSessionType> jupyterSessions(final QueryFilterInput filter, final OrderByInput orderBy, PaginationInput pagination) throws DataFetchingException {
         try {
             final List<InstanceJupyterSessionType> results = instanceJupyterSessionService.getAll(
-                requireNonNullElseGet(filter, QueryFilter::new),
-                requireNonNullElseGet(orderBy, () -> new OrderBy("id", true)), pagination
+                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
+                requireNonNullElseGet(orderBy.toOrderBy(), () -> new OrderBy("id", true)), pagination.toPagination()
             ).stream()
                 .map(InstanceJupyterSessionType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(instanceJupyterSessionService.countAll(filter), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(instanceJupyterSessionService.countAll(filter.toQueryFilter()), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());

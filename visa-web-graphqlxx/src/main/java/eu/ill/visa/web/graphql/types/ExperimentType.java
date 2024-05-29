@@ -17,8 +17,8 @@ public class ExperimentType {
 
     public ExperimentType(final Experiment experiment) {
         this.id = experiment.getId();
-        this.instrument = new InstrumentType(experiment.getInstrument());
-        this.proposal = new ProposalType(experiment.getProposal());
+        this.instrument = experiment.getInstrument() == null ? null : new InstrumentType(experiment.getInstrument());
+        this.proposal = experiment.getProposal() == null ? null : new ProposalType(experiment.getProposal());
         this.title = experiment.getTitle();
         this.startDate = experiment.getStartDate();
         this.endDate = experiment.getEndDate();

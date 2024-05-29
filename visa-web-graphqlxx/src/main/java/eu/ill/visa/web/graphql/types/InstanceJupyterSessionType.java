@@ -22,7 +22,7 @@ public class InstanceJupyterSessionType {
 
     public InstanceJupyterSessionType(final InstanceJupyterSession session) {
         this.id = session.getId();
-        this.instance = new InstanceType(session.getInstance());
+        this.instance = session.getInstance() == null ? null : new InstanceType(session.getInstance());
         this.user = new UserType(session.getUser());
         this.kernelId = session.getKernelId();
         this.sessionId = session.getSessionId();

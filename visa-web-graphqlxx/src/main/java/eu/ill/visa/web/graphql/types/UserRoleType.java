@@ -12,7 +12,7 @@ public class UserRoleType {
     private final Date expiresAt;
 
     public UserRoleType(final UserRole userRole) {
-        this.role = new RoleType(userRole.getRole());
+        this.role = userRole.getRole() == null ? null : new RoleType(userRole.getRole());
         this.expiresAt = userRole.getExpiresAt();
     }
 

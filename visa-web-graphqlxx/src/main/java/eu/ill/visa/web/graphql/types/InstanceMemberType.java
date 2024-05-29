@@ -19,7 +19,7 @@ public class InstanceMemberType {
 
     public InstanceMemberType(final InstanceMember member) {
         this.id = member.getId();
-        this.user = new UserType(member.getUser());
+        this.user = member.getUser() == null ? null : new UserType(member.getUser());
         this.role = member.getRole();
         this.createdAt = member.getCreatedAt();
     }

@@ -17,7 +17,7 @@ public class InstanceSessionType {
     public InstanceSessionType(final InstanceSession session) {
         this.id = session.getId();
         this.connectionId = session.getConnectionId();
-        this.instance = new InstanceType(session.getInstance());
+        this.instance = session.getInstance() == null ? null : new InstanceType(session.getInstance());
         this.current = session.getCurrent();
     }
 

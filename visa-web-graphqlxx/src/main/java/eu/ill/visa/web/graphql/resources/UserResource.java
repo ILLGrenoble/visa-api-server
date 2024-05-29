@@ -3,12 +3,14 @@ package eu.ill.visa.web.graphql.resources;
 import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
+import eu.ill.visa.web.graphql.inputs.OrderByInput;
+import eu.ill.visa.web.graphql.inputs.PaginationInput;
+import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.relay.Connection;
 import eu.ill.visa.web.graphql.relay.PageInfo;
 import eu.ill.visa.web.graphql.types.UserType;
@@ -46,18 +48,18 @@ public class UserResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<UserType> users(final QueryFilter filter, final OrderBy orderBy, Pagination pagination) throws DataFetchingException {
+    public Connection<UserType> users(final QueryFilterInput filter, final OrderByInput orderBy, PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 200)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
             }
             final List<UserType> results = userService.getAll(
-                requireNonNullElseGet(filter, QueryFilter::new),
-                requireNonNullElseGet(orderBy, () -> new OrderBy("activatedAt", false)), pagination
+                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
+                requireNonNullElseGet(orderBy.toOrderBy(), () -> new OrderBy("activatedAt", false)), pagination.toPagination()
             ).stream()
                 .map(UserType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(userService.countAll(filter), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(userService.countAll(filter.toQueryFilter()), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -72,18 +74,18 @@ public class UserResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public Connection<UserType> recentActiveUsers(final Pagination pagination) throws DataFetchingException {
-        final QueryFilter filter = new QueryFilter("lastSeenAt IS NOT NULL AND activatedAt IS NOT NULL");
-        return users(filter, new OrderBy("lastSeenAt", false), pagination);
+    public Connection<UserType> recentActiveUsers(final PaginationInput pagination) throws DataFetchingException {
+        final QueryFilterInput filter = new QueryFilterInput("lastSeenAt IS NOT NULL AND activatedAt IS NOT NULL");
+        return users(filter, new OrderByInput("lastSeenAt", false), pagination);
     }
 
     @Query
-    public Connection<UserType> searchForUserByLastName(final String lastName, boolean onlyActivatedUsers, final Pagination pagination) throws DataFetchingException {
+    public Connection<UserType> searchForUserByLastName(final String lastName, boolean onlyActivatedUsers, final PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 200)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
             }
-            final List<UserType> results = userService.getAllLikeLastName(lastName, onlyActivatedUsers, pagination).stream()
+            final List<UserType> results = userService.getAllLikeLastName(lastName, onlyActivatedUsers, pagination.toPagination()).stream()
                 .map(UserType::new)
                 .toList();
             final PageInfo pageInfo = new PageInfo(userService.countAllLikeLastName(lastName, onlyActivatedUsers), pagination.getLimit(), pagination.getOffset());
@@ -102,9 +104,9 @@ public class UserResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countUsers(final QueryFilter filter) throws DataFetchingException {
+    public @AdaptToScalar(Scalar.Int.class) Long countUsers(final QueryFilterInput filter) throws DataFetchingException {
         try {
-            return userService.countAll(requireNonNullElseGet(filter, QueryFilter::new));
+            return userService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

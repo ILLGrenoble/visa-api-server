@@ -6,6 +6,7 @@ import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
+import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.types.SecurityGroupFilterType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -35,10 +36,10 @@ public class SecurityGroupFilterResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public List<SecurityGroupFilterType> securityGroupFilters(QueryFilter filter) throws DataFetchingException {
+    public List<SecurityGroupFilterType> securityGroupFilters(final QueryFilterInput filter) throws DataFetchingException {
         try {
             return securityGroupFilterService.getAll(
-                requireNonNullElseGet(filter, QueryFilter::new), new OrderBy("objectType", true)
+                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new), new OrderBy("objectType", true)
             ).stream()
                 .map(SecurityGroupFilterType::new)
                 .toList();

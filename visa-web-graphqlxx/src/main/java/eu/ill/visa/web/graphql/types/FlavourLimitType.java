@@ -19,7 +19,7 @@ public class FlavourLimitType {
         this.id = flavourLimit.getId();
         this.objectId = flavourLimit.getObjectId();
         this.objectType = flavourLimit.getObjectType();
-        this.flavour = new FlavourType(flavourLimit.getFlavour());
+        this.flavour = flavourLimit.getFlavour() == null ? null : new FlavourType(flavourLimit.getFlavour());
     }
 
     public Long getId() {

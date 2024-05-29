@@ -10,6 +10,9 @@ import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
+import eu.ill.visa.web.graphql.inputs.OrderByInput;
+import eu.ill.visa.web.graphql.inputs.PaginationInput;
+import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.relay.Connection;
 import eu.ill.visa.web.graphql.relay.PageInfo;
 import eu.ill.visa.web.graphql.types.*;
@@ -53,18 +56,18 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<InstanceType> instances(final QueryFilter filter, final OrderBy orderBy, final Pagination pagination) throws DataFetchingException {
+    public Connection<InstanceType> instances(final QueryFilterInput filter, final OrderByInput orderBy, final PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 50)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
             }
             final List<InstanceType> results = instanceService.getAll(
-                requireNonNullElseGet(filter, QueryFilter::new),
-                requireNonNullElseGet(orderBy, () -> new OrderBy("name", true)), pagination
+                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
+                requireNonNullElseGet(orderBy.toOrderBy(), () -> new OrderBy("name", true)), pagination.toPagination()
             ).stream()
                 .map(InstanceType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(instanceService.countAll(filter), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(instanceService.countAll(filter.toQueryFilter()), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -79,9 +82,9 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countInstances(final QueryFilter filter) throws DataFetchingException {
+    public @AdaptToScalar(Scalar.Int.class) Long countInstances(final QueryFilterInput filter) throws DataFetchingException {
         try {
-            return instanceService.countAll(requireNonNullElseGet(filter, QueryFilter::new));
+            return instanceService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -104,8 +107,8 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public Connection<InstanceType> recentInstances(final Pagination pagination) throws DataFetchingException {
-        return instances(new QueryFilter(), new OrderBy("createdAt", false), pagination);
+    public Connection<InstanceType> recentInstances(final PaginationInput pagination) throws DataFetchingException {
+        return instances(new QueryFilterInput(), new OrderByInput("createdAt", false), pagination);
     }
 
     /**

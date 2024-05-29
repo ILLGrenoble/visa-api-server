@@ -27,7 +27,7 @@ public class UserType {
         this.lastName = user.getLastName();
         this.fullName = user.getFullName();
         this.email = user.getEmail();
-        this.affiliation = new EmployerType(user.getAffiliation());
+        this.affiliation = user.getAffiliation() == null ? null : new EmployerType(user.getAffiliation());
         this.instanceQuota = user.getInstanceQuota();
         this.activeUserRoles = user.getActiveUserRoles().stream().map(UserRoleType::new).toList();
         this.groups = user.getGroups().stream().map(RoleType::new).toList();

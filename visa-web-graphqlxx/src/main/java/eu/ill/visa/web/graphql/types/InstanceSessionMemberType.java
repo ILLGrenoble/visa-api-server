@@ -26,9 +26,9 @@ public class InstanceSessionMemberType {
         this.createdAt = member.getCreatedAt();
         this.updatedAt = member.getUpdatedAt();
         this.lastInteractionAt = member.getLastInteractionAt();
-        this.instanceSession = new InstanceSessionType(member.getInstanceSession());
+        this.instanceSession = member.getInstanceSession() == null ? null : new InstanceSessionType(member.getInstanceSession());
         this.sessionId = member.getSessionId();
-        this.user = new UserType(member.getUser());
+        this.user = member.getUser() == null ? null : new UserType(member.getUser());
         this.role = member.getRole();
         this.active = member.isActive();
     }

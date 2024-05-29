@@ -24,7 +24,7 @@ public class InstanceExtensionRequestType {
 
     public InstanceExtensionRequestType(final InstanceExtensionRequest request) {
         this.id = request.getId();
-        this.instance = new InstanceType(request.getInstance());
+        this.instance = request.getInstance() == null ? null : new InstanceType(request.getInstance());
         this.comments = request.getComments();
         this.handler = new UserType(request.getHandler());
         this.handledOn = request.getHandledOn();

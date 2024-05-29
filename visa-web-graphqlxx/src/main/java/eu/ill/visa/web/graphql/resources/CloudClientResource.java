@@ -54,10 +54,10 @@ public class CloudClientResource {
             try {
                 CloudClient cloudClient = this.getCloudClient(cloudId);
                 future.complete(cloudClient.images().stream().map(CloudImageType::new).toList());
-            } catch (CloudException exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             } catch (DataFetchingException e) {
                 future.completeExceptionally(e);
+            } catch (Exception exception) {
+                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }
         });
         return future;
@@ -75,10 +75,10 @@ public class CloudClientResource {
             try {
                 CloudClient cloudClient = this.getCloudClient(cloudId);
                 future.complete(cloudClient.flavours().stream().map(CloudFlavourType::new).toList());
-            } catch (CloudException exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             } catch (DataFetchingException e) {
                 future.completeExceptionally(e);
+            } catch (Exception exception) {
+                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }
         });
         return future;
@@ -126,10 +126,10 @@ public class CloudClientResource {
                     .map(CloudSecurityGroupType::new)
                     .toList();
                 future.complete(cloudSecurityGroups);
-            } catch (CloudException exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             } catch (DataFetchingException e) {
                 future.completeExceptionally(e);
+            } catch (Exception exception) {
+                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }
         });
         return future;

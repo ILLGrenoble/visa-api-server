@@ -16,8 +16,8 @@ public class PlanType {
 
     public PlanType(final Plan plan) {
         this.id = plan.getId();
-        this.image = new ImageType(plan.getImage());
-        this.flavour = new FlavourType(plan.getFlavour());
+        this.image = plan.getImage() == null ? null : new ImageType(plan.getImage());
+        this.flavour = plan.getFlavour() == null ? null : new FlavourType(plan.getFlavour());
         this.preset = plan.getPreset();
     }
 

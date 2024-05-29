@@ -20,12 +20,11 @@ public class PageInfo {
         this.totalPages = (int) Math.ceil((float) count / limit);
     }
 
-    public boolean hasNextPage() {
+    public Boolean getHasNextPage() {
         return currentPage < totalPages;
     }
 
-
-    public boolean hasPrevPage() {
+    public Boolean getHasPrevPage() {
         return currentPage > 1;
     }
 

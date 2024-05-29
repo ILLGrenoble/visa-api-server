@@ -10,7 +10,7 @@ public class ProtocolStatusType {
     private final Boolean active;
 
     public ProtocolStatusType(final ProtocolStatus status) {
-        this.protocol = new ImageProtocolType(status.getProtocol());
+        this.protocol = status.getProtocol() == null ? null : new ImageProtocolType(status.getProtocol());
         this.active = status.getActive();
     }
 

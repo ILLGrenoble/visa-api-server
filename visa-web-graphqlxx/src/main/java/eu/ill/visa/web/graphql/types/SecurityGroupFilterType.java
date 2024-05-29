@@ -19,7 +19,7 @@ public class SecurityGroupFilterType {
         this.id = filter.getId();
         this.objectId = filter.getObjectId();
         this.objectType = filter.getObjectType();
-        this.securityGroup = new SecurityGroupType(filter.getSecurityGroup());
+        this.securityGroup = filter.getSecurityGroup() == null ? null : new SecurityGroupType(filter.getSecurityGroup());
     }
 
     public Long getId() {

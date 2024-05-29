@@ -18,7 +18,7 @@ public class CloudInstanceType {
         this.id = instance.getId();
         this.name = instance.getName();
         this.address = instance.getAddress();
-        this.fault = new CloudInstanceFaultType(instance.getFault());
+        this.fault = instance.getFault() == null ? null : new CloudInstanceFaultType(instance.getFault());
         this.securityGroups = instance.getSecurityGroups();
     }
 
