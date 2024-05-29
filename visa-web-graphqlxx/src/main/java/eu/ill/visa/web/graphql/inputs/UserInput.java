@@ -1,5 +1,7 @@
 package eu.ill.visa.web.graphql.inputs;
 
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Input;
@@ -14,7 +16,7 @@ public class UserInput {
     private @NotNull Boolean admin;
     private @NotNull Boolean guest;
     private String guestExpiresAt;
-    private List<Long> groupIds;
+    private @AdaptToScalar(Scalar.Int.class) List<Long> groupIds;
 
     public Integer getInstanceQuota() {
         return instanceQuota;

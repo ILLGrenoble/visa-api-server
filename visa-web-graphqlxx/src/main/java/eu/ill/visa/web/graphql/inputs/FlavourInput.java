@@ -1,5 +1,7 @@
 package eu.ill.visa.web.graphql.inputs;
 
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,10 +18,10 @@ public class FlavourInput {
     @Min(1)
     private @NotNull Integer memory;
     private @NotNull Float cpu;
-    private @NotNull Long cloudId;
+    private @AdaptToScalar(Scalar.Int.class) Long cloudId;
     private @NotNull String computeId;
-    private List<Long> instrumentIds;
-    private List<Long> roleIds;
+    private @AdaptToScalar(Scalar.Int.class) List<Long> instrumentIds;
+    private @AdaptToScalar(Scalar.Int.class) List<Long> roleIds;
 
     public String getName() {
         return name;

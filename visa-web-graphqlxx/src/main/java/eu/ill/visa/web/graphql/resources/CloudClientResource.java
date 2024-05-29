@@ -185,7 +185,7 @@ public class CloudClientResource {
      * @throws EntityNotFoundException thrown if the given the cloudClient id was not found
      */
     @Mutation
-    public @NotNull CloudClientType updateCloudClient(@NotNull Long id, @NotNull @Valid CloudClientInput input) throws EntityNotFoundException, InvalidInputException  {
+    public @NotNull CloudClientType updateCloudClient(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull @Valid CloudClientInput input) throws EntityNotFoundException, InvalidInputException  {
         if (id == -1) {
             throw new InvalidInputException("The default cloud provider cannot be modified");
         }
@@ -218,7 +218,7 @@ public class CloudClientResource {
      * @throws InvalidInputException thrown if trying to delete the default cloud client
      */
     @Mutation
-    public @NotNull Boolean deleteCloudClient(@NotNull Long id) throws EntityNotFoundException, InvalidInputException {
+    public @NotNull Boolean deleteCloudClient(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException, InvalidInputException {
         if (id == -1) {
             throw new InvalidInputException("The default cloud client cannot be deleted");
         }

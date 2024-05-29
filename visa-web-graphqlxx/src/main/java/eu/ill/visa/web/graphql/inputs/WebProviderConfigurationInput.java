@@ -4,11 +4,8 @@ import jakarta.validation.constraints.NotNull;
 
 public class WebProviderConfigurationInput {
 
-    @NotNull
-    private String url;
-
-    @NotNull
-    private String authToken;
+    private @NotNull String url;
+    private @NotNull String authToken;
 
     public String getUrl() {
         return url;

@@ -1,13 +1,15 @@
 package eu.ill.visa.web.graphql.inputs;
 
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input("PlanInput")
 public class PlanInput {
 
-    private @NotNull Long imageId;
-    private @NotNull Long flavourId;
+    private @NotNull @AdaptToScalar(Scalar.Int.class) Long imageId;
+    private @NotNull @AdaptToScalar(Scalar.Int.class) Long flavourId;
     private @NotNull Boolean preset;
 
     public Long getImageId() {

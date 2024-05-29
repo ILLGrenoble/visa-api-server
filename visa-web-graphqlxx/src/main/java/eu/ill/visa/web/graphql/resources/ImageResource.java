@@ -108,7 +108,7 @@ public class ImageResource {
      * @return the newly created image
      */
     @Mutation
-    public @NotNull ImageType updateImage(@NotNull Long id, @NotNull @Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
+    public @NotNull ImageType updateImage(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull @Valid ImageInput input) throws EntityNotFoundException, InvalidInputException  {
         // Validate the image input
         this.validateImageInput(input);
 
@@ -129,7 +129,7 @@ public class ImageResource {
      * @throws EntityNotFoundException thrown if the image is not found
      */
     @Mutation
-    public @NotNull ImageType deleteImage(@NotNull Long id) throws EntityNotFoundException {
+    public @NotNull ImageType deleteImage(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
         final Image image = imageService.getById(id);
         if (image == null) {
             throw new EntityNotFoundException("Image not found for the given id");

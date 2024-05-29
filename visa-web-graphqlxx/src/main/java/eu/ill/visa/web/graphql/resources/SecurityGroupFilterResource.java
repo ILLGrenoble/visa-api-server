@@ -13,6 +13,8 @@ import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.inputs.SecurityGroupFilterInput;
 import eu.ill.visa.web.graphql.types.SecurityGroupFilterType;
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -100,7 +102,7 @@ public class SecurityGroupFilterResource {
      * @throws EntityNotFoundException thrown if the given the securityGroupFilter id was not found
      */
     @Mutation
-    public @NotNull SecurityGroupFilterType updateSecurityGroupFilter(@NotNull Long id, @NotNull @Valid SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
+    public @NotNull SecurityGroupFilterType updateSecurityGroupFilter(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull @Valid SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
         final SecurityGroupFilter securityGroupFilter = this.securityGroupFilterService.getById(id);
         if (securityGroupFilter == null) {
             throw new EntityNotFoundException("SecurityGroupFilter was not found for the given id");
@@ -124,7 +126,7 @@ public class SecurityGroupFilterResource {
      * @throws EntityNotFoundException thrown if the securityGroupFilter is not found
      */
     @Mutation
-    public @NotNull SecurityGroupFilterType deleteSecurityGroupFilter(@NotNull Long id) throws EntityNotFoundException {
+    public @NotNull SecurityGroupFilterType deleteSecurityGroupFilter(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
         final SecurityGroupFilter securityGroupFilter = securityGroupFilterService.getById(id);
         if (securityGroupFilter == null) {
             throw new EntityNotFoundException("SecurityGroupFilter not found for the given id");

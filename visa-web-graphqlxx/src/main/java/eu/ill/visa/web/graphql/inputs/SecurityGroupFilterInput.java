@@ -1,5 +1,7 @@
 package eu.ill.visa.web.graphql.inputs;
 
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.eclipse.microprofile.graphql.Input;
@@ -7,8 +9,8 @@ import org.eclipse.microprofile.graphql.Input;
 @Input("SecurityGroupFilterInput")
 public class SecurityGroupFilterInput {
 
-    private @NotNull Long securityGroupId;
-    private @NotNull Long objectId;
+    private @NotNull @AdaptToScalar(Scalar.Int.class) Long securityGroupId;
+    private @NotNull @AdaptToScalar(Scalar.Int.class) Long objectId;
     @Pattern(regexp = "INSTRUMENT|ROLE|FLAVOUR")
     private @NotNull String objectType;
 

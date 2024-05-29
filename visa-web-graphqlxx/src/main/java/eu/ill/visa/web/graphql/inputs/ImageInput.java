@@ -1,5 +1,7 @@
 package eu.ill.visa.web.graphql.inputs;
 
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.eclipse.microprofile.graphql.Input;
@@ -16,10 +18,10 @@ public class ImageInput {
     @Size(max = 2500)
     private String description;
     private String icon;
-    private Long cloudId;
+    private @AdaptToScalar(Scalar.Int.class) Long cloudId;
     private @NotNull String computeId;
     private @NotNull Boolean visible;
-    private List<Long> protocolIds;
+    private @AdaptToScalar(Scalar.Int.class) List<Long> protocolIds;
     @Size(max=16000)
     private String bootCommand;
     private String autologin;

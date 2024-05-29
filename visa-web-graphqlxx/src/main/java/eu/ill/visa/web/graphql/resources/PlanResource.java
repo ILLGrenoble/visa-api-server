@@ -12,6 +12,8 @@ import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.inputs.PlanInput;
 import eu.ill.visa.web.graphql.types.PlanType;
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -101,7 +103,7 @@ public class PlanResource {
      * @throws EntityNotFoundException thrown if the given plan is not found
      */
     @Mutation
-    public @NotNull PlanType updatePlan(@NotNull Long id, @NotNull @Valid PlanInput input) throws EntityNotFoundException {
+    public @NotNull PlanType updatePlan(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull @Valid PlanInput input) throws EntityNotFoundException {
         final Flavour flavour = this.flavourService.getById(input.getFlavourId());
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour not found for the given id");
@@ -138,7 +140,7 @@ public class PlanResource {
      * @throws EntityNotFoundException thrown if there are instances associated to the plan
      */
     @Mutation
-    public @NotNull PlanType deletePlan(@NotNull Long id) throws EntityNotFoundException {
+    public @NotNull PlanType deletePlan(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
         final Plan plan = planService.getById(id);
         if (plan == null) {
             throw new EntityNotFoundException("Plan not found for the given id");

@@ -119,7 +119,7 @@ public class FlavourResource {
      * @throws EntityNotFoundException thrown if the given the flavour id was not found
      */
     @Mutation
-    public @NotNull FlavourType updateFlavour(@NotNull Long id, @NotNull @Valid FlavourInput input) throws EntityNotFoundException, InvalidInputException  {
+    public @NotNull FlavourType updateFlavour(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull @Valid FlavourInput input) throws EntityNotFoundException, InvalidInputException  {
         // Validate the flavour input
         this.validateFlavourInput(input);
 
@@ -144,7 +144,7 @@ public class FlavourResource {
      * @throws EntityNotFoundException thrown if the flavour is not found
      */
     @Mutation
-    public @NotNull FlavourType deleteFlavour(@NotNull Long id) throws EntityNotFoundException {
+    public @NotNull FlavourType deleteFlavour(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
         final Flavour flavour = flavourService.getById(id);
         if (flavour == null) {
             throw new EntityNotFoundException("Flavour not found for the given id");

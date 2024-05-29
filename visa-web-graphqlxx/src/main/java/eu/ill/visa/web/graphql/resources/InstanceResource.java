@@ -1,30 +1,41 @@
 package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.preql.exception.InvalidQueryException;
+import eu.ill.visa.business.services.InstanceActionScheduler;
+import eu.ill.visa.business.services.InstanceExtensionRequestService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
+import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
+import eu.ill.visa.web.graphql.exceptions.ValidationException;
 import eu.ill.visa.web.graphql.inputs.OrderByInput;
 import eu.ill.visa.web.graphql.inputs.PaginationInput;
 import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
-import eu.ill.visa.web.graphql.types.Connection;
-import eu.ill.visa.web.graphql.types.PageInfo;
 import eu.ill.visa.web.graphql.types.*;
+import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Query;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static eu.ill.visa.web.graphql.inputs.OrderByInput.toOrderBy;
@@ -41,12 +52,21 @@ public class InstanceResource {
 
     private final InstanceService instanceService;
     private final CloudClientGateway cloudClientGateway;
+    private final SecurityIdentity securityIdentity;
+    private final InstanceActionScheduler instanceActionScheduler;
+    private final InstanceExtensionRequestService instanceExtensionRequestService;
 
     @Inject
     public InstanceResource(final InstanceService instanceService,
-                            final CloudClientGateway cloudClientGateway) {
+                            final CloudClientGateway cloudClientGateway,
+                            final SecurityIdentity securityIdentity,
+                            final InstanceActionScheduler instanceActionScheduler,
+                            final InstanceExtensionRequestService instanceExtensionRequestService) {
         this.instanceService = instanceService;
         this.cloudClientGateway = cloudClientGateway;
+        this.securityIdentity = securityIdentity;
+        this.instanceActionScheduler = instanceActionScheduler;
+        this.instanceExtensionRequestService = instanceExtensionRequestService;
     }
 
 
@@ -130,7 +150,7 @@ public class InstanceResource {
      * Get the number of instances for a given list of states
      *
      * @param states the states. if no state is provided, then all states will be queried
-     * @return the count of instances grouped by each state
+     * @return the list of counts of instances grouped by each state
      */
     @Query
     public @NotNull List<InstanceStateCount> countInstancesForStates(List<InstanceState> states) {
@@ -177,6 +197,120 @@ public class InstanceResource {
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
+    }
+
+    /**
+     * Reboot an instance
+     *
+     * @param id          the instance id
+     * @return a message
+     * @throws EntityNotFoundException thrown if the instance has not been found
+     */
+    @Mutation
+    public @NotNull Message rebootInstance(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
+        performInstanceAction(id, InstanceCommandType.REBOOT);
+        return new Message("Instance will be rebooted");
+    }
+
+    /**
+     * Start an instance
+     *
+     * @param id          the instance id
+     * @return a message
+     * @throws EntityNotFoundException thrown if the instance has not been found
+     */
+    @Mutation
+    public @NotNull Message startInstance(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
+        performInstanceAction(id, InstanceCommandType.START);
+        return new Message("Instance will be started");
+    }
+
+    /**
+     * Shutdown an instance
+     *
+     * @param id          the instance id
+     * @return a message
+     * @throws EntityNotFoundException thrown if the instance has not been found
+     */
+    @Mutation
+    public @NotNull Message shutdownInstance(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
+        performInstanceAction(id, InstanceCommandType.SHUTDOWN);
+        return new Message("Instance will be shutdown");
+    }
+
+    /**
+     * Delete an instance
+     *
+     * @param id          the instance id
+     * @return a message
+     * @throws EntityNotFoundException thrown if the instance has not been found
+     */
+    @Mutation
+    public @NotNull Message deleteInstance(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
+        final Instance instance = instanceService.getById(id);
+
+        if (instance == null) {
+            throw new EntityNotFoundException("Instance not found for the given id");
+        }
+
+        if (instance.getComputeId() == null || instance.hasAnyState(List.of(InstanceState.STOPPED, InstanceState.ERROR, InstanceState.UNKNOWN, InstanceState.UNAVAILABLE))) {
+            this.performInstanceAction(id, InstanceCommandType.DELETE);
+        } else {
+            instance.setDeleteRequested(true);
+            this.instanceService.save(instance);
+            this.performInstanceAction(id, InstanceCommandType.SHUTDOWN);
+        }
+        return new Message("Instance is scheduled for deletion");
+    }
+
+    /**
+     * Update an instance termination date
+     *
+     * @param id         the instance id
+     * @param dateString the instance termination date
+     * @return a message
+     * @throws EntityNotFoundException thrown if the instance has not been found
+     * @throws ValidationException     thrown if date can't be parsed
+     */
+    @Mutation
+    public @NotNull Message updateInstanceTerminationDate(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull String dateString) throws EntityNotFoundException, ValidationException {
+        final Instance instance = instanceService.getById(id);
+
+        if (instance == null) {
+            throw new EntityNotFoundException("Instance not found for the given id");
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+
+        try {
+            Date terminationDate = dateString == null ? null : simpleDateFormat.parse(dateString);
+
+            this.instanceExtensionRequestService.grantExtension(instance, terminationDate, null, false);
+
+        } catch (ParseException e) {
+            throw new ValidationException(e);
+        }
+
+        return new Message("Instance termination date has been updated");
+    }
+
+    /**
+     * Execute an instance action
+     *
+     * @param id                  the id of the instance
+     * @param instanceCommandType the command type to schedule
+     * @throws EntityNotFoundException thrown if the instance has not been found
+     */
+    private void performInstanceAction(final Long id, final InstanceCommandType instanceCommandType) throws EntityNotFoundException {
+        final AccountToken accountToken = (AccountToken) this.securityIdentity.getPrincipal();
+        final User user = accountToken.getUser();
+        final Instance instance = instanceService.getById(id);
+
+        if (instance == null) {
+            throw new EntityNotFoundException("Instance not found for the given id");
+        }
+
+        instanceActionScheduler.execute(instance, user, instanceCommandType);
     }
 
 }
