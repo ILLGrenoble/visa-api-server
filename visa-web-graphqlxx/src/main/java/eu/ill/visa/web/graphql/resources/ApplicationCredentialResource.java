@@ -7,6 +7,7 @@ import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.ApplicationCredentialType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -25,7 +26,7 @@ public class ApplicationCredentialResource {
 
 
     @Query
-    public List<ApplicationCredentialType> applicationCredentials() throws DataFetchingException {
+    public @NotNull List<ApplicationCredentialType> applicationCredentials() throws DataFetchingException {
         try {
             return applicationCredentialService.getAll().stream()
                 .map(ApplicationCredentialType::new)

@@ -5,6 +5,7 @@ import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.types.InstrumentType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -27,7 +28,7 @@ public class InstrumentResource {
      * @return the list of instruments ordered by name
      */
     @Query
-    public List<InstrumentType> instruments() {
+    public @NotNull List<InstrumentType> instruments() {
         return this.instrumentService.getAll().stream().map(InstrumentType::new).toList();
     }
 

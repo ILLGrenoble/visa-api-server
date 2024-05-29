@@ -58,11 +58,11 @@ import java.util.Set;
             AND e.startDate IS NOT NULL
             AND e.endDate IS NOT NULL
     """),
-    @NamedQuery(name = "experiment.getAllForInstance", query = """
+    @NamedQuery(name = "experiment.getAllForInstanceId", query = """
             SELECT e
             FROM Experiment e
             JOIN e.instances i
-            WHERE i = :instance
+            WHERE i.id = :instanceId
             AND i.deletedAt IS NULL
             AND e.startDate IS NOT NULL
             AND e.endDate IS NOT NULL

@@ -11,6 +11,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -35,7 +36,7 @@ public class CloudClientResource {
      * @return a list of cloud clients
      */
     @Query
-    public List<CloudClientType> cloudClients() {
+    public @NotNull List<CloudClientType> cloudClients() {
         return this.cloudClientGateway.getAll().stream()
             .map(CloudClientType::new)
             .toList();
@@ -48,7 +49,7 @@ public class CloudClientResource {
      * @return a list of cloud images
      */
     @Query
-    public CompletableFuture<List<CloudImageType>> cloudImages(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
+    public @NotNull CompletableFuture<List<CloudImageType>> cloudImages(@AdaptToScalar(Scalar.Int.class) @NotNull Long cloudId) {
         final CompletableFuture<List<CloudImageType>> future = new CompletableFuture<>();
         runAsync(() -> {
             try {
@@ -69,7 +70,7 @@ public class CloudClientResource {
      * @return a list of cloud flavours
      */
     @Query
-    public CompletableFuture<List<CloudFlavourType>> cloudFlavours(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
+    public @NotNull CompletableFuture<List<CloudFlavourType>> cloudFlavours(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
         final CompletableFuture<List<CloudFlavourType>> future = new CompletableFuture<>();
         runAsync(() -> {
             try {
@@ -90,7 +91,7 @@ public class CloudClientResource {
      * @return a list of cloud limits
      */
     @Query
-    public CompletableFuture<List<DetailedCloudLimit>> cloudLimits() {
+    public @NotNull CompletableFuture<List<DetailedCloudLimit>> cloudLimits() {
         List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
 
         List<CompletableFuture<DetailedCloudLimit>> allCloudLimitsFutures = cloudClients.stream().map(cloudClient -> {
@@ -117,7 +118,7 @@ public class CloudClientResource {
      * @return a list of security groups
      */
     @Query
-    public CompletableFuture<List<CloudSecurityGroupType>> cloudSecurityGroups(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
+    public @NotNull CompletableFuture<List<CloudSecurityGroupType>> cloudSecurityGroups(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
         final CompletableFuture<List<CloudSecurityGroupType>> future = new CompletableFuture<>();
         runAsync(() -> {
             try {

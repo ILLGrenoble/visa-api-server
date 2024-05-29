@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.resolvers;
 
 import eu.ill.preql.exception.InvalidQueryException;
+import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceMemberService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.cloud.domain.CloudInstance;
@@ -8,6 +9,7 @@ import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.persistence.repositories.InstanceAttributeRepository;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.*;
 import jakarta.inject.Inject;
@@ -30,14 +32,38 @@ public class InstanceResolver {
     private final CloudClientGateway cloudClientGateway;
     private final InstanceSessionService instanceSessionService;
     private final InstanceMemberService instanceMemberService;
+    private final ExperimentService experimentService;
+    private final InstanceAttributeRepository instanceAttributeRepository;
 
     @Inject
     public InstanceResolver(final CloudClientGateway cloudClientGateway,
                             final InstanceSessionService instanceSessionService,
-                            final InstanceMemberService instanceMemberService) {
+                            final InstanceMemberService instanceMemberService,
+                            final ExperimentService experimentService,
+                            final InstanceAttributeRepository instanceAttributeRepository) {
         this.cloudClientGateway = cloudClientGateway;
         this.instanceSessionService = instanceSessionService;
         this.instanceMemberService = instanceMemberService;
+        this.experimentService = experimentService;
+        this.instanceAttributeRepository = instanceAttributeRepository;
+    }
+
+    public List<InstanceMemberType> members(@Source InstanceType instance) {
+        return this.instanceMemberService.getAllByInstanceId(instance.getId()).stream()
+            .map(InstanceMemberType::new)
+            .toList();
+    }
+
+    public List<ExperimentType> experiments(@Source InstanceType instance) {
+        return this.experimentService.getAllForInstanceId(instance.getId()).stream()
+            .map(ExperimentType::new)
+            .toList();
+    }
+
+    public List<InstanceAttributeType> attributes(@Source InstanceType instance) {
+        return this.instanceAttributeRepository.getAllForInstanceId(instance.getId()).stream()
+            .map(InstanceAttributeType::new)
+            .toList();
     }
 
     public CompletableFuture<List<ProtocolStatusType>> protocols(@Source InstanceType instance) {

@@ -13,10 +13,7 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Objects.requireNonNullElseGet;
 
@@ -86,7 +83,11 @@ public class ExperimentService {
     }
 
     public Set<Experiment> getAllForInstance(final Instance instance) {
-        return repository.getAllForInstance(instance);
+        return repository.getAllForInstanceId(instance.getId());
+    }
+
+    public Set<Experiment> getAllForInstanceId(Long id) {
+        return repository.getAllForInstanceId(id);
     }
 
     public Long getAllCountForUser(@NotNull final User user, @NotNull final ExperimentFilter filter) {
@@ -116,6 +117,5 @@ public class ExperimentService {
     public Long countAll(QueryFilter filter) {
         return repository.countAll(requireNonNullElseGet(filter, QueryFilter::new));
     }
-
 }
 

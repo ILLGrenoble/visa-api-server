@@ -5,6 +5,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "instanceAttribute.getAllByInstanceId", query = """
+            SELECT i.attributes
+            FROM Instance i
+            WHERE i.id = :instanceId
+            AND i.deletedAt IS NULL
+    """),
+})
 @Table(name = "instance_attribute")
 public class InstanceAttribute extends Timestampable {
 

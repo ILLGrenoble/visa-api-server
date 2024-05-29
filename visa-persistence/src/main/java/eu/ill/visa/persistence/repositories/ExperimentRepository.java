@@ -5,7 +5,6 @@ import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Experiment;
-import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.providers.ExperimentFilterProvider;
@@ -101,9 +100,9 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         }
     }
 
-    public Set<Experiment> getAllForInstance(final Instance instance) {
-        final TypedQuery<Experiment> query = getEntityManager().createNamedQuery("experiment.getAllForInstance", Experiment.class);
-        query.setParameter("instance", instance);
+    public Set<Experiment> getAllForInstanceId(final Long instanceId) {
+        final TypedQuery<Experiment> query = getEntityManager().createNamedQuery("experiment.getAllForInstanceId", Experiment.class);
+        query.setParameter("instanceId", instanceId);
 
         return new HashSet<>(query.getResultList());
     }

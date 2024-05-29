@@ -18,6 +18,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -48,7 +49,7 @@ public class UserResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<UserType> users(final QueryFilterInput filter, final OrderByInput orderBy, PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<UserType> users(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 200)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
@@ -74,13 +75,13 @@ public class UserResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public Connection<UserType> recentActiveUsers(final PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<UserType> recentActiveUsers(@NotNull final PaginationInput pagination) throws DataFetchingException {
         final QueryFilterInput filter = new QueryFilterInput("lastSeenAt IS NOT NULL AND activatedAt IS NOT NULL");
         return users(filter, new OrderByInput("lastSeenAt", false), pagination);
     }
 
     @Query
-    public Connection<UserType> searchForUserByLastName(final String lastName, boolean onlyActivatedUsers, final PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<UserType> searchForUserByLastName(@NotNull final String lastName, @NotNull Boolean onlyActivatedUsers, @NotNull final PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 200)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
@@ -104,7 +105,7 @@ public class UserResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countUsers(final QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countUsers(final QueryFilterInput filter) throws DataFetchingException {
         try {
             return userService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
         } catch (InvalidQueryException exception) {
@@ -113,7 +114,7 @@ public class UserResource {
     }
 
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countActivatedUsers() throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countActivatedUsers() throws DataFetchingException {
         try {
             return userService.countAllActivated();
         } catch (InvalidQueryException exception) {
@@ -129,7 +130,7 @@ public class UserResource {
      * @throws EntityNotFoundException thrown if the user does not exist
      */
     @Query
-    public UserType user(final String id) throws EntityNotFoundException {
+    public UserType user(final @NotNull String id) throws EntityNotFoundException {
         final User user = userService.getById(id);
         if (user == null) {
             throw new EntityNotFoundException("User not found");

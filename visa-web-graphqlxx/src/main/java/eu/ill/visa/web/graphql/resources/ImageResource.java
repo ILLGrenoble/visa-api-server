@@ -9,6 +9,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -32,7 +33,7 @@ public class ImageResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public List<ImageType> images() throws DataFetchingException {
+    public @NotNull List<ImageType> images() throws DataFetchingException {
         try {
             return this.imageService.getAllForAdmin().stream()
                 .map(ImageType::new)
@@ -49,7 +50,7 @@ public class ImageResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countImages() throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countImages() throws DataFetchingException {
         try {
             return imageService.countAllForAdmin();
         } catch (InvalidQueryException exception) {

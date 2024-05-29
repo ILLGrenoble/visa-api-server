@@ -10,6 +10,7 @@ import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.types.SecurityGroupType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -35,7 +36,7 @@ public class SecurityGroupResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public List<SecurityGroupType> securityGroups(QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull List<SecurityGroupType> securityGroups(QueryFilterInput filter) throws DataFetchingException {
         try {
             return securityGroupService.getAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new), new OrderBy("name", true)).stream()
                 .map(SecurityGroupType::new)

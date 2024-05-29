@@ -7,6 +7,7 @@ import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.InstanceExtensionRequestType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -24,7 +25,7 @@ public class InstanceExtensionRequestResource {
     }
 
     @Query
-    public List<InstanceExtensionRequestType> instanceExtensionRequests() throws DataFetchingException {
+    public @NotNull List<InstanceExtensionRequestType> instanceExtensionRequests() throws DataFetchingException {
         try {
             return this.instanceExtensionRequestService.getAll().stream()
                 .map(InstanceExtensionRequestType::new)

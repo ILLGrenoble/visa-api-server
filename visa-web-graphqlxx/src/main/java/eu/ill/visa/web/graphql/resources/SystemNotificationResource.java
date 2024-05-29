@@ -7,6 +7,7 @@ import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.SystemNotificationType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -24,7 +25,7 @@ public class SystemNotificationResource {
     }
 
     @Query
-    public List<SystemNotificationType> systemNotifications() throws DataFetchingException {
+    public @NotNull List<SystemNotificationType> systemNotifications() throws DataFetchingException {
         try {
             return clientNotificationService.getAllSystemNotifications().stream()
                 .map(SystemNotificationType::new)

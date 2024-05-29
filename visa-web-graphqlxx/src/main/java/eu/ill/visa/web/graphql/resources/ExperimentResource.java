@@ -16,6 +16,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -45,7 +46,7 @@ public class ExperimentResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<ExperimentType> experiments(final QueryFilterInput filter, final OrderByInput orderBy, final PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<ExperimentType> experiments(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull final PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 50)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
@@ -71,7 +72,7 @@ public class ExperimentResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countExperiments(final QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countExperiments(final QueryFilterInput filter) throws DataFetchingException {
         try {
             return experimentService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
         } catch (InvalidQueryException exception) {

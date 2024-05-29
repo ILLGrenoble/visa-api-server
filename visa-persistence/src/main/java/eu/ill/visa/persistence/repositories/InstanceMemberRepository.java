@@ -48,6 +48,12 @@ public class InstanceMemberRepository extends AbstractRepository<InstanceMember>
         }
     }
 
+    public List<InstanceMember> getAllByInstanceId(Long instanceId) {
+        final TypedQuery<InstanceMember> query = getEntityManager().createNamedQuery("instanceMember.getAllByInstanceId", InstanceMember.class);
+        query.setParameter("instanceId", instanceId);
+        return query.getResultList();
+    }
+
     public List<InstanceMember> getAllByInstanceIdAndRole(Long instanceId, InstanceMemberRole role) {
         final TypedQuery<InstanceMember> query = getEntityManager().createNamedQuery("instanceMember.getAllByInstanceIdAndRole", InstanceMember.class);
         query.setParameter("instanceId", instanceId);

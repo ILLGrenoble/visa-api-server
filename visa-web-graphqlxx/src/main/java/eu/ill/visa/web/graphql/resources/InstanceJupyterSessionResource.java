@@ -16,6 +16,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -45,7 +46,7 @@ public class InstanceJupyterSessionResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<InstanceJupyterSessionType> jupyterSessions(final QueryFilterInput filter, final OrderByInput orderBy, PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<InstanceJupyterSessionType> jupyterSessions(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
         try {
             final List<InstanceJupyterSessionType> results = instanceJupyterSessionService.getAll(
                 requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
@@ -66,7 +67,7 @@ public class InstanceJupyterSessionResource {
      * @return a count of active Jupyter sessions
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
-    public @AdaptToScalar(Scalar.Int.class) Long countJupyterSessions() throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countJupyterSessions() throws DataFetchingException {
         return instanceJupyterSessionService.countAllInstances();
     }
 

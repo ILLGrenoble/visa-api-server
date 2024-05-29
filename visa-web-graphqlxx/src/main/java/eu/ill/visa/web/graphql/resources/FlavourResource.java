@@ -9,6 +9,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -32,7 +33,7 @@ public class FlavourResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public List<FlavourType> flavours() throws DataFetchingException {
+    public @NotNull List<FlavourType> flavours() throws DataFetchingException {
         try {
 
             return this.flavourService.getAllForAdmin().stream()
@@ -51,7 +52,7 @@ public class FlavourResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countFlavours() throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countFlavours() throws DataFetchingException {
         try {
             return flavourService.countAllForAdmin();
         } catch (InvalidQueryException exception) {

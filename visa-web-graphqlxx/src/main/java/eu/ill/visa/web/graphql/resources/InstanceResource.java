@@ -20,6 +20,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -56,7 +57,7 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<InstanceType> instances(final QueryFilterInput filter, final OrderByInput orderBy, final PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<InstanceType> instances(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull final PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 50)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
@@ -82,7 +83,7 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countInstances(final QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countInstances(final QueryFilterInput filter) throws DataFetchingException {
         try {
             return instanceService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
         } catch (InvalidQueryException exception) {
@@ -91,8 +92,8 @@ public class InstanceResource {
     }
 
     @Query
-    public InstanceType instance(final @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
-        final Instance instance = instanceService.getFullById(id);
+    public InstanceType instance(final @NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
+        final Instance instance = instanceService.getById(id);
         if (instance == null) {
             throw new EntityNotFoundException("Instance not found for the given id");
         }
@@ -107,7 +108,7 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public Connection<InstanceType> recentInstances(final PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<InstanceType> recentInstances(final @NotNull PaginationInput pagination) throws DataFetchingException {
         return instances(new QueryFilterInput(), new OrderByInput("createdAt", false), pagination);
     }
 
@@ -118,7 +119,7 @@ public class InstanceResource {
      * @return a count of instances
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countInstancesForState(InstanceState state) {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countInstancesForState(@NotNull InstanceState state) {
         return instanceService.countAllForState(state);
     }
 
@@ -129,7 +130,7 @@ public class InstanceResource {
      * @return the count of instances grouped by each state
      */
     @Query
-    public List<InstanceStateCount> countInstancesForStates(List<InstanceState> states) {
+    public @NotNull List<InstanceStateCount> countInstancesForStates(@NotNull List<InstanceState> states) {
         final List<InstanceStateCount> results = new ArrayList<>();
         for (final InstanceState state : requireNonNullElse(states, asList(InstanceState.values()))) {
             final Long count = instanceService.countAllForState(state);
@@ -139,7 +140,7 @@ public class InstanceResource {
     }
 
     @Query
-    public List<NumberInstancesByFlavourType> countInstancesByFlavours() throws DataFetchingException {
+    public @NotNull List<NumberInstancesByFlavourType> countInstancesByFlavours() throws DataFetchingException {
         try {
             return instanceService.countByFlavour().stream()
                 .map(NumberInstancesByFlavourType::new)
@@ -150,7 +151,7 @@ public class InstanceResource {
     }
 
     @Query
-    public List<NumberInstancesByImageType> countInstancesByImages() throws DataFetchingException {
+    public @NotNull List<NumberInstancesByImageType> countInstancesByImages() throws DataFetchingException {
         try {
             return instanceService.countByImage().stream()
                 .map(NumberInstancesByImageType::new)
@@ -161,7 +162,7 @@ public class InstanceResource {
     }
 
     @Query
-    public List<NumberInstancesByCloudClientType> countInstancesByCloudClients() throws DataFetchingException {
+    public @NotNull List<NumberInstancesByCloudClientType> countInstancesByCloudClients() throws DataFetchingException {
         try {
             return instanceService.countByCloudClient().stream()
                 .map(countByCloudClient -> {

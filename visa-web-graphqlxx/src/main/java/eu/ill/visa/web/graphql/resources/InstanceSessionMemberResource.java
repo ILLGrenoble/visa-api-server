@@ -16,6 +16,7 @@ import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -45,7 +46,7 @@ public class InstanceSessionMemberResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public Connection<InstanceSessionMemberType> sessions(final QueryFilterInput filter, final OrderByInput orderBy, PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<InstanceSessionMemberType> sessions(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
         try {
             final List<InstanceSessionMemberType> results = instanceSessionMemberService.getAll(
                 requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
@@ -68,7 +69,7 @@ public class InstanceSessionMemberResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countSessions(final QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countSessions(final QueryFilterInput filter) throws DataFetchingException {
         try {
             return instanceSessionMemberService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
         } catch (InvalidQueryException exception) {
@@ -84,7 +85,7 @@ public class InstanceSessionMemberResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @AdaptToScalar(Scalar.Int.class) Long countActiveSessions(final QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countActiveSessions(final QueryFilterInput filter) throws DataFetchingException {
         try {
             return instanceSessionMemberService.countAllActive(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
         } catch (InvalidQueryException exception) {

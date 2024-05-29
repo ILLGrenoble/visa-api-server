@@ -5,6 +5,7 @@ import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.types.RoleType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -28,7 +29,7 @@ public class RoleResource {
      * @return all the roles and groups
      */
     @Query
-    public List<RoleType> rolesAndGroups() {
+    public @NotNull List<RoleType> rolesAndGroups() {
         return this.roleService.getAllRolesAndGroups().stream()
             .map(RoleType::new)
             .toList();
@@ -40,7 +41,7 @@ public class RoleResource {
      * @return all the roles
      */
     @Query
-    public List<RoleType> roles() {
+    public @NotNull List<RoleType> roles() {
         return this.roleService.getAllRoles().stream()
             .map(RoleType::new)
             .toList();
@@ -52,7 +53,7 @@ public class RoleResource {
      * @return all the groups
      */
     @Query
-    public List<RoleType> groups() {
+    public @NotNull List<RoleType> groups() {
         return this.roleService.getAllGroups().stream()
             .map(RoleType::new)
             .toList();

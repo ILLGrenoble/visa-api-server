@@ -39,6 +39,10 @@ public class InstanceMemberService {
         return this.repository.getByInstanceAndUser(instance, user);
     }
 
+    public List<InstanceMember> getAllByInstanceId(Long instanceId) {
+        return this.repository.getAllByInstanceId(instanceId);
+    }
+
     public List<InstanceMember> getAllByInstanceIdAndRole(Long instanceId, InstanceMemberRole role) {
         return this.repository.getAllByInstanceIdAndRole(instanceId, role);
     }

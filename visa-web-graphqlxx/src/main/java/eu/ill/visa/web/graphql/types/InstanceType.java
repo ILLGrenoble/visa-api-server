@@ -8,7 +8,6 @@ import io.smallrye.graphql.api.Scalar;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.Date;
-import java.util.List;
 
 @Type("Instance")
 public class InstanceType {
@@ -19,16 +18,13 @@ public class InstanceType {
     private final String name;
     private final String comments;
     private final InstanceState state;
-    private final List<InstanceMemberType> members;
     private final PlanType plan;
-    private final List<ExperimentType> experiments;
     private final Date createdAt;
     private final Date lastSeenAt;
     private final Date lastInteractionAt;
     private final Date terminationDate;
     private final String username;
     private final String keyboardLayout;
-    private final List<InstanceAttributeType> attributes;
     private final Long cloudId;
     private final String computeId;
 
@@ -38,16 +34,13 @@ public class InstanceType {
         this.name = instance.getName();
         this.comments = instance.getComments();
         this.state = instance.getState();
-        this.members = instance.getMembers().stream().map(InstanceMemberType::new).toList();
         this.plan = new PlanType(instance.getPlan());
-        this.experiments = instance.getExperiments().stream().map(ExperimentType::new).toList();
         this.createdAt = instance.getCreatedAt();
         this.lastSeenAt = instance.getLastSeenAt();
         this.lastInteractionAt = instance.getLastInteractionAt();
         this.terminationDate = instance.getTerminationDate();
         this.username = instance.getUsername();
         this.keyboardLayout = instance.getKeyboardLayout();
-        this.attributes = instance.getAttributes().stream().map(InstanceAttributeType::new).toList();
         this.cloudId = instance.getCloudId();
         this.computeId = instance.getComputeId();
     }
@@ -72,16 +65,8 @@ public class InstanceType {
         return state;
     }
 
-    public List<InstanceMemberType> getMembers() {
-        return members;
-    }
-
     public PlanType getPlan() {
         return plan;
-    }
-
-    public List<ExperimentType> getExperiments() {
-        return experiments;
     }
 
     public Date getCreatedAt() {
@@ -106,10 +91,6 @@ public class InstanceType {
 
     public String getKeyboardLayout() {
         return keyboardLayout;
-    }
-
-    public List<InstanceAttributeType> getAttributes() {
-        return attributes;
     }
 
     @JsonIgnore

@@ -7,6 +7,7 @@ import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.FlavourLimitType;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 
@@ -30,7 +31,7 @@ public class FlavourLimitsResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public List<FlavourLimitType> flavourLimits() throws DataFetchingException {
+    public @NotNull List<FlavourLimitType> flavourLimits() throws DataFetchingException {
         try {
             return flavourLimitService.getAll().stream().map(FlavourLimitType::new).toList();
         } catch (InvalidQueryException exception) {

@@ -21,6 +21,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
             and i = :instance
             and m.user = :user
     """),
+    @NamedQuery(name = "instanceMember.getAllByInstanceId", query = """
+            SELECT DISTINCT m FROM Instance i
+            LEFT JOIN i.members m
+            where i.deletedAt IS NULL
+            and i.id = :instanceId
+    """),
     @NamedQuery(name = "instanceMember.getAllByInstanceIdAndRole", query = """
             SELECT DISTINCT m FROM Instance i
             LEFT JOIN i.members m
