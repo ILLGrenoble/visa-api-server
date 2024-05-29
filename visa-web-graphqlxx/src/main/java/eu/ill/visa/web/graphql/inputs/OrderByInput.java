@@ -32,7 +32,10 @@ public class OrderByInput {
         this.ascending = ascending;
     }
 
-    public OrderBy toOrderBy() {
-        return new OrderBy(this.name, this.ascending);
+    public static OrderBy toOrderBy(final OrderByInput input) {
+        if (input == null) {
+            return null;
+        }
+        return new OrderBy(input.name, input.ascending);
     }
 }

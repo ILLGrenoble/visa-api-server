@@ -24,11 +24,14 @@ public class PaginationInput {
         this.offset = offset;
     }
 
-    public Pagination toPagination() {
-        return new Pagination(this.limit, this.offset);
-    }
-
     public boolean isLimitBetween(int min, int max) {
         return limit >= min && limit <= max;
+    }
+
+    public static Pagination toPagination(final PaginationInput input) {
+        if (input == null) {
+            return null;
+        }
+        return new Pagination(input.limit, input.offset);
     }
 }

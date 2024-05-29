@@ -16,6 +16,7 @@ import org.eclipse.microprofile.graphql.Query;
 
 import java.util.List;
 
+import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
 import static java.util.Objects.requireNonNullElseGet;
 
 @GraphQLApi
@@ -40,7 +41,7 @@ public class SecurityGroupFilterResource {
     public @NotNull List<SecurityGroupFilterType> securityGroupFilters(final QueryFilterInput filter) throws DataFetchingException {
         try {
             return securityGroupFilterService.getAll(
-                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new), new OrderBy("objectType", true)
+                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new), new OrderBy("objectType", true)
             ).stream()
                 .map(SecurityGroupFilterType::new)
                 .toList();

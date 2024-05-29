@@ -16,7 +16,7 @@ public class SystemNotificationType {
     private final @NotNull Long id;
     private final @NotNull String message;
     private final @NotNull SystemNotificationLevel level;
-    private final @NotNull Date activatedAt;
+    private final Date activatedAt;
 
     public SystemNotificationType(final SystemNotification systemNotification) {
         this.id = systemNotification.getId();

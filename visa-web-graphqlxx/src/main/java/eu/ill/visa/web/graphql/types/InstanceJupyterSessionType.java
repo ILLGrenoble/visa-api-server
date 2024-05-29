@@ -65,7 +65,7 @@ public class InstanceJupyterSessionType {
     }
 
     @AdaptToScalar(Scalar.Int.class)
-    public Long duration() {
+    public Long getDuration() {
         final long now = new Date().getTime();
         final long createdAt = this.getCreatedAt().getTime();
         final long updatedAt = this.getUpdatedAt().getTime();

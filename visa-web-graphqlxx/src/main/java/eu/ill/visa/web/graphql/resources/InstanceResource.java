@@ -27,6 +27,9 @@ import org.eclipse.microprofile.graphql.Query;
 import java.util.ArrayList;
 import java.util.List;
 
+import static eu.ill.visa.web.graphql.inputs.OrderByInput.toOrderBy;
+import static eu.ill.visa.web.graphql.inputs.PaginationInput.toPagination;
+import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNullElse;
@@ -63,12 +66,12 @@ public class InstanceResource {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
             }
             final List<InstanceType> results = instanceService.getAll(
-                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
-                requireNonNullElseGet(orderBy.toOrderBy(), () -> new OrderBy("name", true)), pagination.toPagination()
+                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new),
+                requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("name", true)), toPagination(pagination)
             ).stream()
                 .map(InstanceType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(instanceService.countAll(filter.toQueryFilter()), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(instanceService.countAll(toQueryFilter(filter)), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -85,7 +88,7 @@ public class InstanceResource {
     @Query
     public @NotNull @AdaptToScalar(Scalar.Int.class) Long countInstances(final QueryFilterInput filter) throws DataFetchingException {
         try {
-            return instanceService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
+            return instanceService.countAll(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new));
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -130,7 +133,7 @@ public class InstanceResource {
      * @return the count of instances grouped by each state
      */
     @Query
-    public @NotNull List<InstanceStateCount> countInstancesForStates(@NotNull List<InstanceState> states) {
+    public @NotNull List<InstanceStateCount> countInstancesForStates(List<InstanceState> states) {
         final List<InstanceStateCount> results = new ArrayList<>();
         for (final InstanceState state : requireNonNullElse(states, asList(InstanceState.values()))) {
             final Long count = instanceService.countAllForState(state);

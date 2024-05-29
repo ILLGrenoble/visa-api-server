@@ -22,7 +22,10 @@ import org.eclipse.microprofile.graphql.Query;
 
 import java.util.List;
 
+import static eu.ill.visa.web.graphql.inputs.OrderByInput.toOrderBy;
+import static eu.ill.visa.web.graphql.inputs.PaginationInput.toPagination;
 import static java.util.Objects.requireNonNullElseGet;
+import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
 
 @GraphQLApi
 @RolesAllowed(Role.ADMIN_ROLE)
@@ -49,12 +52,12 @@ public class InstanceSessionMemberResource {
     public @NotNull Connection<InstanceSessionMemberType> sessions(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
         try {
             final List<InstanceSessionMemberType> results = instanceSessionMemberService.getAll(
-                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
-                requireNonNullElseGet(orderBy.toOrderBy(), () -> new OrderBy("id", true)), pagination.toPagination()
+                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new),
+                requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("id", true)), toPagination(pagination)
             ).stream()
                 .map(InstanceSessionMemberType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(instanceSessionMemberService.countAll(filter.toQueryFilter()), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(instanceSessionMemberService.countAll(toQueryFilter(filter)), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -71,7 +74,7 @@ public class InstanceSessionMemberResource {
     @Query
     public @NotNull @AdaptToScalar(Scalar.Int.class) Long countSessions(final QueryFilterInput filter) throws DataFetchingException {
         try {
-            return instanceSessionMemberService.countAll(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
+            return instanceSessionMemberService.countAll(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new));
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -87,7 +90,7 @@ public class InstanceSessionMemberResource {
     @Query
     public @NotNull @AdaptToScalar(Scalar.Int.class) Long countActiveSessions(final QueryFilterInput filter) throws DataFetchingException {
         try {
-            return instanceSessionMemberService.countAllActive(requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new));
+            return instanceSessionMemberService.countAllActive(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new));
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }

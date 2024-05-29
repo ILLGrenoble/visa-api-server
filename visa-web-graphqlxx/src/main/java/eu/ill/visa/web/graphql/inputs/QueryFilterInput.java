@@ -36,8 +36,11 @@ public class QueryFilterInput {
         this.parameters = parameters;
     }
 
-    public QueryFilter toQueryFilter() {
-        return new QueryFilter(this.query, this.parameters.stream().map(ParameterInput::toParameter).toList());
+    public static QueryFilter toQueryFilter(final QueryFilterInput input) {
+        if (input == null) {
+            return null;
+        }
+        return new QueryFilter(input.query, input.parameters.stream().map(ParameterInput::toParameter).toList());
     }
 
     @Input("Parameter")
@@ -62,8 +65,11 @@ public class QueryFilterInput {
             this.value = value;
         }
 
-        public Parameter toParameter() {
-            return new Parameter(name, value);
+        public static Parameter toParameter(final ParameterInput input) {
+            if (input == null) {
+                return null;
+            }
+            return new Parameter(input.name, input.value);
         }
     }
 }

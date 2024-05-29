@@ -22,6 +22,9 @@ import org.eclipse.microprofile.graphql.Query;
 
 import java.util.List;
 
+import static eu.ill.visa.web.graphql.inputs.OrderByInput.toOrderBy;
+import static eu.ill.visa.web.graphql.inputs.PaginationInput.toPagination;
+import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
 import static java.util.Objects.requireNonNullElseGet;
 
 @GraphQLApi
@@ -49,12 +52,12 @@ public class InstanceJupyterSessionResource {
     public @NotNull Connection<InstanceJupyterSessionType> jupyterSessions(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
         try {
             final List<InstanceJupyterSessionType> results = instanceJupyterSessionService.getAll(
-                requireNonNullElseGet(filter.toQueryFilter(), QueryFilter::new),
-                requireNonNullElseGet(orderBy.toOrderBy(), () -> new OrderBy("id", true)), pagination.toPagination()
+                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new),
+                requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("id", true)), toPagination(pagination)
             ).stream()
                 .map(InstanceJupyterSessionType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(instanceJupyterSessionService.countAll(filter.toQueryFilter()), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(instanceJupyterSessionService.countAll(toQueryFilter(filter)), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -67,6 +70,7 @@ public class InstanceJupyterSessionResource {
      * @return a count of active Jupyter sessions
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
+    @Query
     public @NotNull @AdaptToScalar(Scalar.Int.class) Long countJupyterSessions() throws DataFetchingException {
         return instanceJupyterSessionService.countAllInstances();
     }
