@@ -25,7 +25,7 @@ quarkus:
     port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}
   native:
     resources:
-      includes: fixtures/**.sql,words/**.txt,emails/templates/**.twig
+      includes: images/thumbnail.jpg,fixtures/**.sql,words/**.txt,emails/templates/**.twig
 
 cloud:
   serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
