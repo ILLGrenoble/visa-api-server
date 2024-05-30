@@ -267,13 +267,13 @@ public class InstanceResource {
      * Update an instance termination date
      *
      * @param id         the instance id
-     * @param dateString the instance termination date
+     * @param date the instance termination date
      * @return a message
      * @throws EntityNotFoundException thrown if the instance has not been found
      * @throws ValidationException     thrown if date can't be parsed
      */
     @Mutation
-    public @NotNull Message updateInstanceTerminationDate(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull String dateString) throws EntityNotFoundException, ValidationException {
+    public @NotNull Message updateInstanceTerminationDate(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, String date) throws EntityNotFoundException, ValidationException {
         final Instance instance = instanceService.getById(id);
 
         if (instance == null) {
@@ -283,7 +283,7 @@ public class InstanceResource {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
         try {
-            Date terminationDate = dateString == null ? null : simpleDateFormat.parse(dateString);
+            Date terminationDate = date == null ? null : simpleDateFormat.parse(date);
 
             this.instanceExtensionRequestService.grantExtension(instance, terminationDate, null, false);
 

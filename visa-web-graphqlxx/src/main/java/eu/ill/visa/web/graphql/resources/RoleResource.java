@@ -82,14 +82,14 @@ public class RoleResource {
     }
 
     @Mutation
-    public @NotNull RoleType updateRole(@NotNull @AdaptToScalar(Scalar.Int.class) Long roleId, @NotNull RoleInput input) throws EntityNotFoundException, InvalidInputException {
-        final Role existingRoleWithId = this.roleService.getById(roleId);
+    public @NotNull RoleType updateRole(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull RoleInput input) throws EntityNotFoundException, InvalidInputException {
+        final Role existingRoleWithId = this.roleService.getById(id);
         if (existingRoleWithId == null) {
             throw new EntityNotFoundException("Role with given Id does not exist");
         }
 
         final Role existingRoleWithName = this.roleService.getByName(input.getName());
-        if (existingRoleWithName != null && !existingRoleWithName.getId().equals(roleId)) {
+        if (existingRoleWithName != null && !existingRoleWithName.getId().equals(id)) {
             throw new InvalidInputException("Role with given name already exists");
         }
         existingRoleWithId.setName(input.getName());

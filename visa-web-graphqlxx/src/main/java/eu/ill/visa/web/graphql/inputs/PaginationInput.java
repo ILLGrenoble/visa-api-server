@@ -5,26 +5,26 @@ import org.eclipse.microprofile.graphql.Input;
 
 @Input("Pagination")
 public class PaginationInput {
-    private int limit;
-    private int offset;
+    private Integer limit = Integer.MAX_VALUE;
+    private Integer offset;
 
-    public int getLimit() {
+    public Integer getLimit() {
         return limit;
     }
 
-    public void setLimit(int limit) {
+    public void setLimit(Integer limit) {
         this.limit = limit;
     }
 
-    public int getOffset() {
+    public Integer getOffset() {
         return offset;
     }
 
-    public void setOffset(int offset) {
+    public void setOffset(Integer offset) {
         this.offset = offset;
     }
 
-    public boolean isLimitBetween(int min, int max) {
+    public Boolean isLimitBetween(Integer min, Integer max) {
         return limit >= min && limit <= max;
     }
 

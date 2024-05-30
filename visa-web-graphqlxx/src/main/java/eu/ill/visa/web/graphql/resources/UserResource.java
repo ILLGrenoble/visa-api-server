@@ -44,7 +44,7 @@ import static java.util.Objects.requireNonNullElseGet;
 @RolesAllowed(Role.ADMIN_ROLE)
 public class UserResource {
 
-    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:s");
+    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     private final UserService userService;
     private final RoleService roleService;
