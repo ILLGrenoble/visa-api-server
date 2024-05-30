@@ -1,12 +1,13 @@
 package eu.ill.visa.web.graphql.inputs;
 
 import eu.ill.visa.core.domain.Pagination;
+import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input("Pagination")
 public class PaginationInput {
     private Integer limit = Integer.MAX_VALUE;
-    private Integer offset;
+    private @NotNull Integer offset;
 
     public Integer getLimit() {
         return limit;

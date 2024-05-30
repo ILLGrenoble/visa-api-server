@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.exceptions;
 
-import eu.ill.visa.web.graphql.validation.ValidationError;
 import graphql.ErrorType;
 import graphql.GraphQLError;
 import graphql.GraphQLException;
