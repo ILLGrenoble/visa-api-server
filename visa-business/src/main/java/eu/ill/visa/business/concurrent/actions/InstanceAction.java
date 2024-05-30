@@ -61,6 +61,10 @@ public abstract class InstanceAction {
         return this.getInstanceService().getById(command.getInstance().getId());
     }
 
+    public Instance getFullInstance() {
+        return this.getInstanceService().getFullById(command.getInstance().getId());
+    }
+
     public InstanceCommandState getCommandStateFromDatabase() {
         Long commandId = this.command.getId();
         if (commandId != null) {

@@ -5,13 +5,12 @@ import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceMetadata;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CreateInstanceAction extends InstanceAction {
 
@@ -23,7 +22,7 @@ public class CreateInstanceAction extends InstanceAction {
 
     @Override
     public void run() throws InstanceActionException {
-        final Instance instance = getInstance();
+        final Instance instance = getFullInstance();
         if (instance == null) {
             return;
         }
@@ -46,9 +45,9 @@ public class CreateInstanceAction extends InstanceAction {
 
             User owner = instance.getOwner().getUser();
             List<Instrument> instruments = this.getInstrumentService().getAllForExperimentsAndInstrumentScientist(instance.getExperiments(), owner);
-            List<String> instrumentNames = instruments.stream().map(Instrument::getName).collect(Collectors.toUnmodifiableList());
+            List<String> instrumentNames = instruments.stream().map(Instrument::getName).toList();
 
-            List<String> proposals = instance.getExperiments().stream().map(experiment -> experiment.getProposal().getIdentifier()).collect(Collectors.toUnmodifiableList());
+            List<String> proposals = instance.getExperiments().stream().map(experiment -> experiment.getProposal().getIdentifier()).toList();
 
             final CloudInstanceMetadata metadata = new CloudInstanceMetadata();
 
