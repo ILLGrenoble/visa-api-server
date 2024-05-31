@@ -24,6 +24,9 @@ quarkus:
     host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST}
     port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}
   rest-client:
+#    logging:
+#      scope: request-response
+#      body-limit=100
     account-service:
       url: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
     security-group-service:

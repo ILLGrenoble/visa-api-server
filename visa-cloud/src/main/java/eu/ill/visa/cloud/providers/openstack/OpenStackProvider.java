@@ -6,31 +6,35 @@ import eu.ill.visa.cloud.http.HttpClient;
 import eu.ill.visa.cloud.http.HttpResponse;
 import eu.ill.visa.cloud.providers.CloudProvider;
 import eu.ill.visa.cloud.providers.openstack.converters.*;
+import jakarta.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.json.*;
 import java.util.*;
 
 import static eu.ill.visa.cloud.helpers.JsonHelper.parseObject;
 import static eu.ill.visa.cloud.http.HttpMethod.*;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static jakarta.json.Json.createArrayBuilder;
 import static jakarta.json.Json.createObjectBuilder;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class OpenStackProvider implements CloudProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenStackProvider.class);
 
-    private static final String                         HEADER_X_SUBJECT_TOKEN = "X-Subject-Token";
     private static final String                         HEADER_X_AUTH_TOKEN    = "X-Auth-Token";
     private final        HttpClient                     httpClient;
     private final        OpenStackProviderConfiguration configuration;
 
+    private final OpenStackIdentityProvider identityProvider;
+    private final OpenStackImageProvider imageProvider;
+
     public OpenStackProvider(final HttpClient httpClient, final OpenStackProviderConfiguration configuration) {
         this.httpClient = httpClient;
         this.configuration = configuration;
+        this.identityProvider = new OpenStackIdentityProvider(this.configuration);
+        this.imageProvider = new OpenStackImageProvider(this.configuration, this.identityProvider);
     }
 
     public OpenStackProviderConfiguration getConfiguration() {
@@ -38,13 +42,7 @@ public class OpenStackProvider implements CloudProvider {
     }
 
     private String authenticate() throws CloudException {
-        final String data = AuthenticationConverter.toJson(configuration);
-        final String url = format("%s/v3/auth/tokens", configuration.getIdentityEndpoint());
-        final HttpResponse response = httpClient.sendRequest(url, POST, null, data);
-        if (response.isSuccessful()) {
-            return response.getHeaderIgnoreCase(HEADER_X_SUBJECT_TOKEN);
-        }
-        throw new CloudException("Error authenticating to openstack");
+        return this.identityProvider.authenticate();
     }
 
     private Map<String, String> buildDefaultHeaders(final String authToken) {
@@ -55,35 +53,12 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public List<CloudImage> images() throws CloudException {
-        final String url = format("%s/v2/images", configuration.getImageEndpoint());
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            return null;
-        }
-
-        final JsonObject results = parseObject(response.getBody());
-        final List<CloudImage> images = new ArrayList<>();
-        for (final JsonValue imageValue : results.getJsonArray("images")) {
-            final JsonObject cloudImage = (JsonObject) imageValue;
-            final CloudImage image = ImageConverter.fromJson(cloudImage);
-            images.add(image);
-        }
-        return images;
+        return this.imageProvider.images();
     }
 
     @Override
     public CloudImage image(final String id) throws CloudException {
-        final String url = format("%s/v2/images/%s", configuration.getImageEndpoint(), id);
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            return null;
-        }
-        final JsonObject results = parseObject(response.getBody());
-        return ImageConverter.fromJson(results);
+        return this.imageProvider.image(id);
     }
 
     @Override
