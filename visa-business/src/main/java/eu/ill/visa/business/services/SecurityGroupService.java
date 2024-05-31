@@ -1,5 +1,6 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.business.SecurityGroupServiceClientConfiguration;
 import eu.ill.visa.business.http.SecurityGroupServiceClient;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
@@ -9,26 +10,31 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Transactional
 @Singleton
 public class SecurityGroupService {
+    private static final Logger logger = LoggerFactory.getLogger(SecurityGroupService.class);
 
     private final SecurityGroupRepository repository;
+    private final SecurityGroupServiceClientConfiguration configuration;
 
-    private final SecurityGroupServiceClient securityGroupServiceClient;
+    @RestClient
+    SecurityGroupServiceClient securityGroupServiceClient;
 
     @Inject
     public SecurityGroupService(final SecurityGroupRepository repository,
-                                final SecurityGroupServiceClient securityGroupServiceClient) {
+                                final SecurityGroupServiceClientConfiguration configuration) {
         this.repository = repository;
-        this.securityGroupServiceClient = securityGroupServiceClient;
+        this.configuration = configuration;
     }
 
     public SecurityGroup getById(Long id) {
@@ -48,12 +54,9 @@ public class SecurityGroupService {
     }
 
     public List<SecurityGroup> getAllForCloudClient(Long cloudClientId) {
-        List<SecurityGroup> securityGroups = this.getAll()
-            .stream()
+        return this.getAll().stream()
             .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
-            .collect(Collectors.toList());
-
-        return securityGroups;
+            .toList();
     }
 
     public List<String> getAllSecurityGroupNamesForInstance(final Instance instance) {
@@ -62,13 +65,12 @@ public class SecurityGroupService {
         Long cloudClientId = instance.getCloudId();
 
         // Get security groups from security-groups web service
-        List<String> customSecurityGroups = this.securityGroupServiceClient.getSecurityGroups(instance);
+        List<String> customSecurityGroups = this.getCustomSecurityGroups(instance);
 
         if (owner.hasRole(Role.ADMIN_ROLE)) {
-            List<String> allSecurityGroups = this.getAllForCloudClient(cloudClientId)
-                .stream()
+            List<String> allSecurityGroups = this.getAllForCloudClient(cloudClientId).stream()
                 .map(SecurityGroup::getName)
-                .collect(Collectors.toList());
+                .toList();
 
             Set<String> uniqueSecurityGroups = new LinkedHashSet<>(allSecurityGroups);
             uniqueSecurityGroups.addAll(customSecurityGroups);
@@ -76,18 +78,15 @@ public class SecurityGroupService {
             return new ArrayList<>(uniqueSecurityGroups);
 
         } else {
-            List<String> generalSecurityGroups = this.getDefaultSecurityGroups(cloudClientId)
-                .stream()
+            List<String> generalSecurityGroups = this.getDefaultSecurityGroups(cloudClientId).stream()
                 .map(SecurityGroup::getName)
-                .collect(Collectors.toList());
-            List<String> roleBasedSecurityGroups = this.getRoleBasedSecurityGroups(owner, cloudClientId)
-                .stream()
+                .toList();
+            List<String> roleBasedSecurityGroups = this.getRoleBasedSecurityGroups(owner, cloudClientId).stream()
                 .map(SecurityGroup::getName)
-                .collect(Collectors.toList());
-            List<String> flavourBasedSecurityGroups = this.getFlavourBasedSecurityGroups(instance.getPlan().getFlavour(), cloudClientId)
-                .stream()
+                .toList();
+            List<String> flavourBasedSecurityGroups = this.getFlavourBasedSecurityGroups(instance.getPlan().getFlavour(), cloudClientId).stream()
                 .map(SecurityGroup::getName)
-                .collect(Collectors.toList());
+                .toList();
 
             Set<String> uniqueSecurityGroups = new LinkedHashSet<>(generalSecurityGroups);
             uniqueSecurityGroups.addAll(roleBasedSecurityGroups);
@@ -99,34 +98,42 @@ public class SecurityGroupService {
 
     }
 
+    private List<String> getCustomSecurityGroups(final Instance instance) {
+        List<String> securityGroupNames = new ArrayList<>();
+
+        if (this.configuration.enabled() && this.configuration.url().isPresent()) {
+            try {
+                logger.info("Requesting security groups for instance {} from {} ...", instance.getId(), this.configuration.url().get());
+                List<SecurityGroup> securityGroups = this.securityGroupServiceClient.getSecurityGroups(instance);
+                securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).toList();
+                logger.info("... got security groups [{}] for instance {}", String.join(", ", securityGroupNames), instance.getId());
+
+            } catch (Exception e) {
+                logger.error("Caught exception getting security groups for instance {}: {} ", instance.getId(), e.getMessage());
+            }
+        }
+        return securityGroupNames;
+    }
+
     public List<SecurityGroup> getAll(QueryFilter filter, OrderBy orderBy) {
         return repository.getAll(filter, orderBy);
     }
 
     public List<SecurityGroup> getDefaultSecurityGroups(Long cloudClientId) {
-        List<SecurityGroup> securityGroups = repository.getDefaultSecurityGroups()
-            .stream()
+        return repository.getDefaultSecurityGroups().stream()
             .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
-            .collect(Collectors.toList());
-
-        return securityGroups;
+            .toList();
     }
 
     public List<SecurityGroup> getFlavourBasedSecurityGroups(final Flavour flavour, Long cloudClientId) {
-        List<SecurityGroup> securityGroups = repository.getFlavourBasedSecurityGroups(flavour)
-            .stream()
+        return repository.getFlavourBasedSecurityGroups(flavour).stream()
             .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
-            .collect(Collectors.toList());
-
-        return securityGroups;
+            .toList();
     }
 
     public List<SecurityGroup> getRoleBasedSecurityGroups(final User user, Long cloudClientId) {
-        List<SecurityGroup> securityGroups = repository.getRoleBasedSecurityGroups(user)
-            .stream()
+        return repository.getRoleBasedSecurityGroups(user).stream()
             .filter(securityGroup -> securityGroup.hasSameCloudClientId(cloudClientId))
-            .collect(Collectors.toList());
-
-        return securityGroups;
+            .toList();
     }
 }

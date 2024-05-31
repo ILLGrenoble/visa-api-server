@@ -23,6 +23,11 @@ quarkus:
   mailer:
     host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST}
     port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}
+  rest-client:
+    account-service:
+      url: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
+    security-group-service:
+      url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
   native:
     resources:
       includes: images/thumbnail.jpg,fixtures/**.sql,words/**.txt,emails/templates/**.twig
@@ -95,10 +100,6 @@ vdi:
   guacd:
     ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
     port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
-
-security:
-  token:
-    accountsUrl: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
 
 client:
   login:
@@ -175,6 +176,7 @@ graphql:
         enabled: true
     mailer:
       mock: true
+      host: mailer.com
     devservices:
       timeout: 5m
 

@@ -2,15 +2,13 @@ package eu.ill.visa.security.authenticator;
 
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.security.SecurityConfiguration;
 import eu.ill.visa.security.tokens.AccountToken;
-import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.Date;
 import java.util.Optional;
 
@@ -20,15 +18,13 @@ public class AccountTokenAuthenticator {
     private static final Logger logger = LoggerFactory.getLogger(AccountTokenAuthenticator.class);
 
     private final UserService userService;
-    private final AccountsServiceClient accountsServiceClient;
+
+    @RestClient
+    AccountsServiceClient accountsServiceClient;
 
     @Inject
-    public AccountTokenAuthenticator(UserService userService,
-                                     final SecurityConfiguration configuration) {
+    public AccountTokenAuthenticator(final UserService userService) {
         this.userService = userService;
-        this.accountsServiceClient = QuarkusRestClientBuilder.newBuilder()
-            .baseUri(URI.create(configuration.tokenConfiguration().accountsUrl()))
-            .build(AccountsServiceClient.class);
     }
 
     public Optional<AccountToken> authenticate(final String token) {

@@ -166,7 +166,9 @@ public class InstanceService {
     }
 
     public List<Instance> getAllToDelete() {
-        return this.repository.getAllToDelete();
+        return this.repository.getAllToDelete().stream()
+            .map(Instance::lazyLoadInit)
+            .toList();
     }
 
     public Long countAllForInstrumentScientist(User user, InstanceFilter filter) {
