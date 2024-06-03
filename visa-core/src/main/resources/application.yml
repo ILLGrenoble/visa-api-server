@@ -26,7 +26,7 @@ quarkus:
   rest-client:
 #    logging:
 #      scope: request-response
-#      body-limit=100
+#      body-limit: 100
     account-service:
       url: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
     security-group-service:
@@ -34,6 +34,10 @@ quarkus:
   native:
     resources:
       includes: images/thumbnail.jpg,fixtures/**.sql,words/**.txt,emails/templates/**.twig
+#  log:
+#    category:
+#      "org.jboss.resteasy.reactive.client.logging":
+#        level: DEBUG
 
 cloud:
   serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}

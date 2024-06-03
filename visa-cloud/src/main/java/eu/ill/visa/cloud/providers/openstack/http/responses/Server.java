@@ -3,6 +3,7 @@ package eu.ill.visa.cloud.providers.openstack.http.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceFault;
+import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 import eu.ill.visa.cloud.domain.CloudInstanceState;
 
 import java.util.Date;
@@ -51,6 +52,10 @@ public class Server {
         builder.fault(this.fault);
         builder.securityGroups(this.securityGroups == null ? null : this.securityGroups.stream().map(sg -> sg.name).toList());
         return builder.build();
+    }
+
+    public CloudInstanceIdentifier toCloudInstanceIdentifier(final String addressProvider) {
+        return new CloudInstanceIdentifier(this.id, this.name);
     }
 
     private CloudInstanceState convertStatus() {

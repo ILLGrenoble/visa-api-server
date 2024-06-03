@@ -6,6 +6,7 @@ import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
 import eu.ill.visa.cloud.providers.openstack.converters.CloudFlavourMixin;
+import eu.ill.visa.cloud.providers.openstack.http.requests.InstanceActionRequest;
 import eu.ill.visa.cloud.providers.openstack.http.responses.FlavorResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.FlavorsResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ServerResponse;
@@ -43,6 +44,12 @@ public interface ComputeEndpointClient {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     ServerResponse server(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("serverId") String serverId);
+
+    @POST
+    @Path("/v2/servers/{serverId}/action")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    void runServerAction(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("serverId") String serverId, final InstanceActionRequest action);
 
     @ClientObjectMapper
     static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {

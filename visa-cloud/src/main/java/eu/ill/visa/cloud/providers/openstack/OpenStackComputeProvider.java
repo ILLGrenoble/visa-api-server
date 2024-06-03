@@ -2,9 +2,14 @@ package eu.ill.visa.cloud.providers.openstack;
 
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.domain.CloudInstance;
+import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
+import eu.ill.visa.cloud.providers.openstack.http.requests.InstanceActionRequest;
+import eu.ill.visa.cloud.providers.openstack.http.requests.RebootInstanceActionRequest;
+import eu.ill.visa.cloud.providers.openstack.http.requests.StartInstanceActionRequest;
+import eu.ill.visa.cloud.providers.openstack.http.requests.StopInstanceActionRequest;
 import eu.ill.visa.cloud.providers.openstack.http.responses.Server;
 import eu.ill.visa.cloud.providers.openstack.http.ComputeEndpointClient;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
@@ -14,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.String.format;
 
 public class OpenStackComputeProvider extends AuthenticatedOpenStackProvider {
 
@@ -90,8 +97,68 @@ public class OpenStackComputeProvider extends AuthenticatedOpenStackProvider {
             return null;
 
         } catch (Exception e) {
-            logger.warn("Failed to get cloud flavour with id {} from OpenStack: {}", id, e.getMessage());
             throw new CloudException("Error in response getting instance from OpenStack: " + e.getMessage());
         }
     }
+
+    public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
+        try {
+            return this.computeEndpointClient.servers(this.authenticate()).servers.stream()
+                .map(server -> server.toCloudInstanceIdentifier(this.configuration.getAddressProvider()))
+                .toList();
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            return this.computeEndpointClient.servers(this.authenticate(true)).servers.stream()
+                .map(server -> server.toCloudInstanceIdentifier(this.configuration.getAddressProvider()))
+                .toList();
+
+        } catch (Exception e) {
+            logger.warn("Failed to get cloud instance identifier from OpenStack: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    public void rebootInstance(final String id) throws CloudException {
+        final InstanceActionRequest action = new RebootInstanceActionRequest();
+        try {
+            this.computeEndpointClient.runServerAction(this.authenticate(), id, action);
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            this.computeEndpointClient.runServerAction(this.authenticate(true), id, action);
+
+        } catch (Exception e) {
+            throw new CloudException(format("Could not reboot server with id %s and response %s: ", id, e.getMessage()));
+        }
+    }
+
+    public void startInstance(final String id) throws CloudException {
+        final InstanceActionRequest action = new StartInstanceActionRequest();
+        try {
+            this.computeEndpointClient.runServerAction(this.authenticate(), id, action);
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            this.computeEndpointClient.runServerAction(this.authenticate(true), id, action);
+
+        } catch (Exception e) {
+            throw new CloudException(format("Could not start server with id %s and response %s: ", id, e.getMessage()));
+        }
+    }
+
+    public void shutdownInstance(final String id) throws CloudException {
+        final InstanceActionRequest action = new StopInstanceActionRequest();
+        try {
+            this.computeEndpointClient.runServerAction(this.authenticate(), id, action);
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            this.computeEndpointClient.runServerAction(this.authenticate(true), id, action);
+
+        } catch (Exception e) {
+            throw new CloudException(format("Could not shutdown server with id %s and response %s: ", id, e.getMessage()));
+        }
+    }
+
 }

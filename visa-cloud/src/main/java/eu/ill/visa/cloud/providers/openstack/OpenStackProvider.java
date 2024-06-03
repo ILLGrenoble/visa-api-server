@@ -5,9 +5,11 @@ import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.http.HttpClient;
 import eu.ill.visa.cloud.http.HttpResponse;
 import eu.ill.visa.cloud.providers.CloudProvider;
-import eu.ill.visa.cloud.providers.openstack.converters.InstanceIdentifierConverter;
 import eu.ill.visa.cloud.providers.openstack.converters.LimitConverter;
-import jakarta.json.*;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,22 +78,7 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
-        final String url = format("%s/v2/servers", configuration.getComputeEndpoint());
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            return null;
-        }
-        final JsonObject results = parseObject(response.getBody());
-
-        final List<CloudInstanceIdentifier> servers = new ArrayList<>();
-        for (final JsonValue serverValue : results.getJsonArray("servers")) {
-            final JsonObject cloudServerIdentifier = (JsonObject) serverValue;
-            final CloudInstanceIdentifier server = InstanceIdentifierConverter.fromJson(cloudServerIdentifier);
-            servers.add(server);
-        }
-        return servers;
+        return this.computeProvider.instanceIdentifiers();
     }
 
     @Override
@@ -112,39 +99,17 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public void rebootInstance(String id) throws CloudException {
-        final JsonObjectBuilder type = createObjectBuilder().add("type", "HARD");
-        final String json = createObjectBuilder().add("reboot", type).build().toString();
-        final String url = format("%s/v2/servers/%s/action", configuration.getComputeEndpoint(), id);
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, POST, headers, json);
-        if (!response.isSuccessful()) {
-            throw new CloudException(format("Could not reboot server with id %s and response %s: ", id, response.getBody()));
-        }
+        this.computeProvider.rebootInstance(id);
     }
 
     @Override
     public void startInstance(String id) throws CloudException {
-        final String json = createObjectBuilder().addNull("os-start").build().toString();
-        final String url = format("%s/v2/servers/%s/action", configuration.getComputeEndpoint(), id);
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, POST, headers, json);
-        if (!response.isSuccessful()) {
-            throw new CloudException(format("Could not start server with id %s and response: %s ", id, response.getBody()));
-        }
+        this.computeProvider.startInstance(id);
     }
 
     @Override
     public void shutdownInstance(String id) throws CloudException {
-        final String json = createObjectBuilder().addNull("os-stop").build().toString();
-        final String url = format("%s/v2/servers/%s/action", configuration.getComputeEndpoint(), id);
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, POST, headers, json);
-        if (!response.isSuccessful()) {
-            throw new CloudException(format("Could not shutdown server with id %s and response %s: ", id, response.getBody()));
-        }
+        this.computeProvider.shutdownInstance(id);
     }
 
     @Override
