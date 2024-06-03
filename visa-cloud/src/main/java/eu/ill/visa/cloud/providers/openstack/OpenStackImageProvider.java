@@ -12,28 +12,27 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenStackImageProvider {
+public class OpenStackImageProvider extends AuthenticatedOpenStackProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenStackImageProvider.class);
 
     private final ImageEndpointClient imageEndpointClient;
-    private final OpenStackIdentityProvider identityProvider;
 
     public OpenStackImageProvider(final OpenStackProviderConfiguration configuration,
                                   final OpenStackIdentityProvider identityProvider) {
+        super(identityProvider);
         this.imageEndpointClient = QuarkusRestClientBuilder.newBuilder()
             .baseUri(URI.create(configuration.getImageEndpoint()))
             .build(ImageEndpointClient.class);
-        this.identityProvider = identityProvider;
     }
 
     public List<CloudImage> images() throws CloudException {
         try {
-            return this.imageEndpointClient.images(this.identityProvider.authenticate()).images;
+            return this.imageEndpointClient.images(this.authenticate()).images;
 
         } catch (CloudAuthenticationException e) {
             // Force creation of new authentication token
-            return this.imageEndpointClient.images(this.identityProvider.authenticate(true)).images;
+            return this.imageEndpointClient.images(this.authenticate(true)).images;
 
         } catch (Exception e) {
             logger.error("Failed to get cloud images from OpenStack: {}", e.getMessage());
@@ -43,11 +42,11 @@ public class OpenStackImageProvider {
 
     public CloudImage image(final String id) throws CloudException {
         try {
-            return this.imageEndpointClient.image(this.identityProvider.authenticate(), id);
+            return this.imageEndpointClient.image(this.authenticate(), id);
 
         } catch (CloudAuthenticationException e) {
             // Force creation of new authentication token
-            return this.imageEndpointClient.image(this.identityProvider.authenticate(true), id);
+            return this.imageEndpointClient.image(this.authenticate(true), id);
 
         } catch (Exception e) {
             logger.warn("Failed to get cloud image with id {} from OpenStack: {}", id, e.getMessage());

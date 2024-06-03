@@ -6,8 +6,7 @@ public class CloudFlavourMixin {
 
     public String id;
     public String name;
-    @JsonProperty("vcpus")
-    public Integer cpus;
+    public @JsonProperty("vcpus") Integer cpus;
     public Integer ram;
     public Integer disk;
 

@@ -31,7 +31,7 @@ public class InstanceConverter {
         builder.state(state);
         builder.imageId(imageId);
         builder.flavorId(flavorId);
-        builder.createdAt(createdAt);
+        builder.createdAt(createdAt.toDate());
         builder.fault(fault);
         builder.securityGroups(securityGroups);
         return builder.build();

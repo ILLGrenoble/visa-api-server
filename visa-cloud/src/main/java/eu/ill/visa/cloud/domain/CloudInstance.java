@@ -3,8 +3,8 @@ package eu.ill.visa.cloud.domain;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.joda.time.DateTime;
 
+import java.util.Date;
 import java.util.List;
 
 public class CloudInstance {
@@ -15,7 +15,7 @@ public class CloudInstance {
     private String address;
     private String imageId;
     private String flavorId;
-    private DateTime createdAt;
+    private Date createdAt;
     private CloudInstanceFault fault;
     private List<String> securityGroups;
 
@@ -88,11 +88,11 @@ public class CloudInstance {
         this.flavorId = flavorId;
     }
 
-    public DateTime getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(DateTime createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -146,7 +146,7 @@ public class CloudInstance {
         private String address;
         private String imageId;
         private String flavorId;
-        private DateTime createdAt;
+        private Date createdAt;
         protected CloudInstanceState status;
         private CloudInstanceFault fault;
         private List<String> securityGroups;
@@ -188,7 +188,7 @@ public class CloudInstance {
             return this;
         }
 
-        public Builder createdAt(DateTime createdAt) {
+        public Builder createdAt(Date createdAt) {
             this.createdAt = createdAt;
             return this;
         }

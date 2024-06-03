@@ -7,7 +7,6 @@ public class CloudImageMixin {
     public String id;
     public String name;
     public Long size;
-    @JsonProperty("created_at")
-    public String createdAt;
+    public @JsonProperty("created_at") String createdAt;
 
 }

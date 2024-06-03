@@ -5,7 +5,8 @@ import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.http.HttpClient;
 import eu.ill.visa.cloud.http.HttpResponse;
 import eu.ill.visa.cloud.providers.CloudProvider;
-import eu.ill.visa.cloud.providers.openstack.converters.*;
+import eu.ill.visa.cloud.providers.openstack.converters.InstanceIdentifierConverter;
+import eu.ill.visa.cloud.providers.openstack.converters.LimitConverter;
 import jakarta.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,44 +96,17 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public List<CloudInstance> instances() throws CloudException {
-        final String url = format("%s/v2/servers/detail", configuration.getComputeEndpoint());
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            return null;
-        }
-        final JsonObject results = parseObject(response.getBody());
-
-        final List<CloudInstance> servers = new ArrayList<>();
-        for (final JsonValue serverValue : results.getJsonArray("servers")) {
-            final JsonObject cloudServer = (JsonObject) serverValue;
-            final CloudInstance server = InstanceConverter.fromJson(cloudServer, configuration.getAddressProvider());
-            servers.add(server);
-        }
-        return servers;
+        return this.computeProvider.instances();
     }
 
     @Override
     public CloudInstance instance(final String id) throws CloudException {
-        final String url = format("%s/v2/servers/%s", configuration.getComputeEndpoint(), id);
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            if (response.getCode() == 404) {
-                return null;
-            } else {
-                throw new CloudException("Error in response getting instance from OpenStack. Error code: " + response.getCode());
-            }
-        }
-        final JsonObject results = parseObject(response.getBody());
-        return InstanceConverter.fromJson(results.getJsonObject("server"), configuration.getAddressProvider());
+        return this.computeProvider.instance(id);
     }
 
     @Override
     public String ip(final String id) throws CloudException {
-        final CloudInstance instance = instance(id);
+        final CloudInstance instance = this.instance(id);
         return instance.getAddress();
     }
 

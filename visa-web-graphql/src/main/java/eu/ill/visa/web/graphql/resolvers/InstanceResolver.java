@@ -106,28 +106,24 @@ public class InstanceResolver {
      *
      * @return a list of cloud images
      */
-    public CompletableFuture<CloudInstanceType> cloudInstance(@Source InstanceType instance) {
-        final CompletableFuture<CloudInstanceType> future = new CompletableFuture<>();
-        runAsync(() -> {
-            try {
-                CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
-                if (cloudClient == null) {
-                    future.completeExceptionally(new DataFetchingException("Cloud Client with ID " + instance.getCloudId() + " does not exist"));
+    public CloudInstanceType cloudInstance(@Source InstanceType instance) throws DataFetchingException {
+        try {
+            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
+            if (cloudClient == null) {
+                throw new DataFetchingException("Cloud Client with ID " + instance.getCloudId() + " does not exist");
 
+            } else {
+                CloudInstance cloudInstance = cloudClient.instance(instance.getComputeId());
+                if (cloudInstance != null) {
+                    return new CloudInstanceType(cloudInstance);
                 } else {
-                    CloudInstance cloudInstance = cloudClient.instance(instance.getComputeId());
-                    if (cloudInstance != null) {
-                        future.complete(new CloudInstanceType(cloudInstance));
-                    } else {
-                        future.completeExceptionally(new DataFetchingException("Cloud Instance with compute ID " + instance.getComputeId() + " does not exist"));
-                    }
+                    throw new DataFetchingException("Cloud Instance with compute ID " + instance.getComputeId() + " does not exist");
                 }
-
-            } catch (CloudException exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
             }
-        });
-        return future;
+
+        } catch (CloudException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
     }
 
     public UserType owner(@Source final InstanceType instance) {
