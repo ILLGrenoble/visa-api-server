@@ -1,8 +1,8 @@
 package eu.ill.visa.cloud.providers.openstack;
 
 import eu.ill.visa.cloud.domain.CloudImage;
+import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.providers.openstack.domain.ImagesResponse;
 import eu.ill.visa.cloud.providers.openstack.http.ImageEndpointClient;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 import org.slf4j.Logger;
@@ -28,10 +28,12 @@ public class OpenStackImageProvider {
     }
 
     public List<CloudImage> images() throws CloudException {
-        final String token = this.identityProvider.authenticate();
         try {
-            final ImagesResponse imagesResponse = this.imageEndpointClient.images(token);
-            return imagesResponse.images;
+            return this.imageEndpointClient.images(this.identityProvider.authenticate()).images;
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            return this.imageEndpointClient.images(this.identityProvider.authenticate(true)).images;
 
         } catch (Exception e) {
             logger.error("Failed to get cloud images from OpenStack: {}", e.getMessage());
@@ -40,9 +42,12 @@ public class OpenStackImageProvider {
     }
 
     public CloudImage image(final String id) throws CloudException {
-        final String token = this.identityProvider.authenticate();
         try {
-            return this.imageEndpointClient.image(token, id);
+            return this.imageEndpointClient.image(this.identityProvider.authenticate(), id);
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            return this.imageEndpointClient.image(this.identityProvider.authenticate(true), id);
 
         } catch (Exception e) {
             logger.warn("Failed to get cloud image with id {} from OpenStack: {}", id, e.getMessage());

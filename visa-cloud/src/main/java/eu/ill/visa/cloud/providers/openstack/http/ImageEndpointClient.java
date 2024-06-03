@@ -3,11 +3,14 @@ package eu.ill.visa.cloud.providers.openstack.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ill.visa.cloud.domain.CloudImage;
-import eu.ill.visa.cloud.providers.openstack.domain.CloudImageMixin;
-import eu.ill.visa.cloud.providers.openstack.domain.ImagesResponse;
+import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
+import eu.ill.visa.cloud.providers.openstack.converters.CloudImageMixin;
+import eu.ill.visa.cloud.providers.openstack.http.responses.ImagesResponse;
+import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.quarkus.rest.client.reactive.jackson.ClientObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public interface ImageEndpointClient {
 
@@ -29,5 +32,14 @@ public interface ImageEndpointClient {
     static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {
         return defaultObjectMapper.copy()
             .addMixIn(CloudImage.class, CloudImageMixin.class);
+    }
+
+    @ClientExceptionMapper
+    static RuntimeException toException(Response response) {
+        if (response.getStatus() == 401) {
+            return new CloudAuthenticationException("Authentication failure: " + response.readEntity(String.class) + ")");
+        }
+
+        return null;
     }
 }

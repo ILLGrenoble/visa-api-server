@@ -29,12 +29,14 @@ public class OpenStackProvider implements CloudProvider {
 
     private final OpenStackIdentityProvider identityProvider;
     private final OpenStackImageProvider imageProvider;
+    private final OpenStackComputeProvider computeProvider;
 
     public OpenStackProvider(final HttpClient httpClient, final OpenStackProviderConfiguration configuration) {
         this.httpClient = httpClient;
         this.configuration = configuration;
         this.identityProvider = new OpenStackIdentityProvider(this.configuration);
         this.imageProvider = new OpenStackImageProvider(this.configuration, this.identityProvider);
+        this.computeProvider = new OpenStackComputeProvider(this.configuration, this.identityProvider);
     }
 
     public OpenStackProviderConfiguration getConfiguration() {
@@ -63,55 +65,12 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public List<CloudFlavour> flavors() throws CloudException {
-        final String url = format("%s/v2/flavors/detail", configuration.getComputeEndpoint());
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            return null;
-        }
-
-        final JsonObject results = parseObject(response.getBody());
-        final List<CloudFlavour> flavors = new ArrayList<>();
-        for (final JsonValue flavorValue : results.getJsonArray("flavors")) {
-            final JsonObject cloudFlavor = (JsonObject) flavorValue;
-            final CloudFlavour flavor = FlavorConverter.fromJson(cloudFlavor);
-            flavors.add(flavor);
-        }
-        return flavors;
+        return this.computeProvider.flavors();
     }
 
     @Override
     public CloudFlavour flavor(final String id) throws CloudException {
-        final String url = format("%s/v2/flavors/%s", configuration.getComputeEndpoint(), id);
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            return null;
-        }
-        final JsonObject results = parseObject(response.getBody());
-        return FlavorConverter.fromJson(results.getJsonObject("flavor"));
-    }
-
-    private List<CloudInstanceIdentifier> buildServerIdentifiersResponse(JsonObject response) {
-        final List<CloudInstanceIdentifier> servers = new ArrayList<>();
-        for (final JsonValue serverValue : response.getJsonArray("servers")) {
-            final JsonObject cloudServerIdentifier = (JsonObject) serverValue;
-            final CloudInstanceIdentifier server = InstanceIdentifierConverter.fromJson(cloudServerIdentifier);
-            servers.add(server);
-        }
-        return servers;
-    }
-
-    private List<CloudInstance> buildServersResponse(JsonObject response) {
-        final List<CloudInstance> servers = new ArrayList<>();
-        for (final JsonValue serverValue : response.getJsonArray("servers")) {
-            final JsonObject cloudServer = (JsonObject) serverValue;
-            final CloudInstance server = InstanceConverter.fromJson(cloudServer, configuration.getAddressProvider());
-            servers.add(server);
-        }
-        return servers;
+        return this.computeProvider.flavor(id);
     }
 
     @Override
@@ -124,7 +83,14 @@ public class OpenStackProvider implements CloudProvider {
             return null;
         }
         final JsonObject results = parseObject(response.getBody());
-        return buildServerIdentifiersResponse(results);
+
+        final List<CloudInstanceIdentifier> servers = new ArrayList<>();
+        for (final JsonValue serverValue : results.getJsonArray("servers")) {
+            final JsonObject cloudServerIdentifier = (JsonObject) serverValue;
+            final CloudInstanceIdentifier server = InstanceIdentifierConverter.fromJson(cloudServerIdentifier);
+            servers.add(server);
+        }
+        return servers;
     }
 
     @Override
@@ -137,7 +103,14 @@ public class OpenStackProvider implements CloudProvider {
             return null;
         }
         final JsonObject results = parseObject(response.getBody());
-        return buildServersResponse(results);
+
+        final List<CloudInstance> servers = new ArrayList<>();
+        for (final JsonValue serverValue : results.getJsonArray("servers")) {
+            final JsonObject cloudServer = (JsonObject) serverValue;
+            final CloudInstance server = InstanceConverter.fromJson(cloudServer, configuration.getAddressProvider());
+            servers.add(server);
+        }
+        return servers;
     }
 
     @Override

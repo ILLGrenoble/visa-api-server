@@ -4,7 +4,7 @@ package eu.ill.visa.cloud.providers.openstack.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.ill.visa.cloud.exceptions.CloudRuntimeException;
-import eu.ill.visa.cloud.providers.openstack.domain.Authentication;
+import eu.ill.visa.cloud.providers.openstack.http.requests.AuthenticationRequest;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.quarkus.rest.client.reactive.jackson.ClientObjectMapper;
 import jakarta.ws.rs.Consumes;
@@ -20,7 +20,7 @@ public interface IdentityEndpointClient {
     @Path("/v3/auth/tokens")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    Response authenticate(final Authentication authentication);
+    Response authenticate(final AuthenticationRequest authenticationRequest);
 
     @ClientObjectMapper
     static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {

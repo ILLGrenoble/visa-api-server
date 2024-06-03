@@ -1,4 +1,4 @@
-package eu.ill.visa.cloud.providers.openstack.domain;
+package eu.ill.visa.cloud.providers.openstack.converters;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
