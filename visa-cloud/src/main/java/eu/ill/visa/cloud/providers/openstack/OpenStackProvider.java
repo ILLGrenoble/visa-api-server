@@ -11,7 +11,6 @@ import jakarta.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ public class OpenStackProvider implements CloudProvider {
     private final OpenStackIdentityProvider identityProvider;
     private final OpenStackImageProvider imageProvider;
     private final OpenStackComputeProvider computeProvider;
+    private final OpenStackNetworkProvider networkProvider;
 
     public OpenStackProvider(final HttpClient httpClient, final OpenStackProviderConfiguration configuration) {
         this.httpClient = httpClient;
@@ -41,6 +41,7 @@ public class OpenStackProvider implements CloudProvider {
         this.identityProvider = new OpenStackIdentityProvider(this.configuration);
         this.imageProvider = new OpenStackImageProvider(this.configuration, this.identityProvider);
         this.computeProvider = new OpenStackComputeProvider(this.configuration, this.identityProvider);
+        this.networkProvider = new OpenStackNetworkProvider(this.configuration, this.identityProvider);
     }
 
     public OpenStackProviderConfiguration getConfiguration() {
@@ -186,19 +187,7 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public List<String> securityGroups() throws CloudException {
-        final String url = format("%s/v2.0/security-groups", configuration.getNetworkEndpoint());
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            logger.warn("Could not get security groups: {}", response.getBody());
-            return new ArrayList<>();
-        }
-        final JsonArray currentSecurityGroups = parseObject(response.getBody()).getJsonArray("security_groups");
-        return currentSecurityGroups.stream().map(jsonValue -> jsonValue.asJsonObject().getString("name"))
-            .distinct()
-            .sorted(String::compareToIgnoreCase)
-            .collect(toUnmodifiableList());
+        return this.networkProvider.securityGroups();
     }
 
 }
