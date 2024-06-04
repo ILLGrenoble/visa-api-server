@@ -5,19 +5,20 @@ import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.http.HttpClient;
 import eu.ill.visa.cloud.http.HttpResponse;
 import eu.ill.visa.cloud.providers.CloudProvider;
-import eu.ill.visa.cloud.providers.openstack.converters.LimitConverter;
+import eu.ill.visa.cloud.providers.openstack.http.requests.ServerInput;
 import jakarta.json.JsonArray;
-import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static eu.ill.visa.cloud.helpers.JsonHelper.parseObject;
-import static eu.ill.visa.cloud.http.HttpMethod.*;
-import static jakarta.json.Json.createArrayBuilder;
+import static eu.ill.visa.cloud.http.HttpMethod.GET;
+import static eu.ill.visa.cloud.http.HttpMethod.POST;
 import static jakarta.json.Json.createObjectBuilder;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -159,68 +160,28 @@ public class OpenStackProvider implements CloudProvider {
                                         final CloudInstanceMetadata metadata,
                                         final String bootCommand) throws CloudException {
 
-        final List<JsonObject> securityGroupObjects = securityGroupNames.stream().map(securityGroupName ->
-            createObjectBuilder().add("name", securityGroupName).build()).collect(toUnmodifiableList());
+        ServerInput serverInput = ServerInput.Builder()
+            .name(name)
+            .imageId(imageId)
+            .flavorId(flavorId)
+            .securityGroups(securityGroupNames)
+            .networks(List.of(configuration.getAddressProviderUUID()))
+            .metadata(metadata)
+            .userData(bootCommand)
+            .build();
 
-        final JsonArrayBuilder securityGroupsBuilder = createArrayBuilder();
-        securityGroupObjects.forEach(securityGroupsBuilder::add);
-        final JsonArray securityGroups = securityGroupsBuilder.build();
-
-        final JsonObject network = createObjectBuilder().add("uuid", configuration.getAddressProviderUUID()).build();
-        final JsonArray networks = createArrayBuilder().add(network).build();
-
-        final JsonObjectBuilder metadataNodes = createObjectBuilder();
-        for (Map.Entry<String, String> entry : metadata.entrySet()) {
-            metadataNodes.add(entry.getKey(), entry.getValue());
-        }
-
-        final JsonObjectBuilder server = createObjectBuilder();
-        server.add("name", name);
-        server.add("imageRef", imageId);
-        server.add("flavorRef", flavorId);
-        server.add("security_groups", securityGroups);
-        server.add("networks", networks);
-        server.add("metadata", metadataNodes);
-        if (bootCommand != null) {
-            final Base64.Encoder encoder = Base64.getEncoder();
-            server.add("user_data", encoder.encodeToString(bootCommand.getBytes()));
-        }
-        final String data = createObjectBuilder().add("server", server).build().toString();
-        final String url = format("%s/v2/servers", configuration.getComputeEndpoint());
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-
-        final HttpResponse response = httpClient.sendRequest(url, POST, headers, data);
-        if (!response.isSuccessful()) {
-            throw new CloudException(format("Could not create server with name %s and response %s ", name, response.getBody()));
-        }
-        final JsonObject result = parseObject(response.getBody()).getJsonObject("server");
-        final String id = result.getString("id");
+        String id = this.computeProvider.createInstance(serverInput);
         return this.instance(id);
     }
 
     @Override
     public void deleteInstance(String id) throws CloudException {
-        final String url = format("%s/v2/servers/%s", configuration.getComputeEndpoint(), id);
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, DELETE, headers);
-        if (!response.isSuccessful()) {
-            throw new CloudException(format("Could not delete server with id %s and response %s", id, response.getBody()));
-        }
+        this.computeProvider.deleteInstance(id);
     }
 
     @Override
     public CloudLimit limits() throws CloudException {
-        final String url = format("%s/v2/limits", configuration.getComputeEndpoint());
-        final String authToken = authenticate();
-        final Map<String, String> headers = buildDefaultHeaders(authToken);
-        final HttpResponse response = httpClient.sendRequest(url, GET, headers);
-        if (!response.isSuccessful()) {
-            return null;
-        }
-        final JsonObject results = parseObject(response.getBody());
-        return LimitConverter.fromJson(results);
+        return this.computeProvider.limits();
     }
 
     @Override

@@ -4,6 +4,5 @@ import eu.ill.visa.cloud.domain.CloudFlavour;
 
 import java.util.List;
 
-public class FlavorsResponse {
-    public List<CloudFlavour> flavors;
+public record FlavorsResponse(List<CloudFlavour> flavors) {
 }

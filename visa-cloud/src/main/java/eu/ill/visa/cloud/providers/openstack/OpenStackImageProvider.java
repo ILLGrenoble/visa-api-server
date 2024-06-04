@@ -28,11 +28,14 @@ public class OpenStackImageProvider extends AuthenticatedOpenStackProvider {
 
     public List<CloudImage> images() throws CloudException {
         try {
-            return this.imageEndpointClient.images(this.authenticate()).images;
+            return this.imageEndpointClient.images(this.authenticate()).images();
 
         } catch (CloudAuthenticationException e) {
             // Force creation of new authentication token
-            return this.imageEndpointClient.images(this.authenticate(true)).images;
+            return this.imageEndpointClient.images(this.authenticate(true)).images();
+
+        } catch (CloudException e) {
+            throw e;
 
         } catch (Exception e) {
             logger.error("Failed to get cloud images from OpenStack: {}", e.getMessage());
@@ -47,6 +50,9 @@ public class OpenStackImageProvider extends AuthenticatedOpenStackProvider {
         } catch (CloudAuthenticationException e) {
             // Force creation of new authentication token
             return this.imageEndpointClient.image(this.authenticate(true), id);
+
+        } catch (CloudException e) {
+            throw e;
 
         } catch (Exception e) {
             logger.warn("Failed to get cloud image with id {} from OpenStack: {}", id, e.getMessage());

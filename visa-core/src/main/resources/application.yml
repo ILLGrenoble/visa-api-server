@@ -26,7 +26,7 @@ quarkus:
   rest-client:
 #    logging:
 #      scope: request-response
-#      body-limit: 100
+#      body-limit: 1000
     account-service:
       url: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
     security-group-service:

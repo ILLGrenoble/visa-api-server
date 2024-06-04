@@ -4,6 +4,5 @@ import eu.ill.visa.cloud.domain.CloudImage;
 
 import java.util.List;
 
-public class ImagesResponse {
-    public List<CloudImage> images;
+public record ImagesResponse(List<CloudImage> images) {
 }

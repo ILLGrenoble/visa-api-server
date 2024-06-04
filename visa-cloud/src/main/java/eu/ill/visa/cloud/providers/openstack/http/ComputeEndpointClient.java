@@ -7,10 +7,8 @@ import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
 import eu.ill.visa.cloud.providers.openstack.converters.CloudFlavourMixin;
 import eu.ill.visa.cloud.providers.openstack.http.requests.InstanceActionRequest;
-import eu.ill.visa.cloud.providers.openstack.http.responses.FlavorResponse;
-import eu.ill.visa.cloud.providers.openstack.http.responses.FlavorsResponse;
-import eu.ill.visa.cloud.providers.openstack.http.responses.ServerResponse;
-import eu.ill.visa.cloud.providers.openstack.http.responses.ServersResponse;
+import eu.ill.visa.cloud.providers.openstack.http.requests.ServerRequest;
+import eu.ill.visa.cloud.providers.openstack.http.responses.*;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import io.quarkus.rest.client.reactive.jackson.ClientObjectMapper;
 import jakarta.ws.rs.*;
@@ -39,17 +37,35 @@ public interface ComputeEndpointClient {
     @Consumes(MediaType.APPLICATION_JSON)
     ServersResponse servers(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
 
+    @POST
+    @Path("/v2/servers")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    ServerCreationResponse createServer(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, final ServerRequest request);
+
     @GET
     @Path("/v2/servers/{serverId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     ServerResponse server(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("serverId") String serverId);
 
+    @DELETE
+    @Path("/v2/servers/{serverId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    void deleteServer(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("serverId") String serverId);
+
     @POST
     @Path("/v2/servers/{serverId}/action")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     void runServerAction(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("serverId") String serverId, final InstanceActionRequest action);
+
+    @GET
+    @Path("/v2/limits")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    LimitsResponse limits(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
 
     @ClientObjectMapper
     static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {
