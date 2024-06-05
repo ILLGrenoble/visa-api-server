@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
+import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.providers.openstack.converters.CloudFlavourMixin;
 import eu.ill.visa.cloud.providers.openstack.http.requests.InstanceActionRequest;
 import eu.ill.visa.cloud.providers.openstack.http.requests.ServerRequest;
@@ -88,7 +89,7 @@ public interface ComputeEndpointClient {
             return new CloudNotFoundException("Not found: " + response.readEntity(String.class) + ")");
         }
 
-        return null;
+        return new CloudClientException("Cloud runtime exception (" + response.getStatus() + "): " + response.readEntity(String.class) + ")");
     }
 
 }

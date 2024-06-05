@@ -3,6 +3,7 @@ package eu.ill.visa.cloud.providers.openstack;
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.CloudProvider;
+import eu.ill.visa.cloud.providers.openstack.endpoints.*;
 import eu.ill.visa.cloud.providers.openstack.http.requests.ServerInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,16 +16,16 @@ public class OpenStackProvider implements CloudProvider {
 
     private final OpenStackProviderConfiguration configuration;
 
-    private final OpenStackImageProvider imageProvider;
-    private final OpenStackComputeProvider computeProvider;
-    private final OpenStackNetworkProvider networkProvider;
+    private final ImageEndpoint imageEndpoint;
+    private final ComputeEndpoint computeEndpoint;
+    private final NetworkEndpoint networkEndpoint;
 
     public OpenStackProvider(final OpenStackProviderConfiguration configuration) {
         this.configuration = configuration;
-        OpenStackIdentityProvider identityProvider = new OpenStackIdentityProvider(this.configuration);
-        this.imageProvider = new OpenStackImageProvider(this.configuration, identityProvider);
-        this.computeProvider = new OpenStackComputeProvider(this.configuration, identityProvider);
-        this.networkProvider = new OpenStackNetworkProvider(this.configuration, identityProvider);
+        OpenStackIdentityEndpoint identityEndpoint = new OpenStackIdentityEndpoint(this.configuration);
+        this.imageEndpoint = OpenStackImageEndpoint.authenticationProxy(this.configuration, identityEndpoint);
+        this.networkEndpoint = OpenStackNetworkEndpoint.authenticationProxy(this.configuration, identityEndpoint);
+        this.computeEndpoint = OpenStackComputeEndpoint.authenticationProxy(configuration, identityEndpoint);
     }
 
     public OpenStackProviderConfiguration getConfiguration() {
@@ -33,37 +34,37 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public List<CloudImage> images() throws CloudException {
-        return this.imageProvider.images();
+        return this.imageEndpoint.images();
     }
 
     @Override
     public CloudImage image(final String id) throws CloudException {
-        return this.imageProvider.image(id);
+        return this.imageEndpoint.image(id);
     }
 
     @Override
     public List<CloudFlavour> flavors() throws CloudException {
-        return this.computeProvider.flavors();
+        return this.computeEndpoint.flavors();
     }
 
     @Override
     public CloudFlavour flavor(final String id) throws CloudException {
-        return this.computeProvider.flavor(id);
+        return this.computeEndpoint.flavor(id);
     }
 
     @Override
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
-        return this.computeProvider.instanceIdentifiers();
+        return this.computeEndpoint.instanceIdentifiers();
     }
 
     @Override
     public List<CloudInstance> instances() throws CloudException {
-        return this.computeProvider.instances();
+        return this.computeEndpoint.instances();
     }
 
     @Override
     public CloudInstance instance(final String id) throws CloudException {
-        return this.computeProvider.instance(id);
+        return this.computeEndpoint.instance(id);
     }
 
     @Override
@@ -74,23 +75,23 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public void rebootInstance(String id) throws CloudException {
-        this.computeProvider.rebootInstance(id);
+        this.computeEndpoint.rebootInstance(id);
     }
 
     @Override
     public void startInstance(String id) throws CloudException {
-        this.computeProvider.startInstance(id);
+        this.computeEndpoint.startInstance(id);
     }
 
     @Override
     public void shutdownInstance(String id) throws CloudException {
-        this.computeProvider.shutdownInstance(id);
+        this.computeEndpoint.shutdownInstance(id);
     }
 
     @Override
     public void updateSecurityGroups(String id, List<String> securityGroupNames) throws CloudException {
 
-        final List<String> currentSecurityGroupNames =this.computeProvider.serverSecurityGroups(id);
+        final List<String> currentSecurityGroupNames =this.computeEndpoint.serverSecurityGroups(id);
         List<String> securityGroupNamesToRemove = currentSecurityGroupNames.stream().filter(name -> !securityGroupNames.contains(name)).toList();
         List<String> securityGroupNamesToAdd = securityGroupNames.stream().filter(name -> !currentSecurityGroupNames.contains(name)).toList();
 
@@ -98,12 +99,12 @@ public class OpenStackProvider implements CloudProvider {
 
         // Remove obsolete security groups one by one
         for (String securityGroupName : securityGroupNamesToRemove) {
-            this.computeProvider.removeServerSecurityGroup(id, securityGroupName);
+            this.computeEndpoint.removeServerSecurityGroup(id, securityGroupName);
         }
 
         // Add missing security groups one by one
         for (String securityGroupName : securityGroupNamesToAdd) {
-            this.computeProvider.addServerSecurityGroup(id, securityGroupName);
+            this.computeEndpoint.addServerSecurityGroup(id, securityGroupName);
         }
     }
 
@@ -125,23 +126,22 @@ public class OpenStackProvider implements CloudProvider {
             .userData(bootCommand)
             .build();
 
-        String id = this.computeProvider.createInstance(serverInput);
+        String id = this.computeEndpoint.createInstance(serverInput);
         return this.instance(id);
     }
 
     @Override
     public void deleteInstance(String id) throws CloudException {
-        this.computeProvider.deleteInstance(id);
+        this.computeEndpoint.deleteInstance(id);
     }
 
     @Override
     public CloudLimit limits() throws CloudException {
-        return this.computeProvider.limits();
+        return this.computeEndpoint.limits();
     }
 
     @Override
     public List<String> securityGroups() throws CloudException {
-        return this.networkProvider.securityGroups();
+        return this.networkEndpoint.securityGroups();
     }
-
 }

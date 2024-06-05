@@ -2,6 +2,8 @@ package eu.ill.visa.cloud.providers.openstack.http;
 
 
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
+import eu.ill.visa.cloud.exceptions.CloudClientException;
+import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
 import eu.ill.visa.cloud.providers.openstack.http.responses.SecurityGroupsResponse;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import jakarta.ws.rs.*;
@@ -22,8 +24,11 @@ public interface NetworkEndpointClient {
     static RuntimeException toException(Response response) {
         if (response.getStatus() == 401) {
             return new CloudAuthenticationException("Authentication failure: " + response.readEntity(String.class) + ")");
+
+        } else if (response.getStatus() == 404) {
+            return new CloudNotFoundException("Not found: " + response.readEntity(String.class) + ")");
         }
 
-        return null;
+        return new CloudClientException("Cloud runtime exception (" + response.getStatus() + "): " + response.readEntity(String.class) + ")");
     }
 }

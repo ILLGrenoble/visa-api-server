@@ -1,10 +1,11 @@
-package eu.ill.visa.cloud.providers.openstack;
+package eu.ill.visa.cloud.providers.openstack.endpoints;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.exceptions.CloudRuntimeException;
+import eu.ill.visa.cloud.exceptions.CloudClientException;
+import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.openstack.domain.AuthenticationToken;
 import eu.ill.visa.cloud.providers.openstack.http.requests.AuthenticationRequest;
 import eu.ill.visa.cloud.providers.openstack.http.responses.AuthenticationResponse;
@@ -19,8 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class OpenStackIdentityProvider {
-    private static final Logger logger = LoggerFactory.getLogger(OpenStackIdentityProvider.class);
+public class OpenStackIdentityEndpoint {
+    private static final Logger logger = LoggerFactory.getLogger(OpenStackIdentityEndpoint.class);
 
     private static final String HEADER_X_SUBJECT_TOKEN = "X-Subject-Token";
 
@@ -30,7 +31,7 @@ public class OpenStackIdentityProvider {
 
     private AuthenticationToken token = new AuthenticationToken(null, new Date());
 
-    public OpenStackIdentityProvider(final OpenStackProviderConfiguration configuration) {
+    public OpenStackIdentityEndpoint(final OpenStackProviderConfiguration configuration) {
         this.identityEndpointClient = QuarkusRestClientBuilder.newBuilder()
             .baseUri(URI.create(configuration.getIdentityEndpoint()))
             .build(IdentityEndpointClient.class);
@@ -59,7 +60,7 @@ public class OpenStackIdentityProvider {
 
                 this.token = new AuthenticationToken(token, expiresAt);
 
-            } catch (CloudRuntimeException e) {
+            } catch (CloudClientException e) {
                 throw new CloudException(e.getMessage());
             }
         }
