@@ -126,7 +126,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
     }
 
     public void rebootInstance(final String id) throws CloudException {
-        this.runServerAction(id, new StartInstanceActionRequest(), "Could not reboot server");
+        this.runServerAction(id, new RebootInstanceActionRequest(), "Could not reboot server");
     }
 
     public void startInstance(final String id) throws CloudException {
