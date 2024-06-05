@@ -38,7 +38,7 @@ public class InstanceSecurityGroupUpdateJob {
     public void execute() {
         logger.info("Executing instance security group update job");
 
-        List<Instance> instances = this.instanceService.getAll();
+        List<Instance> instances = this.instanceService.getAllFull();
 
         // Determine which instances have changed security groups
         for (Instance instance : instances) {
@@ -62,7 +62,7 @@ public class InstanceSecurityGroupUpdateJob {
             return true;
         }
 
-        if ((list1 == null && list2 != null) || (list1 != null && list2 == null) || (list1.size() != list2.size()))  {
+        if (list1 == null || list2 == null || list1.size() != list2.size())  {
             return false;
         }
 

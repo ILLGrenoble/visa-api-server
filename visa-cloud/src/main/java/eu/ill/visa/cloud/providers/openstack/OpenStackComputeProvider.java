@@ -8,6 +8,7 @@ import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
 import eu.ill.visa.cloud.providers.openstack.http.requests.*;
+import eu.ill.visa.cloud.providers.openstack.http.responses.SecurityGroupsResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.Server;
 import eu.ill.visa.cloud.providers.openstack.http.ComputeEndpointClient;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
@@ -133,54 +134,23 @@ public class OpenStackComputeProvider extends AuthenticatedOpenStackProvider {
     }
 
     public void rebootInstance(final String id) throws CloudException {
-        final InstanceActionRequest action = new RebootInstanceActionRequest();
-        try {
-            this.computeEndpointClient.runServerAction(this.authenticate(), id, action);
-
-        } catch (CloudAuthenticationException e) {
-            // Force creation of new authentication token
-            this.computeEndpointClient.runServerAction(this.authenticate(true), id, action);
-
-        } catch (CloudException e) {
-            throw e;
-
-        } catch (Exception e) {
-            throw new CloudException(format("Could not reboot server with id %s and response %s: ", id, e.getMessage()));
-        }
+        this.runServerAction(id, new StartInstanceActionRequest(), "Could not reboot server");
     }
 
     public void startInstance(final String id) throws CloudException {
-        final InstanceActionRequest action = new StartInstanceActionRequest();
-        try {
-            this.computeEndpointClient.runServerAction(this.authenticate(), id, action);
-
-        } catch (CloudAuthenticationException e) {
-            // Force creation of new authentication token
-            this.computeEndpointClient.runServerAction(this.authenticate(true), id, action);
-
-        } catch (CloudException e) {
-            throw e;
-
-        } catch (Exception e) {
-            throw new CloudException(format("Could not start server with id %s and response %s: ", id, e.getMessage()));
-        }
+        this.runServerAction(id, new StartInstanceActionRequest(), "Could not start server");
     }
 
     public void shutdownInstance(final String id) throws CloudException {
-        final InstanceActionRequest action = new StopInstanceActionRequest();
-        try {
-            this.computeEndpointClient.runServerAction(this.authenticate(), id, action);
+        this.runServerAction(id, new StopInstanceActionRequest(), "Could not shutdown server");
+    }
 
-        } catch (CloudAuthenticationException e) {
-            // Force creation of new authentication token
-            this.computeEndpointClient.runServerAction(this.authenticate(true), id, action);
+    public void addServerSecurityGroup(final String id, final String securityGroup) throws CloudException {
+        this.runServerAction(id, new AddSecurityGroupInstanceActionRequest(securityGroup), "Could not add server security group");
+    }
 
-        } catch (CloudException e) {
-            throw e;
-
-        } catch (Exception e) {
-            throw new CloudException(format("Could not shutdown server with id %s and response %s: ", id, e.getMessage()));
-        }
+    public void removeServerSecurityGroup(final String id, final String securityGroup) throws CloudException {
+        this.runServerAction(id, new RemoveSecurityGroupInstanceActionRequest(securityGroup), "Could not remove server security group");
     }
 
     public void deleteInstance(final String id) throws CloudException {
@@ -214,6 +184,44 @@ public class OpenStackComputeProvider extends AuthenticatedOpenStackProvider {
             throw new CloudException(format("Could not create server with name %s and response %s ", input.name, e.getMessage()));
         }
     }
+
+    public List<String> serverSecurityGroups(final String id) throws CloudException {
+        try {
+            return this.computeEndpointClient.serverSecurityGroups(this.authenticate(), id).securityGroups().stream()
+                .map(SecurityGroupsResponse.SecurityGroup::name)
+                .toList();
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            return this.computeEndpointClient.serverSecurityGroups(this.authenticate(true), id).securityGroups().stream()
+                .map(SecurityGroupsResponse.SecurityGroup::name)
+                .toList();
+
+        } catch (CloudException e) {
+            throw e;
+
+        } catch (Exception e) {
+            logger.error("Failed to get security groups for server with id {} from OpenStack: {}", id, e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    private void runServerAction(final String id, final InstanceActionRequest action, final String errorMessage) throws CloudException {
+        try {
+            this.computeEndpointClient.runServerAction(this.authenticate(), id, action);
+
+        } catch (CloudAuthenticationException e) {
+            // Force creation of new authentication token
+            this.computeEndpointClient.runServerAction(this.authenticate(true), id, action);
+
+        } catch (CloudException e) {
+            throw e;
+
+        } catch (Exception e) {
+            throw new CloudException(format("%s for server with id %s: %s: ", errorMessage, id, e.getMessage()));
+        }
+    }
+
 
     public CloudLimit limits() throws CloudException {
         try {

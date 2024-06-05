@@ -8,7 +8,7 @@ import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.InstanceAttributeRepository;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.*;
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static eu.ill.visa.business.services.PortService.isPortOpen;
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
 import static java.util.Objects.requireNonNullElseGet;
 import static java.util.concurrent.CompletableFuture.runAsync;
 
@@ -127,11 +126,8 @@ public class InstanceResolver {
     }
 
     public UserType owner(@Source final InstanceType instance) {
-        return this.instanceMemberService.getAllByInstanceIdAndRole(instance.getId(), OWNER).stream()
-            .findFirst()
-            .map(InstanceMember::getUser)
-            .map(UserType::new)
-            .orElse(null);
+        User user = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+        return new UserType(user);
     }
 
     public List<InstanceSessionMemberType> activeSessions(@Source final InstanceType instance) throws DataFetchingException {

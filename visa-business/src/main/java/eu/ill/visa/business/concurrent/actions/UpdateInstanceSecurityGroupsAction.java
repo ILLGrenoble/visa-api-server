@@ -20,7 +20,7 @@ public class UpdateInstanceSecurityGroupsAction extends InstanceAction {
     @Override
     public void run() throws InstanceActionException {
         try {
-            final Instance instance = getInstance();
+            final Instance instance = getFullInstance();
 
             // Test case when a instance has not yet been created on open stack
             if (instance == null || instance.getComputeId() == null) {

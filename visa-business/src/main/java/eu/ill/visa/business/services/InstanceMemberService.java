@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
+
 @Transactional
 @Singleton
 public class InstanceMemberService {
@@ -45,6 +47,13 @@ public class InstanceMemberService {
 
     public List<InstanceMember> getAllByInstanceIdAndRole(Long instanceId, InstanceMemberRole role) {
         return this.repository.getAllByInstanceIdAndRole(instanceId, role);
+    }
+
+    public User getOwnerByInstanceId(Long instanceId) {
+        return repository.getAllByInstanceIdAndRole(instanceId, OWNER).stream()
+            .findFirst()
+            .map(InstanceMember::getUser)
+            .orElse(null);
     }
 
     public void save(@NotNull InstanceMember instanceMember) {

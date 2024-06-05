@@ -116,6 +116,12 @@ public class InstanceService {
         return this.repository.getAll(filter, orderBy, pagination);
     }
 
+    public List<Instance> getAllFull() {
+        return this.repository.getAll().stream()
+            .map(Instance::lazyLoadInit)
+            .toList();
+    }
+
     public List<Instance> getAll() {
         return this.repository.getAll();
     }

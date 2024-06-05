@@ -62,6 +62,12 @@ public interface ComputeEndpointClient {
     void runServerAction(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("serverId") String serverId, final InstanceActionRequest action);
 
     @GET
+    @Path("/v2/servers/{serverId}/os-security-groups")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    SecurityGroupsResponse serverSecurityGroups(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("serverId") String serverId);
+
+    @GET
     @Path("/v2/limits")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
