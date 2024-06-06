@@ -121,7 +121,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
 
         } catch (CloudClientException e) {
             logger.warn("Failed to get cloud instance identifier from OpenStack: {}", e.getMessage());
-            return null;
+            return new ArrayList<>();
         }
     }
 

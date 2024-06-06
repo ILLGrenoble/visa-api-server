@@ -12,33 +12,9 @@
     <artifactId>visa-cloud</artifactId>
 
     <properties>
-        <java.json-api.version>2.1.3</java.json-api.version>
-        <jakarta.json.version>2.0.1</jakarta.json.version>
-        <okhttp.version>4.12.0</okhttp.version>
-        <joda-time.version>2.12.7</joda-time.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>jakarta.json</groupId>
-            <artifactId>jakarta.json-api</artifactId>
-            <version>${java.json-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.json</artifactId>
-            <version>${jakarta.json.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>${okhttp.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda-time.version}</version>
-        </dependency>
     </dependencies>
 
 

@@ -3,16 +3,14 @@ package eu.ill.visa.cloud.services;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.http.HttpClient;
-import eu.ill.visa.cloud.http.clients.OkHttpClientAdapter;
 import eu.ill.visa.cloud.providers.NullProvider;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProvider;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.web.WebProvider;
 import eu.ill.visa.cloud.providers.web.WebProviderConfiguration;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -84,8 +82,7 @@ public class CloudClientFactory {
             requireNonNull(parameters.get("url"), "url must be set"),
             requireNonNull(parameters.get("authToken"), "authToken must be set")
         );
-        final HttpClient httpClient = new OkHttpClientAdapter();
-        return new CloudClient(id, name, provider, new WebProvider(httpClient, configuration), serverNamePrefix, visible);
+        return new CloudClient(id, name, provider, new WebProvider(configuration), serverNamePrefix, visible);
     }
 
 

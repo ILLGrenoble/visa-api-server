@@ -18,6 +18,8 @@ public class CloudInstance {
     private Date createdAt;
     private CloudInstanceFault fault;
     private List<String> securityGroups;
+    private CloudInstanceMetadata metadata;
+    private String bootCommand;
 
     public String getId() {
         return id;
@@ -104,6 +106,21 @@ public class CloudInstance {
         this.securityGroups = securityGroups;
     }
 
+    public CloudInstanceMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(CloudInstanceMetadata metadata) {
+        this.metadata = metadata;
+    }
+
+    public String getBootCommand() {
+        return bootCommand;
+    }
+
+    public void setBootCommand(String bootCommand) {
+        this.bootCommand = bootCommand;
+    }
 
     @Override
     public boolean equals(Object object) {
@@ -150,6 +167,8 @@ public class CloudInstance {
         protected CloudInstanceState status;
         private CloudInstanceFault fault;
         private List<String> securityGroups;
+        private CloudInstanceMetadata metadata;
+        private String bootCommand;
 
         private Builder() {
         }
@@ -203,6 +222,16 @@ public class CloudInstance {
             return this;
         }
 
+        public Builder metadata(CloudInstanceMetadata metadata) {
+            this.metadata = metadata;
+            return this;
+        }
+
+        public Builder bootCommand(String bootCommand) {
+            this.bootCommand = bootCommand;
+            return this;
+        }
+
         public CloudInstance build() {
             final CloudInstance cloudInstance = new CloudInstance();
             cloudInstance.setState(status);
@@ -214,6 +243,8 @@ public class CloudInstance {
             cloudInstance.setCreatedAt(createdAt);
             cloudInstance.setFault(fault);
             cloudInstance.setSecurityGroups(securityGroups);
+            cloudInstance.setMetadata(metadata);
+            cloudInstance.setBootCommand(bootCommand);
             return cloudInstance;
         }
     }

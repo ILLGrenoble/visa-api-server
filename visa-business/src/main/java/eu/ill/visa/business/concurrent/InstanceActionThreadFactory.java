@@ -1,6 +1,5 @@
 package eu.ill.visa.business.concurrent;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ public class InstanceActionThreadFactory implements ThreadFactory {
     }
 
     @Override
-    public Thread newThread(@NotNull Runnable runnable) {
+    public Thread newThread(Runnable runnable) {
         return new TaskThread(runnable);
     }
 }
