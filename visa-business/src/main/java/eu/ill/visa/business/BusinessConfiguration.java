@@ -14,4 +14,6 @@ public interface BusinessConfiguration {
     SignatureConfiguration signature();
 
     SecurityGroupServiceClientConfiguration securityGroupServiceClient();
+
+    ErrorReportEmailConfiguration errorReportEmail();
 }
