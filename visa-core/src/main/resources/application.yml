@@ -20,6 +20,8 @@ quarkus:
       ignore: true
   scheduler:
     enabled: ${VISA_SCHEDULER_ENABLED:true}
+  devservices:
+    enabled: true
   mailer:
     host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST}
     port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}
@@ -57,7 +59,11 @@ quarkus:
       app-name: ${VISA_LOGGING_SYSLOG_APP_NAME}
       facility: ${VISA_LOGGING_SYSLOG_FACILITY:local-use-0}
       truncate: false
-#    category:
+    category:
+      "eu.ill":
+        level: ${VISA_LOGGING_LEVEL:INFO}
+      "org.apache.guacamole":
+        level: DEBUG
 #      "org.jboss.resteasy.reactive.client.logging":
 #        level: DEBUG
 
@@ -172,12 +178,6 @@ graphql:
       jdbc:
         url: ${VISA_DATABASE_URL}
       db-kind: postgresql
-      devservices:
-        enabled: false
-    log:
-      category:
-        "eu.ill":
-          level: ${VISA_LOGGING_LEVEL:INFO}
 
 "%dev":
   quarkus:
@@ -187,12 +187,6 @@ graphql:
       jdbc:
         url: ${VISA_DATABASE_URL}
       db-kind: postgresql
-      devservices:
-        enabled: false
-    log:
-      category:
-        "eu.ill":
-          level: ${VISA_LOGGING_LEVEL:INFO}
 
 "%test":
   quarkus:
@@ -215,6 +209,7 @@ graphql:
       mock: true
       host: mailer.com
     devservices:
+      enabled: true
       timeout: 5m
 
   business:
