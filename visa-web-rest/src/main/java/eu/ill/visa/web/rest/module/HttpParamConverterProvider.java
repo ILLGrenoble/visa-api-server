@@ -2,7 +2,7 @@ package eu.ill.visa.web.rest.module;
 
 import eu.ill.visa.core.entity.*;
 
-import eu.ill.visa.web.rest.converters.http.*;
+import eu.ill.visa.web.rest.converters.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.ParamConverterProvider;

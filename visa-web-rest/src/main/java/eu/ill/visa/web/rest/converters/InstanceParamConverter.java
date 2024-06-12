@@ -1,4 +1,4 @@
-package eu.ill.visa.web.rest.converters.http;
+package eu.ill.visa.web.rest.converters;
 
 
 import jakarta.enterprise.context.ApplicationScoped;

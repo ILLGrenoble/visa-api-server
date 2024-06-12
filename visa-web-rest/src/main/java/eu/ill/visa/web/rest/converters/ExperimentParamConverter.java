@@ -1,4 +1,4 @@
-package eu.ill.visa.web.rest.converters.http;
+package eu.ill.visa.web.rest.converters;
 
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.core.entity.Experiment;
