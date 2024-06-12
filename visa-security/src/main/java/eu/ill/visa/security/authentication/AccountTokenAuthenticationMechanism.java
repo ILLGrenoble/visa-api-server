@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Locale;
 import java.util.Optional;
 
-//@Alternative
-//@Priority(1)
 @ApplicationScoped
 public class AccountTokenAuthenticationMechanism implements HttpAuthenticationMechanism {
 
@@ -36,9 +34,6 @@ public class AccountTokenAuthenticationMechanism implements HttpAuthenticationMe
         LOWERCASE_BASIC_PREFIX = BEARER_PREFIX.toLowerCase(Locale.ENGLISH);
         PREFIX_LENGTH = BEARER_PREFIX.length();
     }
-
-//    private final JWTAuthMechanism jwtAuthMechanism;
-//    private final BasicAuthenticationMechanism basicAuthenticationMechanism;
 
     public AccountTokenAuthenticationMechanism() {
     }
