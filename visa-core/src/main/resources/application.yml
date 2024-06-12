@@ -1,4 +1,3 @@
-
 quarkus:
   http:
     root-path: /api
@@ -16,8 +15,6 @@ quarkus:
       generation: update
     log:
       sql: false
-    persistence-xml:
-      ignore: true
   scheduler:
     enabled: ${VISA_SCHEDULER_ENABLED:true}
   devservices:
@@ -194,20 +191,34 @@ graphql:
       enabled: false
     log:
       level: info
+      console:
+        enable: true
+      file:
+        enable: false
+        format: "[%-5p] [%c{3.}] (%t) %s%e%n"
+      syslog:
+        enable: false
+        format: "[%-5p] [%c{3.}] (%t) %s%e%n"
     hibernate-orm:
       log:
         sql: false
       database:
         generation: create
       sql-load-script: fixtures.sql
-      persistence-xml:
-        ignore: true
     datasource:
       devservices:
         enabled: true
     mailer:
       mock: true
       host: mailer.com
+      logging:
+        host: mailer.com
+        mock: true
+    rest-client:
+      account-service:
+        url: accounts.dummy.org
+      security-group-service:
+        url: security-groups.dummy.org
     devservices:
       enabled: true
       timeout: 5m
