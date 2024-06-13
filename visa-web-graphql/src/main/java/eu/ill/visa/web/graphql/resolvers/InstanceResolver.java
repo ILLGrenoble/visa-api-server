@@ -1,13 +1,13 @@
 package eu.ill.visa.web.graphql.resolvers;
 
 import eu.ill.preql.exception.InvalidQueryException;
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceMemberService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.InstanceAttributeRepository;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
@@ -29,19 +29,19 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 @GraphQLApi
 public class InstanceResolver {
 
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceMemberService instanceMemberService;
     private final ExperimentService experimentService;
     private final InstanceAttributeRepository instanceAttributeRepository;
 
     @Inject
-    public InstanceResolver(final CloudClientGateway cloudClientGateway,
+    public InstanceResolver(final CloudClientService cloudClientService,
                             final InstanceSessionService instanceSessionService,
                             final InstanceMemberService instanceMemberService,
                             final ExperimentService experimentService,
                             final InstanceAttributeRepository instanceAttributeRepository) {
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.instanceSessionService = instanceSessionService;
         this.instanceMemberService = instanceMemberService;
         this.experimentService = experimentService;
@@ -71,7 +71,7 @@ public class InstanceResolver {
 
         runAsync(() -> {
             try {
-                CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
+                CloudClient cloudClient = this.cloudClientService.getCloudClient(instance.getCloudId());
                 if (cloudClient == null) {
                     future.completeExceptionally(new DataFetchingException("Cloud Client with ID " + instance.getCloudId() + " does not exist"));
 
@@ -107,7 +107,7 @@ public class InstanceResolver {
      */
     public CloudInstanceType cloudInstance(@Source InstanceType instance) throws DataFetchingException {
         try {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(instance.getCloudId());
             if (cloudClient == null) {
                 throw new DataFetchingException("Cloud Client with ID " + instance.getCloudId() + " does not exist");
 
@@ -151,7 +151,7 @@ public class InstanceResolver {
     }
 
     public @NotNull CloudClientType cloudClient(@Source final InstanceType instance) {
-        CloudClient cloudClient = this.cloudClientGateway.getCloudClient(instance.getCloudId());
+        CloudClient cloudClient = this.cloudClientService.getCloudClient(instance.getCloudId());
         if (cloudClient != null) {
             return new CloudClientType(cloudClient);
         }

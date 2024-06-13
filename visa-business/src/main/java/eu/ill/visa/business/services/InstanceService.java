@@ -2,7 +2,6 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
@@ -28,7 +27,7 @@ public class InstanceService {
 
     private final InstanceRepository repository;
     private final InstanceConfiguration configuration;
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
 
     // Specifies a window in which to look for instances for which an instrument control support user can provider support.
     // Defines a window and looks for experiment schedules that overlap this window
@@ -37,10 +36,10 @@ public class InstanceService {
     @Inject
     public InstanceService(final InstanceRepository repository,
                            final InstanceConfiguration configuration,
-                           final CloudClientGateway cloudClientGateway) {
+                           final CloudClientService cloudClientService) {
         this.repository = repository;
         this.configuration = configuration;
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
     }
 
     public Long countAll() {
@@ -129,7 +128,7 @@ public class InstanceService {
     public Map<CloudClient, List<Instance>> getAllByCloud() {
         List<Instance> instances = this.getAll();
 
-        List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
+        List<CloudClient> cloudClients = this.cloudClientService.getAll();
         Map<CloudClient, List<Instance>> cloudInstances = new HashMap<>();
 
         for (CloudClient cloudClient : cloudClients) {
@@ -138,7 +137,7 @@ public class InstanceService {
 
         instances.forEach(instance -> {
             Long cloudId = instance.getCloudId();
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(cloudId);
             if (cloudClient != null) {
                 cloudInstances.get(cloudClient).add(instance);
 

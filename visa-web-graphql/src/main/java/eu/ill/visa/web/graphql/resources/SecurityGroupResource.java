@@ -1,12 +1,12 @@
 package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.preql.exception.InvalidQueryException;
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.CloudProviderService;
 import eu.ill.visa.business.services.SecurityGroupFilterService;
 import eu.ill.visa.business.services.SecurityGroupService;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
@@ -39,17 +39,17 @@ public class SecurityGroupResource {
 
     private final SecurityGroupService securityGroupService;
     private final SecurityGroupFilterService securityGroupFilterService;
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
     private final CloudProviderService cloudProviderService;
 
     @Inject
     public SecurityGroupResource(final SecurityGroupService securityGroupService,
                                  final SecurityGroupFilterService securityGroupFilterService,
-                                 final CloudClientGateway cloudClientGateway,
+                                 final CloudClientService cloudClientService,
                                  final CloudProviderService cloudProviderService) {
         this.securityGroupService = securityGroupService;
         this.securityGroupFilterService = securityGroupFilterService;
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.cloudProviderService = cloudProviderService;
     }
 
@@ -154,7 +154,7 @@ public class SecurityGroupResource {
 
     private void validateSecurityGroupInput(SecurityGroupInput securityGroupInput) throws InvalidInputException {
         try {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(securityGroupInput.getCloudId());
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(securityGroupInput.getCloudId());
             if (cloudClient == null) {
                 throw new InvalidInputException("Invalid cloud Id");
             }
@@ -172,7 +172,7 @@ public class SecurityGroupResource {
 
     private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {
         if (cloudId != null && cloudId > 0) {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(cloudId);
             return this.cloudProviderService.getById(cloudClient.getId());
         }
         return null;

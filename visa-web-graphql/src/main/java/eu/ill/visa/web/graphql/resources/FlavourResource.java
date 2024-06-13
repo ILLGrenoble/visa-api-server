@@ -5,7 +5,6 @@ import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
@@ -37,7 +36,7 @@ public class FlavourResource {
     private final FlavourLimitService flavourLimitService;
     private final InstrumentService instrumentService;
     private final RoleService roleService;
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
     private final CloudProviderService cloudProviderService;
 
     @Inject
@@ -45,13 +44,13 @@ public class FlavourResource {
                            final FlavourLimitService flavourLimitService,
                            final InstrumentService instrumentService,
                            final RoleService roleService,
-                           final CloudClientGateway cloudClientGateway,
+                           final CloudClientService cloudClientService,
                            final CloudProviderService cloudProviderService) {
         this.flavourService = flavourService;
         this.flavourLimitService = flavourLimitService;
         this.instrumentService = instrumentService;
         this.roleService = roleService;
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.cloudProviderService = cloudProviderService;
     }
 
@@ -164,7 +163,7 @@ public class FlavourResource {
 
     private void validateFlavourInput(FlavourInput flavourInput) throws InvalidInputException {
         try {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(flavourInput.getCloudId());
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(flavourInput.getCloudId());
             if (cloudClient == null) {
                 throw new InvalidInputException("Invalid cloud Id");
             }
@@ -226,7 +225,7 @@ public class FlavourResource {
 
     private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {
         if (cloudId != null && cloudId > 0) {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(cloudId);
             return this.cloudProviderService.getById(cloudClient.getId());
         }
         return null;

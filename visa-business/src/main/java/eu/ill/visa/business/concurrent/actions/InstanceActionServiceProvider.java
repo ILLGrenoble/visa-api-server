@@ -3,7 +3,6 @@ package eu.ill.visa.business.concurrent.actions;
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
@@ -23,8 +22,7 @@ public class InstanceActionServiceProvider {
     private final SecurityGroupService securityGroupService;
     private final InstrumentService instrumentService;
     private final SignatureService signatureService;
-
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
 
 
     @Inject
@@ -33,7 +31,7 @@ public class InstanceActionServiceProvider {
                                          final InstanceCommandService instanceCommandService,
                                          final SecurityGroupService securityGroupService,
                                          final InstrumentService instrumentService,
-                                         final CloudClientGateway cloudClientGateway,
+                                         final CloudClientService cloudClientService,
                                          final EmailManager emailManager,
                                          final SignatureService signatureService) {
         this.instanceService = instanceService;
@@ -41,7 +39,7 @@ public class InstanceActionServiceProvider {
         this.instanceCommandService = instanceCommandService;
         this.securityGroupService = securityGroupService;
         this.instrumentService = instrumentService;
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.emailManager = emailManager;
         this.signatureService = signatureService;
     }
@@ -82,7 +80,7 @@ public class InstanceActionServiceProvider {
     }
 
     public CloudClient getCloudClient(Long cloudClientId) {
-        return this.cloudClientGateway.getCloudClient(cloudClientId);
+        return this.cloudClientService.getCloudClient(cloudClientId);
     }
 
     public EmailManager getEmailManager() {

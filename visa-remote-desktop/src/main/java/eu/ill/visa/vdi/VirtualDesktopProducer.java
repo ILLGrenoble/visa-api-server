@@ -6,10 +6,10 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.store.MemoryStoreFactory;
 import com.corundumstudio.socketio.store.RedissonStoreFactory;
 import com.corundumstudio.socketio.store.StoreFactory;
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.business.services.SignatureService;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.vdi.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.exceptions.DefaultExceptionListener;
 import eu.ill.visa.vdi.services.GuacamoleDesktopService;
@@ -29,7 +29,7 @@ public class VirtualDesktopProducer {
     private final static Logger logger = LoggerFactory.getLogger(VirtualDesktopProducer.class);
 
     private final VirtualDesktopConfiguration configuration;
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
     private final InstanceSessionService instanceSessionService;
     private final SignatureService signatureService;
     private final ImageProtocolService imageProtocolService;
@@ -37,13 +37,13 @@ public class VirtualDesktopProducer {
 
     @Inject
     public VirtualDesktopProducer(final VirtualDesktopConfiguration configuration,
-                                  final CloudClientGateway cloudClientGateway,
+                                  final CloudClientService cloudClientService,
                                   final InstanceSessionService instanceSessionService,
                                   final SignatureService signatureService,
                                   final ImageProtocolService imageProtocolService,
                                   final ConnectionThreadExecutor executorService) {
         this.configuration = configuration;
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.instanceSessionService = instanceSessionService;
         this.signatureService = signatureService;
         this.imageProtocolService = imageProtocolService;
@@ -99,12 +99,12 @@ public class VirtualDesktopProducer {
 
     @Produces
     public WebXDesktopService webXDesktopService() {
-        return new WebXDesktopService(instanceSessionService, cloudClientGateway, signatureService, imageProtocolService, executorService);
+        return new WebXDesktopService(instanceSessionService, cloudClientService, signatureService, imageProtocolService, executorService);
     }
 
     @Produces
     public GuacamoleDesktopService guacamoleDesktopService() {
-        return new GuacamoleDesktopService(instanceSessionService, cloudClientGateway, signatureService, imageProtocolService, configuration, executorService);
+        return new GuacamoleDesktopService(instanceSessionService, cloudClientService, signatureService, imageProtocolService, configuration, executorService);
     }
 
 }

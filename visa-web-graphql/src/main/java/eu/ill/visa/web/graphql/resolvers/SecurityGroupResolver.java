@@ -1,7 +1,7 @@
 package eu.ill.visa.web.graphql.resolvers;
 
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.SecurityGroupType;
 import jakarta.inject.Inject;
@@ -13,15 +13,15 @@ import org.eclipse.microprofile.graphql.Source;
 @GraphQLApi
 public class SecurityGroupResolver {
 
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
 
     @Inject
-    public SecurityGroupResolver(final CloudClientGateway cloudClientGateway) {
-        this.cloudClientGateway = cloudClientGateway;
+    public SecurityGroupResolver(final CloudClientService cloudClientService) {
+        this.cloudClientService = cloudClientService;
     }
 
     public @NotNull CloudClientType cloudClient(@Source SecurityGroupType securityGroup) {
-        CloudClient cloudClient = this.cloudClientGateway.getCloudClient(securityGroup.getCloudId());
+        CloudClient cloudClient = this.cloudClientService.getCloudClient(securityGroup.getCloudId());
         if (cloudClient != null) {
             return new CloudClientType(cloudClient);
         }

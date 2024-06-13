@@ -1,11 +1,11 @@
 package eu.ill.visa.vdi.services;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
@@ -43,12 +43,12 @@ public class GuacamoleDesktopService extends DesktopService {
     private final ConnectionThreadExecutor executorService;
 
     public GuacamoleDesktopService(final InstanceSessionService instanceSessionService,
-                            final CloudClientGateway cloudClientGateway,
+                            final CloudClientService cloudClientService,
                             final SignatureService signatureService,
                             final ImageProtocolService imageProtocolService,
                             final VirtualDesktopConfiguration configuration,
                             final ConnectionThreadExecutor executorService) {
-        super(cloudClientGateway);
+        super(cloudClientService);
 
         this.instanceSessionService = instanceSessionService;
         this.signatureService = signatureService;

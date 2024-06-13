@@ -1,10 +1,10 @@
 package eu.ill.visa.web.graphql.resolvers;
 
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProvider;
 import eu.ill.visa.cloud.providers.web.WebProvider;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.OpenStackProviderConfigurationType;
 import eu.ill.visa.web.graphql.types.WebProviderConfigurationType;
@@ -14,14 +14,14 @@ import org.eclipse.microprofile.graphql.Source;
 @GraphQLApi
 public class CloudClientResolver {
 
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
 
-    public CloudClientResolver(final CloudClientGateway cloudClientGateway) {
-        this.cloudClientGateway = cloudClientGateway;
+    public CloudClientResolver(final CloudClientService cloudClientService) {
+        this.cloudClientService = cloudClientService;
     }
 
     public OpenStackProviderConfigurationType openStackProviderConfiguration(@Source CloudClientType cloudClientType) {
-        final CloudClient cloudClient = cloudClientGateway.getCloudClient(cloudClientType.getId());
+        final CloudClient cloudClient = cloudClientService.getCloudClient(cloudClientType.getId());
 
         if (cloudClient.getType().equals(CloudClientFactory.OPENSTACK)) {
             try {
@@ -36,7 +36,7 @@ public class CloudClientResolver {
     }
 
     public WebProviderConfigurationType webProviderConfiguration(@Source CloudClientType cloudClientType) {
-        final CloudClient cloudClient = cloudClientGateway.getCloudClient(cloudClientType.getId());
+        final CloudClient cloudClient = cloudClientService.getCloudClient(cloudClientType.getId());
         if (cloudClient.getType().equals(CloudClientFactory.WEB)) {
             try {
                 WebProvider webProvider = (WebProvider)cloudClient.getProvider();

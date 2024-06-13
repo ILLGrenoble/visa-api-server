@@ -1,12 +1,11 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.visa.business.services.CloudProviderService;
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Role;
@@ -35,16 +34,13 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 @RolesAllowed(Role.ADMIN_ROLE)
 public class CloudClientResource {
 
-    private final CloudClientGateway cloudClientGateway;
-    private final CloudProviderService cloudProviderService;
+    private final CloudClientService cloudClientService;
     private final InstanceService instanceService;
 
     @Inject
-    public CloudClientResource(final CloudClientGateway cloudClientGateway,
-                               final CloudProviderService cloudProviderService,
+    public CloudClientResource(final CloudClientService cloudClientService,
                                final InstanceService instanceService) {
-        this.cloudClientGateway = cloudClientGateway;
-        this.cloudProviderService = cloudProviderService;
+        this.cloudClientService = cloudClientService;
         this.instanceService = instanceService;
     }
 
@@ -55,7 +51,7 @@ public class CloudClientResource {
      */
     @Query
     public @NotNull List<CloudClientType> cloudClients() {
-        return this.cloudClientGateway.getAll().stream()
+        return this.cloudClientService.getAll().stream()
             .map(CloudClientType::new)
             .toList();
     }
@@ -110,24 +106,26 @@ public class CloudClientResource {
      */
     @Query
     public @NotNull CompletableFuture<List<DetailedCloudLimit>> cloudLimits() {
-        List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
+        final CompletableFuture<List<DetailedCloudLimit>> bigFuture = new CompletableFuture<>();
+        runAsync(() -> {
+            List<CloudClient> cloudClients = this.cloudClientService.getAll();
 
-        List<CompletableFuture<DetailedCloudLimit>> allCloudLimitsFutures = cloudClients.stream().map(cloudClient -> {
-            final CompletableFuture<DetailedCloudLimit> future = new CompletableFuture<>();
-            runAsync(() -> {
-                try {
-                    CloudLimit cloudLimit = cloudClient.limits();
-                    future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), cloudLimit));
-                } catch (CloudException exception) {
-                    future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), exception.getMessage()));
-                }
-            });
-            return future;
-        }).toList();
+            List<CompletableFuture<DetailedCloudLimit>> allCloudLimitsFutures = cloudClients.stream().map(cloudClient -> {
+                final CompletableFuture<DetailedCloudLimit> future = new CompletableFuture<>();
+                runAsync(() -> {
+                    try {
+                        CloudLimit cloudLimit = cloudClient.limits();
+                        future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), cloudLimit));
+                    } catch (CloudException exception) {
+                        future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), exception.getMessage()));
+                    }
+                });
+                return future;
+            }).toList();
 
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(allCloudLimitsFutures.toArray(new CompletableFuture[0]));
-
-        return allFutures.thenApply(future -> allCloudLimitsFutures.stream().map(CompletableFuture::join).toList()).toCompletableFuture();
+            bigFuture.complete(allCloudLimitsFutures.stream().map(CompletableFuture::join).toList());
+        });
+        return bigFuture;
     }
 
     /**
@@ -173,7 +171,7 @@ public class CloudClientResource {
 
         this.setCloudConfigurationParameters(configuration, input);
 
-        return new CloudClientType(this.cloudProviderService.createCloudClient(configuration));
+        return new CloudClientType(this.cloudClientService.createOrUpdateCloudClient(configuration));
     }
 
     /**
@@ -190,7 +188,7 @@ public class CloudClientResource {
             throw new InvalidInputException("The default cloud provider cannot be modified");
         }
 
-        CloudProviderConfiguration configuration = this.cloudProviderService.getById(id);
+        CloudProviderConfiguration configuration = this.cloudClientService.getCloudProviderConfiguration(id);
         if (configuration == null) {
             throw new EntityNotFoundException("Cloud provider not found for the given id");
         }
@@ -206,7 +204,7 @@ public class CloudClientResource {
 
         this.setCloudConfigurationParameters(configuration, input);
 
-        return new CloudClientType(this.cloudProviderService.save(configuration));
+        return new CloudClientType(this.cloudClientService.createOrUpdateCloudClient(configuration));
     }
 
     /**
@@ -223,8 +221,8 @@ public class CloudClientResource {
             throw new InvalidInputException("The default cloud client cannot be deleted");
         }
 
-        final CloudProviderConfiguration configuration = this.cloudProviderService.getById(id);
-        if (configuration == null) {
+        final CloudClient cloudClient = this.cloudClientService.getCloudClient(id);
+        if (cloudClient == null) {
             throw new EntityNotFoundException("Cloud Client not found for the given id");
         }
 
@@ -239,7 +237,7 @@ public class CloudClientResource {
             throw new InvalidInputException("Cannot delete a cloud provider with active instances");
         }
 
-        this.cloudProviderService.delete(configuration);
+        this.cloudClientService.delete(cloudClient);
         return true;
     }
 
@@ -274,7 +272,7 @@ public class CloudClientResource {
     }
 
     private CloudClient getCloudClient(Long cloudId) throws DataFetchingException {
-        CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+        CloudClient cloudClient = this.cloudClientService.getCloudClient(cloudId);
         if (cloudClient == null) {
             throw new DataFetchingException("Cloud Client with ID " + cloudId + " does not exist");
         }

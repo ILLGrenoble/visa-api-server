@@ -45,8 +45,4 @@ public class CloudProviderRepository extends AbstractRepository<CloudProviderCon
             merge(cloudProviderConfiguration);
         }
     }
-
-    public void create(CloudProviderConfiguration cloudProviderConfiguration) {
-        persist(cloudProviderConfiguration);
-    }
 }

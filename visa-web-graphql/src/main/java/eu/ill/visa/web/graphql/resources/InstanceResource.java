@@ -1,11 +1,11 @@
 package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.preql.exception.InvalidQueryException;
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.InstanceActionScheduler;
 import eu.ill.visa.business.services.InstanceExtensionRequestService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
@@ -51,19 +51,19 @@ import static java.util.Objects.requireNonNullElseGet;
 public class InstanceResource {
 
     private final InstanceService instanceService;
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
     private final SecurityIdentity securityIdentity;
     private final InstanceActionScheduler instanceActionScheduler;
     private final InstanceExtensionRequestService instanceExtensionRequestService;
 
     @Inject
     public InstanceResource(final InstanceService instanceService,
-                            final CloudClientGateway cloudClientGateway,
+                            final CloudClientService cloudClientService,
                             final SecurityIdentity securityIdentity,
                             final InstanceActionScheduler instanceActionScheduler,
                             final InstanceExtensionRequestService instanceExtensionRequestService) {
         this.instanceService = instanceService;
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.securityIdentity = securityIdentity;
         this.instanceActionScheduler = instanceActionScheduler;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
@@ -189,7 +189,7 @@ public class InstanceResource {
         try {
             return instanceService.countByCloudClient().stream()
                 .map(countByCloudClient -> {
-                    CloudClient cloudClient = this.cloudClientGateway.getCloudClient(countByCloudClient.getId());
+                    CloudClient cloudClient = this.cloudClientService.getCloudClient(countByCloudClient.getId());
                     return new NumberInstancesByCloudClient(cloudClient.getId(), cloudClient.getName(), countByCloudClient.getTotal());
                 })
                 .map(NumberInstancesByCloudClientType::new)

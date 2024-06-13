@@ -33,7 +33,7 @@ public class CloudClientGateway {
 
     }
 
-    public CloudClient getDefaultCloudClient() {
+    private CloudClient getDefaultCloudClient() {
         return defaultCloudClient;
     }
 
@@ -68,13 +68,7 @@ public class CloudClientGateway {
         return null;
     }
 
-    public CloudClient updateCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) {
-        this.secondaryCloudClients.remove(providerId);
-
-        return this.addCloudClient(providerId, name, providerConfiguration, serverNamePrefix, visible);
-    }
-
-    public void removeCloudClient(Long providerId) {
-        this.secondaryCloudClients.remove(providerId);
+    public void removeCloudClient(Long id) {
+        this.secondaryCloudClients.remove(id);
     }
 }

@@ -3,7 +3,6 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.domain.HealthReport;
 import eu.ill.visa.core.domain.HealthState;
 import eu.ill.visa.core.domain.enumerations.HealthStatus;
@@ -18,13 +17,13 @@ import java.util.List;
 @Singleton
 public class HealthService {
 
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
     private final ImageService imageService;
 
     @Inject
-    public HealthService(final CloudClientGateway cloudClientGateway,
+    public HealthService(final CloudClientService cloudClientService,
                          final ImageService imageService) {
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.imageService = imageService;
     }
 
@@ -51,7 +50,7 @@ public class HealthService {
 
     private HealthState getCloudHealthStatus() {
         try {
-            List<CloudClient> cloudClients = this.cloudClientGateway.getAll();
+            List<CloudClient> cloudClients = this.cloudClientService.getAll();
             for (CloudClient cloudClient : cloudClients) {
                 CloudLimit cloudLimit = cloudClient.limits();
                 if (cloudLimit == null) {

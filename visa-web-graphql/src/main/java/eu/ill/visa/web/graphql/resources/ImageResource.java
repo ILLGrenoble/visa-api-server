@@ -1,13 +1,13 @@
 package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.preql.exception.InvalidQueryException;
+import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.CloudProviderService;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.ImageService;
 import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.cloud.services.CloudClientGateway;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Image;
 import eu.ill.visa.core.entity.ImageProtocol;
@@ -36,17 +36,17 @@ public class ImageResource {
 
     private final ImageService imageService;
     private final ImageProtocolService imageProtocolService;
-    private final CloudClientGateway cloudClientGateway;
+    private final CloudClientService cloudClientService;
     private final CloudProviderService cloudProviderService;
 
     @Inject
     public ImageResource(final ImageService imageService,
                          final ImageProtocolService imageProtocolService,
-                         final CloudClientGateway cloudClientGateway,
+                         final CloudClientService cloudClientService,
                          final CloudProviderService cloudProviderService) {
         this.imageService = imageService;
         this.imageProtocolService = imageProtocolService;
-        this.cloudClientGateway = cloudClientGateway;
+        this.cloudClientService = cloudClientService;
         this.cloudProviderService = cloudProviderService;
     }
 
@@ -141,7 +141,7 @@ public class ImageResource {
 
     private void validateImageInput(ImageInput imageInput) throws InvalidInputException {
         try {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(imageInput.getCloudId());
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(imageInput.getCloudId());
             if (cloudClient == null) {
                 throw new InvalidInputException("Invalid cloud Id");
             }
@@ -180,7 +180,7 @@ public class ImageResource {
 
     private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {
         if (cloudId != null && cloudId > 0) {
-            CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudId);
+            CloudClient cloudClient = this.cloudClientService.getCloudClient(cloudId);
             return this.cloudProviderService.getById(cloudClient.getId());
         }
         return null;
