@@ -1,6 +1,6 @@
 package eu.ill.visa.cloud.exceptions;
 
-public class CloudAuthenticationException extends RuntimeException {
+public class CloudAuthenticationException extends CloudRuntimeException {
 
     public CloudAuthenticationException() {
     }

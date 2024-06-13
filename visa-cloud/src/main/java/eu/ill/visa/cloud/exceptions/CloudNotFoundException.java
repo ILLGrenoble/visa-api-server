@@ -1,6 +1,6 @@
 package eu.ill.visa.cloud.exceptions;
 
-public class CloudNotFoundException extends RuntimeException {
+public class CloudNotFoundException extends CloudRuntimeException {
 
     public CloudNotFoundException() {
     }

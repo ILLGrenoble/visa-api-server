@@ -4,6 +4,7 @@ import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
+import eu.ill.visa.cloud.exceptions.CloudRuntimeException;
 import eu.ill.visa.cloud.providers.CloudProvider;
 import eu.ill.visa.cloud.providers.web.http.WebProviderClient;
 import eu.ill.visa.cloud.providers.web.http.requests.InstanceSecurityGroupRequest;
@@ -232,10 +233,12 @@ public class WebProvider implements CloudProvider {
         try {
             return this.webProviderClient.limits(this.configuration.getAuthToken());
 
-        } catch (Exception e) {
+        } catch (CloudRuntimeException e) {
             logger.warn("Failed to get cloud metrics from Web Provider: {}", e.getMessage());
+            return null;
+        } catch (Exception e) {
+            throw new CloudException("Failed to get cloud metrics from Web Provider " + e.getMessage());
         }
-        return null;
     }
 
     @Override
@@ -244,9 +247,11 @@ public class WebProvider implements CloudProvider {
             List<String> securityGroups = this.webProviderClient.securityGroups(this.configuration.getAuthToken());
             return securityGroups;
 
-        } catch (Exception e) {
+        } catch (CloudRuntimeException e) {
             logger.warn("Failed to get security groups from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+        } catch (Exception e) {
+            throw new CloudException("Failed to get security groups from Web Provider " + e.getMessage());
         }
-        return new ArrayList<>();
     }
 }
