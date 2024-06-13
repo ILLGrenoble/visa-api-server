@@ -221,7 +221,7 @@ public class DesktopAccessService {
         if (client.isChannelOpen()) {
 
             User user = candidate.getUser();
-            Instance instance = this.instanceService.getById(candidate.getInstanceId());
+            Instance instance = this.instanceService.getFullById(candidate.getInstanceId());
 
             if (instance != null) {
                 // Convert the support role to a normal user one if the owner of the instance is staff

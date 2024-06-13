@@ -1,8 +1,6 @@
 package eu.ill.visa.vdi.domain;
 
-import java.io.Serializable;
-
-public class AccessRequest implements Serializable {
+public class AccessRequest {
     private String token;
     private String userFullName;
 

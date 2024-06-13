@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Provider
-public class LoggingFilter implements ContainerRequestFilter {
+public class LoggingRequestFilter implements ContainerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoggingRequestFilter.class);
 
     @Context
     UriInfo info;
@@ -28,6 +28,6 @@ public class LoggingFilter implements ContainerRequestFilter {
         final String address = request.remoteAddress().toString();
         final String forwardedIP = request.getHeader("X-Forwarded-For");
 
-        logger.debug("{} {} from IP {}", method, path, forwardedIP == null ? address : forwardedIP);
+        logger.info("{} {} from IP {}", method, path, forwardedIP == null ? address : forwardedIP);
     }
 }

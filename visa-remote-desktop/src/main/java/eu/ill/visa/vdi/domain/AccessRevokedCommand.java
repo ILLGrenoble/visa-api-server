@@ -1,8 +1,6 @@
 package eu.ill.visa.vdi.domain;
 
-import java.io.Serializable;
-
-public class AccessRevokedCommand implements Serializable {
+public class AccessRevokedCommand {
     String userId;
 
     public AccessRevokedCommand() {

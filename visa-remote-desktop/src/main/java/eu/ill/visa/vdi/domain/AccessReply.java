@@ -1,8 +1,6 @@
 package eu.ill.visa.vdi.domain;
 
-import java.io.Serializable;
-
-public class AccessReply implements Serializable {
+public class AccessReply {
     String id;
     String response;
 

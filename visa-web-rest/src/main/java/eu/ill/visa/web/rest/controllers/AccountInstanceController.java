@@ -394,6 +394,7 @@ public class AccountInstanceController extends AbstractController {
             List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembers(instance);
 
             return createResponse(sessionMembers.stream()
+                .peek(instanceSessionMember -> instanceSessionMember.getInstanceSession().setInstance(instance))
                 .map(InstanceSessionMemberDto::new)
                 .collect(toList()));
         }

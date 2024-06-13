@@ -1,8 +1,6 @@
 package eu.ill.visa.vdi.domain;
 
-import java.io.Serializable;
-
-public class AccessCancellation implements Serializable {
+public class AccessCancellation {
     private String token;
     private String userFullName;
 
