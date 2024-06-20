@@ -37,7 +37,7 @@ public class LoggingRequestFilter implements ContainerRequestFilter {
         final String address = request.remoteAddress().toString();
         final String forwardedIP = request.getHeader("X-Forwarded-For");
 
-        logger.info("{} {} {}, user: {}", forwardedIP == null ? address : forwardedIP, method, path, principal);
+        logger.debug("{} {} {}, user: {}", forwardedIP == null ? address : forwardedIP, method, path, principal);
     }
 
     private String getPrincipal(SecurityContext securityContext) {
