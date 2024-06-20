@@ -1,32 +1,25 @@
 package eu.ill.visa.vdi.business.services;
 
-import com.corundumstudio.socketio.BroadcastOperations;
 import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.SocketIONamespace;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
-import eu.ill.visa.core.entity.InstanceSessionMember;
-import eu.ill.visa.core.entity.User;
-import eu.ill.visa.vdi.domain.models.AccessCancellation;
-import eu.ill.visa.vdi.domain.models.AccessReply;
-import eu.ill.visa.vdi.domain.models.AccessRequest;
-import eu.ill.visa.vdi.domain.models.Role;
-import eu.ill.visa.vdi.domain.events.AccessCancellationEvent;
-import eu.ill.visa.vdi.domain.events.AccessCandidateEvent;
+import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
 import eu.ill.visa.vdi.domain.events.AccessReplyEvent;
 import eu.ill.visa.vdi.domain.events.Event;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
-import eu.ill.visa.vdi.domain.models.DesktopCandidate;
+import eu.ill.visa.vdi.domain.models.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import static eu.ill.visa.vdi.domain.events.Event.ACCESS_DENIED;
 
@@ -34,169 +27,158 @@ import static eu.ill.visa.vdi.domain.events.Event.ACCESS_DENIED;
 public class DesktopAccessService {
     private static final Logger logger = LoggerFactory.getLogger(DesktopAccessService.class);
 
+    private record AccessRequestToken(String connectionId, ConnectedUser user, String token) { }
+
     private final DesktopConnectionService desktopConnectionService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceService instanceService;
+    private final RemoteDesktopBroker remoteDesktopBroker;
 
-    private final Map<UUID, DesktopCandidate> desktopCandidates = new HashMap<>();
-    private final Map<UUID, UUID> clientSessionIds = new HashMap<>();
+    private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
+    private final List<AccessRequestToken> accessRequestTokens = new ArrayList<>();
 
     @Inject
     public DesktopAccessService(final DesktopConnectionService desktopConnectionService,
                                 final InstanceSessionService instanceSessionService,
-                                final InstanceService instanceService) {
+                                final InstanceService instanceService,
+                                final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBroker) {
         this.desktopConnectionService = desktopConnectionService;
         this.instanceSessionService = instanceSessionService;
         this.instanceService = instanceService;
+        this.remoteDesktopBroker = remoteDesktopBroker.get();
     }
 
-    private DesktopCandidate addCandidate(SocketIOClient client, User user, Instance instance) {
-        DesktopCandidate desktopCandidate = new DesktopCandidate(client, user, instance.getId());
-        this.desktopCandidates.put(client.getSessionId(), desktopCandidate);
+    private DesktopCandidate addCandidate(SocketIOClient client, ConnectedUser user, Long instanceId) {
+        DesktopCandidate desktopCandidate = new DesktopCandidate(client, user, instanceId);
+        this.desktopCandidates.add(desktopCandidate);
 
         return desktopCandidate;
     }
 
-    public void initiateAccess(SocketIOClient client, User user, Instance instance) {
+    private DesktopCandidate getCandidateById(String connectionId) {
+        return this.desktopCandidates.stream()
+            .filter(candidate -> candidate.getConnectionId().equals(connectionId))
+            .findAny()
+            .orElse(null);
+    }
+
+    private DesktopCandidate removeCandidate(String connectionId) {
+        DesktopCandidate desktopCandidate = this.getCandidateById(connectionId);
+        if (desktopCandidate != null) {
+            this.desktopCandidates.remove(desktopCandidate);
+            return  desktopCandidate;
+        }
+        return null;
+    }
+
+    public void initiateAccess(SocketIOClient client, ConnectedUser user, Long instanceId) {
         // Create pending desktop connection
-        DesktopCandidate desktopCandidate = this.addCandidate(client, user, instance);
+        DesktopCandidate desktopCandidate = this.addCandidate(client, user, instanceId);
 
         // Get room Id from connection
         String room = desktopCandidate.getRoomId();
 
         client.joinRoom(room);
 
-        final SocketIONamespace namespace = client.getNamespace();
-        final BroadcastOperations operations = namespace.getRoomOperations(room);
+        this.remoteDesktopBroker.onAccessRequested(instanceId, user, client.getSessionId().toString());
+    }
 
-        client.sendEvent(Event.ACCESS_PENDING_EVENT);
+    public void onAccessRequested(Long instanceId, ConnectedUser user, String requesterConnectionId) {
+        // See if we have the owner of the instance
+        List<DesktopConnection> ownerDesktopConnections = this.desktopConnectionService.getOwnerDesktopConnectionsForInstanceId(instanceId);
+        if (!ownerDesktopConnections.isEmpty()) {
+            logger.info("Handling access request for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
 
-        SocketIOClient owner = this.getDesktopOwner(operations.getClients());
-        if (owner == null) {
-            // If owner not found on this server then broadcast to all other servers
-            this.desktopConnectionService.broadcast(client, room, new AccessCandidateEvent(user.getFullName()));
+            // Generate a token
+            String requestToken = UUID.randomUUID().toString();
 
+            // Maintain a map of token to candidateConnectionId
+            this.accessRequestTokens.add(new AccessRequestToken(requesterConnectionId, user, requestToken));
+
+            // Send request to owners
+            ownerDesktopConnections.forEach(desktopConnection -> {
+                SocketIOClient owner = desktopConnection.getClient();
+                owner.sendEvent(Event.ACCESS_REQUEST_EVENT, new AccessRequest(user, requestToken));
+            });
         } else {
-            this.sendRequestToOwner(user.getFullName(), client.getSessionId(), owner);
+            logger.info("Ignoring access request for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
         }
     }
 
     public void cancelAccess(SocketIOClient client) {
-        // Determine if access has been requested
-        DesktopCandidate desktopCandidate = this.desktopCandidates.remove(client.getSessionId());
+        // Verify that access has been requested
+        DesktopCandidate desktopCandidate = this.removeCandidate(client.getSessionId().toString());
         if (desktopCandidate != null) {
-            User user = desktopCandidate.getUser();
-
-            // Get room Id from connection
-            String room = desktopCandidate.getRoomId();
-
-            // See if request was made to owner on local server
-            UUID requestToken = this.getRequestTokenForClient(client.getSessionId());
-            if (requestToken != null) {
-
-                // Get owner
-                final SocketIONamespace namespace = client.getNamespace();
-                final BroadcastOperations operations = namespace.getRoomOperations(room);
-                SocketIOClient owner = this.getDesktopOwner(operations.getClients());
-
-                // Send cancellation to owner
-                this.sendCancellationToOwner(user.getFullName(), requestToken, owner);
-
-            } else {
-                // Broadcast cancellation to other servers
-                this.desktopConnectionService.broadcast(client, room, new AccessCancellationEvent(user.getFullName()));
-            }
+            // A desktop request was in progress
+            this.remoteDesktopBroker.onAccessCancelled(desktopCandidate.getInstanceId(), desktopCandidate.getUser(), desktopCandidate.getConnectionId());
         }
     }
 
-    public void forwardCandidateRequest(Collection<SocketIOClient> clients, String userFullName, UUID candidateSessionId) {
-        SocketIOClient owner = this.getDesktopOwner(clients);
-        if (owner != null) {
-            this.sendRequestToOwner(userFullName, candidateSessionId, owner);
+    public void onAccessRequestCancelled(Long instanceId, ConnectedUser user, String requesterConnectionId) {
+        AccessRequestToken token = this.getRequestTokenForConnectionId(requesterConnectionId);
+        if (token != null) {
+            logger.info("Handling cancellation for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
+            List<DesktopConnection> ownerDesktopConnections = this.desktopConnectionService.getOwnerDesktopConnectionsForInstanceId(instanceId);
+            // Send cancellation to owners
+            ownerDesktopConnections.forEach(desktopConnection -> {
+                SocketIOClient owner = desktopConnection.getClient();
+                owner.sendEvent(Event.ACCESS_CANCELLATION_EVENT, new AccessCancellation(user.getFullName(), token.token()));
+            });
+
+            // Cleanup the map of tokens for candidateConnectionIds
+            this.accessRequestTokens.remove(token);
+
+        } else {
+            logger.info("Ignoring cancellation for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
         }
     }
 
-    public void forwardAccessCancellation(Collection<SocketIOClient> clients, String userFullName, UUID candidateSessionId) {
-        SocketIOClient owner = this.getDesktopOwner(clients);
-        if (owner != null) {
-            UUID requestToken = this.getRequestTokenForClient(candidateSessionId);
-            if (requestToken != null) {
-                this.sendCancellationToOwner(userFullName, requestToken, owner);
-            }
-        }
+    private AccessRequestToken getRequestTokenForConnectionId(String connectionId) {
+        return this.accessRequestTokens.stream()
+            .filter(token -> token.connectionId().equals(connectionId))
+            .findAny()
+            .orElse(null);
     }
 
-    private SocketIOClient getDesktopOwner(Collection<SocketIOClient> clients) {
-
-        for (final SocketIOClient aClient : clients) {
-            InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(aClient.getSessionId());
-            if (instanceSessionMember != null && instanceSessionMember.getRole().equals("OWNER")) {
-                return aClient;
-            }
-        }
-
-        return null;
-    }
-
-    private UUID getRequestTokenForClient(UUID clientSessionId) {
-        for (Map.Entry<UUID, UUID> entry : this.clientSessionIds.entrySet()) {
-            if (entry.getValue().equals(clientSessionId)) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    private void sendRequestToOwner(String userFullName, UUID clientSessionId, SocketIOClient owner) {
-        // Generate a token
-        UUID requestToken = UUID.randomUUID();
-
-        // Maintain a map of token to candidateSessionId
-        this.clientSessionIds.put(requestToken, clientSessionId);
-
-        // Send request to owner
-        owner.sendEvent(Event.ACCESS_REQUEST_EVENT, new AccessRequest(userFullName, requestToken.toString()));
-    }
-
-    private void sendCancellationToOwner(String userFullName, UUID requestToken, SocketIOClient owner) {
-        // Remove clientSessionId from map
-        this.clientSessionIds.remove(requestToken);
-
-        // Send cancellation to owner
-        owner.sendEvent(Event.ACCESS_CANCELLATION_EVENT, new AccessCancellation(userFullName, requestToken.toString()));
+    private AccessRequestToken getRequestTokenForToken(String token) {
+        return this.accessRequestTokens.stream()
+            .filter(accessRequestToken -> accessRequestToken.token().equals(token))
+            .findAny()
+            .orElse(null);
     }
 
     public void onAccessReply(SocketIOClient owner, AccessReply accessReply) {
-        UUID requestToken = UUID.fromString(accessReply.getId());
-        UUID clientSessionId = this.clientSessionIds.remove(requestToken);
-        Role replyRole = accessReply.getRole();
+        AccessRequestToken accessRequestToken = this.getRequestTokenForToken(accessReply.getId());
+        if (accessRequestToken != null) {
+            this.accessRequestTokens.remove(accessRequestToken);
+            Role replyRole = accessReply.getRole();
 
-        DesktopCandidate candidate = this.desktopCandidates.remove(clientSessionId);
-        if (candidate != null) {
-            this.connectFromAccessReply(candidate, replyRole);
+            DesktopCandidate candidate = this.removeCandidate(accessRequestToken.connectionId());
+            if (candidate != null) {
+                this.connectFromAccessReply(candidate, replyRole);
 
-        } else {
-            // Broadcast candidate response
-            this.desktopConnectionService.broadcast(owner, new AccessReplyEvent(new AccessReply(clientSessionId.toString(), replyRole.toString())));
+            } else {
+                // Broadcast candidate response
+                this.desktopConnectionService.broadcast(owner, new AccessReplyEvent(new AccessReply(accessRequestToken.connectionId(), replyRole.toString())));
+            }
         }
     }
 
     public void handleForwardedAccessReply(AccessReply accessReply) {
-        UUID clientSessionId = UUID.fromString(accessReply.getId());
-        DesktopCandidate candidate = this.desktopCandidates.remove(clientSessionId);
+        DesktopCandidate candidate = this.removeCandidate(accessReply.getId());
         if (candidate != null) {
             Role replyRole = accessReply.getRole();
             this.connectFromAccessReply(candidate, replyRole);
         }
     }
 
-    private Role convertAccessReplyRole(Role replyRole, Instance instance, User user) {
+    private Role convertAccessReplyRole(Role replyRole, Instance instance, ConnectedUser user) {
         if (replyRole.equals(Role.SUPPORT)) {
             InstanceMember owner = instance.getOwner();
             boolean ownerIsExternalUser = !owner.getUser().hasRole(eu.ill.visa.core.entity.Role.STAFF_ROLE);
             if (ownerIsExternalUser) {
                 // See if user has right to access instance when owner away (support role, otherwise user role)
-                if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
+                if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
                     // SUPPORT role if user can connect while owner away
                     return Role.SUPPORT;
 
@@ -220,14 +202,15 @@ public class DesktopAccessService {
         SocketIOClient client = candidate.getClient();
         if (client.isChannelOpen()) {
 
-            User user = candidate.getUser();
+            ConnectedUser user = candidate.getUser();
             Instance instance = this.instanceService.getFullById(candidate.getInstanceId());
 
             if (instance != null) {
                 // Convert the support role to a normal user one if the owner of the instance is staff
                 Role role = this.convertAccessReplyRole(replyRole, instance, user);
+                user.setRole(role);
                 try {
-                    this.desktopConnectionService.createDesktopConnection(client, instance, user, role);
+                    this.desktopConnectionService.createDesktopConnection(client, instance, user);
 
                     client.sendEvent(Event.ACCESS_GRANTED_EVENT, role);
 

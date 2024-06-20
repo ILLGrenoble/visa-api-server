@@ -7,13 +7,12 @@ import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
-import eu.ill.visa.vdi.domain.models.Role;
+import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.GuacamoleSocket;
 import org.apache.guacamole.net.GuacamoleTunnel;
@@ -102,68 +101,66 @@ public class GuacamoleDesktopService extends DesktopService {
         return new ConfiguredGuacamoleSocket(socket, config, information);
     }
 
-    private ConfiguredGuacamoleSocket createSocketAndSession(Instance instance, User user, Role role) throws OwnerNotConnectedException, GuacamoleException {
+    private ConfiguredGuacamoleSocket createSocketAndSession(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException {
         // Create new session if user is owner
-        if (role.equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
+        if (user.getRole().equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final ConfiguredGuacamoleSocket socket = buildSocket(instance);
             InstanceSession session = instanceSessionService.create(instance, socket.getConnectionID());
-            logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
+            logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
             return socket;
 
         } else {
-            logger.warn("A non-owner - {} - is trying to create a new instance session", getInstanceAndUser(instance, user, role));
+            logger.warn("A non-owner - {} - is trying to create a new instance session", getInstanceAndUser(instance, user));
             throw new OwnerNotConnectedException();
         }
     }
 
-    private ConfiguredGuacamoleSocket getOrCreateSocket(Instance instance, User user, Role role) throws OwnerNotConnectedException, GuacamoleException {
+    private ConfiguredGuacamoleSocket getOrCreateSocket(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException {
         InstanceSession session = instanceSessionService.getByInstance(instance);
 
         if (session == null) {
-            return this.createSocketAndSession(instance, user, role);
+            return this.createSocketAndSession(instance, user);
 
         } else {
             try {
                 // try to connect to existing sessionId
-                logger.info("User {} connecting to existing guacamole session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
+                logger.info("User {} connecting to existing guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
                 return buildSocket(instance, session);
 
             } catch (GuacamoleException exception) {
-                logger.error("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user, role), session.getConnectionId());
+                logger.error("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
                 // If it fails then invalidate current session
                 session.setCurrent(false);
                 this.instanceSessionService.save(session);
 
                 // Create a new session
-                return this.createSocketAndSession(instance, user, role);
+                return this.createSocketAndSession(instance, user);
             }
         }
     }
 
     private GuacamoleSocket createGuacamoleSocket(final Instance instance,
-                                                              final User user,
-                                                              final Role role) throws OwnerNotConnectedException, ConnectionException {
+                                                              final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
         try {
             synchronized (instance) {
-                final GuacamoleSocket socket = getOrCreateSocket(instance, user, role);
+                final GuacamoleSocket socket = getOrCreateSocket(instance, user);
 
                 return socket;
             }
 
         } catch (GuacamoleException exception) {
-            throw new ConnectionException("Error connecting to tunnel for " + this.getInstanceAndUser(instance, user, role) + " : " + exception.getMessage());
+            throw new ConnectionException("Error connecting to tunnel for " + this.getInstanceAndUser(instance, user) + " : " + exception.getMessage());
         }
     }
 
     @Override
     public ConnectionThread connect(final SocketIOClient client,
                                     final Instance instance,
-                                    final User user,
-                                    final Role role) throws OwnerNotConnectedException, ConnectionException {
-        final GuacamoleSocket guacamoleSocket = this.createGuacamoleSocket(instance, user, role);
+                                    final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
+        final GuacamoleSocket guacamoleSocket = this.createGuacamoleSocket(instance, user);
 
         final GuacamoleTunnel guacamoleTunnel = new SimpleGuacamoleTunnel(guacamoleSocket);
-        return executorService.startGuacamoleConnectionThread(client, guacamoleTunnel, instance, user, role);
+        return executorService.startGuacamoleConnectionThread(client, guacamoleTunnel, instance, user);
     }
 }

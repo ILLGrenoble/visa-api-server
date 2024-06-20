@@ -7,12 +7,11 @@ import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
-import eu.ill.visa.vdi.domain.models.Role;
+import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.webx.WebXClientInformation;
 import eu.ill.webx.WebXConfiguration;
 import eu.ill.webx.WebXTunnel;
@@ -90,58 +89,57 @@ public class WebXDesktopService extends DesktopService {
         return tunnel;
     }
 
-    private WebXTunnel createTunnelAndSession(Instance instance, User user, Role role) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
+    private WebXTunnel createTunnelAndSession(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
         // Create new session if user is owner
-        if (role.equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
+        if (user.getRole().equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final WebXTunnel tunnel = buildTunnel(instance);
             InstanceSession session = instanceSessionService.create(instance, tunnel.getConnectionId());
-            logger.info("User {} created WebX session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
+            logger.info("User {} created WebX session {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
             return tunnel;
 
         } else {
-            logger.warn("A non-owner - {} - is trying to create a new instance session", getInstanceAndUser(instance, user, role));
+            logger.warn("A non-owner - {} - is trying to create a new instance session", getInstanceAndUser(instance, user));
             throw new OwnerNotConnectedException();
         }
     }
 
-    private WebXTunnel getOrCreateTunnel(Instance instance, User user, Role role) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
+    private WebXTunnel getOrCreateTunnel(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
         InstanceSession session = instanceSessionService.getByInstance(instance);
 
         if (session == null) {
-            return this.createTunnelAndSession(instance, user, role);
+            return this.createTunnelAndSession(instance, user);
 
         } else {
             try {
                 // try to connect to existing sessionId
-                logger.info("User {} connecting to existing WebX session {}", getInstanceAndUser(instance, user, role), session.getConnectionId());
+                logger.info("User {} connecting to existing WebX session {}", getInstanceAndUser(instance, user), session.getConnectionId());
                 return buildTunnel(instance, session);
 
             } catch (WebXConnectionException exception) {
-                logger.error("Failed to connect {} to given WebX session {} so creating a new one", getInstanceAndUser(instance, user, role), session.getConnectionId());
+                logger.error("Failed to connect {} to given WebX session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
                 // If it fails then invalidate current session
                 session.setCurrent(false);
                 this.instanceSessionService.save(session);
 
                 // Create a new session
-                return this.createTunnelAndSession(instance, user, role);
+                return this.createTunnelAndSession(instance, user);
             }
         }
     }
     private WebXTunnel createWebXTunnel(final Instance instance,
-                                        final User user,
-                                        final Role role) throws OwnerNotConnectedException, ConnectionException {
+                                        final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
         try {
-            return getOrCreateTunnel(instance, user, role);
+            return getOrCreateTunnel(instance, user);
 
         } catch (WebXException exception) {
-            throw new ConnectionException("Error connecting to tunnel for " + this.getInstanceAndUser(instance, user, role) + " : " + exception.getMessage());
+            throw new ConnectionException("Error connecting to tunnel for " + this.getInstanceAndUser(instance, user) + " : " + exception.getMessage());
         }
     }
 
     @Override
-    public ConnectionThread connect(SocketIOClient client, Instance instance, User user, Role role) throws OwnerNotConnectedException, ConnectionException {
-        final WebXTunnel webXTunnel = this.createWebXTunnel(instance, user, role);
-        return executorService.startWebXConnectionThread(client, webXTunnel, instance, user, role);
+    public ConnectionThread connect(SocketIOClient client, Instance instance, ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
+        final WebXTunnel webXTunnel = this.createWebXTunnel(instance, user);
+        return executorService.startWebXConnectionThread(client, webXTunnel, instance, user);
     }
 }

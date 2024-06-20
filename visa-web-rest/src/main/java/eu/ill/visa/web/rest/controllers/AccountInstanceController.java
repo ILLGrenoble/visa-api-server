@@ -558,7 +558,7 @@ public class AccountInstanceController extends AbstractController {
             instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
         }
         instanceDto.setExpirationDate(instanceExpirationService.getExpirationDate(instance));
-        instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));
+        instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user.getId()));
         instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
 
         return instanceDto;

@@ -8,15 +8,15 @@ import com.corundumstudio.socketio.store.pubsub.PubSubType;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.vdi.domain.models.AccessReply;
-import eu.ill.visa.vdi.domain.models.AccessRevokedCommand;
-import eu.ill.visa.vdi.domain.events.Event;
-import eu.ill.visa.vdi.gateway.listeners.*;
-import eu.ill.visa.vdi.gateway.pubsub.*;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
 import eu.ill.visa.vdi.business.services.RoleService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
+import eu.ill.visa.vdi.domain.events.Event;
+import eu.ill.visa.vdi.domain.models.AccessReply;
+import eu.ill.visa.vdi.domain.models.AccessRevokedCommand;
+import eu.ill.visa.vdi.gateway.listeners.*;
+import eu.ill.visa.vdi.gateway.pubsub.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -91,10 +91,8 @@ public class RemoteDesktopServer {
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomClosedListener(this.server), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomLockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomUnlockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
-            storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerAccessCandidateListener(this.server, this.desktopAccessService), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerAccessReplyListener(this.desktopAccessService), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerAccessRevokedListener(this.server), DispatchMessage.class);
-            storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerAccessCancellationListener(this.server, this.desktopAccessService), DispatchMessage.class);
         }
     }
 

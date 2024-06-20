@@ -2,13 +2,13 @@ package eu.ill.visa.vdi.domain.models;
 
 public class AccessRequest {
     private String token;
-    private String userFullName;
+    private ConnectedUser user;
 
     public AccessRequest() {
     }
 
-    public AccessRequest(String userFullName, String token) {
-        this.userFullName = userFullName;
+    public AccessRequest(ConnectedUser user, String token) {
+        this.user = user;
         this.token = token;
     }
 
@@ -20,11 +20,11 @@ public class AccessRequest {
         this.token = token;
     }
 
-    public String getUserFullName() {
-        return userFullName;
+    public ConnectedUser getUser() {
+        return user;
     }
 
-    public void setUserFullName(String userFullName) {
-        this.userFullName = userFullName;
+    public void setUser(ConnectedUser user) {
+        this.user = user;
     }
 }

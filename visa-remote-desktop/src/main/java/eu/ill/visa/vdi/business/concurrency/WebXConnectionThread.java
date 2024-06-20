@@ -2,8 +2,7 @@ package eu.ill.visa.vdi.business.concurrency;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.User;
-import eu.ill.visa.vdi.domain.models.Role;
+import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.webx.WebXTunnel;
 import eu.ill.webx.exceptions.WebXClientException;
 import eu.ill.webx.exceptions.WebXConnectionInterruptException;
@@ -15,8 +14,8 @@ public class WebXConnectionThread extends ConnectionThread {
     private static final Logger logger = LoggerFactory.getLogger(WebXConnectionThread.class);
     private final WebXTunnel tunnel;
 
-    public WebXConnectionThread(final SocketIOClient client, final WebXTunnel tunnel, final Instance instance, final User user, final Role role) {
-        super(client, instance, user, role);
+    public WebXConnectionThread(final SocketIOClient client, final WebXTunnel tunnel, final Instance instance, final ConnectedUser user) {
+        super(client, instance, user);
         this.tunnel = tunnel;
     }
 

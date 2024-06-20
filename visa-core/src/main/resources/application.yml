@@ -35,6 +35,10 @@ quarkus:
       url: ${VISA_ACCOUNTS_SERVICE_CLIENT_URL}
     security-group-service:
       url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
+  redis:
+    devservices:
+      enabled: false
+    hosts-provider-name: redis-pubsub-hosts-provider
   native:
     resources:
       includes: images/thumbnail.jpg,fixtures/**.sql,words/**.txt,emails/templates/**.twig

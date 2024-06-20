@@ -6,6 +6,7 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.core.entity.User;
+import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.Role;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.InvalidTokenException;
@@ -52,6 +53,7 @@ public class ClientConnectListener extends AbstractListener implements ConnectLi
             final User user = token.getUser();
             final Instance instance = token.getInstance();
             final Role role = roleService.getRole(instance, user);
+            ConnectedUser connectedUser = new ConnectedUser(user.getId(), user.getFullName(), role);
 
             if (instance.getUsername() == null) {
                 logger.warn("No username is associated with the instance {}: the owner has never connected. Disconnecting user {}", instance.getId(), user);
@@ -60,13 +62,13 @@ public class ClientConnectListener extends AbstractListener implements ConnectLi
             } else {
                 if (role.equals(SUPPORT)) {
                     // See if user can connect even if owner is away
-                    if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
-                        this.desktopConnectionService.createDesktopConnection(client, instance, user, role);
+                    if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
+                        this.desktopConnectionService.createDesktopConnection(client, instance, connectedUser);
 
                     } else {
                         if (this.desktopConnectionService.isOwnerConnected(instance)) {
                             // Start process of requesting access from the owner
-                            this.desktopAccessService.initiateAccess(client, user, instance);
+                            this.desktopAccessService.initiateAccess(client, connectedUser, instance.getId());
 
                         } else {
                             throw new OwnerNotConnectedException();
@@ -74,7 +76,7 @@ public class ClientConnectListener extends AbstractListener implements ConnectLi
                     }
 
                 } else {
-                    this.desktopConnectionService.createDesktopConnection(client, instance, user, role);
+                    this.desktopConnectionService.createDesktopConnection(client, instance, connectedUser);
                 }
             }
 

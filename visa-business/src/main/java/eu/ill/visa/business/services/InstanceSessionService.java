@@ -23,16 +23,19 @@ public class InstanceSessionService {
     private final InstanceSessionMemberRepository instanceSessionMemberRepository;
     private final InstanceJupyterSessionService instanceJupyterSessionService;
     private final InstanceService instanceService;
+    private final UserService userService;
 
     @Inject
     public InstanceSessionService(final InstanceSessionRepository repository,
                                   final InstanceSessionMemberRepository instanceSessionMemberRepository,
                                   final InstanceJupyterSessionService instanceJupyterSessionService,
-                                  final InstanceService instanceService) {
+                                  final InstanceService instanceService,
+                                  final UserService userService) {
         this.repository = repository;
         this.instanceSessionMemberRepository = instanceSessionMemberRepository;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.instanceService = instanceService;
+        this.userService = userService;
     }
 
     public List<InstanceSession> getAll() {
@@ -129,7 +132,8 @@ public class InstanceSessionService {
         this.instanceJupyterSessionService.cleanupSession();
     }
 
-    public boolean canConnectWhileOwnerAway(Instance instance, User user) {
+    public boolean canConnectWhileOwnerAway(Instance instance, String userId) {
+        final User user = this.userService.getById(userId);
         boolean userIsOwner = instance.isOwner(user);
 
         // The user is the owner
