@@ -6,14 +6,22 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
+import eu.ill.visa.vdi.brokers.RemoteDesktopPubSub;
+import eu.ill.visa.vdi.brokers.redis.messages.AccessRequestCancellationMessage;
+import eu.ill.visa.vdi.brokers.redis.messages.AccessRequestMessage;
+import eu.ill.visa.vdi.brokers.redis.messages.AccessRequestResponseMessage;
 import eu.ill.visa.vdi.domain.events.Event;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
-import eu.ill.visa.vdi.domain.models.*;
+import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.DesktopCandidate;
+import eu.ill.visa.vdi.domain.models.DesktopConnection;
+import eu.ill.visa.vdi.domain.models.Role;
 import eu.ill.visa.vdi.gateway.events.AccessCancellation;
 import eu.ill.visa.vdi.gateway.events.AccessRequest;
 import eu.ill.visa.vdi.gateway.events.AccessRequestReply;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -24,6 +32,7 @@ import java.util.List;
 
 import static eu.ill.visa.vdi.domain.events.Event.ACCESS_DENIED;
 
+@Startup
 @ApplicationScoped
 public class DesktopAccessService {
     private static final Logger logger = LoggerFactory.getLogger(DesktopAccessService.class);
@@ -31,7 +40,10 @@ public class DesktopAccessService {
     private final DesktopConnectionService desktopConnectionService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceService instanceService;
-    private final RemoteDesktopBroker remoteDesktopBroker;
+
+    private final RemoteDesktopPubSub<AccessRequestMessage> accessRequestPubSub;
+    private final RemoteDesktopPubSub<AccessRequestCancellationMessage> accessRequestCancelledPubSub;
+    private final RemoteDesktopPubSub<AccessRequestResponseMessage> accessRequestResponsePubSub;
 
     private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
 
@@ -39,11 +51,18 @@ public class DesktopAccessService {
     public DesktopAccessService(final DesktopConnectionService desktopConnectionService,
                                 final InstanceSessionService instanceSessionService,
                                 final InstanceService instanceService,
-                                final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBroker) {
+                                final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
         this.desktopConnectionService = desktopConnectionService;
         this.instanceSessionService = instanceSessionService;
         this.instanceService = instanceService;
-        this.remoteDesktopBroker = remoteDesktopBroker.get();
+        RemoteDesktopBroker remoteDesktopBroker = remoteDesktopBrokerInstance.get();
+
+        this.accessRequestPubSub = remoteDesktopBroker.createPubSub(AccessRequestMessage.class,
+            (message) -> this.onAccessRequested(message.instanceId(), message.user(), message.requesterConnectionId()));
+        this.accessRequestCancelledPubSub = remoteDesktopBroker.createPubSub(AccessRequestCancellationMessage.class,
+            (message) -> this.onAccessRequestCancelled(message.instanceId(), message.user(), message.requesterConnectionId()));
+        this.accessRequestResponsePubSub = remoteDesktopBroker.createPubSub(AccessRequestResponseMessage.class,
+            (message) -> this.onAccessRequestResponse(message.instanceId(), message.requesterConnectionId(), message.role()));
     }
 
     public void requestAccess(SocketIOClient client, ConnectedUser user, Long instanceId) {
@@ -54,8 +73,7 @@ public class DesktopAccessService {
         String room = desktopCandidate.getRoomId();
 
         client.joinRoom(room);
-
-        this.remoteDesktopBroker.onAccessRequested(instanceId, user, client.getSessionId().toString());
+        this.accessRequestPubSub.broadcast(new AccessRequestMessage(instanceId, user, client.getSessionId().toString()));
     }
 
     public void cancelAccessRequest(SocketIOClient client) {
@@ -63,13 +81,13 @@ public class DesktopAccessService {
         DesktopCandidate desktopCandidate = this.removeCandidate(client.getSessionId().toString());
         if (desktopCandidate != null) {
             // A desktop request was in progress
-            this.remoteDesktopBroker.onAccessRequestCancelled(desktopCandidate.getInstanceId(), desktopCandidate.getUser(), desktopCandidate.getConnectionId());
+            this.accessRequestCancelledPubSub.broadcast(new AccessRequestCancellationMessage(desktopCandidate.getInstanceId(), desktopCandidate.getUser(), desktopCandidate.getConnectionId()));
         }
     }
 
     public void respondToAccessRequest(Long instanceId, String requesterConnectionId, Role role) {
         // Forward reply to broker
-        this.remoteDesktopBroker.onAccessRequestResponse(instanceId, requesterConnectionId, role);
+        this.accessRequestResponsePubSub.broadcast(new AccessRequestResponseMessage(instanceId, requesterConnectionId, role));
     }
 
     public void onAccessRequested(Long instanceId, ConnectedUser user, String requesterConnectionId) {
@@ -83,8 +101,6 @@ public class DesktopAccessService {
                 SocketIOClient owner = desktopConnection.getClient();
                 owner.sendEvent(Event.ACCESS_REQUEST_EVENT, new AccessRequest(instanceId, user, requesterConnectionId));
             });
-        } else {
-            logger.info("Ignoring access request for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
         }
     }
 
@@ -98,9 +114,6 @@ public class DesktopAccessService {
                 SocketIOClient owner = desktopConnection.getClient();
                 owner.sendEvent(Event.ACCESS_CANCELLATION_EVENT, new AccessCancellation(user.getFullName(), requesterConnectionId));
             });
-
-        } else {
-            logger.info("Ignoring cancellation for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
         }
     }
 
@@ -109,9 +122,6 @@ public class DesktopAccessService {
         if (candidate != null) {
             logger.info("Handling response ({}) of access request for instance {} from user {} with client id {}", role, candidate.getInstanceId(), candidate.getUser().getFullName(), requesterConnectionId);
             this.connectFromAccessReply(candidate, role);
-
-        } else {
-            logger.info("Ignoring response ({}) of access request  for instance {}from client id {}", role, instanceId, requesterConnectionId);
         }
 
         // Send message to any other owners that request has been handled
@@ -125,21 +135,21 @@ public class DesktopAccessService {
         }
     }
 
-    private DesktopCandidate addCandidate(SocketIOClient client, ConnectedUser user, Long instanceId) {
+    private synchronized DesktopCandidate addCandidate(SocketIOClient client, ConnectedUser user, Long instanceId) {
         DesktopCandidate desktopCandidate = new DesktopCandidate(client, user, instanceId);
         this.desktopCandidates.add(desktopCandidate);
 
         return desktopCandidate;
     }
 
-    private DesktopCandidate getCandidateById(String connectionId) {
+    private synchronized DesktopCandidate getCandidateById(String connectionId) {
         return this.desktopCandidates.stream()
             .filter(candidate -> candidate.getConnectionId().equals(connectionId))
             .findAny()
             .orElse(null);
     }
 
-    private DesktopCandidate removeCandidate(String connectionId) {
+    private synchronized DesktopCandidate removeCandidate(String connectionId) {
         DesktopCandidate desktopCandidate = this.getCandidateById(connectionId);
         if (desktopCandidate != null) {
             this.desktopCandidates.remove(desktopCandidate);

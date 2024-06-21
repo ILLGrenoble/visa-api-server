@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.brokers.redis;
 
+import eu.ill.visa.vdi.brokers.RemoteDesktopPubSub;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import io.smallrye.mutiny.Uni;
@@ -7,7 +8,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 import java.util.function.Consumer;
 
-public class RemoteDesktopPubSub<T> implements Consumer<T> {
+public class RedisRemoteDesktopPubSub<T> implements RemoteDesktopPubSub<T>, Consumer<T> {
 
     private final String channel;
     private final RemoteDesktopMessageHandler<T> handler;
@@ -15,9 +16,9 @@ public class RemoteDesktopPubSub<T> implements Consumer<T> {
     private final PubSubCommands.RedisSubscriber subscriber;
     private final PubSubCommands<T> publisher;
 
-    public RemoteDesktopPubSub(final RedisDataSource redisDataSource,
-                               final Class<T> clazz,
-                               final RemoteDesktopMessageHandler<T> handler) {
+    public RedisRemoteDesktopPubSub(final RedisDataSource redisDataSource,
+                                    final Class<T> clazz,
+                                    final RemoteDesktopMessageHandler<T> handler) {
         this.handler = handler;
         this.channel =  clazz.getName();
         this.publisher = redisDataSource.pubsub(clazz);
@@ -42,7 +43,4 @@ public class RemoteDesktopPubSub<T> implements Consumer<T> {
         this.publisher.publish(this.channel, message);
     }
 
-    public interface RemoteDesktopMessageHandler<T> {
-        void onMessage(T message);
-    }
 }

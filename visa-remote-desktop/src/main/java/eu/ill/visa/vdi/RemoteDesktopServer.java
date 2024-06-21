@@ -80,7 +80,7 @@ public class RemoteDesktopServer {
         server.addEventListener("webxdisplay", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("thumbnail", byte[].class, new ClientThumbnailListener(this.desktopConnectionService, this.instanceService));
         server.addEventListener(Event.ACCESS_REPLY_EVENT, AccessRequestReply.class, new ClientAccessReplyListener(this.desktopAccessService));
-        server.addEventListener(Event.ACCESS_REVOKED_EVENT, AccessRevokedCommand.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService, this.instanceSessionService, this.instanceService));
+        server.addEventListener(Event.ACCESS_REVOKED_EVENT, AccessRevokedCommand.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService));
         server.addDisconnectListener(new ClientDisconnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.instanceService, this.virtualDesktopConfiguration));
     }
 
@@ -91,7 +91,6 @@ public class RemoteDesktopServer {
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomClosedListener(this.server), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomLockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomUnlockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
-            storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerAccessRevokedListener(this.server), DispatchMessage.class);
         }
     }
 

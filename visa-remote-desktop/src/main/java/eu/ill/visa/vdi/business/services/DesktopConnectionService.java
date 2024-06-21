@@ -12,6 +12,9 @@ import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
+import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
+import eu.ill.visa.vdi.brokers.RemoteDesktopPubSub;
+import eu.ill.visa.vdi.brokers.redis.messages.AccessRevokedMessage;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.domain.events.*;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
@@ -20,6 +23,7 @@ import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import eu.ill.visa.vdi.domain.models.Role;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -30,6 +34,7 @@ import java.util.*;
 import static eu.ill.visa.vdi.domain.events.Event.ACCESS_REVOKED_EVENT;
 import static eu.ill.visa.vdi.domain.events.Event.OWNER_AWAY_EVENT;
 
+@Startup
 @ApplicationScoped
 public class DesktopConnectionService {
 
@@ -42,7 +47,10 @@ public class DesktopConnectionService {
     private final WebXDesktopService webXDesktopService;
     private final InstanceExpirationService instanceExpirationService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
+
     private final List<DesktopConnection> desktopConnections = new ArrayList<>();
+
+    private final RemoteDesktopPubSub<AccessRevokedMessage> accessRevokedPubSub;
 
     @Inject
     public DesktopConnectionService(final InstanceSessionService instanceSessionService,
@@ -50,13 +58,19 @@ public class DesktopConnectionService {
                                     final GuacamoleDesktopService guacamoleDesktopService,
                                     final WebXDesktopService webXDesktopService,
                                     final InstanceExpirationService instanceExpirationService,
-                                    final VirtualDesktopConfiguration virtualDesktopConfiguration) {
+                                    final VirtualDesktopConfiguration virtualDesktopConfiguration,
+                                    final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
         this.instanceSessionService = instanceSessionService;
         this.userService = userService;
         this.guacamoleDesktopService = guacamoleDesktopService;
         this.webXDesktopService = webXDesktopService;
         this.instanceExpirationService = instanceExpirationService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
+
+        RemoteDesktopBroker remoteDesktopBroker = remoteDesktopBrokerInstance.get();
+
+        this.accessRevokedPubSub = remoteDesktopBroker.createPubSub(AccessRevokedMessage.class,
+            (message) -> this.onAccessRevoked(message.instanceId(), message.userId()));
     }
 
     public void broadcast(final SocketIOClient client, final Event...events) {
@@ -94,7 +108,7 @@ public class DesktopConnectionService {
         }
 
         DesktopConnection desktopConnection = new DesktopConnection(client, instance.getId(), instance.getLastSeenAt(), user, thread, instance.getId().toString());
-        this.desktopConnections.add(desktopConnection);
+        this.addDesktopConnection(desktopConnection);
 
         client.joinRoom(desktopConnection.getRoomId());
 
@@ -123,19 +137,44 @@ public class DesktopConnectionService {
         return desktopConnection;
     }
 
+    public void revokeUserAccess(final SocketIOClient client, final String userId) {
+        final DesktopConnection connection = this.getDesktopConnection(client);
+
+        // Verify that we have a connection and that the user is the owner
+        if (connection != null && connection.getConnectedUser().getRole().equals(Role.OWNER)) {
+            this.accessRevokedPubSub.broadcast(new AccessRevokedMessage(connection.getInstanceId(), userId));
+        }
+    }
+
+    public void onAccessRevoked(Long instanceId, final String userId) {
+        this.getDesktopConnectionsForInstanceIdAndUserId(instanceId, userId).forEach(desktopConnection -> {
+            SocketIOClient client = desktopConnection.getClient();
+            logger.info("Revoking access to remote desktop for instance {} for user {} with connection ID {}", instanceId, desktopConnection.getConnectedUser().getFullName(), desktopConnection.getConnectionId());
+            client.sendEvent(ACCESS_REVOKED_EVENT);
+            client.disconnect();
+        });
+    }
+
+    private synchronized void addDesktopConnection(final DesktopConnection desktopConnection) {
+        this.desktopConnections.add(desktopConnection);
+    }
+
     public synchronized DesktopConnection getDesktopConnection(final SocketIOClient client) {
         String clientId = client.getSessionId().toString();
         return this.desktopConnections.stream().filter(desktopConnection -> desktopConnection.getConnectionId().equals(clientId)).findAny().orElse(null);
-    }
-
-    public synchronized List<DesktopConnection> getDesktopConnectionsForInstanceId(Long instanceId) {
-        return this.desktopConnections.stream().filter(desktopConnection -> desktopConnection.getInstanceId().equals(instanceId)).toList();
     }
 
     public synchronized List<DesktopConnection> getOwnerDesktopConnectionsForInstanceId(Long instanceId) {
         return this.desktopConnections.stream()
             .filter(desktopConnection -> desktopConnection.getInstanceId().equals(instanceId))
             .filter(desktopConnection -> desktopConnection.getConnectedUser().getRole().equals(Role.OWNER))
+            .toList();
+    }
+
+    public synchronized List<DesktopConnection> getDesktopConnectionsForInstanceIdAndUserId(Long instanceId, final String userId) {
+        return this.desktopConnections.stream()
+            .filter(desktopConnection -> desktopConnection.getInstanceId().equals(instanceId))
+            .filter(desktopConnection -> desktopConnection.getConnectedUser().getId().equals(userId))
             .toList();
     }
 
