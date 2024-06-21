@@ -47,34 +47,33 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
             client.leaveRoom(connection.getRoomId());
 
             final Instance instance = instanceService.getById(connection.getInstanceId());
-            InstanceSession session = null;
             if (instance != null) {
-                session = instanceSessionService.getByInstance(instance);
-            }
-            if (session != null) {
-                // Remove client/member from instance session
-                instanceSessionService.removeInstanceSessionMember(session, client.getSessionId());
+                InstanceSession session = instanceSessionService.getByInstance(instance);
+                if (session != null) {
+                    // Remove client/member from instance session
+                    instanceSessionService.removeInstanceSessionMember(session, client.getSessionId());
 
-                if (!this.desktopConnectionService.isOwnerConnected(instance) && !connection.getConnectedUser().getRole().equals(Role.SUPPORT)) {
-                    if (this.virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
-                        this.desktopConnectionService.lockRoom(client, connection.getRoomId(), instance);
+                    if (!this.desktopConnectionService.isOwnerConnected(instance) && !connection.getConnectedUser().getRole().equals(Role.SUPPORT)) {
+                        if (this.virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
+                            this.desktopConnectionService.lockRoom(instance);
+
+                        } else {
+                            logger.info("There is no owner ar admin connected so all clients will be disconnected");
+                            this.desktopConnectionService.closeRoom(instance);
+                        }
 
                     } else {
-                        logger.info("There is no owner ar admin connected so all clients will be disconnected");
-                        this.desktopConnectionService.disconnectAllRoomClients(client, connection.getRoomId());
+                        // broadcast events for a user disconnected and current users
+                        this.broadcast(client,
+                            new UserDisconnectedEvent(this.getConnectedUser(client)),
+                            new UsersConnectedEvent(instance, this.getConnectedUsers(instance, false))
+                        );
                     }
 
                 } else {
-                    // broadcast events for a user disconnected and current users
-                    this.broadcast(client,
-                        new UserDisconnectedEvent(this.getConnectedUser(client)),
-                        new UsersConnectedEvent(instance, this.getConnectedUsers(instance, false))
-                    );
+                    logger.info("There is no active instance session so all clients will be disconnected");
+                    this.desktopConnectionService.closeRoom(instance);
                 }
-
-            } else {
-                logger.info("There is no active instance session so all clients will be disconnected");
-                this.desktopConnectionService.disconnectAllRoomClients(client, connection.getRoomId());
             }
 
             this.removeDesktopConnection(client);

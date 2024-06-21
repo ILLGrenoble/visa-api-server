@@ -14,9 +14,14 @@ import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
 import eu.ill.visa.vdi.brokers.RemoteDesktopPubSub;
-import eu.ill.visa.vdi.brokers.redis.messages.AccessRevokedMessage;
+import eu.ill.visa.vdi.brokers.messages.AccessRevokedMessage;
+import eu.ill.visa.vdi.brokers.messages.RoomClosedMessage;
+import eu.ill.visa.vdi.brokers.messages.RoomLockedMessage;
+import eu.ill.visa.vdi.brokers.messages.RoomUnlockedMessage;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
-import eu.ill.visa.vdi.domain.events.*;
+import eu.ill.visa.vdi.domain.events.Event;
+import eu.ill.visa.vdi.domain.events.UserConnectedEvent;
+import eu.ill.visa.vdi.domain.events.UsersConnectedEvent;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
@@ -29,10 +34,10 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static eu.ill.visa.vdi.domain.events.Event.ACCESS_REVOKED_EVENT;
-import static eu.ill.visa.vdi.domain.events.Event.OWNER_AWAY_EVENT;
+import static eu.ill.visa.vdi.domain.events.Event.*;
 
 @Startup
 @ApplicationScoped
@@ -51,6 +56,9 @@ public class DesktopConnectionService {
     private final List<DesktopConnection> desktopConnections = new ArrayList<>();
 
     private final RemoteDesktopPubSub<AccessRevokedMessage> accessRevokedPubSub;
+    private final RemoteDesktopPubSub<RoomClosedMessage> roomClosedPubSub;
+    private final RemoteDesktopPubSub<RoomLockedMessage> roomLockedPubSub;
+    private final RemoteDesktopPubSub<RoomUnlockedMessage> roomUnlockedPubSub;
 
     @Inject
     public DesktopConnectionService(final InstanceSessionService instanceSessionService,
@@ -71,6 +79,15 @@ public class DesktopConnectionService {
 
         this.accessRevokedPubSub = remoteDesktopBroker.createPubSub(AccessRevokedMessage.class,
             (message) -> this.onAccessRevoked(message.instanceId(), message.userId()));
+
+        this.roomClosedPubSub = remoteDesktopBroker.createPubSub(RoomClosedMessage.class,
+            (message) -> this.onRoomClosed(message.instanceId()));
+
+        this.roomLockedPubSub = remoteDesktopBroker.createPubSub(RoomLockedMessage.class,
+            (message) -> this.onRoomLocked(message.instanceId()));
+
+        this.roomUnlockedPubSub = remoteDesktopBroker.createPubSub(RoomUnlockedMessage.class,
+            (message) -> this.onRoomUnlocked(message.instanceId()));
     }
 
     public void broadcast(final SocketIOClient client, final Event...events) {
@@ -86,7 +103,6 @@ public class DesktopConnectionService {
             event.broadcast(client, operations);
         }
     }
-
 
     public DesktopConnection createDesktopConnection(final SocketIOClient client, final Instance instance, final ConnectedUser user) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
         final Role role = user.getRole();
@@ -125,7 +141,7 @@ public class DesktopConnectionService {
 
         if (unlockRoom) {
             // Unlock room for all clients
-            this.unlockRoom(client, desktopConnection.getRoomId(), instance);
+            this.unlockRoom(instance);
 
         } else {
             this.broadcast(client,
@@ -135,24 +151,6 @@ public class DesktopConnectionService {
         }
 
         return desktopConnection;
-    }
-
-    public void revokeUserAccess(final SocketIOClient client, final String userId) {
-        final DesktopConnection connection = this.getDesktopConnection(client);
-
-        // Verify that we have a connection and that the user is the owner
-        if (connection != null && connection.getConnectedUser().getRole().equals(Role.OWNER)) {
-            this.accessRevokedPubSub.broadcast(new AccessRevokedMessage(connection.getInstanceId(), userId));
-        }
-    }
-
-    public void onAccessRevoked(Long instanceId, final String userId) {
-        this.getDesktopConnectionsForInstanceIdAndUserId(instanceId, userId).forEach(desktopConnection -> {
-            SocketIOClient client = desktopConnection.getClient();
-            logger.info("Revoking access to remote desktop for instance {} for user {} with connection ID {}", instanceId, desktopConnection.getConnectedUser().getFullName(), desktopConnection.getConnectionId());
-            client.sendEvent(ACCESS_REVOKED_EVENT);
-            client.disconnect();
-        });
     }
 
     private synchronized void addDesktopConnection(final DesktopConnection desktopConnection) {
@@ -168,6 +166,13 @@ public class DesktopConnectionService {
         return this.desktopConnections.stream()
             .filter(desktopConnection -> desktopConnection.getInstanceId().equals(instanceId))
             .filter(desktopConnection -> desktopConnection.getConnectedUser().getRole().equals(Role.OWNER))
+            .toList();
+    }
+
+    public synchronized List<DesktopConnection> getNonOwnerDesktopConnectionsForInstanceId(Long instanceId) {
+        return this.desktopConnections.stream()
+            .filter(desktopConnection -> desktopConnection.getInstanceId().equals(instanceId))
+            .filter(desktopConnection -> !desktopConnection.getConnectedUser().getRole().equals(Role.OWNER))
             .toList();
     }
 
@@ -215,75 +220,57 @@ public class DesktopConnectionService {
         return false;
     }
 
-    public void disconnectAllRoomClients(final SocketIOClient client, final String room) {
-        final SocketIONamespace namespace = client.getNamespace();
+    public void revokeUserAccess(final SocketIOClient client, final String userId) {
+        final DesktopConnection connection = this.getDesktopConnection(client);
 
-        final BroadcastOperations operations = namespace.getRoomOperations(room);
-        final Collection<SocketIOClient> clients = operations.getClients();
-        this.broadcast(client, new RoomClosedEvent());
-
-        for (final SocketIOClient aClient : clients) {
-            aClient.sendEvent(OWNER_AWAY_EVENT);
-            aClient.disconnect();
+        // Verify that we have a connection and that the user is the owner
+        if (connection != null && connection.getConnectedUser().getRole().equals(Role.OWNER)) {
+            this.accessRevokedPubSub.broadcast(new AccessRevokedMessage(connection.getInstanceId(), userId));
         }
     }
 
-    public void lockRoom(final SocketIOClient client, final String room, Instance instance) {
-        final SocketIONamespace namespace = client.getNamespace();
-
-        final BroadcastOperations operations = namespace.getRoomOperations(room);
-        final Collection<SocketIOClient> clients = operations.getClients();
-
-        // broadcast room closed and current connected users
-        this.broadcast(client,
-            new RoomLockedEvent(instance),
-            new UsersConnectedEvent(instance, this.getConnectedUsers(instance, true))
-        );
-
-        for (final SocketIOClient aClient : clients) {
-            DesktopConnection connection = this.getDesktopConnection(aClient);
-            connection.setRoomLocked(true);
-        }
+    public void closeRoom(final Instance instance) {
+        this.roomClosedPubSub.broadcast(new RoomClosedMessage(instance.getId()));
     }
 
-    public void unlockRoom(final SocketIOClient client, final String room, Instance instance) {
-        final SocketIONamespace namespace = client.getNamespace();
-
-        final BroadcastOperations operations = namespace.getRoomOperations(room);
-        final Collection<SocketIOClient> clients = operations.getClients();
-
-        // broadcast room closed and current connected users
-        this.broadcast(client,
-            new RoomUnlockedEvent(instance),
-            new UsersConnectedEvent(instance, this.getConnectedUsers(instance, false))
-        );
-
-        for (final SocketIOClient aClient : clients) {
-            DesktopConnection connection = this.getDesktopConnection(aClient);
-            connection.setRoomLocked(false);
-        }
+    public void lockRoom(final Instance instance) {
+        this.roomLockedPubSub.broadcast(new RoomLockedMessage(instance.getId()));
     }
 
-    public boolean disconnectClient(SocketIOClient owner, String room, UUID clientSessionId) {
-        final SocketIONamespace namespace = owner.getNamespace();
+    public void unlockRoom(final Instance instance) {
+        this.roomUnlockedPubSub.broadcast(new RoomUnlockedMessage(instance.getId()));
+    }
 
-        final BroadcastOperations operations = namespace.getRoomOperations(room);
-        final Collection<SocketIOClient> clients = operations.getClients();
+    public void onAccessRevoked(Long instanceId, final String userId) {
+        this.getDesktopConnectionsForInstanceIdAndUserId(instanceId, userId).forEach(desktopConnection -> {
+            SocketIOClient client = desktopConnection.getClient();
+            logger.info("Revoking access to remote desktop for instance {} for user {} with connection ID {}", instanceId, desktopConnection.getConnectedUser().getFullName(), desktopConnection.getConnectionId());
+            client.sendEvent(ACCESS_REVOKED_EVENT);
+            client.disconnect();
+        });
+    }
 
-        Optional<SocketIOClient> clientOptional = clients.stream()
-            .filter(aClient -> aClient.getSessionId().equals(clientSessionId))
-            .findFirst();
+    public void onRoomClosed(final Long instanceId) {
+        this.getNonOwnerDesktopConnectionsForInstanceId(instanceId).forEach(desktopConnection -> {
+            SocketIOClient client = desktopConnection.getClient();
+            client.sendEvent(OWNER_AWAY_EVENT);
+            client.disconnect();
+        });
+    }
 
-        if (clientOptional.isPresent()) {
-            logger.info("Disconnecting client {} from room {}", clientSessionId, room);
-            SocketIOClient aClient = clientOptional.get();
-            aClient.sendEvent(ACCESS_REVOKED_EVENT);
-            aClient.disconnect();
+    public void onRoomLocked(final Long instanceId) {
+        this.getNonOwnerDesktopConnectionsForInstanceId(instanceId).stream().forEach(desktopConnection -> {
+            desktopConnection.setRoomLocked(true);
 
-            return true;
+            desktopConnection.getClient().sendEvent(ROOM_LOCKED_EVENT);
+        });
+    }
 
-        } else {
-            return false;
-        }
+    public void onRoomUnlocked(final Long instanceId) {
+        this.getNonOwnerDesktopConnectionsForInstanceId(instanceId).forEach(desktopConnection -> {
+            desktopConnection.setRoomLocked(false);
+
+            desktopConnection.getClient().sendEvent(ROOM_UNLOCKED_EVENT);
+        });
     }
 }

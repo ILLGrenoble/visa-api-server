@@ -1,10 +1,6 @@
 package eu.ill.visa.vdi;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import com.corundumstudio.socketio.store.RedissonStoreFactory;
-import com.corundumstudio.socketio.store.StoreFactory;
-import com.corundumstudio.socketio.store.pubsub.DispatchMessage;
-import com.corundumstudio.socketio.store.pubsub.PubSubType;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
@@ -16,7 +12,6 @@ import eu.ill.visa.vdi.domain.events.Event;
 import eu.ill.visa.vdi.gateway.events.AccessRequestReply;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedCommand;
 import eu.ill.visa.vdi.gateway.listeners.*;
-import eu.ill.visa.vdi.gateway.pubsub.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -64,7 +59,6 @@ public class RemoteDesktopServer {
         }
 
         this.bindListeners(server);
-        this.bindStoreFactorySubscriptions();
         this.server.start();
     }
 
@@ -82,16 +76,6 @@ public class RemoteDesktopServer {
         server.addEventListener(Event.ACCESS_REPLY_EVENT, AccessRequestReply.class, new ClientAccessReplyListener(this.desktopAccessService));
         server.addEventListener(Event.ACCESS_REVOKED_EVENT, AccessRevokedCommand.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService));
         server.addDisconnectListener(new ClientDisconnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.instanceService, this.virtualDesktopConfiguration));
-    }
-
-    private void bindStoreFactorySubscriptions() {
-        final StoreFactory storeFactory = this.server.getConfiguration().getStoreFactory();
-        if (storeFactory instanceof RedissonStoreFactory) {
-            logger.info("Binding pub-sub store subscriptions");
-            storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomClosedListener(this.server), DispatchMessage.class);
-            storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomLockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
-            storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomUnlockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
-        }
     }
 
     private void cleanupSessions() {

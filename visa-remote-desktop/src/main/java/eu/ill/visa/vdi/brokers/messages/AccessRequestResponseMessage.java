@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.brokers.redis.messages;
+package eu.ill.visa.vdi.brokers.messages;
 
 import eu.ill.visa.vdi.domain.models.Role;
 
