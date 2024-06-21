@@ -68,7 +68,7 @@ public class ClientConnectListener extends AbstractListener implements ConnectLi
                     } else {
                         if (this.desktopConnectionService.isOwnerConnected(instance)) {
                             // Start process of requesting access from the owner
-                            this.desktopAccessService.initiateAccess(client, connectedUser, instance.getId());
+                            this.desktopAccessService.requestAccess(client, connectedUser, instance.getId());
 
                         } else {
                             throw new OwnerNotConnectedException();

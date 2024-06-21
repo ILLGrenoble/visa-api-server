@@ -7,7 +7,7 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSessionMember;
-import eu.ill.visa.vdi.domain.models.AccessRevokedCommand;
+import eu.ill.visa.vdi.gateway.events.AccessRevokedCommand;
 import eu.ill.visa.vdi.domain.models.Role;
 import eu.ill.visa.vdi.domain.events.AccessRevokedEvent;
 import eu.ill.visa.vdi.domain.models.DesktopConnection;

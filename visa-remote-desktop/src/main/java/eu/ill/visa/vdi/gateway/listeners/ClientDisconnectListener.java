@@ -80,7 +80,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
             this.removeDesktopConnection(client);
 
         } else {
-            this.desktopAccessService.cancelAccess(client);
+            this.desktopAccessService.cancelAccessRequest(client);
         }
     }
 }

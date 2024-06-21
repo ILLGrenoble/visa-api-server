@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.domain.models;
+package eu.ill.visa.vdi.gateway.events;
 
 public class AccessRevokedCommand {
     String userId;

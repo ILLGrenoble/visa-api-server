@@ -2,6 +2,7 @@ package eu.ill.visa.business.concurrent;
 
 import eu.ill.visa.business.BusinessConfiguration;
 import eu.ill.visa.core.entity.Instance;
+import io.quarkus.runtime.Startup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+@Startup
 @ApplicationScoped
 public class InstanceActionDispatcher {
 

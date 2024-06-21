@@ -86,10 +86,10 @@ public class DesktopConnectionService {
         boolean isWebX = protocol != null && protocol.equals("webx");
         final ConnectionThread thread;
         if (isWebX) {
-            logger.info("User {} creating WebX desktop connection to instance {}", (user.getFullName() + "(" + role.toString() + ")"), instance.getId());
+            logger.info("User {} creating WebX desktop connection to instance {}", (user.getFullName() + " (" + role.toString() + ")"), instance.getId());
             thread = webXDesktopService.connect(client, instance, user);
         } else {
-            logger.info("User {} creating Guacamole desktop connection to instance {}", (user.getFullName() + "(" + role.toString() + ")"), instance.getId());
+            logger.info("User {} creating Guacamole desktop connection to instance {}", (user.getFullName() + " (" + role.toString() + ")"), instance.getId());
             thread = guacamoleDesktopService.connect(client, instance, user);
         }
 
@@ -115,7 +115,7 @@ public class DesktopConnectionService {
 
         } else {
             this.broadcast(client,
-                new UserConnectedEvent(this.getConnectedUser(client)),
+                new UserConnectedEvent(this.getConnectedUser(client), client.getSessionId().toString()),
                 new UsersConnectedEvent(instance, this.getConnectedUsers(instance, false))
             );
         }
@@ -154,7 +154,7 @@ public class DesktopConnectionService {
     public List<ConnectedUser> getConnectedUsers(Instance instance, boolean isRoomLocked) {
         List<InstanceSessionMember> instanceSessionMembers = this.instanceSessionService.getAllSessionMembers(instance);
         logger.info("Instance {} has {} connected users", instance.getId(), instanceSessionMembers.size());
-        List<ConnectedUser> connectedUsers = instanceSessionMembers.stream().map(instanceSessionMember -> {
+        return instanceSessionMembers.stream().map(instanceSessionMember -> {
             User user = instanceSessionMember.getUser();
             Role role = Role.valueOf(instanceSessionMember.getRole());
             if (isRoomLocked && role.equals(Role.USER)) {
@@ -162,8 +162,6 @@ public class DesktopConnectionService {
             }
             return new ConnectedUser(user.getId(), user.getFullName(), role);
         }).toList();
-
-        return connectedUsers;
     }
 
     public boolean isOwnerConnected(final Instance instance) {

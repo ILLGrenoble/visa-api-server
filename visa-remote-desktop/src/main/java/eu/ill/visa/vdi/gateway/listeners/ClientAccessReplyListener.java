@@ -3,12 +3,12 @@ package eu.ill.visa.vdi.gateway.listeners;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.DataListener;
-import eu.ill.visa.vdi.domain.models.AccessReply;
+import eu.ill.visa.vdi.gateway.events.AccessRequestReply;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientAccessReplyListener implements DataListener<AccessReply> {
+public class ClientAccessReplyListener implements DataListener<AccessRequestReply> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientAccessReplyListener.class);
 
@@ -19,7 +19,7 @@ public class ClientAccessReplyListener implements DataListener<AccessReply> {
     }
 
     @Override
-    public void onData(final SocketIOClient client, final AccessReply data, final AckRequest ackRequest) {
-        this.desktopAccessService.onAccessReply(client, data);
+    public void onData(final SocketIOClient client, final AccessRequestReply data, final AckRequest ackRequest) {
+        this.desktopAccessService.respondToAccessRequest(data.getInstanceId(), data.getRequesterConnectionId(), data.getRole());
     }
 }

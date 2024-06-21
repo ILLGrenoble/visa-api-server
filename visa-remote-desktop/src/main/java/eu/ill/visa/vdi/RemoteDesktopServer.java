@@ -13,8 +13,8 @@ import eu.ill.visa.vdi.business.services.DesktopConnectionService;
 import eu.ill.visa.vdi.business.services.RoleService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.events.Event;
-import eu.ill.visa.vdi.domain.models.AccessReply;
-import eu.ill.visa.vdi.domain.models.AccessRevokedCommand;
+import eu.ill.visa.vdi.gateway.events.AccessRequestReply;
+import eu.ill.visa.vdi.gateway.events.AccessRevokedCommand;
 import eu.ill.visa.vdi.gateway.listeners.*;
 import eu.ill.visa.vdi.gateway.pubsub.*;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -79,7 +79,7 @@ public class RemoteDesktopServer {
         server.addEventListener("display", String.class, new GuacamoleClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("webxdisplay", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("thumbnail", byte[].class, new ClientThumbnailListener(this.desktopConnectionService, this.instanceService));
-        server.addEventListener(Event.ACCESS_REPLY_EVENT, AccessReply.class, new ClientAccessReplyListener(this.desktopAccessService));
+        server.addEventListener(Event.ACCESS_REPLY_EVENT, AccessRequestReply.class, new ClientAccessReplyListener(this.desktopAccessService));
         server.addEventListener(Event.ACCESS_REVOKED_EVENT, AccessRevokedCommand.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService, this.instanceSessionService, this.instanceService));
         server.addDisconnectListener(new ClientDisconnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.instanceService, this.virtualDesktopConfiguration));
     }
@@ -91,7 +91,6 @@ public class RemoteDesktopServer {
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomClosedListener(this.server), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomLockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerRoomUnlockedListener(this.desktopConnectionService, this.server), DispatchMessage.class);
-            storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerAccessReplyListener(this.desktopAccessService), DispatchMessage.class);
             storeFactory.pubSubStore().subscribe(PubSubType.DISPATCH, new ServerAccessRevokedListener(this.server), DispatchMessage.class);
         }
     }
