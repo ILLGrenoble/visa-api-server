@@ -81,7 +81,7 @@ public class InstanceSessionService {
 
             List<InstanceSessionMember> members = this.instanceSessionMemberRepository.getAllSessionMembers(instanceSession);
 
-            if (members.size() == 0) {
+            if (members.isEmpty()) {
                 logger.info("Session for Instance with Id: {} is no longer current as it has no connected members", instanceSession.getInstance().getId());
                 instanceSession.setCurrent(false);
             }

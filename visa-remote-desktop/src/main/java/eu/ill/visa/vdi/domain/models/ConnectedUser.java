@@ -1,7 +1,5 @@
 package eu.ill.visa.vdi.domain.models;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import java.util.List;
 
 public class ConnectedUser {
@@ -58,10 +56,6 @@ public class ConnectedUser {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-            .append("id", id)
-            .append("fullName", fullName)
-            .append("role", role)
-            .toString();
+        return this.fullName + " (" + this.id + ", " + this.role + ")";
     }
 }

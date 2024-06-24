@@ -65,12 +65,7 @@ public class DesktopAccessService {
     public void requestAccess(SocketIOClient client, ConnectedUser user, Long instanceId) {
         // Create pending desktop connection
         DesktopCandidate desktopCandidate = this.addCandidate(client, user, instanceId);
-
-        // Get room id from connection
-        String room = desktopCandidate.getRoomId();
-
-        client.joinRoom(room);
-        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(instanceId, user, client.getSessionId().toString()));
+        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(instanceId, user, desktopCandidate.getConnectionId()));
     }
 
     public void cancelAccessRequest(SocketIOClient client) {
@@ -95,8 +90,7 @@ public class DesktopAccessService {
 
             // Send request to owners
             ownerDesktopConnections.forEach(desktopConnection -> {
-                SocketIOClient owner = desktopConnection.getClient();
-                owner.sendEvent(Event.ACCESS_REQUEST_EVENT, new AccessRequest(instanceId, user, requesterConnectionId));
+                desktopConnection.getClient().sendEvent(Event.ACCESS_REQUEST_EVENT, new AccessRequest(instanceId, user, requesterConnectionId));
             });
         }
     }
@@ -108,8 +102,7 @@ public class DesktopAccessService {
 
             // Send cancellation to owners
             ownerDesktopConnections.forEach(desktopConnection -> {
-                SocketIOClient owner = desktopConnection.getClient();
-                owner.sendEvent(Event.ACCESS_CANCELLATION_EVENT, new AccessCancellation(user.getFullName(), requesterConnectionId));
+                desktopConnection.getClient().sendEvent(Event.ACCESS_CANCELLATION_EVENT, new AccessCancellation(user.getFullName(), requesterConnectionId));
             });
         }
     }
@@ -122,14 +115,9 @@ public class DesktopAccessService {
         }
 
         // Send message to any other owners that request has been handled
-        List<DesktopConnection> ownerDesktopConnections = this.desktopConnectionService.getOwnerDesktopConnectionsForInstanceId(instanceId);
-        if (!ownerDesktopConnections.isEmpty()) {
-            // Send cancellation to owners
-            ownerDesktopConnections.forEach(desktopConnection -> {
-                SocketIOClient owner = desktopConnection.getClient();
-                owner.sendEvent(Event.ACCESS_REPLY_EVENT, new AccessRequestReply(instanceId, requesterConnectionId, role.toString()));
-            });
-        }
+        this.desktopConnectionService.getOwnerDesktopConnectionsForInstanceId(instanceId).forEach(desktopConnection -> {
+            desktopConnection.getClient().sendEvent(Event.ACCESS_REPLY_EVENT, new AccessRequestReply(instanceId, requesterConnectionId, role.toString()));
+        });
     }
 
     private synchronized DesktopCandidate addCandidate(SocketIOClient client, ConnectedUser user, Long instanceId) {

@@ -7,12 +7,10 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
-import eu.ill.visa.vdi.domain.models.Role;
-import eu.ill.visa.vdi.domain.events.UserDisconnectedEvent;
-import eu.ill.visa.vdi.domain.events.UsersConnectedEvent;
-import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.domain.models.DesktopConnection;
+import eu.ill.visa.vdi.domain.models.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +42,6 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
         if (connection != null) {
             connection.getConnectionThread().closeTunnel();
 
-            client.leaveRoom(connection.getRoomId());
-
             final Instance instance = instanceService.getById(connection.getInstanceId());
             if (instance != null) {
                 InstanceSession session = instanceSessionService.getByInstance(instance);
@@ -64,10 +60,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
 
                     } else {
                         // broadcast events for a user disconnected and current users
-                        this.broadcast(client,
-                            new UserDisconnectedEvent(this.getConnectedUser(client)),
-                            new UsersConnectedEvent(instance, this.getConnectedUsers(instance, false))
-                        );
+                        this.desktopConnectionService.disconnectUser(instance, this.getConnectedUser(client), connection.getConnectionId());
                     }
 
                 } else {

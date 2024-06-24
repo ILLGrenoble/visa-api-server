@@ -14,6 +14,6 @@ public class ClientAccessRevokedCommandListener extends AbstractListener impleme
 
     @Override
     public void onData(final SocketIOClient client, final AccessRevokedCommand command, final AckRequest ackRequest) {
-        this.desktopConnectionService.revokeUserAccess(client, command.getUserId());
+        this.desktopConnectionService.revokeUserAccess(client, command.userId());
     }
 }
