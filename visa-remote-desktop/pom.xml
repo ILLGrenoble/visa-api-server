@@ -14,7 +14,6 @@
     <properties>
         <guacamole.version>1.5.5</guacamole.version>
         <netty.socketio.version>2.0.9</netty.socketio.version>
-        <redisson.version>3.31.0</redisson.version>
         <webx-relay.version>0.1.0</webx-relay.version>
     </properties>
 
@@ -39,11 +38,6 @@
             <groupId>com.corundumstudio.socketio</groupId>
             <artifactId>netty-socketio</artifactId>
             <version>${netty.socketio.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-            <version>${redisson.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.ill</groupId>
