@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static eu.ill.visa.vdi.domain.events.Event.*;
+import static eu.ill.visa.vdi.domain.models.Event.*;
 
 @Startup
 @ApplicationScoped

@@ -9,7 +9,7 @@ import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestCancellationMessage;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestMessage;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestResponseMessage;
-import eu.ill.visa.vdi.domain.events.Event;
+import eu.ill.visa.vdi.domain.models.Event;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
@@ -17,9 +17,9 @@ import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.DesktopCandidate;
 import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import eu.ill.visa.vdi.domain.models.Role;
-import eu.ill.visa.vdi.gateway.events.AccessCancellation;
-import eu.ill.visa.vdi.gateway.events.AccessRequest;
-import eu.ill.visa.vdi.gateway.events.AccessRequestReply;
+import eu.ill.visa.vdi.gateway.events.AccessCancellationEvent;
+import eu.ill.visa.vdi.gateway.events.AccessRequestEvent;
+import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static eu.ill.visa.vdi.domain.events.Event.ACCESS_DENIED;
+import static eu.ill.visa.vdi.domain.models.Event.ACCESS_DENIED;
 
 @Startup
 @ApplicationScoped
@@ -65,6 +65,9 @@ public class DesktopAccessService {
     public void requestAccess(SocketIOClient client, ConnectedUser user, Long instanceId) {
         // Create pending desktop connection
         DesktopCandidate desktopCandidate = this.addCandidate(client, user, instanceId);
+
+        client.sendEvent(Event.ACCESS_PENDING_EVENT);
+
         this.remoteDesktopBroker.broadcast(new AccessRequestMessage(instanceId, user, desktopCandidate.getConnectionId()));
     }
 
@@ -90,7 +93,7 @@ public class DesktopAccessService {
 
             // Send request to owners
             ownerDesktopConnections.forEach(desktopConnection -> {
-                desktopConnection.getClient().sendEvent(Event.ACCESS_REQUEST_EVENT, new AccessRequest(instanceId, user, requesterConnectionId));
+                desktopConnection.getClient().sendEvent(Event.ACCESS_REQUEST_EVENT, new AccessRequestEvent(instanceId, user, requesterConnectionId));
             });
         }
     }
@@ -102,7 +105,7 @@ public class DesktopAccessService {
 
             // Send cancellation to owners
             ownerDesktopConnections.forEach(desktopConnection -> {
-                desktopConnection.getClient().sendEvent(Event.ACCESS_CANCELLATION_EVENT, new AccessCancellation(user.getFullName(), requesterConnectionId));
+                desktopConnection.getClient().sendEvent(Event.ACCESS_CANCELLATION_EVENT, new AccessCancellationEvent(user.getFullName(), requesterConnectionId));
             });
         }
     }
@@ -116,7 +119,7 @@ public class DesktopAccessService {
 
         // Send message to any other owners that request has been handled
         this.desktopConnectionService.getOwnerDesktopConnectionsForInstanceId(instanceId).forEach(desktopConnection -> {
-            desktopConnection.getClient().sendEvent(Event.ACCESS_REPLY_EVENT, new AccessRequestReply(instanceId, requesterConnectionId, role.toString()));
+            desktopConnection.getClient().sendEvent(Event.ACCESS_REPLY_EVENT, new AccessRequestResponseEvent(instanceId, requesterConnectionId, role.toString()));
         });
     }
 

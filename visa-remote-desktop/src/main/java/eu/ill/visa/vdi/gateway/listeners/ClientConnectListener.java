@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static eu.ill.visa.vdi.domain.models.Role.SUPPORT;
-import static eu.ill.visa.vdi.domain.events.Event.ACCESS_DENIED;
-import static eu.ill.visa.vdi.domain.events.Event.OWNER_AWAY_EVENT;
+import static eu.ill.visa.vdi.domain.models.Event.ACCESS_DENIED;
+import static eu.ill.visa.vdi.domain.models.Event.OWNER_AWAY_EVENT;
 
 public class ClientConnectListener extends AbstractListener implements ConnectListener {
 

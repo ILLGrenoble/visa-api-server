@@ -4,9 +4,9 @@ import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.DataListener;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
-import eu.ill.visa.vdi.gateway.events.AccessRequestReply;
+import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 
-public class ClientAccessReplyListener implements DataListener<AccessRequestReply> {
+public class ClientAccessReplyListener implements DataListener<AccessRequestResponseEvent> {
 
     private final DesktopAccessService desktopAccessService;
 
@@ -15,7 +15,7 @@ public class ClientAccessReplyListener implements DataListener<AccessRequestRepl
     }
 
     @Override
-    public void onData(final SocketIOClient client, final AccessRequestReply data, final AckRequest ackRequest) {
+    public void onData(final SocketIOClient client, final AccessRequestResponseEvent data, final AckRequest ackRequest) {
         this.desktopAccessService.respondToAccessRequest(data.instanceId(), data.requesterConnectionId(), data.getRole());
     }
 }
