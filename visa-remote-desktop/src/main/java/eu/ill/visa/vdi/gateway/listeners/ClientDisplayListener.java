@@ -9,10 +9,10 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
-import eu.ill.visa.vdi.domain.models.Role;
-import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +51,8 @@ public abstract class ClientDisplayListener<T> extends AbstractListener implemen
             connection.setInstanceActivity(controlActivityType);
         }
 
-        Role role = connection.getConnectedUser().getRole();
-        if (controlActivityType == null || role.equals(Role.OWNER) || role.equals(Role.SUPPORT) || (role.equals(Role.USER) && !connection.isRoomLocked())) {
+        InstanceMemberRole role = connection.getConnectedUser().getRole();
+        if (controlActivityType == null || role.equals(InstanceMemberRole.OWNER) || role.equals(InstanceMemberRole.SUPPORT) || (role.equals(InstanceMemberRole.USER) && !connection.isRoomLocked())) {
             this.writeData(connection.getConnectionThread(), data);
         }
 

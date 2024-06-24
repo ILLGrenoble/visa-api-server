@@ -5,7 +5,7 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.DataListener;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.vdi.domain.models.Role;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
 import org.apache.commons.imaging.ImageFormat;
@@ -35,7 +35,7 @@ public class ClientThumbnailListener extends AbstractListener implements DataLis
             if (connection == null) {
                 return;
             }
-            if (connection.getConnectedUser().hasAnyRole(List.of(Role.OWNER, Role.SUPPORT))) {
+            if (connection.getConnectedUser().hasAnyRole(List.of(InstanceMemberRole.OWNER, InstanceMemberRole.SUPPORT))) {
                 final Instance instance = instanceService.getById(connection.getInstanceId());
                 if (instance != null) {
                     final ImageFormat mimeType = Imaging.guessFormat(data);

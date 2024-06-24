@@ -4,5 +4,6 @@ public enum InstanceMemberRole {
     OWNER,
     USER,
     GUEST,
-    SUPPORT
+    SUPPORT,
+    NONE
 }

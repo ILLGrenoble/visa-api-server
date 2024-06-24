@@ -6,11 +6,11 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
 import eu.ill.visa.vdi.domain.models.DesktopConnection;
-import eu.ill.visa.vdi.domain.models.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
                     // Remove client/member from instance session
                     instanceSessionService.removeInstanceSessionMember(session, client.getSessionId());
 
-                    if (!this.desktopConnectionService.isOwnerConnected(instance) && !connection.getConnectedUser().getRole().equals(Role.SUPPORT)) {
+                    if (!this.desktopConnectionService.isOwnerConnected(instance) && !connection.getConnectedUser().getRole().equals(InstanceMemberRole.SUPPORT)) {
                         if (this.virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
                             this.desktopConnectionService.lockRoom(instance);
 

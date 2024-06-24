@@ -6,7 +6,6 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
-import eu.ill.visa.vdi.business.services.RoleService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.models.Event;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
@@ -14,19 +13,14 @@ import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
 import eu.ill.visa.vdi.gateway.listeners.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class RemoteDesktopServer {
-
-    private final static Logger logger = LoggerFactory.getLogger(RemoteDesktopServer.class);
 
     private final SocketIOServer server;
     private final DesktopConnectionService desktopConnectionService;
     private final InstanceService instanceService;
     private final TokenAuthenticatorService authenticator;
-    private final RoleService roleService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceActivityService instanceActivityService;
     private final DesktopAccessService desktopAccessService;
@@ -38,7 +32,6 @@ public class RemoteDesktopServer {
                                final DesktopConnectionService desktopConnectionService,
                                final InstanceService instanceService,
                                final TokenAuthenticatorService authenticator,
-                               final RoleService roleService,
                                final DesktopAccessService desktopAccessService,
                                final VirtualDesktopConfiguration virtualDesktopConfiguration,
                                final InstanceActivityService instanceActivityService) {
@@ -47,7 +40,6 @@ public class RemoteDesktopServer {
         this.desktopConnectionService = desktopConnectionService;
         this.instanceService = instanceService;
         this.authenticator = authenticator;
-        this.roleService = roleService;
         this.desktopAccessService = desktopAccessService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
         this.instanceActivityService = instanceActivityService;
@@ -69,7 +61,7 @@ public class RemoteDesktopServer {
     }
 
     private void bindListeners(final SocketIOServer server) {
-        server.addConnectListener(new ClientConnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.roleService, this.authenticator));
+        server.addConnectListener(new ClientConnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.authenticator));
         server.addEventListener("display", String.class, new GuacamoleClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("webxdisplay", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("thumbnail", byte[].class, new ClientThumbnailListener(this.desktopConnectionService, this.instanceService));

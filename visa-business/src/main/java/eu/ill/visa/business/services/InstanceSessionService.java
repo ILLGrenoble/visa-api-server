@@ -1,6 +1,7 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.persistence.repositories.InstanceSessionMemberRepository;
 import eu.ill.visa.persistence.repositories.InstanceSessionRepository;
 import jakarta.inject.Inject;
@@ -12,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
+
+import static java.util.Objects.requireNonNull;
 
 @Transactional
 @Singleton
@@ -156,5 +159,20 @@ public class InstanceSessionService {
         }
 
         return false;
+    }
+
+    public InstanceMemberRole getUserSessionRole(final Instance instance, final User user) {
+        requireNonNull(instance, "instance cannot be null");
+        requireNonNull(user, "user cannot be null");
+
+        final InstanceMember member = instance.getMember(user);
+        if (member == null) {
+            if (user.hasAnyRole(List.of(Role.ADMIN_ROLE, Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
+                return InstanceMemberRole.SUPPORT;
+            }
+
+            return InstanceMemberRole.NONE;
+        }
+        return member.getRole();
     }
 }

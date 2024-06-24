@@ -5,6 +5,7 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestCancellationMessage;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestMessage;
@@ -16,7 +17,6 @@ import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.DesktopCandidate;
 import eu.ill.visa.vdi.domain.models.DesktopConnection;
-import eu.ill.visa.vdi.domain.models.Role;
 import eu.ill.visa.vdi.gateway.events.AccessCancellationEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
@@ -80,7 +80,7 @@ public class DesktopAccessService {
         }
     }
 
-    public void respondToAccessRequest(Long instanceId, String requesterConnectionId, Role role) {
+    public void respondToAccessRequest(Long instanceId, String requesterConnectionId, InstanceMemberRole role) {
         // Forward reply to broker
         this.remoteDesktopBroker.broadcast(new AccessRequestResponseMessage(instanceId, requesterConnectionId, role));
     }
@@ -110,7 +110,7 @@ public class DesktopAccessService {
         }
     }
 
-    public void onAccessRequestResponse(Long instanceId, String requesterConnectionId, Role role) {
+    public void onAccessRequestResponse(Long instanceId, String requesterConnectionId, InstanceMemberRole role) {
         DesktopCandidate candidate = this.removeCandidate(requesterConnectionId);
         if (candidate != null) {
             logger.info("Handling response ({}) of access request for instance {} from user {} with client id {}", role, candidate.getInstanceId(), candidate.getUser().getFullName(), requesterConnectionId);
@@ -146,7 +146,7 @@ public class DesktopAccessService {
         return null;
     }
 
-    private void connectFromAccessReply(DesktopCandidate candidate, Role replyRole) {
+    private void connectFromAccessReply(DesktopCandidate candidate, InstanceMemberRole replyRole) {
 
         SocketIOClient client = candidate.getClient();
         if (client.isChannelOpen()) {
@@ -156,7 +156,7 @@ public class DesktopAccessService {
 
             if (instance != null) {
                 // Convert the support role to a normal user one if the owner of the instance is staff
-                Role role = this.convertAccessReplyRole(replyRole, instance, user);
+                InstanceMemberRole role = this.convertAccessReplyRole(replyRole, instance, user);
                 user.setRole(role);
                 try {
                     this.desktopConnectionService.createDesktopConnection(client, instance, user);
@@ -186,24 +186,24 @@ public class DesktopAccessService {
         }
     }
 
-    private Role convertAccessReplyRole(Role replyRole, Instance instance, ConnectedUser user) {
-        if (replyRole.equals(Role.SUPPORT)) {
+    private InstanceMemberRole convertAccessReplyRole(InstanceMemberRole replyRole, Instance instance, ConnectedUser user) {
+        if (replyRole.equals(InstanceMemberRole.SUPPORT)) {
             InstanceMember owner = instance.getOwner();
             boolean ownerIsExternalUser = !owner.getUser().hasRole(eu.ill.visa.core.entity.Role.STAFF_ROLE);
             if (ownerIsExternalUser) {
                 // See if user has right to access instance when owner away (support role, otherwise user role)
                 if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
                     // SUPPORT role if user can connect while owner away
-                    return Role.SUPPORT;
+                    return InstanceMemberRole.SUPPORT;
 
                 } else {
                     // Standard USER role if user cannot connect if owner is away
-                    return Role.USER;
+                    return InstanceMemberRole.USER;
                 }
 
             } else {
                 // Standard user for staff
-                return Role.USER;
+                return InstanceMemberRole.USER;
             }
         } else {
             return replyRole;

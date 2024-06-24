@@ -1,14 +1,15 @@
 package eu.ill.visa.vdi.gateway.events;
 
-import eu.ill.visa.vdi.domain.models.Role;
+
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 
 public record AccessRequestResponseEvent(Long instanceId, String requesterConnectionId, String response) {
-    public Role getRole() {
+    public InstanceMemberRole getRole() {
         if (this.response.equals("GUEST")) {
-            return Role.GUEST;
+            return InstanceMemberRole.GUEST;
         } else if (this.response.equals("SUPPORT")) {
-            return Role.SUPPORT;
+            return InstanceMemberRole.SUPPORT;
         }
-        return Role.NONE;
+        return InstanceMemberRole.NONE;
     }
 }

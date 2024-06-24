@@ -1,6 +1,6 @@
 package eu.ill.visa.vdi.brokers.messages;
 
-import eu.ill.visa.vdi.domain.models.Role;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 
-public record AccessRequestResponseMessage(Long instanceId, String requesterConnectionId, Role role) {
+public record AccessRequestResponseMessage(Long instanceId, String requesterConnectionId, InstanceMemberRole role) {
 }

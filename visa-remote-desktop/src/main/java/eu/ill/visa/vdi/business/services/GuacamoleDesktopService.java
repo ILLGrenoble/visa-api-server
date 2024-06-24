@@ -7,6 +7,7 @@ import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
@@ -26,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static eu.ill.visa.vdi.domain.models.Role.OWNER;
 import static java.util.Objects.requireNonNullElse;
 
 public class GuacamoleDesktopService extends DesktopService {
@@ -103,7 +103,7 @@ public class GuacamoleDesktopService extends DesktopService {
 
     private ConfiguredGuacamoleSocket createSocketAndSession(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException {
         // Create new session if user is owner
-        if (user.getRole().equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
+        if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final ConfiguredGuacamoleSocket socket = buildSocket(instance);
             InstanceSession session = instanceSessionService.create(instance, socket.getConnectionID());
             logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());

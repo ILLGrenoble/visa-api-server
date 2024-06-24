@@ -31,6 +31,7 @@ public class RedisMessageCarrier {
         this.payload = payload;
     }
 
+    @SuppressWarnings("unchecked")
     <T> T getData() throws MessageMarshallingException {
         try {
             return (T)this.data;

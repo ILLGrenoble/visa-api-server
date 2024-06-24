@@ -7,6 +7,7 @@ import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
@@ -21,7 +22,6 @@ import eu.ill.webx.exceptions.WebXException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static eu.ill.visa.vdi.domain.models.Role.OWNER;
 import static java.util.Objects.requireNonNullElse;
 
 public class WebXDesktopService extends DesktopService {
@@ -91,7 +91,7 @@ public class WebXDesktopService extends DesktopService {
 
     private WebXTunnel createTunnelAndSession(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
         // Create new session if user is owner
-        if (user.getRole().equals(OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
+        if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final WebXTunnel tunnel = buildTunnel(instance);
             InstanceSession session = instanceSessionService.create(instance, tunnel.getConnectionId());
             logger.info("User {} created WebX session {}", getInstanceAndUser(instance, user), session.getConnectionId());

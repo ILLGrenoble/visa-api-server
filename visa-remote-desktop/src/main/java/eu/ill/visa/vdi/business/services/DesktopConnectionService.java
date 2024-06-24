@@ -9,6 +9,7 @@ import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
 import eu.ill.visa.vdi.brokers.messages.*;
@@ -18,7 +19,6 @@ import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.DesktopConnection;
-import eu.ill.visa.vdi.domain.models.Role;
 import eu.ill.visa.vdi.gateway.events.UserConnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UserDisconnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UsersConnectedEvent;
@@ -83,8 +83,8 @@ public class DesktopConnectionService {
     }
 
     public DesktopConnection createDesktopConnection(final SocketIOClient client, final Instance instance, final ConnectedUser user) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
-        final Role role = user.getRole();
-        if (role == Role.NONE) {
+        final InstanceMemberRole role = user.getRole();
+        if (role == InstanceMemberRole.NONE) {
             throw new UnauthorizedException("User " + user.getFullName() + " is unauthorised to access the instance " + instance.getId());
         }
 
@@ -106,7 +106,7 @@ public class DesktopConnectionService {
 
         InstanceSession instanceSession = this.instanceSessionService.getByInstance(instance);
         boolean unlockRoom = virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
-            && role.equals(Role.OWNER)
+            && role.equals(InstanceMemberRole.OWNER)
             && !this.isOwnerConnected(instance);
 
         // Update the connected clients of the session
@@ -144,14 +144,14 @@ public class DesktopConnectionService {
     public synchronized List<DesktopConnection> getOwnerDesktopConnectionsForInstanceId(Long instanceId) {
         return this.desktopConnections.stream()
             .filter(desktopConnection -> desktopConnection.getInstanceId().equals(instanceId))
-            .filter(desktopConnection -> desktopConnection.getConnectedUser().getRole().equals(Role.OWNER))
+            .filter(desktopConnection -> desktopConnection.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
             .toList();
     }
 
     public synchronized List<DesktopConnection> getNonOwnerDesktopConnectionsForInstanceId(Long instanceId) {
         return this.desktopConnections.stream()
             .filter(desktopConnection -> desktopConnection.getInstanceId().equals(instanceId))
-            .filter(desktopConnection -> !desktopConnection.getConnectedUser().getRole().equals(Role.OWNER))
+            .filter(desktopConnection -> !desktopConnection.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
             .toList();
     }
 
@@ -179,9 +179,9 @@ public class DesktopConnectionService {
         logger.info("Instance {} has {} connected users", instanceId, instanceSessionMembers.size());
         return instanceSessionMembers.stream().map(instanceSessionMember -> {
             User user = instanceSessionMember.getUser();
-            Role role = Role.valueOf(instanceSessionMember.getRole());
-            if (isRoomLocked && role.equals(Role.USER)) {
-                role= Role.GUEST;
+            InstanceMemberRole role = InstanceMemberRole.valueOf(instanceSessionMember.getRole());
+            if (isRoomLocked && role.equals(InstanceMemberRole.USER)) {
+                role= InstanceMemberRole.GUEST;
             }
             return new ConnectedUser(user.getId(), user.getFullName(), role);
         }).toList();
@@ -211,7 +211,7 @@ public class DesktopConnectionService {
         final DesktopConnection connection = this.getDesktopConnection(client);
 
         // Verify that we have a connection and that the user is the owner
-        if (connection != null && connection.getConnectedUser().getRole().equals(Role.OWNER)) {
+        if (connection != null && connection.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)) {
             this.remoteDesktopBroker.broadcast(new AccessRevokedMessage(connection.getInstanceId(), userId));
         }
     }
