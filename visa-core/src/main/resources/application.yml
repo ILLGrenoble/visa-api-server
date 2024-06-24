@@ -37,7 +37,7 @@ quarkus:
       url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
   redis:
     hosts-provider-name: redis-pubsub-hosts-provider
-    max-pool-size: 24
+#    max-pool-size: 24
     devservices:
       enabled: false
   native:

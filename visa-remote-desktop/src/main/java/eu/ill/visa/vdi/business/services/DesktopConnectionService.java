@@ -13,7 +13,6 @@ import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
-import eu.ill.visa.vdi.brokers.RemoteDesktopPubSub;
 import eu.ill.visa.vdi.brokers.messages.AccessRevokedMessage;
 import eu.ill.visa.vdi.brokers.messages.RoomClosedMessage;
 import eu.ill.visa.vdi.brokers.messages.RoomLockedMessage;
@@ -53,12 +52,9 @@ public class DesktopConnectionService {
     private final InstanceExpirationService instanceExpirationService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
 
-    private final List<DesktopConnection> desktopConnections = new ArrayList<>();
+    private final RemoteDesktopBroker remoteDesktopBroker;
 
-    private final RemoteDesktopPubSub<AccessRevokedMessage> accessRevokedPubSub;
-    private final RemoteDesktopPubSub<RoomClosedMessage> roomClosedPubSub;
-    private final RemoteDesktopPubSub<RoomLockedMessage> roomLockedPubSub;
-    private final RemoteDesktopPubSub<RoomUnlockedMessage> roomUnlockedPubSub;
+    private final List<DesktopConnection> desktopConnections = new ArrayList<>();
 
     @Inject
     public DesktopConnectionService(final InstanceSessionService instanceSessionService,
@@ -75,19 +71,16 @@ public class DesktopConnectionService {
         this.instanceExpirationService = instanceExpirationService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
 
-        RemoteDesktopBroker remoteDesktopBroker = remoteDesktopBrokerInstance.get();
+        this.remoteDesktopBroker = remoteDesktopBrokerInstance.get();
 
-        this.accessRevokedPubSub = remoteDesktopBroker.createPubSub(AccessRevokedMessage.class,
-            (message) -> this.onAccessRevoked(message.instanceId(), message.userId()));
-
-        this.roomClosedPubSub = remoteDesktopBroker.createPubSub(RoomClosedMessage.class,
-            (message) -> this.onRoomClosed(message.instanceId()));
-
-        this.roomLockedPubSub = remoteDesktopBroker.createPubSub(RoomLockedMessage.class,
-            (message) -> this.onRoomLocked(message.instanceId()));
-
-        this.roomUnlockedPubSub = remoteDesktopBroker.createPubSub(RoomUnlockedMessage.class,
-            (message) -> this.onRoomUnlocked(message.instanceId()));
+        this.remoteDesktopBroker.subscribe(AccessRevokedMessage.class)
+            .next((message) -> this.onAccessRevoked(message.instanceId(), message.userId()));
+        this.remoteDesktopBroker.subscribe(RoomClosedMessage.class)
+            .next((message) -> this.onRoomClosed(message.instanceId()));
+        this.remoteDesktopBroker.subscribe(RoomLockedMessage.class)
+            .next((message) -> this.onRoomLocked(message.instanceId()));
+        this.remoteDesktopBroker.subscribe(RoomUnlockedMessage.class)
+            .next((message) -> this.onRoomUnlocked(message.instanceId()));
     }
 
     public void broadcast(final SocketIOClient client, final Event...events) {
@@ -225,20 +218,20 @@ public class DesktopConnectionService {
 
         // Verify that we have a connection and that the user is the owner
         if (connection != null && connection.getConnectedUser().getRole().equals(Role.OWNER)) {
-            this.accessRevokedPubSub.broadcast(new AccessRevokedMessage(connection.getInstanceId(), userId));
+            this.remoteDesktopBroker.broadcast(new AccessRevokedMessage(connection.getInstanceId(), userId));
         }
     }
 
     public void closeRoom(final Instance instance) {
-        this.roomClosedPubSub.broadcast(new RoomClosedMessage(instance.getId()));
+        this.remoteDesktopBroker.broadcast(new RoomClosedMessage(instance.getId()));
     }
 
     public void lockRoom(final Instance instance) {
-        this.roomLockedPubSub.broadcast(new RoomLockedMessage(instance.getId()));
+        this.remoteDesktopBroker.broadcast(new RoomLockedMessage(instance.getId()));
     }
 
     public void unlockRoom(final Instance instance) {
-        this.roomUnlockedPubSub.broadcast(new RoomUnlockedMessage(instance.getId()));
+        this.remoteDesktopBroker.broadcast(new RoomUnlockedMessage(instance.getId()));
     }
 
     public void onAccessRevoked(Long instanceId, final String userId) {

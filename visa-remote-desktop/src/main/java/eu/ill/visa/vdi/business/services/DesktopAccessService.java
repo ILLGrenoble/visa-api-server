@@ -6,7 +6,6 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
-import eu.ill.visa.vdi.brokers.RemoteDesktopPubSub;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestCancellationMessage;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestMessage;
 import eu.ill.visa.vdi.brokers.messages.AccessRequestResponseMessage;
@@ -41,9 +40,7 @@ public class DesktopAccessService {
     private final InstanceSessionService instanceSessionService;
     private final InstanceService instanceService;
 
-    private final RemoteDesktopPubSub<AccessRequestMessage> accessRequestPubSub;
-    private final RemoteDesktopPubSub<AccessRequestCancellationMessage> accessRequestCancelledPubSub;
-    private final RemoteDesktopPubSub<AccessRequestResponseMessage> accessRequestResponsePubSub;
+    private final RemoteDesktopBroker remoteDesktopBroker;
 
     private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
 
@@ -55,14 +52,14 @@ public class DesktopAccessService {
         this.desktopConnectionService = desktopConnectionService;
         this.instanceSessionService = instanceSessionService;
         this.instanceService = instanceService;
-        RemoteDesktopBroker remoteDesktopBroker = remoteDesktopBrokerInstance.get();
+        this.remoteDesktopBroker = remoteDesktopBrokerInstance.get();
 
-        this.accessRequestPubSub = remoteDesktopBroker.createPubSub(AccessRequestMessage.class,
-            (message) -> this.onAccessRequested(message.instanceId(), message.user(), message.requesterConnectionId()));
-        this.accessRequestCancelledPubSub = remoteDesktopBroker.createPubSub(AccessRequestCancellationMessage.class,
-            (message) -> this.onAccessRequestCancelled(message.instanceId(), message.user(), message.requesterConnectionId()));
-        this.accessRequestResponsePubSub = remoteDesktopBroker.createPubSub(AccessRequestResponseMessage.class,
-            (message) -> this.onAccessRequestResponse(message.instanceId(), message.requesterConnectionId(), message.role()));
+        this.remoteDesktopBroker.subscribe(AccessRequestMessage.class)
+            .next((message) -> this.onAccessRequested(message.instanceId(), message.user(), message.requesterConnectionId()));
+        this.remoteDesktopBroker.subscribe(AccessRequestCancellationMessage.class)
+            .next((message) -> this.onAccessRequestCancelled(message.instanceId(), message.user(), message.requesterConnectionId()));
+        this.remoteDesktopBroker.subscribe(AccessRequestResponseMessage.class)
+            .next((message) -> this.onAccessRequestResponse(message.instanceId(), message.requesterConnectionId(), message.role()));
     }
 
     public void requestAccess(SocketIOClient client, ConnectedUser user, Long instanceId) {
@@ -73,7 +70,7 @@ public class DesktopAccessService {
         String room = desktopCandidate.getRoomId();
 
         client.joinRoom(room);
-        this.accessRequestPubSub.broadcast(new AccessRequestMessage(instanceId, user, client.getSessionId().toString()));
+        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(instanceId, user, client.getSessionId().toString()));
     }
 
     public void cancelAccessRequest(SocketIOClient client) {
@@ -81,13 +78,13 @@ public class DesktopAccessService {
         DesktopCandidate desktopCandidate = this.removeCandidate(client.getSessionId().toString());
         if (desktopCandidate != null) {
             // A desktop request was in progress
-            this.accessRequestCancelledPubSub.broadcast(new AccessRequestCancellationMessage(desktopCandidate.getInstanceId(), desktopCandidate.getUser(), desktopCandidate.getConnectionId()));
+            this.remoteDesktopBroker.broadcast(new AccessRequestCancellationMessage(desktopCandidate.getInstanceId(), desktopCandidate.getUser(), desktopCandidate.getConnectionId()));
         }
     }
 
     public void respondToAccessRequest(Long instanceId, String requesterConnectionId, Role role) {
         // Forward reply to broker
-        this.accessRequestResponsePubSub.broadcast(new AccessRequestResponseMessage(instanceId, requesterConnectionId, role));
+        this.remoteDesktopBroker.broadcast(new AccessRequestResponseMessage(instanceId, requesterConnectionId, role));
     }
 
     public void onAccessRequested(Long instanceId, ConnectedUser user, String requesterConnectionId) {
