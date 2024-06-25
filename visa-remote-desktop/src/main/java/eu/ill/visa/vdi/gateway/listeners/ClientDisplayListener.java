@@ -20,10 +20,11 @@ import java.util.Date;
 
 import static java.lang.String.format;
 
-public abstract class ClientDisplayListener<T> extends AbstractListener implements DataListener<T> {
+public abstract class ClientDisplayListener<T> implements DataListener<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientDisplayListener.class);
 
+    private final DesktopConnectionService desktopConnectionService;
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceActivityService instanceActivityService;
@@ -32,7 +33,7 @@ public abstract class ClientDisplayListener<T> extends AbstractListener implemen
                                  final InstanceService instanceService,
                                  final InstanceSessionService instanceSessionService,
                                  final InstanceActivityService instanceActivityService) {
-        super(desktopConnectionService);
+        this.desktopConnectionService = desktopConnectionService;
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceActivityService = instanceActivityService;
@@ -41,7 +42,7 @@ public abstract class ClientDisplayListener<T> extends AbstractListener implemen
     @Override
     public void onData(final SocketIOClient client, final T data, final AckRequest ackRequest) {
 
-        final DesktopConnection connection = this.getDesktopConnection(client);
+        final DesktopConnection connection = this.desktopConnectionService.getDesktopConnection(client);
         if (connection == null) {
             return;
         }

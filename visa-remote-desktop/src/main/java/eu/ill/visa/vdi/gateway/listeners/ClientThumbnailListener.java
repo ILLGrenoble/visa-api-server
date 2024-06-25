@@ -16,21 +16,22 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class ClientThumbnailListener extends AbstractListener implements DataListener<byte[]> {
+public class ClientThumbnailListener implements DataListener<byte[]> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientThumbnailListener.class);
 
+    private final DesktopConnectionService desktopConnectionService;
     private final InstanceService instanceService;
 
     public ClientThumbnailListener(final DesktopConnectionService desktopConnectionService,
                                    final InstanceService instanceService) {
-        super(desktopConnectionService);
+        this.desktopConnectionService = desktopConnectionService;
         this.instanceService = instanceService;
     }
 
     @Override
     public void onData(final SocketIOClient client, final byte[] data, final AckRequest ackRequest) {
-        final DesktopConnection connection = this.getDesktopConnection(client);
+        final DesktopConnection connection = this.desktopConnectionService.getDesktopConnection(client);
         try {
             if (connection == null) {
                 return;
@@ -47,7 +48,5 @@ public class ClientThumbnailListener extends AbstractListener implements DataLis
         } catch (Exception exception) {
             logger.error("Error creating thumbnail for instance: {}", connection.getInstanceId(), exception);
         }
-
-
     }
 }

@@ -21,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import static eu.ill.visa.vdi.domain.models.Event.ACCESS_DENIED;
 import static eu.ill.visa.vdi.domain.models.Event.OWNER_AWAY_EVENT;
 
-public class ClientConnectListener extends AbstractListener implements ConnectListener {
+public class ClientConnectListener implements ConnectListener {
 
-    private static final Logger                   logger = LoggerFactory.getLogger(ClientConnectListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClientConnectListener.class);
+
+    private final DesktopConnectionService desktopConnectionService;
     private final DesktopAccessService desktopAccessService;
     private final InstanceSessionService instanceSessionService;
     private final TokenAuthenticatorService authenticator;
@@ -32,7 +34,7 @@ public class ClientConnectListener extends AbstractListener implements ConnectLi
                                  final DesktopAccessService desktopAccessService,
                                  final InstanceSessionService instanceSessionService,
                                  final TokenAuthenticatorService authenticator) {
-        super(desktopConnectionService);
+        this.desktopConnectionService = desktopConnectionService;
         this.desktopAccessService = desktopAccessService;
         this.instanceSessionService = instanceSessionService;
         this.authenticator = authenticator;

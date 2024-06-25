@@ -6,10 +6,12 @@ import com.corundumstudio.socketio.listener.DataListener;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
 
-public class ClientAccessRevokedCommandListener extends AbstractListener implements DataListener<AccessRevokedEvent> {
+public class ClientAccessRevokedCommandListener implements DataListener<AccessRevokedEvent> {
+
+    private final DesktopConnectionService desktopConnectionService;
 
     public ClientAccessRevokedCommandListener(final DesktopConnectionService desktopConnectionService) {
-        super(desktopConnectionService);
+        this.desktopConnectionService = desktopConnectionService;
     }
 
     @Override

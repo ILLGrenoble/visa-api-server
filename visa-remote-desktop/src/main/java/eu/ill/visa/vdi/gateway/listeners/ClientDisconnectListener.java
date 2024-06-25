@@ -14,10 +14,11 @@ import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientDisconnectListener extends AbstractListener implements DisconnectListener {
+public class ClientDisconnectListener  implements DisconnectListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientDisconnectListener.class);
 
+    private final DesktopConnectionService desktopConnectionService;
     private final DesktopAccessService desktopAccessService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceService instanceService;
@@ -28,7 +29,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
                                     final InstanceSessionService instanceSessionService,
                                     final InstanceService instanceService,
                                     final VirtualDesktopConfiguration virtualDesktopConfiguration) {
-        super(desktopConnectionService);
+        this.desktopConnectionService = desktopConnectionService;
         this.desktopAccessService = desktopAccessService;
         this.instanceSessionService = instanceSessionService;
         this.instanceService = instanceService;
@@ -37,7 +38,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
 
     @Override
     public void onDisconnect(final SocketIOClient client) {
-        final DesktopConnection connection = this.getDesktopConnection(client);
+        final DesktopConnection connection = this.desktopConnectionService.getDesktopConnection(client);
 
         if (connection != null) {
             connection.getConnectionThread().closeTunnel();
@@ -60,7 +61,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
 
                     } else {
                         // broadcast events for a user disconnected and current users
-                        this.desktopConnectionService.disconnectUser(instance, this.getConnectedUser(client), connection.getConnectionId());
+                        this.desktopConnectionService.disconnectUser(instance, this.desktopConnectionService.getConnectedUser(client), connection.getConnectionId());
                     }
 
                 } else {
@@ -69,7 +70,7 @@ public class ClientDisconnectListener extends AbstractListener implements Discon
                 }
             }
 
-            this.removeDesktopConnection(client);
+            this.desktopConnectionService.removeDesktopConnection(client);
 
         } else {
             this.desktopAccessService.cancelAccessRequest(client);
