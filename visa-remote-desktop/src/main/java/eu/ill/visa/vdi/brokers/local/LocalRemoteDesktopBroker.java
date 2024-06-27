@@ -22,6 +22,9 @@ public class LocalRemoteDesktopBroker implements RemoteDesktopBroker {
     }
 
     @Override
+    public void shutdown() {
+    }
+
     public synchronized <T> RemoteDesktopMessageSubscriptionList<T> subscribe(Class<T> clazz) {
         RemoteDesktopMessageSubscriptionList<T> subscriptionList = this.getSubscriptionList(clazz.getName());
         if (subscriptionList == null) {

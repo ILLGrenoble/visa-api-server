@@ -6,8 +6,8 @@ import com.corundumstudio.socketio.listener.DataListener;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
-import eu.ill.visa.vdi.domain.models.DesktopConnection;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.apache.commons.imaging.ImageFormat;
 import org.apache.commons.imaging.ImageFormats;
 import org.apache.commons.imaging.Imaging;
@@ -31,22 +31,21 @@ public class ClientThumbnailListener implements DataListener<byte[]> {
 
     @Override
     public void onData(final SocketIOClient client, final byte[] data, final AckRequest ackRequest) {
-        final DesktopConnection connection = this.desktopConnectionService.getDesktopConnection(client);
-        try {
-            if (connection == null) {
-                return;
-            }
-            if (connection.getConnectedUser().hasAnyRole(List.of(InstanceMemberRole.OWNER, InstanceMemberRole.SUPPORT))) {
-                final Instance instance = instanceService.getById(connection.getInstanceId());
-                if (instance != null) {
-                    final ImageFormat mimeType = Imaging.guessFormat(data);
-                    if (mimeType == ImageFormats.JPEG) {
-                        instanceService.createOrUpdateThumbnail(instance, data);
+        final SocketClient socketClient = new SocketClient(client, client.getSessionId().toString());
+        this.desktopConnectionService.findDesktopSessionMember(socketClient).ifPresent(desktopSessionMember -> {
+            try {
+                if (desktopSessionMember.getConnectedUser().hasAnyRole(List.of(InstanceMemberRole.OWNER, InstanceMemberRole.SUPPORT))) {
+                    final Instance instance = instanceService.getById(desktopSessionMember.getSession().getInstanceId());
+                    if (instance != null) {
+                        final ImageFormat mimeType = Imaging.guessFormat(data);
+                        if (mimeType == ImageFormats.JPEG) {
+                            instanceService.createOrUpdateThumbnail(instance, data);
+                        }
                     }
                 }
+            } catch (Exception exception) {
+                logger.error("Error creating thumbnail for instance: {}", desktopSessionMember.getSession().getInstanceId(), exception);
             }
-        } catch (Exception exception) {
-            logger.error("Error creating thumbnail for instance: {}", connection.getInstanceId(), exception);
-        }
+        });
     }
 }

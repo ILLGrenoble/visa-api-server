@@ -7,7 +7,7 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
-import eu.ill.visa.vdi.domain.models.Event;
+import eu.ill.visa.vdi.domain.models.SessionEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
 import eu.ill.visa.vdi.gateway.listeners.*;
@@ -65,8 +65,8 @@ public class RemoteDesktopServer {
         server.addEventListener("display", String.class, new GuacamoleClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("webxdisplay", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("thumbnail", byte[].class, new ClientThumbnailListener(this.desktopConnectionService, this.instanceService));
-        server.addEventListener(Event.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class, new ClientAccessReplyListener(this.desktopAccessService));
-        server.addEventListener(Event.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService));
+        server.addEventListener(SessionEvent.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class, new ClientAccessReplyListener(this.desktopAccessService));
+        server.addEventListener(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService));
         server.addDisconnectListener(new ClientDisconnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.instanceService, this.virtualDesktopConfiguration));
     }
 

@@ -5,7 +5,6 @@ import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
 import eu.ill.visa.vdi.brokers.RemoteDesktopMessageSubscriptionList;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.redis.datasource.RedisDataSource;
-import io.quarkus.runtime.Shutdown;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ public class RedisRemoteDesktopBroker implements RemoteDesktopBroker {
         logger.info("Enabling load-balanced web-sockets with redis at {}, using db {}", configuration.redisURL().get(), configuration.redisDatabase());
     }
 
-    @Shutdown
+    @Override
     public void shutdown() {
         try {
             this.redisPubSub.shutdown();
@@ -33,10 +32,12 @@ public class RedisRemoteDesktopBroker implements RemoteDesktopBroker {
         }
     }
 
+    @Override
     public <T> RemoteDesktopMessageSubscriptionList<T> subscribe(Class<T> clazz) {
         return this.redisPubSub.subscribe(clazz);
     }
 
+    @Override
     public <T> void broadcast(T message) {
         this.redisPubSub.broadcast(message);
     }

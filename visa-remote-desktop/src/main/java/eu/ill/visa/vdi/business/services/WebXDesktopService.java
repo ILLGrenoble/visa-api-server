@@ -1,6 +1,5 @@
 package eu.ill.visa.vdi.business.services;
 
-import com.corundumstudio.socketio.SocketIOClient;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.business.services.SignatureService;
@@ -13,6 +12,8 @@ import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
+import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.webx.WebXClientInformation;
 import eu.ill.webx.WebXConfiguration;
 import eu.ill.webx.WebXTunnel;
@@ -93,7 +94,7 @@ public class WebXDesktopService extends DesktopService {
         // Create new session if user is owner
         if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final WebXTunnel tunnel = buildTunnel(instance);
-            InstanceSession session = instanceSessionService.create(instance, tunnel.getConnectionId());
+            InstanceSession session = instanceSessionService.create(instance, WEBX_PROTOCOL, tunnel.getConnectionId());
             logger.info("User {} created WebX session {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
             return tunnel;
@@ -105,7 +106,7 @@ public class WebXDesktopService extends DesktopService {
     }
 
     private WebXTunnel getOrCreateTunnel(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
-        InstanceSession session = instanceSessionService.getByInstance(instance);
+        InstanceSession session = instanceSessionService.getByInstanceAndProtocol(instance, WEBX_PROTOCOL);
 
         if (session == null) {
             return this.createTunnelAndSession(instance, user);
@@ -138,8 +139,10 @@ public class WebXDesktopService extends DesktopService {
     }
 
     @Override
-    public ConnectionThread connect(SocketIOClient client, Instance instance, ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
+    public RemoteDesktopConnection connect(SocketClient client, Instance instance, ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
         final WebXTunnel webXTunnel = this.createWebXTunnel(instance, user);
-        return executorService.startWebXConnectionThread(client, webXTunnel, instance, user);
+        final ConnectionThread connectionThread = executorService.startWebXConnectionThread(client, webXTunnel, instance, user);
+        return new RemoteDesktopConnection(client, connectionThread);
+
     }
 }

@@ -8,17 +8,38 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "instanceSession.getById", query = """
-            SELECT i FROM InstanceSession i WHERE i.id = :id
+        SELECT isess
+        FROM InstanceSession isess
+        LEFT JOIN isess.instance i
+        WHERE isess.id = :id
+        AND i.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceSession.getAll", query = """
-            SELECT i FROM InstanceSession i WHERE i.current = true ORDER BY i.id DESC
+        SELECT isess
+        FROM InstanceSession isess
+        LEFT JOIN isess.instance i
+        WHERE isess.current = true
+        AND i.deletedAt IS NULL
+        ORDER BY isess.id DESC
     """),
     @NamedQuery(name = "instanceSession.getAllByInstance", query = """
-            SELECT i
-            FROM InstanceSession i
-            WHERE i.instance = :instance
-            AND i.current = true
-            ORDER BY i.id DESC
+        SELECT isess
+        FROM InstanceSession isess
+        LEFT JOIN isess.instance i
+        WHERE i = :instance
+        AND isess.current = true
+        AND i.deletedAt IS NULL
+        ORDER BY isess.id DESC
+    """),
+    @NamedQuery(name = "instanceSession.getAllByInstanceIdAndProtocol", query = """
+        SELECT isess
+        FROM InstanceSession isess
+        LEFT JOIN isess.instance i
+        WHERE i.id = :instanceId
+        AND isess.protocol = :protocol
+        AND isess.current = true
+        AND i.deletedAt IS NULL
+        ORDER BY isess.id DESC
     """),
 })
 @Table(name = "instance_session")
@@ -32,6 +53,9 @@ public class InstanceSession extends Timestampable {
     @Column(name = "connection_id", length = 150, nullable = false)
     private String connectionId;
 
+    @Column(name = "protocol", length = 150, nullable = true)
+    private String protocol;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
     private Instance instance;
@@ -42,8 +66,9 @@ public class InstanceSession extends Timestampable {
     public InstanceSession() {
     }
 
-    public InstanceSession(Instance instance, String connectionId) {
+    public InstanceSession(Instance instance, String protocol, String connectionId) {
         this.instance = instance;
+        this.protocol = protocol;
         this.connectionId = connectionId;
         this.current = true;
     }
@@ -70,6 +95,14 @@ public class InstanceSession extends Timestampable {
 
     public void setConnectionId(String connectionId) {
         this.connectionId = connectionId;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public Boolean getCurrent() {

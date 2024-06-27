@@ -12,7 +12,9 @@ import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopConnectionService;
-import eu.ill.visa.vdi.domain.models.DesktopConnection;
+import eu.ill.visa.vdi.domain.models.DesktopSession;
+import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
+import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,57 +43,56 @@ public abstract class ClientDisplayListener<T> implements DataListener<T> {
 
     @Override
     public void onData(final SocketIOClient client, final T data, final AckRequest ackRequest) {
+        final SocketClient socketClient = new SocketClient(client, client.getSessionId().toString());
+        this.desktopConnectionService.findDesktopSessionMember(socketClient).ifPresent(desktopSessionMember -> {
 
-        final DesktopConnection connection = this.desktopConnectionService.getDesktopConnection(client);
-        if (connection == null) {
-            return;
-        }
+            final DesktopSession desktopSession = desktopSessionMember.getSession();
 
-        InstanceActivityType controlActivityType = this.getControlActivityType(data);
-        if (controlActivityType != null) {
-            connection.setInstanceActivity(controlActivityType);
-        }
-
-        InstanceMemberRole role = connection.getConnectedUser().getRole();
-        if (controlActivityType == null || role.equals(InstanceMemberRole.OWNER) || role.equals(InstanceMemberRole.SUPPORT) || (role.equals(InstanceMemberRole.USER) && !connection.isRoomLocked())) {
-            this.writeData(connection.getConnectionThread(), data);
-        }
-
-        // Update last seen time of instance if more than one minute
-        final Date lastSeenDate = connection.getLastSeenAt();
-        final Date currentDate = new Date();
-        if (lastSeenDate == null || (currentDate.getTime() - lastSeenDate.getTime() > 5 * 1000)) {
-            final Long instanceId = connection.getInstanceId();
-            final Instance instance = instanceService.getById(instanceId);
+            final Instance instance = this.instanceService.getById(desktopSession.getInstanceId());
             if (instance == null) {
-                logger.warn(format("Instance not found %d for connected user %s with role %s", instanceId, connection.getConnectedUser().getFullName(), role));
-                client.disconnect();
-            } else {
+                return;
+            }
+
+            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.getDesktopConnection();
+            InstanceActivityType controlActivityType = this.getControlActivityType(data);
+            if (controlActivityType != null) {
+                remoteDesktopConnection.setInstanceActivity(controlActivityType);
+            }
+
+            InstanceMemberRole role = desktopSessionMember.getConnectedUser().getRole();
+            if (controlActivityType == null || role.equals(InstanceMemberRole.OWNER) || role.equals(InstanceMemberRole.SUPPORT) || (role.equals(InstanceMemberRole.USER) && !desktopSession.isLocked())) {
+                this.writeData(remoteDesktopConnection.getConnectionThread(), data);
+            }
+
+            // Update last seen time of instance if more than one minute
+            final Date lastSeenDate = remoteDesktopConnection.getLastSeenAt();
+            final Date currentDate = new Date();
+            if (lastSeenDate == null || (currentDate.getTime() - lastSeenDate.getTime() > 5 * 1000)) {
                 instance.updateLastSeenAt();
 
-                if (lastSeenDate == null || lastSeenDate.getTime() <= connection.getLastInteractionAt().getTime()) {
-                    instance.setLastInteractionAt(connection.getLastInteractionAt());
+                if (lastSeenDate == null || lastSeenDate.getTime() <= remoteDesktopConnection.getLastInteractionAt().getTime()) {
+                    instance.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
                 }
 
                 instanceService.save(instance);
 
-                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(client.getSessionId());
+                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.getId());
                 if (instanceSessionMember == null) {
-                    logger.warn(format("Instance session member not found for instance %d", instanceId));
+                    logger.warn(format("Instance session member not found for instance %d", instance.getId()));
                 } else {
                     instanceSessionMember.updateLastSeenAt();
-                    instanceSessionMember.setLastInteractionAt(connection.getLastInteractionAt());
+                    instanceSessionMember.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
                     instanceSessionService.saveInstanceSessionMember(instanceSessionMember);
 
-                    InstanceActivityType instanceActivityType = connection.getInstanceActivity();
+                    InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
                     if (instanceActivityType != null) {
                         this.instanceActivityService.create(instanceSessionMember.getUser(), instance, instanceActivityType);
-                        connection.resetInstanceActivity();
+                        remoteDesktopConnection.resetInstanceActivity();
                     }
                 }
-                connection.setLastSeenAt(instance.getLastSeenAt());
+                remoteDesktopConnection.setLastSeenAt(instance.getLastSeenAt());
             }
-        }
+        });
     }
 
     protected abstract InstanceActivityType getControlActivityType(T data);

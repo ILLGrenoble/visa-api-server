@@ -1,6 +1,5 @@
 package eu.ill.visa.vdi.business.services;
 
-import com.corundumstudio.socketio.SocketIOClient;
 import eu.ill.visa.business.services.ImageProtocolService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.business.services.SignatureService;
@@ -14,6 +13,8 @@ import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
+import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.GuacamoleSocket;
 import org.apache.guacamole.net.GuacamoleTunnel;
@@ -105,7 +106,7 @@ public class GuacamoleDesktopService extends DesktopService {
         // Create new session if user is owner
         if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final ConfiguredGuacamoleSocket socket = buildSocket(instance);
-            InstanceSession session = instanceSessionService.create(instance, socket.getConnectionID());
+            InstanceSession session = instanceSessionService.create(instance, GUACAMOLE_PROTOCOL, socket.getConnectionID());
             logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
             return socket;
@@ -117,7 +118,7 @@ public class GuacamoleDesktopService extends DesktopService {
     }
 
     private ConfiguredGuacamoleSocket getOrCreateSocket(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException {
-        InstanceSession session = instanceSessionService.getByInstance(instance);
+        InstanceSession session = instanceSessionService.getByInstanceAndProtocol(instance, GUACAMOLE_PROTOCOL);
 
         if (session == null) {
             return this.createSocketAndSession(instance, user);
@@ -140,8 +141,7 @@ public class GuacamoleDesktopService extends DesktopService {
         }
     }
 
-    private GuacamoleSocket createGuacamoleSocket(final Instance instance,
-                                                              final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
+    private GuacamoleSocket createGuacamoleSocket(final Instance instance, final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
         try {
             synchronized (instance) {
                 final GuacamoleSocket socket = getOrCreateSocket(instance, user);
@@ -155,12 +155,13 @@ public class GuacamoleDesktopService extends DesktopService {
     }
 
     @Override
-    public ConnectionThread connect(final SocketIOClient client,
-                                    final Instance instance,
-                                    final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
+    public RemoteDesktopConnection connect(final SocketClient client,
+                                           final Instance instance,
+                                           final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
         final GuacamoleSocket guacamoleSocket = this.createGuacamoleSocket(instance, user);
 
         final GuacamoleTunnel guacamoleTunnel = new SimpleGuacamoleTunnel(guacamoleSocket);
-        return executorService.startGuacamoleConnectionThread(client, guacamoleTunnel, instance, user);
+        final ConnectionThread connectionThread = executorService.startGuacamoleConnectionThread(client, guacamoleTunnel, instance, user);
+        return new RemoteDesktopConnection(client, connectionThread);
     }
 }

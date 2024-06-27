@@ -56,7 +56,7 @@ public class InstanceActionServiceProvider {
             this.instanceSessionService.save(session);
         }
 
-        final List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembers(instance);
+        final List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembersByInstance(instance);
         for (InstanceSessionMember member : sessionMembers) {
             member.setActive(false);
             this.instanceSessionService.saveInstanceSessionMember(member);

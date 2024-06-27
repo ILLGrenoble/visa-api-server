@@ -1,4 +1,4 @@
 package eu.ill.visa.vdi.brokers.messages;
 
-public record RoomClosedMessage(Long instanceId) {
+public record RoomClosedMessage(String desktopSessionId) {
 }

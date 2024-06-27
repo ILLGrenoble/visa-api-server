@@ -1,4 +1,4 @@
 package eu.ill.visa.vdi.brokers.messages;
 
-public record AccessRevokedMessage(Long instanceId, String userId) {
+public record AccessRevokedMessage(String desktopSessionId, String userId) {
 }

@@ -4,7 +4,6 @@ import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.QueryFilter;
-import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.persistence.providers.InstanceSessionMemberFilterProvider;
@@ -76,20 +75,21 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         return query.getResultList();
     }
 
-    public List<InstanceSessionMember> getAllSessionMembers(final Instance instance) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstance", InstanceSessionMember.class);
-        query.setParameter("instance", instance);
-        return query.getResultList();
-    }
-
     public List<InstanceSessionMember> getAllSessionMembersByInstanceId(final Long instanceId) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceByInstanceId", InstanceSessionMember.class);
+        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceId", InstanceSessionMember.class);
         query.setParameter("instanceId", instanceId);
         return query.getResultList();
     }
 
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceIdAndProtocol(Long instanceId, String protocol) {
+        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceIdAndProtocol", InstanceSessionMember.class);
+        query.setParameter("instanceId", instanceId);
+        query.setParameter("protocol", protocol);
+        return query.getResultList();
+    }
+
     public List<InstanceSessionMember> getAllHistorySessionMembersByInstanceId(final Long instanceId) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllHistoryForInstanceByInstanceId", InstanceSessionMember.class);
+        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllHistoryForInstanceId", InstanceSessionMember.class);
         query.setParameter("instanceId", instanceId);
         return query.getResultList();
     }

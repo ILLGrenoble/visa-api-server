@@ -29,21 +29,30 @@ public class InstanceSessionRepository extends AbstractRepository<InstanceSessio
         query.setMaxResults(1);
 
         List<InstanceSession> sessions = query.getResultList();
-        if (sessions.size() > 0) {
-            return sessions.get(0);
+        if (!sessions.isEmpty()) {
+            return sessions.getFirst();
         }
         return null;
     }
-
 
     public List<InstanceSession> getAllByInstance(final Instance instance) {
         final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getAllByInstance", InstanceSession.class);
         query.setParameter("instance", instance);
 
-        List<InstanceSession> sessions = query.getResultList();
-        return sessions;
+        return query.getResultList();
     }
 
+    public InstanceSession getByInstanceIdAndProtocol(Long instanceId, String protocol) {
+        try {
+            final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getAllByInstanceIdAndProtocol", InstanceSession.class);
+            query.setParameter("instanceId", instanceId);
+            query.setParameter("protocol", protocol);
+            return query.getSingleResult();
+
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
 
     public InstanceSession getById(final Long id) {
         try {

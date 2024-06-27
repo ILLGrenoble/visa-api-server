@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 
@@ -49,8 +48,8 @@ public class InstanceSessionService {
         return this.repository.getById(id);
     }
 
-    public InstanceSession create(@NotNull Instance instance, String connectionId) {
-        InstanceSession session = new InstanceSession(instance, connectionId);
+    public InstanceSession create(@NotNull Instance instance, String protocol, String connectionId) {
+        InstanceSession session = new InstanceSession(instance, protocol, connectionId);
 
         this.save(session);
 
@@ -65,19 +64,27 @@ public class InstanceSessionService {
         return this.repository.getAllByInstance(instance);
     }
 
+    public InstanceSession getByInstanceAndProtocol(@NotNull Instance instance, String protocol) {
+        return this.getByInstanceIdAndProtocol(instance.getId(), protocol);
+    }
+
+    public InstanceSession getByInstanceIdAndProtocol(Long instanceId, String protocol) {
+        return this.repository.getByInstanceIdAndProtocol(instanceId, protocol);
+    }
+
     public void save(@NotNull InstanceSession instanceSession) {
         this.repository.save(instanceSession);
     }
 
-    public void addInstanceSessionMember(@NotNull InstanceSession instanceSession, UUID sessionId, User user, String role) {
-        InstanceSessionMember sessionMember = new InstanceSessionMember(instanceSession, sessionId.toString(), user, role);
+    public void addInstanceSessionMember(@NotNull InstanceSession instanceSession, String memberId, User user, String role) {
+        InstanceSessionMember sessionMember = new InstanceSessionMember(instanceSession, memberId, user, role);
         sessionMember.setActive(true);
 
         this.instanceSessionMemberRepository.save(sessionMember);
     }
 
-    public void removeInstanceSessionMember(@NotNull InstanceSession instanceSession, UUID sessionId) {
-        InstanceSessionMember sessionMember = this.instanceSessionMemberRepository.getSessionMember(instanceSession, sessionId.toString());
+    public void removeInstanceSessionMember(@NotNull InstanceSession instanceSession, String memberId) {
+        InstanceSessionMember sessionMember = this.instanceSessionMemberRepository.getSessionMember(instanceSession, memberId);
         if (sessionMember != null) {
             sessionMember.setActive(false);
             this.instanceSessionMemberRepository.save(sessionMember);
@@ -90,7 +97,7 @@ public class InstanceSessionService {
             }
             this.repository.save(instanceSession);
         } else {
-            logger.warn("Got a null session member (session {}) for instance {}", sessionId.toString(), instanceSession.getInstance().getId());
+            logger.warn("Got a null session member (memberId {}) for instance {}", memberId, instanceSession.getInstance().getId());
         }
     }
 
@@ -102,16 +109,20 @@ public class InstanceSessionService {
         return this.instanceSessionMemberRepository.getAllHistorySessionMembersByInstanceId(instanceId);
     }
 
-    public List<InstanceSessionMember> getAllSessionMembers(@NotNull Instance instance) {
-        return this.instanceSessionMemberRepository.getAllSessionMembers(instance);
+    public List<InstanceSessionMember> getAllSessionMembersByInstance(@NotNull Instance instance) {
+        return this.getAllSessionMembersByInstanceId(instance.getId());
     }
 
     public List<InstanceSessionMember> getAllSessionMembersByInstanceId(@NotNull Long instanceId) {
         return this.instanceSessionMemberRepository.getAllSessionMembersByInstanceId(instanceId);
     }
 
-    public InstanceSessionMember getSessionMemberBySessionId(UUID sessionId) {
-        return this.instanceSessionMemberRepository.getBySessionId(sessionId.toString());
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceIdAndProtocol(Long instanceId, String protocol) {
+        return this.instanceSessionMemberRepository.getAllSessionMembersByInstanceIdAndProtocol(instanceId, protocol);
+    }
+
+    public InstanceSessionMember getSessionMemberBySessionId(String sessionId) {
+        return this.instanceSessionMemberRepository.getBySessionId(sessionId);
     }
 
     public void saveInstanceSessionMember(InstanceSessionMember instanceSessionMember) {

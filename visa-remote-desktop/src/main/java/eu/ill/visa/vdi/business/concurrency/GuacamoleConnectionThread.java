@@ -1,8 +1,8 @@
 package eu.ill.visa.vdi.business.concurrency;
 
-import com.corundumstudio.socketio.SocketIOClient;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.apache.guacamole.GuacamoleClientException;
 import org.apache.guacamole.GuacamoleConnectionClosedException;
 import org.apache.guacamole.GuacamoleException;
@@ -17,10 +17,10 @@ import static org.apache.guacamole.net.GuacamoleTunnel.INTERNAL_DATA_OPCODE;
 
 public class GuacamoleConnectionThread extends ConnectionThread {
 
-    private static final Logger          logger = LoggerFactory.getLogger(GuacamoleConnectionThread.class);
-    private final        GuacamoleTunnel tunnel;
+    private static final Logger logger = LoggerFactory.getLogger(GuacamoleConnectionThread.class);
+    private final GuacamoleTunnel tunnel;
 
-    public GuacamoleConnectionThread(final SocketIOClient client, final GuacamoleTunnel tunnel, final Instance instance, final ConnectedUser user) {
+    public GuacamoleConnectionThread(final SocketClient client, final GuacamoleTunnel tunnel, final Instance instance, final ConnectedUser user) {
         super(client, instance, user);
         this.tunnel = tunnel;
     }

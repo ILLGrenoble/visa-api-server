@@ -391,7 +391,7 @@ public class AccountInstanceController extends AbstractController {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
-            List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembers(instance);
+            List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembersByInstance(instance);
 
             return createResponse(sessionMembers.stream()
                 .peek(instanceSessionMember -> instanceSessionMember.getInstanceSession().setInstance(instance))

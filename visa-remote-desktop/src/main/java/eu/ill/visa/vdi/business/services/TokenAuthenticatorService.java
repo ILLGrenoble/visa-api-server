@@ -1,7 +1,5 @@
 package eu.ill.visa.vdi.business.services;
 
-import com.corundumstudio.socketio.HandshakeData;
-import com.corundumstudio.socketio.SocketIOClient;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.vdi.domain.exceptions.InvalidTokenException;
@@ -11,7 +9,6 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class TokenAuthenticatorService {
 
-    private final static String TOKEN_PARAMETER = "token";
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
 
     @Inject
@@ -19,10 +16,7 @@ public class TokenAuthenticatorService {
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
     }
 
-    public InstanceAuthenticationToken authenticate(final SocketIOClient client) throws InvalidTokenException {
-        final HandshakeData data = client.getHandshakeData();
-        final String token = data.getSingleUrlParam(TOKEN_PARAMETER);
-
+    public InstanceAuthenticationToken authenticate(final String token) throws InvalidTokenException {
         if (token == null) {
             throw new InvalidTokenException("Could not find or session ticket is invalid");
         }

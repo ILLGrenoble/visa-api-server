@@ -1,6 +1,6 @@
 package eu.ill.visa.vdi.domain.models;
 
-public interface Event {
+public interface SessionEvent {
 
     String USER_CONNECTED_EVENT = "user:connected";
     String USER_DISCONNECTED_EVENT = "user:disconnected";
