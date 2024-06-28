@@ -8,8 +8,10 @@ import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.models.SessionEvent;
+import eu.ill.visa.vdi.gateway.dispatcher.ClientEventDispatcher;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
+import eu.ill.visa.vdi.gateway.events.ClientEventCarrier;
 import eu.ill.visa.vdi.gateway.listeners.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -25,6 +27,7 @@ public class RemoteDesktopServer {
     private final InstanceActivityService instanceActivityService;
     private final DesktopAccessService desktopAccessService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
+    private final ClientEventDispatcher clientEventDispatcher;
 
     @Inject
     public RemoteDesktopServer(final SocketIOServer server,
@@ -34,7 +37,8 @@ public class RemoteDesktopServer {
                                final TokenAuthenticatorService authenticator,
                                final DesktopAccessService desktopAccessService,
                                final VirtualDesktopConfiguration virtualDesktopConfiguration,
-                               final InstanceActivityService instanceActivityService) {
+                               final InstanceActivityService instanceActivityService,
+                               final ClientEventDispatcher clientEventDispatcher) {
         this.server = server;
         this.instanceSessionService = instanceSessionService;
         this.desktopConnectionService = desktopConnectionService;
@@ -43,6 +47,7 @@ public class RemoteDesktopServer {
         this.desktopAccessService = desktopAccessService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
         this.instanceActivityService = instanceActivityService;
+        this.clientEventDispatcher = clientEventDispatcher;
     }
 
     public void startServer() {
@@ -51,6 +56,7 @@ public class RemoteDesktopServer {
         }
 
         this.bindListeners(server);
+        this.bindClientEventListeners();
         this.server.start();
     }
 
@@ -62,12 +68,20 @@ public class RemoteDesktopServer {
 
     private void bindListeners(final SocketIOServer server) {
         server.addConnectListener(new ClientConnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService, this.authenticator));
+        server.addEventListener("event", ClientEventCarrier.class, new ClientEventCarrierListener(this.clientEventDispatcher));
         server.addEventListener("display", String.class, new GuacamoleClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
         server.addEventListener("webxdisplay", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
-        server.addEventListener("thumbnail", byte[].class, new ClientThumbnailListener(this.desktopConnectionService, this.instanceService));
-        server.addEventListener(SessionEvent.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class, new ClientAccessReplyListener(this.desktopAccessService));
-        server.addEventListener(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class, new ClientAccessRevokedCommandListener(this.desktopConnectionService));
         server.addDisconnectListener(new ClientDisconnectListener(this.desktopConnectionService, this.desktopAccessService));
+    }
+
+
+    private void bindClientEventListeners() {
+        this.clientEventDispatcher.subscribe("thumbnail", String.class)
+            .next(new ClientThumbnailListener(this.desktopConnectionService, this.instanceService));
+        this.clientEventDispatcher.subscribe(SessionEvent.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class)
+            .next(new ClientAccessRequestResponseListener(this.desktopAccessService));
+        this.clientEventDispatcher.subscribe(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class)
+            .next(new ClientAccessRevokedListener(this.desktopConnectionService));
     }
 
     private void cleanupSessions() {
