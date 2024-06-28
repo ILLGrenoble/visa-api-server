@@ -6,8 +6,8 @@ public interface SessionEvent {
     String USER_DISCONNECTED_EVENT = "user:disconnected";
     String USERS_CONNECTED_EVENT = "users:connected";
     String OWNER_AWAY_EVENT = "owner:away";
-    String ROOM_LOCKED_EVENT = "room:locked";
-    String ROOM_UNLOCKED_EVENT = "room:unlocked";
+    String SESSION_LOCKED_EVENT = "session:locked";
+    String SESSION_UNLOCKED_EVENT = "session:unlocked";
     String ACCESS_DENIED = "access:denied";
     String ACCESS_REQUEST_EVENT = "access:request";
     String ACCESS_REPLY_EVENT = "access:reply";

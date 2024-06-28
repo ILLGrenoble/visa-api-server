@@ -77,12 +77,12 @@ public class DesktopSessionService {
             .next((message) -> this.onUserDisconnected(message.sessionId(), message.desktopSessionMemberId(), message.user()));
         this.remoteDesktopBroker.subscribe(AccessRevokedMessage.class)
             .next((message) -> this.onAccessRevoked(message.sessionId(), message.userId()));
-        this.remoteDesktopBroker.subscribe(RoomClosedMessage.class)
-            .next((message) -> this.onRoomClosed(message.sessionId()));
-        this.remoteDesktopBroker.subscribe(RoomLockedMessage.class)
-            .next((message) -> this.onRoomLocked(message.sessionId(), message.user()));
-        this.remoteDesktopBroker.subscribe(RoomUnlockedMessage.class)
-            .next((message) -> this.onRoomUnlocked(message.sessionId()));
+        this.remoteDesktopBroker.subscribe(SessionClosedMessage.class)
+            .next((message) -> this.onSessionClosed(message.sessionId()));
+        this.remoteDesktopBroker.subscribe(SessionLockedMessage.class)
+            .next((message) -> this.onSessionLocked(message.sessionId(), message.user()));
+        this.remoteDesktopBroker.subscribe(SessionUnlockedMessage.class)
+            .next((message) -> this.onSessionUnlocked(message.sessionId()));
     }
 
     @Shutdown
@@ -125,7 +125,7 @@ public class DesktopSessionService {
         DesktopSessionMember desktopSessionMember = new DesktopSessionMember(user, sessionEventConnection, remoteDesktopConnection, desktopSession);
         desktopSession.addMember(desktopSessionMember);
 
-        boolean unlockRoom = virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
+        boolean unlockSession = virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
             && role.equals(InstanceMemberRole.OWNER)
             && !this.isOwnerConnected(instanceSession.getId());
 
@@ -135,9 +135,9 @@ public class DesktopSessionService {
         // Remove instance from instance_expiration table if it is there due to inactivity
         this.instanceExpirationService.onInstanceActivated(instanceSession.getInstance());
 
-        if (unlockRoom) {
-            // Unlock room for all clients
-            this.unlockRoom(desktopSession.getSessionId());
+        if (unlockSession) {
+            // Unlock session for all clients
+            this.unlockSession(desktopSession.getSessionId());
 
         } else {
             this.connectUser(desktopSession.getSessionId(), desktopSessionMember.getId(), user);
@@ -158,11 +158,11 @@ public class DesktopSessionService {
 
             if (desktopSessionMember.isRole(InstanceMemberRole.OWNER) && !this.isOwnerConnected(sessionId)) {
                 if (this.virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
-                    this.lockRoom(sessionId, desktopSessionMember.getConnectedUser());
+                    this.lockSession(sessionId, desktopSessionMember.getConnectedUser());
 
                 } else {
                     logger.info("There is no owner ar admin connected so all clients will be disconnected");
-                    this.closeRoom(sessionId);
+                    this.closeSession(sessionId);
                 }
 
             } else {
@@ -172,7 +172,7 @@ public class DesktopSessionService {
 
         } else {
             logger.info("There is no active instance session so all clients will be disconnected");
-            this.closeRoom(sessionId);
+            this.closeSession(sessionId);
         }
 
         this.removeDesktopSessionMember(desktopSession, desktopSessionMember);
@@ -205,16 +205,16 @@ public class DesktopSessionService {
         }
     }
 
-    public void closeRoom(final Long sessionId) {
-        this.remoteDesktopBroker.broadcast(new RoomClosedMessage(sessionId));
+    public void closeSession(final Long sessionId) {
+        this.remoteDesktopBroker.broadcast(new SessionClosedMessage(sessionId));
     }
 
-    public void lockRoom(final Long sessionId, final ConnectedUser user) {
-        this.remoteDesktopBroker.broadcast(new RoomLockedMessage(sessionId, user));
+    public void lockSession(final Long sessionId, final ConnectedUser user) {
+        this.remoteDesktopBroker.broadcast(new SessionLockedMessage(sessionId, user));
     }
 
-    public void unlockRoom(final Long sessionId) {
-        this.remoteDesktopBroker.broadcast(new RoomUnlockedMessage(sessionId));
+    public void unlockSession(final Long sessionId) {
+        this.remoteDesktopBroker.broadcast(new SessionUnlockedMessage(sessionId));
     }
 
     public synchronized Optional<DesktopSession> findDesktopSession(final Long sessionId) {
@@ -291,9 +291,9 @@ public class DesktopSessionService {
         });
     }
 
-    private void onRoomClosed(final Long sessionId) {
+    private void onSessionClosed(final Long sessionId) {
         this.getDesktopSession(sessionId).ifPresent(desktopSession -> {
-            logger.info("Room closed (owner away) for instance {} with protocol {}: disconnecting all clients", desktopSession.getInstanceId(), desktopSession.getProtocol());
+            logger.info("Session closed (owner away) for instance {} with protocol {}: disconnecting all clients", desktopSession.getInstanceId(), desktopSession.getProtocol());
 
             desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
                 .forEach(desktopSessionMember -> {
@@ -303,9 +303,9 @@ public class DesktopSessionService {
         });
     }
 
-    private void onRoomLocked(final Long sessionId, final ConnectedUser user) {
+    private void onSessionLocked(final Long sessionId, final ConnectedUser user) {
         this.getDesktopSession(sessionId).ifPresent(desktopSession -> {
-            logger.info("Room locked (owner away) for instance {} with protocol {}: making all clients read-only", desktopSession.getInstanceId(), desktopSession.getProtocol());
+            logger.info("Session locked (owner away) for instance {} with protocol {}: making all clients read-only", desktopSession.getInstanceId(), desktopSession.getProtocol());
             desktopSession.setLocked(true);
 
             desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
@@ -315,7 +315,7 @@ public class DesktopSessionService {
                         desktopSessionMember.sendEvent(USER_DISCONNECTED_EVENT, new UserDisconnectedEvent(user, desktopSession.getInstanceId()));
 
                     } else {
-                        desktopSessionMember.sendEvent(ROOM_LOCKED_EVENT);
+                        desktopSessionMember.sendEvent(SESSION_LOCKED_EVENT);
                     }
                 });
 
@@ -323,14 +323,14 @@ public class DesktopSessionService {
         });
     }
 
-    private void onRoomUnlocked(final Long sessionId) {
+    private void onSessionUnlocked(final Long sessionId) {
         this.getDesktopSession(sessionId).ifPresent(desktopSession -> {
-            logger.info("Room unlocked (owner back) for instance {} with protocol {}: all clients resume original roles", desktopSession.getInstanceId(), desktopSession.getProtocol());
+            logger.info("Session unlocked (owner back) for instance {} with protocol {}: all clients resume original roles", desktopSession.getInstanceId(), desktopSession.getProtocol());
             desktopSession.setLocked(false);
 
             desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
                 .forEach(desktopSessionMember -> {
-                    desktopSessionMember.sendEvent(ROOM_UNLOCKED_EVENT);
+                    desktopSessionMember.sendEvent(SESSION_UNLOCKED_EVENT);
                 });
 
             this.sendUsersConnectedEvent(desktopSession);
