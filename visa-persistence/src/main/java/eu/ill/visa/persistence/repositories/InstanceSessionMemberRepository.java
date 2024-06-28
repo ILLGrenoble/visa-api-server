@@ -69,22 +69,15 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         }
     }
 
-    public List<InstanceSessionMember> getAllSessionMembers(final InstanceSession instanceSession) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceSession", InstanceSessionMember.class);
-        query.setParameter("instanceSession", instanceSession);
-        return query.getResultList();
-    }
-
     public List<InstanceSessionMember> getAllSessionMembersByInstanceId(final Long instanceId) {
         final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceId", InstanceSessionMember.class);
         query.setParameter("instanceId", instanceId);
         return query.getResultList();
     }
 
-    public List<InstanceSessionMember> getAllSessionMembersByInstanceIdAndProtocol(Long instanceId, String protocol) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceIdAndProtocol", InstanceSessionMember.class);
-        query.setParameter("instanceId", instanceId);
-        query.setParameter("protocol", protocol);
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceSessionId(final Long instanceSessionId) {
+        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllByInstanceSessionId", InstanceSessionMember.class);
+        query.setParameter("instanceSessionId", instanceSessionId);
         return query.getResultList();
     }
 

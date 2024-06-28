@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.business.services;
 
+import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
@@ -33,6 +34,7 @@ public class DesktopAccessService {
     private static final Logger logger = LoggerFactory.getLogger(DesktopAccessService.class);
 
     private final DesktopConnectionService desktopConnectionService;
+    private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
 
     private final RemoteDesktopBroker remoteDesktopBroker;
@@ -41,27 +43,29 @@ public class DesktopAccessService {
 
     @Inject
     public DesktopAccessService(final DesktopConnectionService desktopConnectionService,
+                                final InstanceService instanceService,
                                 final InstanceSessionService instanceSessionService,
                                 final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
         this.desktopConnectionService = desktopConnectionService;
+        this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.remoteDesktopBroker = remoteDesktopBrokerInstance.get();
 
         this.remoteDesktopBroker.subscribe(AccessRequestMessage.class)
-            .next((message) -> this.onAccessRequested(message.instanceId(), message.protocol(), message.user(), message.requesterConnectionId()));
+            .next((message) -> this.onAccessRequested(message.sessionId(), message.user(), message.requesterConnectionId()));
         this.remoteDesktopBroker.subscribe(AccessRequestCancellationMessage.class)
-            .next((message) -> this.onAccessRequestCancelled(message.instanceId(), message.protocol(), message.user(), message.requesterConnectionId()));
+            .next((message) -> this.onAccessRequestCancelled(message.sessionId(), message.user(), message.requesterConnectionId()));
         this.remoteDesktopBroker.subscribe(AccessRequestResponseMessage.class)
-            .next((message) -> this.onAccessRequestResponse(message.instanceId(), message.protocol(), message.requesterConnectionId(), message.role()));
+            .next((message) -> this.onAccessRequestResponse(message.sessionId(), message.requesterConnectionId(), message.role()));
     }
 
-    public void requestAccess(final SocketClient client, final PendingDesktopSessionMember pendingDesktopSessionMember) {
+    public void requestAccess(final SocketClient client, final Long sessionId, final PendingDesktopSessionMember pendingDesktopSessionMember) {
         // Create pending desktop connection
-        DesktopCandidate desktopCandidate = this.addCandidate(client, pendingDesktopSessionMember);
+        DesktopCandidate desktopCandidate = this.addCandidate(client, sessionId, pendingDesktopSessionMember);
 
         client.sendEvent(SessionEvent.ACCESS_PENDING_EVENT);
 
-        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(pendingDesktopSessionMember.instance().getId(), pendingDesktopSessionMember.protocol(), pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().connectionId()));
+        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(sessionId, pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().connectionId()));
     }
 
     public void cancelAccessRequest(final SocketClient client) {
@@ -69,35 +73,35 @@ public class DesktopAccessService {
         this.removeCandidate(client.connectionId()).ifPresent(desktopCandidate -> {
             // A desktop request was in progress
             final PendingDesktopSessionMember pendingDesktopSessionMember = desktopCandidate.pendingDesktopSessionMember();
-            this.remoteDesktopBroker.broadcast(new AccessRequestCancellationMessage(pendingDesktopSessionMember.instance().getId(), pendingDesktopSessionMember.protocol(), pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().connectionId()));
+            this.remoteDesktopBroker.broadcast(new AccessRequestCancellationMessage(desktopCandidate.sessionId(), pendingDesktopSessionMember.connectedUser(), client.connectionId()));
         });
     }
 
-    public void respondToAccessRequest(final Long instanceId, final String protocol, final String requesterConnectionId, final InstanceMemberRole role) {
+    public void respondToAccessRequest(final Long sessionId, final String requesterConnectionId, final InstanceMemberRole role) {
         // Forward reply to broker
-        this.remoteDesktopBroker.broadcast(new AccessRequestResponseMessage(instanceId, protocol, requesterConnectionId, role));
+        this.remoteDesktopBroker.broadcast(new AccessRequestResponseMessage(sessionId, requesterConnectionId, role));
     }
 
-    private void onAccessRequested(final Long instanceId, final String protocol, final ConnectedUser user, final String requesterConnectionId) {
+    private void onAccessRequested(final Long sessionId, final ConnectedUser user, final String requesterConnectionId) {
         // See if we have the owner of the instance
-        this.desktopConnectionService.findDesktopSession(instanceId, protocol).ifPresent(desktopSession -> {
+        this.desktopConnectionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
             List<DesktopSessionMember> ownerSessionMembers = desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)).toList();
             if (!ownerSessionMembers.isEmpty()) {
-                logger.info("Handling access request for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
+                logger.info("Handling access request for instance {} from user {} with client id {}", desktopSession.getInstanceId(), user.getFullName(), requesterConnectionId);
 
                 // Send request to owners
                 ownerSessionMembers.forEach(ownerSessionMember -> {
-                    ownerSessionMember.sendEvent(SessionEvent.ACCESS_REQUEST_EVENT, new AccessRequestEvent(instanceId, protocol, user, requesterConnectionId));
+                    ownerSessionMember.sendEvent(SessionEvent.ACCESS_REQUEST_EVENT, new AccessRequestEvent(sessionId, user, requesterConnectionId));
                 });
             }
         });
     }
 
-    private void onAccessRequestCancelled(final Long instanceId, final String protocol, final ConnectedUser user, final String requesterConnectionId) {
-        this.desktopConnectionService.findDesktopSession(instanceId, protocol).ifPresent(desktopSession -> {
+    private void onAccessRequestCancelled(final Long sessionId, final ConnectedUser user, final String requesterConnectionId) {
+        this.desktopConnectionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
             List<DesktopSessionMember> ownerSessionMembers = desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)).toList();
             if (!ownerSessionMembers.isEmpty()) {
-                logger.info("Handling cancellation for instance {} from user {} with client id {}", instanceId, user.getFullName(), requesterConnectionId);
+                logger.info("Handling cancellation for instance {} from user {} with client id {}", desktopSession.getInstanceId(), user.getFullName(), requesterConnectionId);
 
                 // Send cancellation to owners
                 ownerSessionMembers.forEach(ownerSessionMember -> {
@@ -107,23 +111,23 @@ public class DesktopAccessService {
         });
     }
 
-    private void onAccessRequestResponse(final Long instanceId, final String protocol, final String requesterConnectionId, final InstanceMemberRole role) {
+    private void onAccessRequestResponse(final Long sessionId, final String requesterConnectionId, final InstanceMemberRole role) {
         this.removeCandidate(requesterConnectionId).ifPresent(desktopCandidate -> {
             final PendingDesktopSessionMember pendingDesktopSessionMember = desktopCandidate.pendingDesktopSessionMember();
-            logger.info("Handling response ({}) of access request for instance {} from user {} with client id {}", role, pendingDesktopSessionMember.instance().getId(), pendingDesktopSessionMember.connectedUser().getFullName(), requesterConnectionId);
+            logger.info("Handling response ({}) of access request for instance {} from user {} with client id {}", role, pendingDesktopSessionMember.instanceId(), pendingDesktopSessionMember.connectedUser().getFullName(), requesterConnectionId);
             this.connectFromAccessReply(desktopCandidate, role);
         });
 
         // Send message to any other owners that request has been handled
-        this.desktopConnectionService.findDesktopSession(instanceId, protocol).ifPresent(desktopSession -> {
+        this.desktopConnectionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
             desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)).forEach(ownerSessionMember -> {
-                ownerSessionMember.sendEvent(SessionEvent.ACCESS_REPLY_EVENT, new AccessRequestResponseEvent(instanceId, protocol, requesterConnectionId, role.toString()));
+                ownerSessionMember.sendEvent(SessionEvent.ACCESS_REPLY_EVENT, new AccessRequestResponseEvent(sessionId, requesterConnectionId, role.toString()));
             });
         });
     }
 
-    private synchronized DesktopCandidate addCandidate(final SocketClient client, final PendingDesktopSessionMember pendingDesktopSessionMember) {
-        DesktopCandidate desktopCandidate = new DesktopCandidate(client, pendingDesktopSessionMember);
+    private synchronized DesktopCandidate addCandidate(final SocketClient client, final Long sessionId, final PendingDesktopSessionMember pendingDesktopSessionMember) {
+        DesktopCandidate desktopCandidate = new DesktopCandidate(client, sessionId, pendingDesktopSessionMember);
         this.desktopCandidates.add(desktopCandidate);
 
         return desktopCandidate;
@@ -147,28 +151,33 @@ public class DesktopAccessService {
         if (client.isChannelOpen()) {
             final PendingDesktopSessionMember pendingDesktopSessionMember = candidate.pendingDesktopSessionMember();
             final ConnectedUser user = pendingDesktopSessionMember.connectedUser();
-            final Instance instance = pendingDesktopSessionMember.instance();
+            final Long instanceId = pendingDesktopSessionMember.instanceId();
+            final Instance instance = this.instanceService.getFullById(instanceId);
+            if (instance != null) {
+                // Convert the support role to a normal user one if the owner of the instance is staff
+                InstanceMemberRole role = this.convertAccessReplyRole(replyRole, instance, user);
+                user.setRole(role);
+                try {
+                    this.desktopConnectionService.createDesktopSessionMember(client, pendingDesktopSessionMember);
 
-            // Convert the support role to a normal user one if the owner of the instance is staff
-            InstanceMemberRole role = this.convertAccessReplyRole(replyRole, instance, user);
-            user.setRole(role);
-            try {
-                this.desktopConnectionService.createDesktopSessionMember(client, pendingDesktopSessionMember);
+                    client.sendEvent(SessionEvent.ACCESS_GRANTED_EVENT, role);
 
-                client.sendEvent(SessionEvent.ACCESS_GRANTED_EVENT, role);
+                } catch (OwnerNotConnectedException exception) {
+                    client.sendEvent(SessionEvent.OWNER_AWAY_EVENT);
+                    client.disconnect();
 
-            } catch (OwnerNotConnectedException exception) {
-                client.sendEvent(SessionEvent.OWNER_AWAY_EVENT);
-                client.disconnect();
+                } catch (UnauthorizedException exception) {
+                    logger.warn(exception.getMessage());
+                    client.sendEvent(ACCESS_DENIED);
+                    client.disconnect();
 
-            } catch (UnauthorizedException exception) {
-                logger.warn(exception.getMessage());
-                client.sendEvent(ACCESS_DENIED);
-                client.disconnect();
+                } catch (ConnectionException exception) {
+                    logger.error(exception.getMessage());
+                    client.disconnect();
+                }
 
-            } catch (ConnectionException exception) {
-                logger.error(exception.getMessage());
-                client.disconnect();
+            } else {
+                logger.info("Instance {} no longer exists for access reply", instanceId);
             }
 
         } else {

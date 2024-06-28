@@ -3,27 +3,26 @@ package eu.ill.visa.vdi.domain.models;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class DesktopSession {
 
-    private final String id;
+    private final Long sessionId;
     private final Long instanceId;
     private final String protocol;
     private boolean isLocked;
 
     private final List<DesktopSessionMember> members = new ArrayList<>();
 
-    public DesktopSession(final Long instanceId, final String protocol) {
-        this.id = UUID.randomUUID().toString();
+    public DesktopSession(final Long sessionId, final Long instanceId, final String protocol) {
+        this.sessionId = sessionId;
         this.instanceId = instanceId;
         this.protocol = protocol;
     }
 
-    public String getId() {
-        return id;
+    public Long getSessionId() {
+        return sessionId;
     }
 
     public Long getInstanceId() {
@@ -50,10 +49,6 @@ public class DesktopSession {
         members.remove(desktopSessionMember);
     }
 
-    public DesktopSessionMember getMemberWithId(final String desktopSessionMemberId) {
-        return this.members.stream().filter(member -> member.getId().equals(desktopSessionMemberId)).findAny().orElse(null);
-    }
-
     public boolean isLocked() {
         return isLocked;
     }
@@ -67,11 +62,11 @@ public class DesktopSession {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DesktopSession that = (DesktopSession) o;
-        return Objects.equals(id, that.id);
+        return Objects.equals(sessionId, that.sessionId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(sessionId);
     }
 }

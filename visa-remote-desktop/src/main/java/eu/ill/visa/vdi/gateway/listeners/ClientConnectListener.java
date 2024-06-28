@@ -2,9 +2,11 @@ package eu.ill.visa.vdi.gateway.listeners;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.listener.ConnectListener;
+import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
+import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
@@ -30,15 +32,18 @@ public class ClientConnectListener implements ConnectListener {
 
     private final DesktopConnectionService desktopConnectionService;
     private final DesktopAccessService desktopAccessService;
+    private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
     private final TokenAuthenticatorService authenticator;
 
     public ClientConnectListener(final DesktopConnectionService desktopConnectionService,
                                  final DesktopAccessService desktopAccessService,
+                                 final InstanceService instanceService,
                                  final InstanceSessionService instanceSessionService,
                                  final TokenAuthenticatorService authenticator) {
         this.desktopConnectionService = desktopConnectionService;
         this.desktopAccessService = desktopAccessService;
+        this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.authenticator = authenticator;
     }
@@ -67,7 +72,7 @@ public class ClientConnectListener implements ConnectListener {
 
             final String protocol = client.getHandshakeData().getSingleUrlParam(PROTOCOL_PARAMETER);
 
-            PendingDesktopSessionMember pendingDesktopSessionMember = new PendingDesktopSessionMember(connectedUser, sessionEventConnection, instance, protocol, token);
+            PendingDesktopSessionMember pendingDesktopSessionMember = new PendingDesktopSessionMember(connectedUser, sessionEventConnection, instance.getId(), protocol, token);
             this.desktopConnectionService.addPendingDesktopSessionMember(pendingDesktopSessionMember);
 
         } catch (InvalidTokenException exception) {
@@ -87,50 +92,58 @@ public class ClientConnectListener implements ConnectListener {
 
         final PendingDesktopSessionMember pendingDesktopSessionMember = this.desktopConnectionService.getPendingDesktopSessionMember(token);
         if (pendingDesktopSessionMember != null) {
-            final Instance instance = pendingDesktopSessionMember.instance();
-            final ConnectedUser user = pendingDesktopSessionMember.connectedUser();
-            final SessionEventConnection sessionEventConnection = pendingDesktopSessionMember.sessionEventConnection();
-            try {
-                if (instance.getUsername() == null) {
-                    logger.warn("No username is associated with the instance {}: the owner has never connected. Disconnecting user {}", instance.getId(), user);
-                    throw new OwnerNotConnectedException();
-
-                } else {
-                    if (user.getRole().equals(InstanceMemberRole.SUPPORT)) {
-                        // See if user can connect even if owner is away
-                        if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
-                            this.desktopConnectionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
-
-                        } else {
-                            if (this.desktopConnectionService.isOwnerConnected(instance.getId(), pendingDesktopSessionMember.protocol())) {
-                                // Start process of requesting access from the owner
-                                this.desktopAccessService.requestAccess(socketClient, pendingDesktopSessionMember);
-
-                            } else {
-                                throw new OwnerNotConnectedException();
-                            }
-                        }
+            final Long instanceId = pendingDesktopSessionMember.instanceId();
+            final Instance instance = this.instanceService.getFullById(instanceId);
+            if (instance != null) {
+                final ConnectedUser user = pendingDesktopSessionMember.connectedUser();
+                final SessionEventConnection sessionEventConnection = pendingDesktopSessionMember.sessionEventConnection();
+                try {
+                    if (instance.getUsername() == null) {
+                        logger.warn("No username is associated with the instance {}: the owner has never connected. Disconnecting user {}", instance.getId(), user);
+                        throw new OwnerNotConnectedException();
 
                     } else {
-                        this.desktopConnectionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
+                        if (user.getRole().equals(InstanceMemberRole.SUPPORT)) {
+                            // See if user can connect even if owner is away
+                            if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
+                                this.desktopConnectionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
+
+                            } else {
+                                final InstanceSession instanceSession = this.instanceSessionService.getByInstanceAndProtocol(instance, pendingDesktopSessionMember.protocol());
+                                if (instanceSession != null && this.desktopConnectionService.isOwnerConnected(instanceSession.getId())) {
+                                    // Start process of requesting access from the owner
+                                    this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), pendingDesktopSessionMember);
+
+                                } else {
+                                    throw new OwnerNotConnectedException();
+                                }
+                            }
+
+                        } else {
+                            this.desktopConnectionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
+                        }
                     }
+
+                } catch (OwnerNotConnectedException exception) {
+                    sessionEventConnection.sendEvent(OWNER_AWAY_EVENT);
+                    sessionEventConnection.disconnect();
+                    socketClient.disconnect();
+
+                } catch (UnauthorizedException exception) {
+                    logger.warn(exception.getMessage());
+                    sessionEventConnection.sendEvent(ACCESS_DENIED);
+                    sessionEventConnection.disconnect();
+                    socketClient.disconnect();
+
+                } catch (ConnectionException exception) {
+                    logger.error(exception.getMessage());
+                    sessionEventConnection.sendEvent(ACCESS_DENIED);
+                    sessionEventConnection.disconnect();
+                    socketClient.disconnect();
                 }
 
-            } catch (OwnerNotConnectedException exception) {
-                sessionEventConnection.sendEvent(OWNER_AWAY_EVENT);
-                sessionEventConnection.disconnect();
-                socketClient.disconnect();
-
-            } catch (UnauthorizedException exception) {
-                logger.warn(exception.getMessage());
-                sessionEventConnection.sendEvent(ACCESS_DENIED);
-                sessionEventConnection.disconnect();
-                socketClient.disconnect();
-
-            } catch (ConnectionException exception) {
-                logger.error(exception.getMessage());
-                sessionEventConnection.sendEvent(ACCESS_DENIED);
-                sessionEventConnection.disconnect();
+            } else {
+                logger.error("Instance no longer exists for token {}", token);
                 socketClient.disconnect();
             }
 

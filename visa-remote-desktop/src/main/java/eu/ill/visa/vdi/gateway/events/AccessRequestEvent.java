@@ -2,5 +2,5 @@ package eu.ill.visa.vdi.gateway.events;
 
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 
-public record AccessRequestEvent(Long instanceId, String protocol, ConnectedUser user, String requesterConnectionId) {
+public record AccessRequestEvent(Long sessionId, ConnectedUser user, String requesterConnectionId) {
 }

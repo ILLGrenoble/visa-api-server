@@ -44,7 +44,7 @@ public class InstanceSessionRepository extends AbstractRepository<InstanceSessio
 
     public InstanceSession getByInstanceIdAndProtocol(Long instanceId, String protocol) {
         try {
-            final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getAllByInstanceIdAndProtocol", InstanceSession.class);
+            final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getByInstanceIdAndProtocol", InstanceSession.class);
             query.setParameter("instanceId", instanceId);
             query.setParameter("protocol", protocol);
             return query.getSingleResult();

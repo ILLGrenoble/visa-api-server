@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.domain.models;
 
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.gateway.listeners.ClientConnectListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,10 @@ public class DesktopSessionMember {
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    public boolean isRole(final InstanceMemberRole role) {
+        return this.connectedUser.isRole(role);
     }
 
     @Override

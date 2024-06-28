@@ -16,6 +16,6 @@ public class ClientAccessReplyListener implements DataListener<AccessRequestResp
 
     @Override
     public void onData(final SocketIOClient client, final AccessRequestResponseEvent data, final AckRequest ackRequest) {
-        this.desktopAccessService.respondToAccessRequest(data.instanceId(), data.protocol(), data.requesterConnectionId(), data.getRole());
+        this.desktopAccessService.respondToAccessRequest(data.sessionId(), data.requesterConnectionId(), data.getRole());
     }
 }

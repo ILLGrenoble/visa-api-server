@@ -89,7 +89,7 @@ public class InstanceSessionService {
             sessionMember.setActive(false);
             this.instanceSessionMemberRepository.save(sessionMember);
 
-            List<InstanceSessionMember> members = this.instanceSessionMemberRepository.getAllSessionMembers(instanceSession);
+            List<InstanceSessionMember> members = this.getAllSessionMembersByInstanceSessionId(instanceSession.getId());
 
             if (members.isEmpty()) {
                 logger.info("Session for Instance with Id: {} is no longer current as it has no connected members", instanceSession.getInstance().getId());
@@ -101,8 +101,12 @@ public class InstanceSessionService {
         }
     }
 
-    public List<InstanceSessionMember> getAllSessionMembers(@NotNull InstanceSession instanceSession) {
-        return this.instanceSessionMemberRepository.getAllSessionMembers(instanceSession);
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceSession(@NotNull InstanceSession instanceSession) {
+        return this.getAllSessionMembersByInstanceSessionId(instanceSession.getId());
+    }
+
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceSessionId(@NotNull Long sessionId) {
+        return this.instanceSessionMemberRepository.getAllSessionMembersByInstanceSessionId(sessionId);
     }
 
     public List<InstanceSessionMember> getAllHistorySessionMembersByInstanceId(final Long instanceId) {
@@ -115,10 +119,6 @@ public class InstanceSessionService {
 
     public List<InstanceSessionMember> getAllSessionMembersByInstanceId(@NotNull Long instanceId) {
         return this.instanceSessionMemberRepository.getAllSessionMembersByInstanceId(instanceId);
-    }
-
-    public List<InstanceSessionMember> getAllSessionMembersByInstanceIdAndProtocol(Long instanceId, String protocol) {
-        return this.instanceSessionMemberRepository.getAllSessionMembersByInstanceIdAndProtocol(instanceId, protocol);
     }
 
     public InstanceSessionMember getSessionMemberBySessionId(String sessionId) {

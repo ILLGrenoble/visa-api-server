@@ -22,11 +22,11 @@ import java.util.Date;
             AND i.active = true
             AND instance.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instanceSessionMember.getAllForInstanceSession", query = """
+    @NamedQuery(name = "instanceSessionMember.getAllByInstanceSessionId", query = """
             SELECT i FROM InstanceSessionMember i
             LEFT JOIN i.instanceSession instanceSession
             LEFT JOIN instanceSession.instance instance
-            WHERE i.instanceSession = :instanceSession
+            WHERE i.instanceSession.id = :instanceSessionId
             AND i.active = true
             AND instance.deletedAt IS NULL
     """),
@@ -38,12 +38,11 @@ import java.util.Date;
             AND i.active = true
             AND instance.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instanceSessionMember.getAllForInstanceIdAndProtocol", query = """
+    @NamedQuery(name = "instanceSessionMember.getAllByConnectionId", query = """
             SELECT i FROM InstanceSessionMember i
             LEFT JOIN i.instanceSession instanceSession
             LEFT JOIN instanceSession.instance instance
-            WHERE instance.id = :instanceId
-            AND instanceSession.protocol = :protocol
+            WHERE instanceSession.connectionId = :connectionId
             AND i.active = true
             AND instance.deletedAt IS NULL
     """),
