@@ -5,7 +5,7 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
-import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.business.services.DesktopSessionService;
 
 import java.nio.ByteBuffer;
 
@@ -13,11 +13,11 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public class WebXClientDisplayListener extends ClientDisplayListener<byte[]> {
 
-    public WebXClientDisplayListener(final DesktopConnectionService desktopConnectionService,
+    public WebXClientDisplayListener(final DesktopSessionService desktopSessionService,
                                      final InstanceService instanceService,
                                      final InstanceSessionService instanceSessionService,
                                      final InstanceActivityService instanceActivityService) {
-        super(desktopConnectionService, instanceService, instanceSessionService, instanceActivityService);
+        super(desktopSessionService, instanceService, instanceSessionService, instanceActivityService);
     }
 
     @Override

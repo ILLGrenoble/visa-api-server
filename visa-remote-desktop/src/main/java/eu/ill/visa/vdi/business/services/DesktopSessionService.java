@@ -35,9 +35,9 @@ import static eu.ill.visa.vdi.domain.models.SessionEvent.*;
 
 @Startup
 @ApplicationScoped
-public class DesktopConnectionService {
+public class DesktopSessionService {
 
-    private final static Logger logger = LoggerFactory.getLogger(DesktopConnectionService.class);
+    private final static Logger logger = LoggerFactory.getLogger(DesktopSessionService.class);
 
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
@@ -53,14 +53,14 @@ public class DesktopConnectionService {
     private final List<DesktopSession> desktopSessions = new ArrayList<>();
 
     @Inject
-    public DesktopConnectionService(final InstanceService instanceService,
-                                    final InstanceSessionService instanceSessionService,
-                                    final UserService userService,
-                                    final GuacamoleDesktopService guacamoleDesktopService,
-                                    final WebXDesktopService webXDesktopService,
-                                    final InstanceExpirationService instanceExpirationService,
-                                    final VirtualDesktopConfiguration virtualDesktopConfiguration,
-                                    final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
+    public DesktopSessionService(final InstanceService instanceService,
+                                 final InstanceSessionService instanceSessionService,
+                                 final UserService userService,
+                                 final GuacamoleDesktopService guacamoleDesktopService,
+                                 final WebXDesktopService webXDesktopService,
+                                 final InstanceExpirationService instanceExpirationService,
+                                 final VirtualDesktopConfiguration virtualDesktopConfiguration,
+                                 final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.userService = userService;

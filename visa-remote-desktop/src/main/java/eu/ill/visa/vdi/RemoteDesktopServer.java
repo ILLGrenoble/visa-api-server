@@ -5,7 +5,7 @@ import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
-import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.models.SessionEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 public class RemoteDesktopServer {
 
     private final SocketIOServer server;
-    private final DesktopConnectionService desktopConnectionService;
+    private final DesktopSessionService desktopConnectionService;
     private final InstanceService instanceService;
     private final TokenAuthenticatorService authenticator;
     private final InstanceSessionService instanceSessionService;
@@ -29,7 +29,7 @@ public class RemoteDesktopServer {
     @Inject
     public RemoteDesktopServer(final SocketIOServer server,
                                final InstanceSessionService instanceSessionService,
-                               final DesktopConnectionService desktopConnectionService,
+                               final DesktopSessionService desktopConnectionService,
                                final InstanceService instanceService,
                                final TokenAuthenticatorService authenticator,
                                final DesktopAccessService desktopAccessService,

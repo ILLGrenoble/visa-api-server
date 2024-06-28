@@ -10,7 +10,7 @@ import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
-import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.InvalidTokenException;
@@ -30,18 +30,18 @@ public class ClientConnectListener implements ConnectListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientConnectListener.class);
 
-    private final DesktopConnectionService desktopConnectionService;
+    private final DesktopSessionService desktopSessionService;
     private final DesktopAccessService desktopAccessService;
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
     private final TokenAuthenticatorService authenticator;
 
-    public ClientConnectListener(final DesktopConnectionService desktopConnectionService,
+    public ClientConnectListener(final DesktopSessionService desktopSessionService,
                                  final DesktopAccessService desktopAccessService,
                                  final InstanceService instanceService,
                                  final InstanceSessionService instanceSessionService,
                                  final TokenAuthenticatorService authenticator) {
-        this.desktopConnectionService = desktopConnectionService;
+        this.desktopSessionService = desktopSessionService;
         this.desktopAccessService = desktopAccessService;
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
@@ -73,7 +73,7 @@ public class ClientConnectListener implements ConnectListener {
             final String protocol = client.getHandshakeData().getSingleUrlParam(PROTOCOL_PARAMETER);
 
             PendingDesktopSessionMember pendingDesktopSessionMember = new PendingDesktopSessionMember(connectedUser, sessionEventConnection, instance.getId(), protocol, token);
-            this.desktopConnectionService.addPendingDesktopSessionMember(pendingDesktopSessionMember);
+            this.desktopSessionService.addPendingDesktopSessionMember(pendingDesktopSessionMember);
 
         } catch (InvalidTokenException exception) {
             logger.error("Token received for initialising Desktop Connection is invalid: {}", exception.getMessage());
@@ -90,7 +90,7 @@ public class ClientConnectListener implements ConnectListener {
 
         logger.info("Initialising websocket client for RemoteDesktopConnection with connection id: {} with token {}", connectionId, token);
 
-        final PendingDesktopSessionMember pendingDesktopSessionMember = this.desktopConnectionService.getPendingDesktopSessionMember(token);
+        final PendingDesktopSessionMember pendingDesktopSessionMember = this.desktopSessionService.getPendingDesktopSessionMember(token);
         if (pendingDesktopSessionMember != null) {
             final Long instanceId = pendingDesktopSessionMember.instanceId();
             final Instance instance = this.instanceService.getFullById(instanceId);
@@ -106,11 +106,11 @@ public class ClientConnectListener implements ConnectListener {
                         if (user.getRole().equals(InstanceMemberRole.SUPPORT)) {
                             // See if user can connect even if owner is away
                             if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
-                                this.desktopConnectionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
+                                this.desktopSessionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
 
                             } else {
                                 final InstanceSession instanceSession = this.instanceSessionService.getByInstanceAndProtocol(instance, pendingDesktopSessionMember.protocol());
-                                if (instanceSession != null && this.desktopConnectionService.isOwnerConnected(instanceSession.getId())) {
+                                if (instanceSession != null && this.desktopSessionService.isOwnerConnected(instanceSession.getId())) {
                                     // Start process of requesting access from the owner
                                     this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), pendingDesktopSessionMember);
 
@@ -120,7 +120,7 @@ public class ClientConnectListener implements ConnectListener {
                             }
 
                         } else {
-                            this.desktopConnectionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
+                            this.desktopSessionService.createDesktopSessionMember(socketClient, pendingDesktopSessionMember);
                         }
                     }
 

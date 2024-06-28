@@ -5,15 +5,15 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
-import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.business.services.DesktopSessionService;
 
 public class GuacamoleClientDisplayListener extends ClientDisplayListener<String> {
 
-    public GuacamoleClientDisplayListener(final DesktopConnectionService desktopConnectionService,
+    public GuacamoleClientDisplayListener(final DesktopSessionService desktopSessionService,
                                           final InstanceService instanceService,
                                           final InstanceSessionService instanceSessionService,
                                           final InstanceActivityService instanceActivityService) {
-        super(desktopConnectionService, instanceService, instanceSessionService, instanceActivityService);
+        super(desktopSessionService, instanceService, instanceSessionService, instanceActivityService);
     }
 
     @Override

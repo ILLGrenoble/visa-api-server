@@ -11,7 +11,7 @@ import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
-import eu.ill.visa.vdi.business.services.DesktopConnectionService;
+import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
@@ -26,16 +26,16 @@ public abstract class ClientDisplayListener<T> implements DataListener<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientDisplayListener.class);
 
-    private final DesktopConnectionService desktopConnectionService;
+    private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceActivityService instanceActivityService;
 
-    public ClientDisplayListener(final DesktopConnectionService desktopConnectionService,
+    public ClientDisplayListener(final DesktopSessionService desktopSessionService,
                                  final InstanceService instanceService,
                                  final InstanceSessionService instanceSessionService,
                                  final InstanceActivityService instanceActivityService) {
-        this.desktopConnectionService = desktopConnectionService;
+        this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceActivityService = instanceActivityService;
@@ -44,7 +44,7 @@ public abstract class ClientDisplayListener<T> implements DataListener<T> {
     @Override
     public void onData(final SocketIOClient client, final T data, final AckRequest ackRequest) {
         final SocketClient socketClient = new SocketClient(client, client.getSessionId().toString());
-        this.desktopConnectionService.findDesktopSessionMember(socketClient).ifPresent(desktopSessionMember -> {
+        this.desktopSessionService.findDesktopSessionMember(socketClient).ifPresent(desktopSessionMember -> {
 
             final DesktopSession desktopSession = desktopSessionMember.getSession();
 

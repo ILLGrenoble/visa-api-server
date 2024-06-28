@@ -33,7 +33,7 @@ import static eu.ill.visa.vdi.domain.models.SessionEvent.ACCESS_DENIED;
 public class DesktopAccessService {
     private static final Logger logger = LoggerFactory.getLogger(DesktopAccessService.class);
 
-    private final DesktopConnectionService desktopConnectionService;
+    private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
 
@@ -42,11 +42,11 @@ public class DesktopAccessService {
     private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
 
     @Inject
-    public DesktopAccessService(final DesktopConnectionService desktopConnectionService,
+    public DesktopAccessService(final DesktopSessionService desktopSessionService,
                                 final InstanceService instanceService,
                                 final InstanceSessionService instanceSessionService,
                                 final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
-        this.desktopConnectionService = desktopConnectionService;
+        this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.remoteDesktopBroker = remoteDesktopBrokerInstance.get();
@@ -84,7 +84,7 @@ public class DesktopAccessService {
 
     private void onAccessRequested(final Long sessionId, final ConnectedUser user, final String requesterConnectionId) {
         // See if we have the owner of the instance
-        this.desktopConnectionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
+        this.desktopSessionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
             List<DesktopSessionMember> ownerSessionMembers = desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)).toList();
             if (!ownerSessionMembers.isEmpty()) {
                 logger.info("Handling access request for instance {} from user {} with client id {}", desktopSession.getInstanceId(), user.getFullName(), requesterConnectionId);
@@ -98,7 +98,7 @@ public class DesktopAccessService {
     }
 
     private void onAccessRequestCancelled(final Long sessionId, final ConnectedUser user, final String requesterConnectionId) {
-        this.desktopConnectionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
+        this.desktopSessionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
             List<DesktopSessionMember> ownerSessionMembers = desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)).toList();
             if (!ownerSessionMembers.isEmpty()) {
                 logger.info("Handling cancellation for instance {} from user {} with client id {}", desktopSession.getInstanceId(), user.getFullName(), requesterConnectionId);
@@ -119,7 +119,7 @@ public class DesktopAccessService {
         });
 
         // Send message to any other owners that request has been handled
-        this.desktopConnectionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
+        this.desktopSessionService.findDesktopSession(sessionId).ifPresent(desktopSession -> {
             desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)).forEach(ownerSessionMember -> {
                 ownerSessionMember.sendEvent(SessionEvent.ACCESS_REPLY_EVENT, new AccessRequestResponseEvent(sessionId, requesterConnectionId, role.toString()));
             });
@@ -158,7 +158,7 @@ public class DesktopAccessService {
                 InstanceMemberRole role = this.convertAccessReplyRole(replyRole, instance, user);
                 user.setRole(role);
                 try {
-                    this.desktopConnectionService.createDesktopSessionMember(client, pendingDesktopSessionMember);
+                    this.desktopSessionService.createDesktopSessionMember(client, pendingDesktopSessionMember);
 
                     client.sendEvent(SessionEvent.ACCESS_GRANTED_EVENT, role);
 
