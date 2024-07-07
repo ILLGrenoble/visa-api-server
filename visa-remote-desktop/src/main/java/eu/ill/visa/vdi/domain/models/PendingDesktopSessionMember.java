@@ -3,7 +3,7 @@ package eu.ill.visa.vdi.domain.models;
 public record PendingDesktopSessionMember(
     String token,
     ConnectedUser connectedUser,
-    SessionEventConnection sessionEventConnection,
+    EventChannel eventChannel,
     Long instanceId,
     String protocol
 ) {

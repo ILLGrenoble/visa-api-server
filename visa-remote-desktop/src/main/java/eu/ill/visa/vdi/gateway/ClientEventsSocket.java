@@ -66,7 +66,7 @@ public class ClientEventsSocket {
             this.runOnWorker(new SocketClient(session, token), clientEventCarrier,  this.clientEventsGateway::onEvent);
 
         } catch (Exception e) {
-            logger.error("Failed to disconnect from ClientEventsSocket: {}", e.getMessage());
+            logger.error("Failed to handle message from ClientEventsSocket: {}", e.getMessage());
         }
     }
 

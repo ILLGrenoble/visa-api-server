@@ -20,14 +20,14 @@ public class ClientEventsDisconnectSubscriber implements ClientDisconnectSubscri
     public void onDisconnect(SocketClient socketClient) {
         // See if the desktop session is pending
         this.desktopSessionService.getPendingDesktopSessionMember(socketClient.token()).ifPresentOrElse(pendingDesktopSessionMember -> {
-            logger.info("Event Connection disconnected by client {}: removing pending Session Member.", socketClient.token());
+            logger.info("Event Channel disconnected by client {}: removing pending Session Member.", socketClient.token());
             this.desktopSessionService.removePendingDesktopSessionMember(pendingDesktopSessionMember);
         }, () -> {
 
             // If not pending then disable the event channel (client should try to reconnect event channel)
             this.desktopSessionService.findDesktopSessionMemberByToken(socketClient.token()).ifPresent(desktopSessionMember -> {
-                logger.info("Event Connection disconnected by client {}: disabling event connection in session member: {}", socketClient.token(), desktopSessionMember);
-                desktopSessionMember.setEventConnection(null);
+                logger.info("Event Channel disconnected by client {}: disabling event channel in session member: {}", socketClient.token(), desktopSessionMember);
+                desktopSessionMember.setEventChannel(null);
             });
         });
     }

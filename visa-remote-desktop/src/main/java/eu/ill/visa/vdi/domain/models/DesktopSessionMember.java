@@ -11,18 +11,18 @@ public class DesktopSessionMember {
 
     private final String token;
     private final ConnectedUser connectedUser;
-    private SessionEventConnection eventConnection;
+    private EventChannel eventChannel;
     private final RemoteDesktopConnection remoteDesktopConnection;
     private final DesktopSession session;
 
     public DesktopSessionMember(final String token,
                                 final ConnectedUser connectedUser,
-                                final SessionEventConnection eventConnection,
+                                final EventChannel eventChannel,
                                 final RemoteDesktopConnection remoteDesktopConnection,
                                 final DesktopSession session) {
         this.token = token;
         this.connectedUser = connectedUser;
-        this.eventConnection = eventConnection;
+        this.eventChannel = eventChannel;
         this.remoteDesktopConnection = remoteDesktopConnection;
         this.session = session;
     }
@@ -35,8 +35,8 @@ public class DesktopSessionMember {
         return connectedUser;
     }
 
-    public void setEventConnection(SessionEventConnection eventConnection) {
-        this.eventConnection = eventConnection;
+    public void setEventChannel(EventChannel eventChannel) {
+        this.eventChannel = eventChannel;
     }
 
     public RemoteDesktopConnection getRemoteDesktopConnection() {
@@ -52,8 +52,8 @@ public class DesktopSessionMember {
     }
 
     public <T> void sendEvent(String type, T data) {
-        if (this.eventConnection != null) {
-            this.eventConnection.sendEvent(type, data);
+        if (this.eventChannel != null) {
+            this.eventChannel.sendEvent(type, data);
 
         } else {
             logger.warn("Attempting to send event to closed Event Channel for session member {}", this.token);
@@ -63,7 +63,7 @@ public class DesktopSessionMember {
     public void disconnect() {
         try {
             this.remoteDesktopConnection.disconnect();
-            this.eventConnection.disconnect();
+            this.eventChannel.disconnect();
 
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -74,8 +74,8 @@ public class DesktopSessionMember {
         return this.connectedUser.isRole(role);
     }
 
-    public boolean isEventConnectionOpen() {
-        return this.eventConnection != null;
+    public boolean isEventChannelOpen() {
+        return this.eventChannel != null;
     }
 
     @Override

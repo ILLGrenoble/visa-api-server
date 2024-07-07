@@ -14,7 +14,7 @@ import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
-import eu.ill.visa.vdi.domain.models.SessionEventConnection;
+import eu.ill.visa.vdi.domain.models.EventChannel;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ public class ClientConnectListener implements ConnectListener {
             final Instance instance = this.instanceService.getFullById(instanceId);
             if (instance != null) {
                 final ConnectedUser user = pendingDesktopSessionMember.connectedUser();
-                final SessionEventConnection sessionEventConnection = pendingDesktopSessionMember.sessionEventConnection();
+                final EventChannel eventChannel = pendingDesktopSessionMember.eventChannel();
                 try {
                     if (instance.getUsername() == null) {
                         logger.warn("No username is associated with the instance {}: the owner has never connected. Disconnecting user {}", instance.getId(), user);
@@ -91,20 +91,20 @@ public class ClientConnectListener implements ConnectListener {
                     }
 
                 } catch (OwnerNotConnectedException exception) {
-                    sessionEventConnection.sendEvent(OWNER_AWAY_EVENT);
-                    sessionEventConnection.disconnect();
+                    eventChannel.sendEvent(OWNER_AWAY_EVENT);
+                    eventChannel.disconnect();
                     socketClient.disconnect();
 
                 } catch (UnauthorizedException exception) {
                     logger.warn(exception.getMessage());
-                    sessionEventConnection.sendEvent(ACCESS_DENIED);
-                    sessionEventConnection.disconnect();
+                    eventChannel.sendEvent(ACCESS_DENIED);
+                    eventChannel.disconnect();
                     socketClient.disconnect();
 
                 } catch (ConnectionException exception) {
                     logger.error(exception.getMessage());
-                    sessionEventConnection.sendEvent(ACCESS_DENIED);
-                    sessionEventConnection.disconnect();
+                    eventChannel.sendEvent(ACCESS_DENIED);
+                    eventChannel.disconnect();
                     socketClient.disconnect();
                 }
 

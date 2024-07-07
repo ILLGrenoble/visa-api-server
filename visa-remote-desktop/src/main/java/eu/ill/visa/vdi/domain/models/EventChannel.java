@@ -1,6 +1,6 @@
 package eu.ill.visa.vdi.domain.models;
 
-public record SessionEventConnection(SocketClient client) {
+public record EventChannel(SocketClient client) {
 
     public <T> void sendEvent(String type) {
         this.sendEvent(type, null);

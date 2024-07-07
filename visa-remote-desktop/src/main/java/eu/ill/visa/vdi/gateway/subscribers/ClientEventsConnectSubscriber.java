@@ -10,7 +10,7 @@ import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.exceptions.InvalidTokenException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.PendingDesktopSessionMember;
-import eu.ill.visa.vdi.domain.models.SessionEventConnection;
+import eu.ill.visa.vdi.domain.models.EventChannel;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.visa.vdi.gateway.dispatcher.ClientConnectSubscriber;
 import eu.ill.visa.vdi.gateway.events.ConnectionInitiatedEvent;
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static eu.ill.visa.vdi.domain.models.SessionEvent.ACCESS_DENIED;
-import static eu.ill.visa.vdi.domain.models.SessionEvent.CONNECTION_INITIATED_EVENT;
+import static eu.ill.visa.vdi.domain.models.SessionEvent.EVENT_CHANNEL_OPEN;
 
 public class ClientEventsConnectSubscriber implements ClientConnectSubscriber {
 
@@ -40,22 +40,22 @@ public class ClientEventsConnectSubscriber implements ClientConnectSubscriber {
 
     @Override
     public void onConnect(SocketClient socketClient) {
-        final SessionEventConnection sessionEventConnection = new SessionEventConnection(socketClient);
+        final EventChannel eventChannel = new EventChannel(socketClient);
 
         // See if a desktop session exists already for this token (and verify that the events channel is disconnected)
         this.desktopSessionService.findDesktopSessionMemberByToken(socketClient.token()).ifPresentOrElse(desktopSessionMember -> {
-            if (desktopSessionMember.isEventConnectionOpen()) {
-                logger.warn("Event connection for desktop session already exists: {}. Ignoring new event connection", desktopSessionMember);
+            if (desktopSessionMember.isEventChannelOpen()) {
+                logger.warn("Event Channel for desktop session already exists: {}. Ignoring new event channel", desktopSessionMember);
 
             } else {
-                logger.warn("setting new Event Connection for desktop session {}", desktopSessionMember);
-                desktopSessionMember.setEventConnection(sessionEventConnection);
+                logger.warn("setting new Event Channel for desktop session {}", desktopSessionMember);
+                desktopSessionMember.setEventChannel(eventChannel);
             }
 
         }, () -> {
             // If a desktop session doesn't exist then create a pending one (token is only valid once so will reject if token previously validated)
             try {
-                logger.info("Initialising websocket client for SessionEventConnection with connection id: {}", socketClient.token());
+                logger.info("Initialising websocket client for Event Channel with token: {}", socketClient.token());
 
                 final String token = socketClient.token();
                 final String protocol = socketClient.getRequestParameter(PROTOCOL_PARAMETER);
@@ -67,15 +67,15 @@ public class ClientEventsConnectSubscriber implements ClientConnectSubscriber {
                 final InstanceMemberRole role = instanceSessionService.getUserSessionRole(instance, user);
                 ConnectedUser connectedUser = new ConnectedUser(user.getId(), user.getFullName(), role);
 
-                PendingDesktopSessionMember pendingDesktopSessionMember = new PendingDesktopSessionMember(token, connectedUser, sessionEventConnection, instance.getId(), protocol);
+                PendingDesktopSessionMember pendingDesktopSessionMember = new PendingDesktopSessionMember(token, connectedUser, eventChannel, instance.getId(), protocol);
                 this.desktopSessionService.addPendingDesktopSessionMember(pendingDesktopSessionMember);
 
-                socketClient.sendEvent(CONNECTION_INITIATED_EVENT, new ConnectionInitiatedEvent(token));
+                socketClient.sendEvent(EVENT_CHANNEL_OPEN, new ConnectionInitiatedEvent(token));
 
             } catch (InvalidTokenException exception) {
-                logger.error("Token received for initialising Desktop Connection is invalid: {}", exception.getMessage());
-                sessionEventConnection.sendEvent(ACCESS_DENIED);
-                sessionEventConnection.disconnect();
+                logger.error("Token received for initialising Event Channel is invalid: {}", exception.getMessage());
+                eventChannel.sendEvent(ACCESS_DENIED);
+                eventChannel.disconnect();
             }
         });
 
