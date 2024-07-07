@@ -1,15 +1,9 @@
 package eu.ill.visa.vdi.domain.models;
 
-public class SessionEventConnection {
-
-    private final SocketClient client;
-
-    public SessionEventConnection(SocketClient client) {
-        this.client = client;
-    }
+public record SessionEventConnection(SocketClient client) {
 
     public <T> void sendEvent(String type) {
-        this.client.sendEvent(type);
+        this.sendEvent(type, null);
     }
 
     public <T> void sendEvent(String type, T data) {
@@ -19,5 +13,4 @@ public class SessionEventConnection {
     public void disconnect() {
         this.client.disconnect();
     }
-
 }

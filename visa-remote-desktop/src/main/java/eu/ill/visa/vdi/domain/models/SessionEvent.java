@@ -2,6 +2,7 @@ package eu.ill.visa.vdi.domain.models;
 
 public interface SessionEvent {
 
+    String CONNECTION_INITIATED_EVENT = "connection:initiated";
     String USER_CONNECTED_EVENT = "user:connected";
     String USER_DISCONNECTED_EVENT = "user:disconnected";
     String USERS_CONNECTED_EVENT = "users:connected";
@@ -15,4 +16,6 @@ public interface SessionEvent {
     String ACCESS_GRANTED_EVENT = "access:granted";
     String ACCESS_CANCELLATION_EVENT = "access:cancel";
     String ACCESS_REVOKED_EVENT = "access:revoked";
+
+    String EVENT_CHANNEL = "event";
 }

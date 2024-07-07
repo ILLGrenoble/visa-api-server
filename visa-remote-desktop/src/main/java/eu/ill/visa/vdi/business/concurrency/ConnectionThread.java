@@ -24,7 +24,7 @@ public abstract class ConnectionThread implements Runnable {
     public abstract void writeByteData(byte[] data);
 
     protected String getInstanceAndUser() {
-        return "User " + this.user.getFullName() + " (" + this.user.getId() + ", " + this.user.getRole().toString() + "), Instance " + this.instance.getId() + ", Connection Id " + this.client.connectionId();
+        return "User " + this.user.getFullName() + " (" + this.user.getId() + ", " + this.user.getRole().toString() + "), Instance " + this.instance.getId() + ", Connection Id " + this.client.token();
     }
 }
 

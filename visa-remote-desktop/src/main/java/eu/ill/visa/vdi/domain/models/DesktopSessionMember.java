@@ -1,44 +1,46 @@
 package eu.ill.visa.vdi.domain.models;
 
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
-import eu.ill.visa.vdi.gateway.listeners.ClientConnectListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class DesktopSessionMember {
-    private static final Logger logger = LoggerFactory.getLogger(ClientConnectListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(DesktopSessionMember.class);
 
-    private final String id;
+    private final String token;
     private final ConnectedUser connectedUser;
-    private final SessionEventConnection eventConnection;
-    private final RemoteDesktopConnection desktopConnection;
+    private SessionEventConnection eventConnection;
+    private final RemoteDesktopConnection remoteDesktopConnection;
     private final DesktopSession session;
 
-    public DesktopSessionMember(ConnectedUser connectedUser, SessionEventConnection eventConnection, RemoteDesktopConnection desktopConnection, DesktopSession session) {
-        this.id = UUID.randomUUID().toString();
+    public DesktopSessionMember(final String token,
+                                final ConnectedUser connectedUser,
+                                final SessionEventConnection eventConnection,
+                                final RemoteDesktopConnection remoteDesktopConnection,
+                                final DesktopSession session) {
+        this.token = token;
         this.connectedUser = connectedUser;
         this.eventConnection = eventConnection;
-        this.desktopConnection = desktopConnection;
+        this.remoteDesktopConnection = remoteDesktopConnection;
         this.session = session;
     }
 
-    public String getId() {
-        return id;
+    public String getToken() {
+        return token;
     }
 
     public ConnectedUser getConnectedUser() {
         return connectedUser;
     }
 
-    public SessionEventConnection getEventConnection() {
-        return eventConnection;
+    public void setEventConnection(SessionEventConnection eventConnection) {
+        this.eventConnection = eventConnection;
     }
 
-    public RemoteDesktopConnection getDesktopConnection() {
-        return desktopConnection;
+    public RemoteDesktopConnection getRemoteDesktopConnection() {
+        return remoteDesktopConnection;
     }
 
     public DesktopSession getSession() {
@@ -46,18 +48,21 @@ public class DesktopSessionMember {
     }
 
     public <T> void sendEvent(String type) {
-        this.eventConnection.sendEvent(type);
+        this.sendEvent(type, null);
     }
 
     public <T> void sendEvent(String type, T data) {
-        this.eventConnection.sendEvent(type, data);
+        if (this.eventConnection != null) {
+            this.eventConnection.sendEvent(type, data);
+
+        } else {
+            logger.warn("Attempting to send event to closed Event Channel for session member {}", this.token);
+        }
     }
 
     public void disconnect() {
-
-        // Check for exceptions ?
         try {
-            this.desktopConnection.disconnect();
+            this.remoteDesktopConnection.disconnect();
             this.eventConnection.disconnect();
 
         } catch (Exception e) {
@@ -69,16 +74,24 @@ public class DesktopSessionMember {
         return this.connectedUser.isRole(role);
     }
 
+    public boolean isEventConnectionOpen() {
+        return this.eventConnection != null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DesktopSessionMember that = (DesktopSessionMember) o;
-        return Objects.equals(id, that.id);
+        return Objects.equals(token, that.token);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(token);
+    }
+
+    public String toString() {
+        return String.format("User %s (role = %s) on Instance %s with protocol %s (token = %s}", connectedUser.getFullName(), connectedUser.getRole(), session.getInstanceId(), session.getProtocol(), token);
     }
 }

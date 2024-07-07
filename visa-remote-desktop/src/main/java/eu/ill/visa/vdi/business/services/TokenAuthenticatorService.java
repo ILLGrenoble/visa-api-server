@@ -16,7 +16,7 @@ public class TokenAuthenticatorService {
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
     }
 
-    public InstanceAuthenticationToken authenticate(final String token) throws InvalidTokenException {
+    public synchronized InstanceAuthenticationToken authenticate(final String token) throws InvalidTokenException {
         if (token == null) {
             throw new InvalidTokenException("Could not find or session ticket is invalid");
         }
@@ -30,6 +30,9 @@ public class TokenAuthenticatorService {
         if (authenticationToken.isExpired(10)) {
             throw new InvalidTokenException("Authentication session ticket has expired");
         }
+
+        // Delete the authentication token to ensure it isn't reused
+        this.instanceAuthenticationTokenService.delete(authenticationToken);
 
         return authenticationToken;
     }

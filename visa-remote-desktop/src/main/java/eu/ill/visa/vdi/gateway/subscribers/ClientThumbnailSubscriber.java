@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.listeners;
+package eu.ill.visa.vdi.gateway.subscribers;
 
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.entity.Instance;
@@ -16,22 +16,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
-public class ClientThumbnailListener implements ClientEventSubscriber<String> {
+public class ClientThumbnailSubscriber implements ClientEventSubscriber<String> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientThumbnailListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClientThumbnailSubscriber.class);
 
     private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
 
-    public ClientThumbnailListener(final DesktopSessionService desktopSessionService,
-                                   final InstanceService instanceService) {
+    public ClientThumbnailSubscriber(final DesktopSessionService desktopSessionService,
+                                     final InstanceService instanceService) {
         this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
     }
 
     @Override
     public void onEvent(final SocketClient client, final String base64) {
-        this.desktopSessionService.findDesktopSessionMember(client).ifPresent(desktopSessionMember -> {
+        this.desktopSessionService.findDesktopSessionMemberByToken(client.token()).ifPresent(desktopSessionMember -> {
             try {
                 if (desktopSessionMember.getConnectedUser().hasAnyRole(List.of(InstanceMemberRole.OWNER, InstanceMemberRole.SUPPORT))) {
                     final Instance instance = instanceService.getById(desktopSessionMember.getSession().getInstanceId());

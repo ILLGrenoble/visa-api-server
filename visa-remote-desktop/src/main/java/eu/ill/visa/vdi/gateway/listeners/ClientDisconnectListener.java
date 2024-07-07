@@ -24,7 +24,11 @@ public class ClientDisconnectListener implements DisconnectListener {
     @Override
     public void onDisconnect(final SocketIOClient client) {
         final SocketClient socketClient = new SocketClient(client, client.getSessionId().toString());
-        this.desktopSessionService.findDesktopSessionMember(socketClient).ifPresentOrElse(this.desktopSessionService::onDesktopMemberDisconnect, () -> {
+        this.desktopSessionService.findDesktopSessionMember(socketClient)
+            .ifPresentOrElse(desktopSessionMember -> {
+                logger.info("Remote Desktop Connection disconnected by client {}: disconnecting Session Member: {}", socketClient.token(), desktopSessionMember);
+                this.desktopSessionService.onDesktopMemberDisconnect(desktopSessionMember);
+            }, () -> {
             this.desktopAccessService.cancelAccessRequest(socketClient);
         });
     }

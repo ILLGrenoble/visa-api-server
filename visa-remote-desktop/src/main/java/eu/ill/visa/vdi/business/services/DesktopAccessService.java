@@ -65,15 +65,15 @@ public class DesktopAccessService {
 
         client.sendEvent(SessionEvent.ACCESS_PENDING_EVENT);
 
-        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(sessionId, pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().connectionId()));
+        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(sessionId, pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().token()));
     }
 
     public void cancelAccessRequest(final SocketClient client) {
         // Verify that access has been requested
-        this.removeCandidate(client.connectionId()).ifPresent(desktopCandidate -> {
+        this.removeCandidate(client.token()).ifPresent(desktopCandidate -> {
             // A desktop request was in progress
             final PendingDesktopSessionMember pendingDesktopSessionMember = desktopCandidate.pendingDesktopSessionMember();
-            this.remoteDesktopBroker.broadcast(new AccessRequestCancellationMessage(desktopCandidate.sessionId(), pendingDesktopSessionMember.connectedUser(), client.connectionId()));
+            this.remoteDesktopBroker.broadcast(new AccessRequestCancellationMessage(desktopCandidate.sessionId(), pendingDesktopSessionMember.connectedUser(), client.token()));
         });
     }
 
@@ -135,7 +135,7 @@ public class DesktopAccessService {
 
     private synchronized Optional<DesktopCandidate> getCandidateById(String connectionId) {
         return this.desktopCandidates.stream()
-            .filter(candidate -> candidate.client().connectionId().equals(connectionId))
+            .filter(candidate -> candidate.client().token().equals(connectionId))
             .findAny();
     }
 
@@ -181,7 +181,7 @@ public class DesktopAccessService {
             }
 
         } else {
-            logger.info("Client {} is no longer waiting for an access reply", client.connectionId());
+            logger.info("Client {} is no longer waiting for an access reply", client.token());
         }
     }
 

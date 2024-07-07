@@ -5,18 +5,17 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
-import eu.ill.visa.vdi.domain.exceptions.InvalidTokenException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
-import eu.ill.visa.vdi.domain.models.*;
+import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.SessionEventConnection;
+import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,48 +49,15 @@ public class ClientConnectListener implements ConnectListener {
 
     @Override
     public void onConnect(final SocketIOClient client) {
-        this.initialiseDesktopSessionMember(client);
-        this.createRemoteDesktopConnection(client);
-    }
-
-    private void initialiseDesktopSessionMember(final SocketIOClient client) {
-        String connectionId = client.getSessionId().toString();
-        final SocketClient socketClient = new SocketClient(client, connectionId);
-        final SessionEventConnection sessionEventConnection = new SessionEventConnection(socketClient);
-
-        logger.info("Initialising websocket client for SessionEventConnection with connection id: {}", connectionId);
-
         final String token = client.getHandshakeData().getSingleUrlParam(TOKEN_PARAMETER);
-        try {
-            final InstanceAuthenticationToken instanceAuthenticationToken = authenticator.authenticate(token);
-            final User user = instanceAuthenticationToken.getUser();
-            final Instance instance = instanceAuthenticationToken.getInstance();
+//        final SocketClient socketClient = new SocketClient(client, token);
+        final SocketClient socketClient = new SocketClient(client, client.getSessionId().toString());
 
-            final InstanceMemberRole role = instanceSessionService.getUserSessionRole(instance, user);
-            ConnectedUser connectedUser = new ConnectedUser(user.getId(), user.getFullName(), role);
+        logger.info("Initialising websocket client for RemoteDesktopConnection with connection id: {} with token {}", socketClient.token(), token);
 
-            final String protocol = client.getHandshakeData().getSingleUrlParam(PROTOCOL_PARAMETER);
+        this.desktopSessionService.getPendingDesktopSessionMember(token).ifPresentOrElse(pendingDesktopSessionMember -> {
+            this.desktopSessionService.removePendingDesktopSessionMember(pendingDesktopSessionMember);
 
-            PendingDesktopSessionMember pendingDesktopSessionMember = new PendingDesktopSessionMember(connectedUser, sessionEventConnection, instance.getId(), protocol, token);
-            this.desktopSessionService.addPendingDesktopSessionMember(pendingDesktopSessionMember);
-
-        } catch (InvalidTokenException exception) {
-            logger.error("Token received for initialising Desktop Connection is invalid: {}", exception.getMessage());
-            sessionEventConnection.sendEvent(ACCESS_DENIED);
-            sessionEventConnection.disconnect();
-        }
-
-    }
-
-    private void createRemoteDesktopConnection(final SocketIOClient client) {
-        String connectionId = client.getSessionId().toString();
-        final SocketClient socketClient = new SocketClient(client, connectionId);
-        final String token = client.getHandshakeData().getSingleUrlParam(TOKEN_PARAMETER);
-
-        logger.info("Initialising websocket client for RemoteDesktopConnection with connection id: {} with token {}", connectionId, token);
-
-        final PendingDesktopSessionMember pendingDesktopSessionMember = this.desktopSessionService.getPendingDesktopSessionMember(token);
-        if (pendingDesktopSessionMember != null) {
             final Long instanceId = pendingDesktopSessionMember.instanceId();
             final Instance instance = this.instanceService.getFullById(instanceId);
             if (instance != null) {
@@ -147,9 +113,9 @@ public class ClientConnectListener implements ConnectListener {
                 socketClient.disconnect();
             }
 
-        } else {
+        }, () -> {
             logger.error("Failed to find pending desktop session connection for token {}", token);
             socketClient.disconnect();
-        }
+        });
     }
 }

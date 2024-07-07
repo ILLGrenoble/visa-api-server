@@ -53,7 +53,7 @@ public abstract class ClientDisplayListener<T> implements DataListener<T> {
                 return;
             }
 
-            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.getDesktopConnection();
+            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.getRemoteDesktopConnection();
             InstanceActivityType controlActivityType = this.getControlActivityType(data);
             if (controlActivityType != null) {
                 remoteDesktopConnection.setInstanceActivity(controlActivityType);
@@ -76,7 +76,7 @@ public abstract class ClientDisplayListener<T> implements DataListener<T> {
 
                 instanceService.save(instance);
 
-                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.getId());
+                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.getToken());
                 if (instanceSessionMember == null) {
                     logger.warn(format("Instance session member not found for instance %d", instance.getId()));
                 } else {

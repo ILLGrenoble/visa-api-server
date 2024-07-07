@@ -1,15 +1,15 @@
-package eu.ill.visa.vdi.gateway.listeners;
+package eu.ill.visa.vdi.gateway.subscribers;
 
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.visa.vdi.gateway.dispatcher.ClientEventSubscriber;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 
-public class ClientAccessRequestResponseListener implements ClientEventSubscriber<AccessRequestResponseEvent> {
+public class ClientAccessRequestResponseSubscriber implements ClientEventSubscriber<AccessRequestResponseEvent> {
 
     private final DesktopAccessService desktopAccessService;
 
-    public ClientAccessRequestResponseListener(final DesktopAccessService desktopAccessService) {
+    public ClientAccessRequestResponseSubscriber(final DesktopAccessService desktopAccessService) {
         this.desktopAccessService = desktopAccessService;
     }
 
