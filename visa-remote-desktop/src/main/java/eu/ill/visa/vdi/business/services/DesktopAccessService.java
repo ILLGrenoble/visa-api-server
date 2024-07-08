@@ -63,7 +63,7 @@ public class DesktopAccessService {
         // Create pending desktop connection
         DesktopCandidate desktopCandidate = this.addCandidate(client, sessionId, pendingDesktopSessionMember);
 
-        client.sendEvent(SessionEvent.ACCESS_PENDING_EVENT);
+        pendingDesktopSessionMember.eventChannel().sendEvent(SessionEvent.ACCESS_PENDING_EVENT);
 
         this.remoteDesktopBroker.broadcast(new AccessRequestMessage(sessionId, pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().token()));
     }
@@ -152,6 +152,7 @@ public class DesktopAccessService {
             final PendingDesktopSessionMember pendingDesktopSessionMember = candidate.pendingDesktopSessionMember();
             final ConnectedUser user = pendingDesktopSessionMember.connectedUser();
             final Long instanceId = pendingDesktopSessionMember.instanceId();
+            final EventChannel eventChannel = pendingDesktopSessionMember.eventChannel();
             final Instance instance = this.instanceService.getFullById(instanceId);
             if (instance != null) {
                 // Convert the support role to a normal user one if the owner of the instance is staff
@@ -160,15 +161,15 @@ public class DesktopAccessService {
                 try {
                     this.desktopSessionService.createDesktopSessionMember(client, pendingDesktopSessionMember);
 
-                    client.sendEvent(SessionEvent.ACCESS_GRANTED_EVENT, role);
+                    eventChannel.sendEvent(SessionEvent.ACCESS_GRANTED_EVENT, role);
 
                 } catch (OwnerNotConnectedException exception) {
-                    client.sendEvent(SessionEvent.OWNER_AWAY_EVENT);
+                    eventChannel.sendEvent(SessionEvent.OWNER_AWAY_EVENT);
                     client.disconnect();
 
                 } catch (UnauthorizedException exception) {
                     logger.warn(exception.getMessage());
-                    client.sendEvent(ACCESS_DENIED);
+                    eventChannel.sendEvent(ACCESS_DENIED);
                     client.disconnect();
 
                 } catch (ConnectionException exception) {
