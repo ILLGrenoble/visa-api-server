@@ -16,6 +16,7 @@ import eu.ill.visa.vdi.domain.models.*;
 import eu.ill.visa.vdi.gateway.events.AccessCancellationEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
+import io.quarkus.runtime.Shutdown;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,6 +42,9 @@ public class DesktopAccessService {
 
     private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
 
+    private final Thread keepAliveThread;
+    private boolean keepingAlive = true;
+
     @Inject
     public DesktopAccessService(final DesktopSessionService desktopSessionService,
                                 final InstanceService instanceService,
@@ -57,6 +61,22 @@ public class DesktopAccessService {
             .next((message) -> this.onAccessRequestCancelled(message.sessionId(), message.user(), message.requesterConnectionId()));
         this.remoteDesktopBroker.subscribe(AccessRequestResponseMessage.class)
             .next((message) -> this.onAccessRequestResponse(message.sessionId(), message.requesterConnectionId(), message.role()));
+
+        this.keepAliveThread = new Thread(() -> {
+            while (this.keepingAlive) {
+                try {
+                    Thread.sleep(1000);
+                    this.desktopCandidates.forEach(DesktopCandidate::keepAlive);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        });
+        this.keepAliveThread.start();
+    }
+
+    @Shutdown
+    public void shutdown() {
+        this.keepingAlive = false;
     }
 
     public void requestAccess(final SocketClient client, final Long sessionId, final PendingDesktopSessionMember pendingDesktopSessionMember) {
