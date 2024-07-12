@@ -45,7 +45,7 @@ public class ClientEventsGateway {
     }
 
     public void onConnect(final SocketClient client) {
-        this.connectSubscriptionList.forEach(connectSubscriber -> connectSubscriber.onConnect(client));
+        this.connectSubscriptionList.forEach(connectSubscriber -> connectSubscriber.onConnect(client, null));
     }
 
     public void onDisconnect(final SocketClient client) {

@@ -7,7 +7,7 @@ import jakarta.websocket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RemoteDesktopSocket extends AbstractSocket {
+public abstract class RemoteDesktopSocket extends AbstractSocket {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopSocket.class);
 
@@ -24,7 +24,7 @@ public class RemoteDesktopSocket extends AbstractSocket {
 
     protected void onOpen(Session session, String token) {
         try {
-            this.runOnWorker(new SocketClient(session, token), this.socketConnectSubscriber::onConnect);
+            this.runOnWorker(new SocketClient(session, token), (client) -> this.socketConnectSubscriber.onConnect(client, this::sendNop));
 
         } catch (Exception e) {
             logger.error("Failed to connect to RemoteDesktopSocket: {}", e.getMessage());
@@ -39,4 +39,7 @@ public class RemoteDesktopSocket extends AbstractSocket {
             logger.error("Failed to disconnect from RemoteDesktopSocket: {}", e.getMessage());
         }
     }
+
+    protected abstract void sendNop(final SocketClient socketClient);
+
 }

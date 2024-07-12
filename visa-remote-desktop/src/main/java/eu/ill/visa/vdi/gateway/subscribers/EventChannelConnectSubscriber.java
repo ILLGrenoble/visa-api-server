@@ -8,10 +8,7 @@ import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.exceptions.InvalidTokenException;
-import eu.ill.visa.vdi.domain.models.ConnectedUser;
-import eu.ill.visa.vdi.domain.models.PendingDesktopSessionMember;
-import eu.ill.visa.vdi.domain.models.EventChannel;
-import eu.ill.visa.vdi.domain.models.SocketClient;
+import eu.ill.visa.vdi.domain.models.*;
 import eu.ill.visa.vdi.gateway.dispatcher.SocketConnectSubscriber;
 import eu.ill.visa.vdi.gateway.events.ClientEventCarrier;
 import eu.ill.visa.vdi.gateway.events.ConnectionInitiatedEvent;
@@ -40,7 +37,7 @@ public class EventChannelConnectSubscriber implements SocketConnectSubscriber {
     }
 
     @Override
-    public void onConnect(SocketClient socketClient) {
+    public void onConnect(SocketClient socketClient, final NopSender nopSender) {
         final EventChannel eventChannel = new EventChannel(socketClient);
 
         // See if a desktop session exists already for this token (and verify that the events channel is disconnected)

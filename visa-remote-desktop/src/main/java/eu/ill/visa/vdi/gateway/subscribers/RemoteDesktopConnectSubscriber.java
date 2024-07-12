@@ -12,6 +12,7 @@ import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.EventChannel;
+import eu.ill.visa.vdi.domain.models.NopSender;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.visa.vdi.gateway.dispatcher.SocketConnectSubscriber;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class RemoteDesktopConnectSubscriber implements SocketConnectSubscriber {
     }
 
     @Override
-    public void onConnect(final SocketClient socketClient) {
+    public void onConnect(final SocketClient socketClient, final NopSender nopSender) {
 
         logger.info("Initialising websocket client for RemoteDesktopConnection with token {}", socketClient.token());
 
@@ -67,7 +68,7 @@ public class RemoteDesktopConnectSubscriber implements SocketConnectSubscriber {
                                 final InstanceSession instanceSession = this.instanceSessionService.getByInstanceAndProtocol(instance, pendingDesktopSessionMember.protocol());
                                 if (instanceSession != null && this.desktopSessionService.isOwnerConnected(instanceSession.getId())) {
                                     // Start process of requesting access from the owner
-                                    this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), pendingDesktopSessionMember);
+                                    this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), pendingDesktopSessionMember, nopSender);
 
                                 } else {
                                     throw new OwnerNotConnectedException();

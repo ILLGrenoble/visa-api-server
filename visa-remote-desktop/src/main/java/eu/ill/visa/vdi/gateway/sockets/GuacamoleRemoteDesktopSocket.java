@@ -31,6 +31,10 @@ public class GuacamoleRemoteDesktopSocket extends RemoteDesktopSocket {
         super.onClose(session, token);
     }
 
+    protected void sendNop(final SocketClient socketClient) {
+        socketClient.sendEvent("3.nop;");
+    }
+
     @OnError
     private void onError(Session session, @PathParam("token") String token, Throwable throwable) {
         logger.error("Got guacamole websocket error for session {}: {}", session.getId(), throwable.getMessage());

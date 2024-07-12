@@ -31,6 +31,9 @@ public class WebXRemoteDesktopSocket extends RemoteDesktopSocket {
         super.onClose(session, token);
     }
 
+    protected void sendNop(final SocketClient socketClient) {
+    }
+
     @OnError
     private void onError(Session session, @PathParam("token") String token, Throwable throwable) {
         logger.error("Got webx websocket error for session {}: {}", session.getId(), throwable.getMessage());

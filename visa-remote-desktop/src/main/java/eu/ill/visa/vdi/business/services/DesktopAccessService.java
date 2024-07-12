@@ -42,7 +42,6 @@ public class DesktopAccessService {
 
     private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
 
-    private final Thread keepAliveThread;
     private boolean keepingAlive = true;
 
     @Inject
@@ -62,7 +61,7 @@ public class DesktopAccessService {
         this.remoteDesktopBroker.subscribe(AccessRequestResponseMessage.class)
             .next((message) -> this.onAccessRequestResponse(message.sessionId(), message.requesterConnectionId(), message.role()));
 
-        this.keepAliveThread = new Thread(() -> {
+        Thread keepAliveThread = new Thread(() -> {
             while (this.keepingAlive) {
                 try {
                     Thread.sleep(1000);
@@ -71,7 +70,7 @@ public class DesktopAccessService {
                 }
             }
         });
-        this.keepAliveThread.start();
+        keepAliveThread.start();
     }
 
     @Shutdown
@@ -79,9 +78,9 @@ public class DesktopAccessService {
         this.keepingAlive = false;
     }
 
-    public void requestAccess(final SocketClient client, final Long sessionId, final PendingDesktopSessionMember pendingDesktopSessionMember) {
+    public void requestAccess(final SocketClient client, final Long sessionId, final PendingDesktopSessionMember pendingDesktopSessionMember, final NopSender nopSender) {
         // Create pending desktop connection
-        DesktopCandidate desktopCandidate = this.addCandidate(client, sessionId, pendingDesktopSessionMember);
+        DesktopCandidate desktopCandidate = this.addCandidate(client, sessionId, pendingDesktopSessionMember, nopSender);
 
         pendingDesktopSessionMember.eventChannel().sendEvent(SessionEvent.ACCESS_PENDING_EVENT);
 
@@ -146,8 +145,8 @@ public class DesktopAccessService {
         });
     }
 
-    private synchronized DesktopCandidate addCandidate(final SocketClient client, final Long sessionId, final PendingDesktopSessionMember pendingDesktopSessionMember) {
-        DesktopCandidate desktopCandidate = new DesktopCandidate(client, sessionId, pendingDesktopSessionMember);
+    private synchronized DesktopCandidate addCandidate(final SocketClient client, final Long sessionId, final PendingDesktopSessionMember pendingDesktopSessionMember, final NopSender nopSender) {
+        DesktopCandidate desktopCandidate = new DesktopCandidate(client, sessionId, pendingDesktopSessionMember, nopSender);
         this.desktopCandidates.add(desktopCandidate);
 
         return desktopCandidate;
