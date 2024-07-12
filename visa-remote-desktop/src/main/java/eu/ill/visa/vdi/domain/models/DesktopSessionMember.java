@@ -56,17 +56,16 @@ public class DesktopSessionMember {
             this.eventChannel.sendEvent(type, data);
 
         } else {
-            logger.warn("Attempting to send event to closed Event Channel for session member {}", this.token);
+            logger.warn("Attempting to send event to closed Event Channel for session member {}", this);
         }
     }
 
     public void disconnect() {
         try {
             this.remoteDesktopConnection.disconnect();
-            this.eventChannel.disconnect();
 
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Error while disconnecting the remote desktop for session member {}: {}", this, e.getMessage());
         }
     }
 
