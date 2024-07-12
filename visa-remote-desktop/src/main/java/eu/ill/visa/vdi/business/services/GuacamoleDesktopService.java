@@ -15,6 +15,8 @@ import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.apache.guacamole.GuacamoleException;
 import org.apache.guacamole.net.GuacamoleSocket;
 import org.apache.guacamole.net.GuacamoleTunnel;
@@ -30,6 +32,7 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNullElse;
 
+@ApplicationScoped
 public class GuacamoleDesktopService extends DesktopService {
 
     private final static Logger logger = LoggerFactory.getLogger(GuacamoleDesktopService.class);
@@ -40,6 +43,7 @@ public class GuacamoleDesktopService extends DesktopService {
     private final VirtualDesktopConfiguration configuration;
     private final ConnectionThreadExecutor executorService;
 
+    @Inject
     public GuacamoleDesktopService(final InstanceSessionService instanceSessionService,
                             final SignatureService signatureService,
                             final ImageProtocolService imageProtocolService,

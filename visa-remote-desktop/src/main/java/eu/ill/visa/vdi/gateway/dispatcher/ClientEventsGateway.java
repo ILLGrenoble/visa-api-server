@@ -15,26 +15,25 @@ public class ClientEventsGateway {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientEventsGateway.class);
 
-    private final List<ClientConnectSubscriber> connectSubscriptionList = new ArrayList<>();
-    private final List<ClientDisconnectSubscriber> disconnectSubscriptionList = new ArrayList<>();
-    private final List<ClientEventSubscriptionList<?>> subscriptionLists = new ArrayList<>();
+    private final List<SocketConnectSubscriber> connectSubscriptionList = new ArrayList<>();
+    private final List<SocketDisconnectSubscriber> disconnectSubscriptionList = new ArrayList<>();
+    private final List<SocketEventSubscriptionList<?>> subscriptionLists = new ArrayList<>();
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-
-    public void addConnectSubscriber(final ClientConnectSubscriber connectSubscriber) {
+    public void addConnectSubscriber(final SocketConnectSubscriber connectSubscriber) {
         this.connectSubscriptionList.add(connectSubscriber);
     }
 
-    public void addDisconnectSubscriber(final ClientDisconnectSubscriber disconnectSubscriber) {
+    public void addDisconnectSubscriber(final SocketDisconnectSubscriber disconnectSubscriber) {
         this.disconnectSubscriptionList.add(disconnectSubscriber);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> ClientEventSubscriptionList<T> subscribe(final String type, Class<T> eventClass) {
-        ClientEventSubscriptionList<?> clientEventSubscriptionList = this.subscriptionLists.stream().filter(subscriptionList -> subscriptionList.getType().equals(type)).findFirst().orElse(null);
+    public <T> SocketEventSubscriptionList<T> subscribe(final String type, Class<T> eventClass) {
+        SocketEventSubscriptionList<?> clientEventSubscriptionList = this.subscriptionLists.stream().filter(subscriptionList -> subscriptionList.getType().equals(type)).findFirst().orElse(null);
         if (clientEventSubscriptionList == null) {
-            clientEventSubscriptionList = new ClientEventSubscriptionList<T>(type, eventClass);
+            clientEventSubscriptionList = new SocketEventSubscriptionList<T>(type, eventClass);
             this.subscriptionLists.add(clientEventSubscriptionList);
 
         } else {
@@ -42,7 +41,7 @@ public class ClientEventsGateway {
                 throw new RuntimeException(String.format("Client event subscription list for type %s already exists for class %s", type, clientEventSubscriptionList.getEventClass()));
             }
         }
-        return (ClientEventSubscriptionList<T>)clientEventSubscriptionList;
+        return (SocketEventSubscriptionList<T>)clientEventSubscriptionList;
     }
 
     public void onConnect(final SocketClient client) {
@@ -56,35 +55,35 @@ public class ClientEventsGateway {
     @SuppressWarnings("unchecked")
     public <T> void onEvent(final SocketClient client, final ClientEventCarrier clientEventCarrier) {
         this.subscriptionLists.stream()
-            .filter(clientEventSubscriptionList -> clientEventSubscriptionList.getType().equals(clientEventCarrier.type()))
+            .filter(socketEventSubscriptionList -> socketEventSubscriptionList.getType().equals(clientEventCarrier.type()))
             .findAny()
-            .ifPresent(clientEventSubscriptionList -> {
-                final Class<?> eventClass = clientEventSubscriptionList.getEventClass();
+            .ifPresent(socketEventSubscriptionList -> {
+                final Class<?> eventClass = socketEventSubscriptionList.getEventClass();
                 if (eventClass.equals(String.class)) {
-                    ((ClientEventSubscriptionList<String>)clientEventSubscriptionList).onEvent(client, clientEventCarrier.data().toString());
+                    ((SocketEventSubscriptionList<String>)socketEventSubscriptionList).onEvent(client, clientEventCarrier.data().toString());
 
                 } else if (eventClass.equals(Integer.class)) {
-                    ((ClientEventSubscriptionList<Integer>)clientEventSubscriptionList).onEvent(client, Integer.parseInt(clientEventCarrier.data().toString()));
+                    ((SocketEventSubscriptionList<Integer>)socketEventSubscriptionList).onEvent(client, Integer.parseInt(clientEventCarrier.data().toString()));
 
                 } else if (eventClass.equals(Long.class)) {
-                    ((ClientEventSubscriptionList<Long>)clientEventSubscriptionList).onEvent(client, Long.parseLong(clientEventCarrier.data().toString()));
+                    ((SocketEventSubscriptionList<Long>)socketEventSubscriptionList).onEvent(client, Long.parseLong(clientEventCarrier.data().toString()));
 
                 } else if (eventClass.equals(Float.class)) {
-                    ((ClientEventSubscriptionList<Float>)clientEventSubscriptionList).onEvent(client, Float.parseFloat(clientEventCarrier.data().toString()));
+                    ((SocketEventSubscriptionList<Float>)socketEventSubscriptionList).onEvent(client, Float.parseFloat(clientEventCarrier.data().toString()));
 
                 } else if (eventClass.equals(Double.class)) {
-                    ((ClientEventSubscriptionList<Double>)clientEventSubscriptionList).onEvent(client, Double.parseDouble(clientEventCarrier.data().toString()));
+                    ((SocketEventSubscriptionList<Double>)socketEventSubscriptionList).onEvent(client, Double.parseDouble(clientEventCarrier.data().toString()));
 
                 } else if (eventClass.equals(Boolean.class)) {
-                    ((ClientEventSubscriptionList<Boolean>)clientEventSubscriptionList).onEvent(client, Boolean.parseBoolean(clientEventCarrier.data().toString()));
+                    ((SocketEventSubscriptionList<Boolean>)socketEventSubscriptionList).onEvent(client, Boolean.parseBoolean(clientEventCarrier.data().toString()));
 
                 } else {
                     try {
-                        final T event = (T)this.mapper.convertValue(clientEventCarrier.data(), clientEventSubscriptionList.getEventClass());
-                        ((ClientEventSubscriptionList<T>)clientEventSubscriptionList).onEvent(client, event);
+                        final T event = (T)this.mapper.convertValue(clientEventCarrier.data(), socketEventSubscriptionList.getEventClass());
+                        ((SocketEventSubscriptionList<T>)socketEventSubscriptionList).onEvent(client, event);
 
                     } catch (Exception e) {
-                        logger.error("Failed to deserialize event of type {} to class {}: {}", clientEventCarrier.type(), clientEventSubscriptionList.getEventClass(), e.getMessage());
+                        logger.error("Failed to deserialize event of type {} to class {}: {}", clientEventCarrier.type(), socketEventSubscriptionList.getEventClass(), e.getMessage());
                     }
                 }
             });

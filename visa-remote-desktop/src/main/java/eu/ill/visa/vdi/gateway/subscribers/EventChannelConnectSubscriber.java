@@ -12,7 +12,8 @@ import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.PendingDesktopSessionMember;
 import eu.ill.visa.vdi.domain.models.EventChannel;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import eu.ill.visa.vdi.gateway.dispatcher.ClientConnectSubscriber;
+import eu.ill.visa.vdi.gateway.dispatcher.SocketConnectSubscriber;
+import eu.ill.visa.vdi.gateway.events.ClientEventCarrier;
 import eu.ill.visa.vdi.gateway.events.ConnectionInitiatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +21,17 @@ import org.slf4j.LoggerFactory;
 import static eu.ill.visa.vdi.domain.models.SessionEvent.ACCESS_DENIED;
 import static eu.ill.visa.vdi.domain.models.SessionEvent.EVENT_CHANNEL_OPEN;
 
-public class ClientEventsConnectSubscriber implements ClientConnectSubscriber {
+public class EventChannelConnectSubscriber implements SocketConnectSubscriber {
 
     private final static String PROTOCOL_PARAMETER = "protocol";
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientEventsConnectSubscriber.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventChannelConnectSubscriber.class);
 
     private final DesktopSessionService desktopSessionService;
     private final InstanceSessionService instanceSessionService;
     private final TokenAuthenticatorService authenticator;
 
-    public ClientEventsConnectSubscriber(final DesktopSessionService desktopSessionService,
+    public EventChannelConnectSubscriber(final DesktopSessionService desktopSessionService,
                                          final InstanceSessionService instanceSessionService,
                                          final TokenAuthenticatorService authenticator) {
         this.desktopSessionService = desktopSessionService;
@@ -70,7 +71,7 @@ public class ClientEventsConnectSubscriber implements ClientConnectSubscriber {
                 PendingDesktopSessionMember pendingDesktopSessionMember = new PendingDesktopSessionMember(token, connectedUser, eventChannel, instance.getId(), protocol);
                 this.desktopSessionService.addPendingDesktopSessionMember(pendingDesktopSessionMember);
 
-                socketClient.sendEvent(EVENT_CHANNEL_OPEN, new ConnectionInitiatedEvent(token));
+                socketClient.sendEvent(new ClientEventCarrier(EVENT_CHANNEL_OPEN, new ConnectionInitiatedEvent(token)));
 
             } catch (InvalidTokenException exception) {
                 logger.error("Token received for initialising Event Channel is invalid: {}", exception.getMessage());

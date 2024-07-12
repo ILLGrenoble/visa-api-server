@@ -20,11 +20,14 @@ import eu.ill.webx.WebXTunnel;
 import eu.ill.webx.exceptions.WebXClientException;
 import eu.ill.webx.exceptions.WebXConnectionException;
 import eu.ill.webx.exceptions.WebXException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.Objects.requireNonNullElse;
 
+@ApplicationScoped
 public class WebXDesktopService extends DesktopService {
 
     private static final Logger logger = LoggerFactory.getLogger(WebXDesktopService.class);
@@ -34,6 +37,7 @@ public class WebXDesktopService extends DesktopService {
     private final ImageProtocolService imageProtocolService;
     private final ConnectionThreadExecutor executorService;
 
+    @Inject
     public WebXDesktopService(final InstanceSessionService instanceSessionService,
                               final SignatureService signatureService,
                               final ImageProtocolService imageProtocolService,

@@ -14,12 +14,6 @@ public interface VirtualDesktopConfiguration {
 
     boolean enabled();
 
-    Integer port();
-
-    String host();
-
-    String corsOrigin();
-
     boolean redisEnabled();
 
     Optional<String> redisURL();
@@ -31,10 +25,6 @@ public interface VirtualDesktopConfiguration {
     String ownerDisconnectionPolicy();
 
     boolean cleanupSessionsOnStartup();
-
-    int pingTimeout();
-
-    int pingInterval();
 
     String protocol();
 

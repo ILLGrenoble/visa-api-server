@@ -1,8 +1,5 @@
-package eu.ill.visa.vdi.gateway.listeners;
+package eu.ill.visa.vdi.gateway.subscribers;
 
-import com.corundumstudio.socketio.AckRequest;
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.listener.DataListener;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
@@ -15,6 +12,7 @@ import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
+import eu.ill.visa.vdi.gateway.dispatcher.SocketEventSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,19 +20,19 @@ import java.util.Date;
 
 import static java.lang.String.format;
 
-public abstract class ClientDisplayListener<T> implements DataListener<T> {
+public abstract class RemoteDesktopEventSubscriber<T> implements SocketEventSubscriber<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientDisplayListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopEventSubscriber.class);
 
     private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceActivityService instanceActivityService;
 
-    public ClientDisplayListener(final DesktopSessionService desktopSessionService,
-                                 final InstanceService instanceService,
-                                 final InstanceSessionService instanceSessionService,
-                                 final InstanceActivityService instanceActivityService) {
+    public RemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
+                                        final InstanceService instanceService,
+                                        final InstanceSessionService instanceSessionService,
+                                        final InstanceActivityService instanceActivityService) {
         this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
@@ -42,9 +40,8 @@ public abstract class ClientDisplayListener<T> implements DataListener<T> {
     }
 
     @Override
-    public void onData(final SocketIOClient client, final T data, final AckRequest ackRequest) {
-        final SocketClient socketClient = new SocketClient(client, client.getSessionId().toString());
-        this.desktopSessionService.findDesktopSessionMember(socketClient).ifPresent(desktopSessionMember -> {
+    public void onEvent(final SocketClient socketClient, final T data) {
+        this.desktopSessionService.findDesktopSessionMemberByToken(socketClient.token()).ifPresent(desktopSessionMember -> {
 
             final DesktopSession desktopSession = desktopSessionMember.getSession();
 

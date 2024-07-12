@@ -5,14 +5,14 @@ import eu.ill.visa.vdi.domain.models.SocketClient;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientEventSubscriptionList<T> {
+public class SocketEventSubscriptionList<T> {
 
-    private final List<ClientEventSubscriber<T>> subscribers = new ArrayList<>();
+    private final List<SocketEventSubscriber<T>> subscribers = new ArrayList<>();
 
     private final String type;
     private final Class<T> eventClass;
 
-    public ClientEventSubscriptionList(final String type, final Class<T> eventClass) {
+    public SocketEventSubscriptionList(final String type, final Class<T> eventClass) {
         this.type = type;
         this.eventClass = eventClass;
     }
@@ -25,7 +25,7 @@ public class ClientEventSubscriptionList<T> {
         return eventClass;
     }
 
-    public ClientEventSubscriptionList<T> next(ClientEventSubscriber<T> subscriber) {
+    public SocketEventSubscriptionList<T> next(SocketEventSubscriber<T> subscriber) {
         this.subscribers.add(subscriber);
         return this;
     }

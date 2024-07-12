@@ -5,7 +5,7 @@ import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import eu.ill.visa.vdi.gateway.dispatcher.ClientEventSubscriber;
+import eu.ill.visa.vdi.gateway.dispatcher.SocketEventSubscriber;
 import org.apache.commons.imaging.ImageFormat;
 import org.apache.commons.imaging.ImageFormats;
 import org.apache.commons.imaging.Imaging;
@@ -16,15 +16,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
-public class ClientThumbnailSubscriber implements ClientEventSubscriber<String> {
+public class EventChannelThumbnailSubscriber implements SocketEventSubscriber<String> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientThumbnailSubscriber.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventChannelThumbnailSubscriber.class);
 
     private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
 
-    public ClientThumbnailSubscriber(final DesktopSessionService desktopSessionService,
-                                     final InstanceService instanceService) {
+    public EventChannelThumbnailSubscriber(final DesktopSessionService desktopSessionService,
+                                           final InstanceService instanceService) {
         this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
     }

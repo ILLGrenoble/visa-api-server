@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.listeners;
+package eu.ill.visa.vdi.gateway.subscribers;
 
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
@@ -11,12 +11,12 @@ import java.nio.ByteBuffer;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
-public class WebXClientDisplayListener extends ClientDisplayListener<byte[]> {
+public class WebXRemoteDesktopEventSubscriber extends RemoteDesktopEventSubscriber<byte[]> {
 
-    public WebXClientDisplayListener(final DesktopSessionService desktopSessionService,
-                                     final InstanceService instanceService,
-                                     final InstanceSessionService instanceSessionService,
-                                     final InstanceActivityService instanceActivityService) {
+    public WebXRemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
+                                            final InstanceService instanceService,
+                                            final InstanceSessionService instanceSessionService,
+                                            final InstanceActivityService instanceActivityService) {
         super(desktopSessionService, instanceService, instanceSessionService, instanceActivityService);
     }
 

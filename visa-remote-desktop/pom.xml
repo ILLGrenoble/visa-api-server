@@ -35,11 +35,6 @@
             <version>${guacamole.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.corundumstudio.socketio</groupId>
-            <artifactId>netty-socketio</artifactId>
-            <version>${netty.socketio.version}</version>
-        </dependency>
-        <dependency>
             <groupId>eu.ill</groupId>
             <artifactId>webx-relay</artifactId>
             <version>${webx-relay.version}</version>

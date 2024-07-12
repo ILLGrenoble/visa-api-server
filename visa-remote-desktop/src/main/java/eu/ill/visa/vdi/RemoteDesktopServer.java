@@ -1,6 +1,5 @@
 package eu.ill.visa.vdi;
 
-import com.corundumstudio.socketio.SocketIOServer;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
@@ -11,82 +10,89 @@ import eu.ill.visa.vdi.domain.models.SessionEvent;
 import eu.ill.visa.vdi.gateway.dispatcher.ClientEventsGateway;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
-import eu.ill.visa.vdi.gateway.listeners.ClientConnectListener;
-import eu.ill.visa.vdi.gateway.listeners.ClientDisconnectListener;
-import eu.ill.visa.vdi.gateway.listeners.GuacamoleClientDisplayListener;
-import eu.ill.visa.vdi.gateway.listeners.WebXClientDisplayListener;
+import eu.ill.visa.vdi.gateway.sockets.GuacamoleRemoteDesktopSocket;
+import eu.ill.visa.vdi.gateway.sockets.WebXRemoteDesktopSocket;
 import eu.ill.visa.vdi.gateway.subscribers.*;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class RemoteDesktopServer {
 
-    private final SocketIOServer server;
+    private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopServer.class);
+
     private final DesktopSessionService desktopConnectionService;
     private final InstanceService instanceService;
     private final TokenAuthenticatorService authenticator;
     private final InstanceSessionService instanceSessionService;
     private final InstanceActivityService instanceActivityService;
     private final DesktopAccessService desktopAccessService;
-    private final VirtualDesktopConfiguration virtualDesktopConfiguration;
+    private final VirtualDesktopConfiguration configuration;
     private final ClientEventsGateway clientEventsGateway;
+    private final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket;
+    private final WebXRemoteDesktopSocket webXRemoteDesktopSocket;
 
     @Inject
-    public RemoteDesktopServer(final SocketIOServer server,
-                               final InstanceSessionService instanceSessionService,
+    public RemoteDesktopServer(final InstanceSessionService instanceSessionService,
                                final DesktopSessionService desktopConnectionService,
                                final InstanceService instanceService,
                                final TokenAuthenticatorService authenticator,
                                final DesktopAccessService desktopAccessService,
-                               final VirtualDesktopConfiguration virtualDesktopConfiguration,
+                               final VirtualDesktopConfiguration configuration,
                                final InstanceActivityService instanceActivityService,
-                               final ClientEventsGateway clientEventsGateway) {
-        this.server = server;
+                               final ClientEventsGateway clientEventsGateway,
+                               final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket,
+                               final WebXRemoteDesktopSocket webXRemoteDesktopSocket) {
         this.instanceSessionService = instanceSessionService;
         this.desktopConnectionService = desktopConnectionService;
         this.instanceService = instanceService;
         this.authenticator = authenticator;
         this.desktopAccessService = desktopAccessService;
-        this.virtualDesktopConfiguration = virtualDesktopConfiguration;
+        this.configuration = configuration;
         this.instanceActivityService = instanceActivityService;
         this.clientEventsGateway = clientEventsGateway;
+        this.guacamoleRemoteDesktopSocket = guacamoleRemoteDesktopSocket;
+        this.webXRemoteDesktopSocket = webXRemoteDesktopSocket;
     }
 
+    @Startup
     public void startServer() {
-        if (this.virtualDesktopConfiguration.cleanupSessionsOnStartup()) {
-            this.cleanupSessions();
+        if (configuration.enabled()) {
+            logger.info("Virtual Desktop Server is enabled");
+            if (this.configuration.cleanupSessionsOnStartup()) {
+                this.cleanupSessions();
+            }
+
+            this.bindSubscribers();
+
+        } else {
+            logger.info("Virtual Desktop Server is disabled");
         }
-
-        this.bindListeners(server);
-        this.bindClientSubscribers();
-        this.server.start();
     }
 
-    public void stopServer() {
-        this.server.stop();
-        // make sure the store factory has been shutdown
-        this.server.getConfiguration().getStoreFactory().shutdown();
-    }
-
-    private void bindListeners(final SocketIOServer server) {
-        server.addConnectListener(new ClientConnectListener(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService, this.authenticator));
-        server.addEventListener("display", String.class, new GuacamoleClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
-        server.addEventListener("webxdisplay", byte[].class, new WebXClientDisplayListener(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
-        server.addDisconnectListener(new ClientDisconnectListener(this.desktopConnectionService, this.desktopAccessService));
-    }
-
-
-    private void bindClientSubscribers() {
-        this.clientEventsGateway.addConnectSubscriber(new ClientEventsConnectSubscriber(this.desktopConnectionService, this.instanceSessionService, this.authenticator));
-        this.clientEventsGateway.addDisconnectSubscriber(new ClientEventsDisconnectSubscriber(this.desktopConnectionService));
-
+    private void bindSubscribers() {
+        // Set up event channel
+        this.clientEventsGateway.addConnectSubscriber(new EventChannelConnectSubscriber(this.desktopConnectionService, this.instanceSessionService, this.authenticator));
+        this.clientEventsGateway.addDisconnectSubscriber(new EventChannelDisconnectSubscriber(this.desktopConnectionService));
         this.clientEventsGateway.subscribe("thumbnail", String.class)
-            .next(new ClientThumbnailSubscriber(this.desktopConnectionService, this.instanceService));
+            .next(new EventChannelThumbnailSubscriber(this.desktopConnectionService, this.instanceService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class)
-            .next(new ClientAccessRequestResponseSubscriber(this.desktopAccessService));
+            .next(new EventChannelAccessRequestResponseSubscriber(this.desktopAccessService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class)
-            .next(new ClientAccessRevokedSubscriber(this.desktopConnectionService));
+            .next(new EventChannelAccessRevokedSubscriber(this.desktopConnectionService));
+
+        // Set up guacamole display listeners
+        this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService));
+        this.guacamoleRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
+        this.guacamoleRemoteDesktopSocket.setEventSubscriber(new GuacamoleRemoteDesktopEventSubscriber(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
+
+        // Set up webx display listeners
+        this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService));
+        this.webXRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
+        this.webXRemoteDesktopSocket.setEventSubscriber(new WebXRemoteDesktopEventSubscriber(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
     }
 
     private void cleanupSessions() {

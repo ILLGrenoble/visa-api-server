@@ -1,6 +1,5 @@
 package eu.ill.visa.vdi.business.concurrency;
 
-import com.corundumstudio.socketio.SocketIOClient;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.SocketClient;

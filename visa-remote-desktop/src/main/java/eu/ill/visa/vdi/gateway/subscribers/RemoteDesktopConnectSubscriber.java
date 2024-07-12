@@ -1,7 +1,5 @@
-package eu.ill.visa.vdi.gateway.listeners;
+package eu.ill.visa.vdi.gateway.subscribers;
 
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.listener.ConnectListener;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
@@ -9,53 +7,44 @@ import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.EventChannel;
 import eu.ill.visa.vdi.domain.models.SocketClient;
+import eu.ill.visa.vdi.gateway.dispatcher.SocketConnectSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static eu.ill.visa.vdi.domain.models.SessionEvent.ACCESS_DENIED;
 import static eu.ill.visa.vdi.domain.models.SessionEvent.OWNER_AWAY_EVENT;
 
-public class ClientConnectListener implements ConnectListener {
+public class RemoteDesktopConnectSubscriber implements SocketConnectSubscriber {
 
-    private final static String PROTOCOL_PARAMETER = "protocol";
-    private final static String TOKEN_PARAMETER = "token";
-
-    private static final Logger logger = LoggerFactory.getLogger(ClientConnectListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopConnectSubscriber.class);
 
     private final DesktopSessionService desktopSessionService;
     private final DesktopAccessService desktopAccessService;
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
-    private final TokenAuthenticatorService authenticator;
 
-    public ClientConnectListener(final DesktopSessionService desktopSessionService,
-                                 final DesktopAccessService desktopAccessService,
-                                 final InstanceService instanceService,
-                                 final InstanceSessionService instanceSessionService,
-                                 final TokenAuthenticatorService authenticator) {
+    public RemoteDesktopConnectSubscriber(final DesktopSessionService desktopSessionService,
+                                          final DesktopAccessService desktopAccessService,
+                                          final InstanceService instanceService,
+                                          final InstanceSessionService instanceSessionService) {
         this.desktopSessionService = desktopSessionService;
         this.desktopAccessService = desktopAccessService;
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
-        this.authenticator = authenticator;
     }
 
     @Override
-    public void onConnect(final SocketIOClient client) {
-        final String token = client.getHandshakeData().getSingleUrlParam(TOKEN_PARAMETER);
-//        final SocketClient socketClient = new SocketClient(client, token);
-        final SocketClient socketClient = new SocketClient(client, client.getSessionId().toString());
+    public void onConnect(final SocketClient socketClient) {
 
-        logger.info("Initialising websocket client for RemoteDesktopConnection with connection id: {} with token {}", socketClient.token(), token);
+        logger.info("Initialising websocket client for RemoteDesktopConnection with token {}", socketClient.token());
 
-        this.desktopSessionService.getPendingDesktopSessionMember(token).ifPresentOrElse(pendingDesktopSessionMember -> {
+        this.desktopSessionService.getPendingDesktopSessionMember(socketClient.token()).ifPresentOrElse(pendingDesktopSessionMember -> {
             this.desktopSessionService.removePendingDesktopSessionMember(pendingDesktopSessionMember);
 
             final Long instanceId = pendingDesktopSessionMember.instanceId();
@@ -109,12 +98,12 @@ public class ClientConnectListener implements ConnectListener {
                 }
 
             } else {
-                logger.error("Instance no longer exists for token {}", token);
+                logger.error("Instance no longer exists for token {}", socketClient.token());
                 socketClient.disconnect();
             }
 
         }, () -> {
-            logger.error("Failed to find pending desktop session connection for token {}", token);
+            logger.error("Failed to find pending desktop session connection for token {}", socketClient.token());
             socketClient.disconnect();
         });
     }

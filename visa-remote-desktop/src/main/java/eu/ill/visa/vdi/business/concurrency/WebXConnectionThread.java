@@ -51,7 +51,7 @@ public class WebXConnectionThread extends ConnectionThread {
 
             byte[] messageData;
             while (tunnel.isRunning() && (messageData = tunnel.read()) != null) {
-                client.sendEvent("webxdisplay", messageData);
+                client.sendEvent(messageData);
             }
 
         } catch (WebXClientException exception) {

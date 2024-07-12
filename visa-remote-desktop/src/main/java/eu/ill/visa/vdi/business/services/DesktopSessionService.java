@@ -89,7 +89,7 @@ public class DesktopSessionService {
         this.remoteDesktopBroker.shutdown();
     }
 
-    public DesktopSessionMember createDesktopSessionMember(final SocketClient client, final PendingDesktopSessionMember pendingDesktopSessionMember) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
+    public synchronized DesktopSessionMember createDesktopSessionMember(final SocketClient client, final PendingDesktopSessionMember pendingDesktopSessionMember) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
         final ConnectedUser user = pendingDesktopSessionMember.connectedUser();
         final Long instanceId = pendingDesktopSessionMember.instanceId();
         final Instance instance = this.instanceService.getFullById(instanceId);

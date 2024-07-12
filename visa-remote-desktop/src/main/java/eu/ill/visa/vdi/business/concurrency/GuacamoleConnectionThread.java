@@ -72,7 +72,7 @@ public class GuacamoleConnectionThread extends ConnectionThread {
 
                 // Flush if we expect to wait or buffer is getting full
                 if (!reader.available() || buffer.length() >= 8192) {
-                    client.sendEvent("display", buffer.toString());
+                    client.sendEvent(buffer.toString());
                     buffer.setLength(0);
                 }
 
@@ -91,10 +91,10 @@ public class GuacamoleConnectionThread extends ConnectionThread {
     }
 
     private void sendIdentifierInstruction() {
-        final String               uuid        = tunnel.getUUID().toString();
+        final String uuid = tunnel.getUUID().toString();
         final GuacamoleInstruction instruction = new GuacamoleInstruction(INTERNAL_DATA_OPCODE, uuid);
 
-        client.sendEvent("display", instruction.toString());
+        client.sendEvent(instruction.toString());
     }
 }
 

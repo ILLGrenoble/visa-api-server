@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.listeners;
+package eu.ill.visa.vdi.gateway.subscribers;
 
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
@@ -7,12 +7,12 @@ import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 
-public class GuacamoleClientDisplayListener extends ClientDisplayListener<String> {
+public class GuacamoleRemoteDesktopEventSubscriber extends RemoteDesktopEventSubscriber<String> {
 
-    public GuacamoleClientDisplayListener(final DesktopSessionService desktopSessionService,
-                                          final InstanceService instanceService,
-                                          final InstanceSessionService instanceSessionService,
-                                          final InstanceActivityService instanceActivityService) {
+    public GuacamoleRemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
+                                                 final InstanceService instanceService,
+                                                 final InstanceSessionService instanceSessionService,
+                                                 final InstanceActivityService instanceActivityService) {
         super(desktopSessionService, instanceService, instanceSessionService, instanceActivityService);
     }
 
@@ -36,5 +36,4 @@ public class GuacamoleClientDisplayListener extends ClientDisplayListener<String
     protected void writeData(ConnectionThread connectionThread, String data) {
         connectionThread.writeCharData(data.toCharArray());
     }
-
 }

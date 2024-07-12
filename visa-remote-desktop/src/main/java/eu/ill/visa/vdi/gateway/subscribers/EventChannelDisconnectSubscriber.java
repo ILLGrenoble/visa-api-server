@@ -2,17 +2,17 @@ package eu.ill.visa.vdi.gateway.subscribers;
 
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import eu.ill.visa.vdi.gateway.dispatcher.ClientDisconnectSubscriber;
+import eu.ill.visa.vdi.gateway.dispatcher.SocketDisconnectSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientEventsDisconnectSubscriber implements ClientDisconnectSubscriber {
+public class EventChannelDisconnectSubscriber implements SocketDisconnectSubscriber {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientEventsDisconnectSubscriber.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventChannelDisconnectSubscriber.class);
 
     private final DesktopSessionService desktopSessionService;
 
-    public ClientEventsDisconnectSubscriber(final DesktopSessionService desktopSessionService) {
+    public EventChannelDisconnectSubscriber(final DesktopSessionService desktopSessionService) {
         this.desktopSessionService = desktopSessionService;
     }
 

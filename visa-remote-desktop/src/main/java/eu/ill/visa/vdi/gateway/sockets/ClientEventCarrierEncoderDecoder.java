@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway;
+package eu.ill.visa.vdi.gateway.sockets;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
