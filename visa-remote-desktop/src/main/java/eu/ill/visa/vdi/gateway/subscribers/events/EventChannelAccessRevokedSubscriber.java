@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.subscribers;
+package eu.ill.visa.vdi.gateway.subscribers.events;
 
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.SocketClient;

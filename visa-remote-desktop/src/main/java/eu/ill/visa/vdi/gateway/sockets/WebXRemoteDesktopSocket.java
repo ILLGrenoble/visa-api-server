@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.gateway.sockets;
 
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import eu.ill.visa.vdi.gateway.subscribers.WebXRemoteDesktopEventSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.display.WebXRemoteDesktopEventSubscriber;
 import jakarta.inject.Singleton;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;

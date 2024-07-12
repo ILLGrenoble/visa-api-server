@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.subscribers;
+package eu.ill.visa.vdi.gateway.subscribers.events;
 
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;

@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.subscribers;
+package eu.ill.visa.vdi.gateway.subscribers.display;
 
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
