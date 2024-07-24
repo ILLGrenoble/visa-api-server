@@ -6,14 +6,15 @@ import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.persistence.repositories.SecurityGroupRepository;
+import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,16 +26,25 @@ public class SecurityGroupService {
     private static final Logger logger = LoggerFactory.getLogger(SecurityGroupService.class);
 
     private final SecurityGroupRepository repository;
-    private final SecurityGroupServiceClientConfiguration configuration;
+    private final SecurityGroupServiceClientConfiguration securityGroupServiceClientConfiguration;
 
-    @RestClient
-    SecurityGroupServiceClient securityGroupServiceClient;
+    private final SecurityGroupServiceClient securityGroupServiceClient;
 
     @Inject
     public SecurityGroupService(final SecurityGroupRepository repository,
-                                final SecurityGroupServiceClientConfiguration configuration) {
+                                final SecurityGroupServiceClientConfiguration securityGroupServiceClientConfiguration) {
         this.repository = repository;
-        this.configuration = configuration;
+        this.securityGroupServiceClientConfiguration = securityGroupServiceClientConfiguration;
+
+        if (this.securityGroupServiceClientConfiguration.enabled() && this.securityGroupServiceClientConfiguration.url().isPresent()) {
+            this.securityGroupServiceClient = QuarkusRestClientBuilder.newBuilder()
+                .baseUri(URI.create(securityGroupServiceClientConfiguration.url().get()))
+                .build(SecurityGroupServiceClient.class);
+
+        } else {
+            this.securityGroupServiceClient = null;
+        }
+
     }
 
     public SecurityGroup getById(Long id) {
@@ -101,9 +111,9 @@ public class SecurityGroupService {
     private List<String> getCustomSecurityGroups(final Instance instance) {
         List<String> securityGroupNames = new ArrayList<>();
 
-        if (this.configuration.enabled() && this.configuration.url().isPresent()) {
+        if (this.securityGroupServiceClient != null) {
             try {
-                logger.info("Requesting security groups for instance {} from {} ...", instance.getId(), this.configuration.url().get());
+                logger.info("Requesting security groups for instance {} from {} ...", instance.getId(), this.securityGroupServiceClientConfiguration.url().get());
                 List<SecurityGroup> securityGroups = this.securityGroupServiceClient.getSecurityGroups(instance);
                 securityGroupNames = securityGroups.stream().map(SecurityGroup::getName).toList();
                 logger.info("... got security groups [{}] for instance {}", String.join(", ", securityGroupNames), instance.getId());
