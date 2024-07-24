@@ -81,8 +81,6 @@ public class RemoteDesktopServer {
         // Set up event channel
         this.clientEventsGateway.addConnectSubscriber(new EventChannelConnectSubscriber(this.desktopConnectionService, this.instanceSessionService, this.authenticator));
         this.clientEventsGateway.addDisconnectSubscriber(new EventChannelDisconnectSubscriber(this.desktopConnectionService));
-        this.clientEventsGateway.subscribe("thumbnail", String.class)
-            .next(new EventChannelThumbnailSubscriber(this.desktopConnectionService, this.instanceService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class)
             .next(new EventChannelAccessRequestResponseSubscriber(this.desktopAccessService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class)
