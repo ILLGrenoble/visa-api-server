@@ -1,6 +1,6 @@
-package eu.ill.visa.vdi.domain.exceptions;
+package eu.ill.visa.business;
 
-public class InvalidTokenException extends RemoteDesktopException {
+public class InvalidTokenException extends Exception {
     public InvalidTokenException() {
     }
 

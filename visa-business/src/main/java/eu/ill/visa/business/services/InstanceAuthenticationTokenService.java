@@ -1,5 +1,6 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.business.InvalidTokenException;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.core.entity.User;
@@ -48,5 +49,26 @@ public class InstanceAuthenticationTokenService {
 
     public void delete(InstanceAuthenticationToken InstanceAuthenticationToken) {
         this.repository.delete(InstanceAuthenticationToken);
+    }
+
+    public synchronized InstanceAuthenticationToken authenticate(final String token) throws InvalidTokenException {
+        if (token == null) {
+            throw new InvalidTokenException("Could not find or session ticket is invalid");
+        }
+
+        final InstanceAuthenticationToken authenticationToken = this.getByToken(token);
+
+        if (authenticationToken == null) {
+            throw new InvalidTokenException("Authentication session ticket not found");
+        }
+
+        if (authenticationToken.isExpired(10)) {
+            throw new InvalidTokenException("Authentication session ticket has expired");
+        }
+
+        // Delete the authentication token to ensure it isn't reused
+        this.delete(authenticationToken);
+
+        return authenticationToken;
     }
 }

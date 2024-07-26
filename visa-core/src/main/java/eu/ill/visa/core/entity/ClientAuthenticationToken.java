@@ -7,18 +7,17 @@ import java.util.Date;
 
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "instanceAuthenticationToken.getByToken", query = """
-            SELECT i FROM InstanceAuthenticationToken i
-            WHERE i.token = :token
-            AND i.instance.deletedAt IS NULL
+    @NamedQuery(name = "clientAuthenticationToken.getByTokenAndClientId", query = """
+            SELECT c FROM ClientAuthenticationToken c
+            WHERE c.token = :token
+            AND c.clientId = :clientId
     """),
-    @NamedQuery(name = "instanceAuthenticationToken.getAll", query = """
-            SELECT i FROM InstanceAuthenticationToken i
-            WHERE i.instance.deletedAt IS NULL
+    @NamedQuery(name = "clientAuthenticationToken.getAll", query = """
+            SELECT c FROM InstanceAuthenticationToken c
     """),
 })
-@Table(name = "instance_authentication_token")
-public class InstanceAuthenticationToken extends Timestampable {
+@Table(name = "client_authentication_token")
+public class ClientAuthenticationToken extends Timestampable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,23 +27,22 @@ public class InstanceAuthenticationToken extends Timestampable {
     @Column(name = "token", length = 250, nullable = false)
     private String token;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = false)
     private User user;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
-    private Instance instance;
+    @Column(name = "client_id", length = 250, nullable = false)
+    private String clientId;
 
-    public InstanceAuthenticationToken() {
+    public ClientAuthenticationToken() {
 
     }
 
-    private InstanceAuthenticationToken(Builder builder) {
+    private ClientAuthenticationToken(Builder builder) {
         this.id = builder.id;
         this.token = builder.token;
         this.user = builder.user;
-        this.instance = builder.instance;
+        this.clientId = builder.clientId;
     }
 
     public static Builder newBuilder() {
@@ -84,30 +82,20 @@ public class InstanceAuthenticationToken extends Timestampable {
         this.user = user;
     }
 
-    public Instance getInstance() {
-        return instance;
-    }
-
-    public void setInstance(Instance instance) {
-        this.instance = instance;
-    }
-
-    public InstanceAuthenticationToken lazyLoadInit() {
-        this.instance.lazyLoadInit();
-        this.user.lazyLoadInit();
-        return this;
+    public String getClientId() {
+        return clientId;
     }
 
     public static final class Builder {
         private Long   id;
         private String token;
         private User   user;
-        private Instance instance;
+        private String clientId;
         private Builder() {
         }
 
-        public InstanceAuthenticationToken build() {
-            return new InstanceAuthenticationToken(this);
+        public ClientAuthenticationToken build() {
+            return new ClientAuthenticationToken(this);
         }
 
         public Builder id(Long id) {
@@ -125,8 +113,8 @@ public class InstanceAuthenticationToken extends Timestampable {
             return this;
         }
 
-        public Builder instance(Instance instance) {
-            this.instance = instance;
+        public Builder clientId(String clientId) {
+            this.clientId = clientId;
             return this;
         }
     }

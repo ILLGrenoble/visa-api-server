@@ -1,11 +1,11 @@
 package eu.ill.visa.vdi;
 
 import eu.ill.visa.business.services.InstanceActivityService;
+import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
 import eu.ill.visa.vdi.domain.models.SessionEvent;
 import eu.ill.visa.vdi.gateway.dispatcher.ClientEventsGateway;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
@@ -16,7 +16,10 @@ import eu.ill.visa.vdi.gateway.subscribers.display.GuacamoleRemoteDesktopEventSu
 import eu.ill.visa.vdi.gateway.subscribers.display.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.gateway.subscribers.display.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.gateway.subscribers.display.WebXRemoteDesktopEventSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.events.*;
+import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelAccessRequestResponseSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelAccessRevokedSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelConnectSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelDisconnectSubscriber;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,7 +33,7 @@ public class RemoteDesktopServer {
 
     private final DesktopSessionService desktopConnectionService;
     private final InstanceService instanceService;
-    private final TokenAuthenticatorService authenticator;
+    private final InstanceAuthenticationTokenService authenticator;
     private final InstanceSessionService instanceSessionService;
     private final InstanceActivityService instanceActivityService;
     private final DesktopAccessService desktopAccessService;
@@ -43,7 +46,7 @@ public class RemoteDesktopServer {
     public RemoteDesktopServer(final InstanceSessionService instanceSessionService,
                                final DesktopSessionService desktopConnectionService,
                                final InstanceService instanceService,
-                               final TokenAuthenticatorService authenticator,
+                               final InstanceAuthenticationTokenService authenticator,
                                final DesktopAccessService desktopAccessService,
                                final VirtualDesktopConfiguration configuration,
                                final InstanceActivityService instanceActivityService,

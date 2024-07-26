@@ -1,13 +1,13 @@
 package eu.ill.visa.vdi.gateway.subscribers.events;
 
+import eu.ill.visa.business.InvalidTokenException;
+import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.vdi.business.services.TokenAuthenticatorService;
-import eu.ill.visa.vdi.domain.exceptions.InvalidTokenException;
 import eu.ill.visa.vdi.domain.models.*;
 import eu.ill.visa.vdi.gateway.dispatcher.SocketConnectSubscriber;
 import eu.ill.visa.vdi.gateway.events.ClientEventCarrier;
@@ -26,11 +26,11 @@ public class EventChannelConnectSubscriber implements SocketConnectSubscriber {
 
     private final DesktopSessionService desktopSessionService;
     private final InstanceSessionService instanceSessionService;
-    private final TokenAuthenticatorService authenticator;
+    private final InstanceAuthenticationTokenService authenticator;
 
     public EventChannelConnectSubscriber(final DesktopSessionService desktopSessionService,
                                          final InstanceSessionService instanceSessionService,
-                                         final TokenAuthenticatorService authenticator) {
+                                         final InstanceAuthenticationTokenService authenticator) {
         this.desktopSessionService = desktopSessionService;
         this.instanceSessionService = instanceSessionService;
         this.authenticator = authenticator;

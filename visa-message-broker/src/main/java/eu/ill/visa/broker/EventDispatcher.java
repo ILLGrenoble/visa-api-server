@@ -1,9 +1,11 @@
 package eu.ill.visa.broker;
 
-import eu.ill.visa.broker.domain.models.BroadcastEventMessage;
-import eu.ill.visa.broker.domain.models.ClientEventMessage;
-import eu.ill.visa.broker.domain.models.EventChannelSubscriber;
-import eu.ill.visa.broker.domain.models.UserEventMessage;
+import eu.ill.visa.broker.domain.messages.BroadcastEventMessage;
+import eu.ill.visa.broker.domain.messages.ClientEventCarrierMessage;
+import eu.ill.visa.broker.domain.messages.EventForClientMessage;
+import eu.ill.visa.broker.domain.messages.EventForUserMessage;
+import eu.ill.visa.broker.domain.models.*;
+import eu.ill.visa.broker.gateway.ClientEventsGateway;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,52 +18,66 @@ import java.util.List;
 public class EventDispatcher {
 
     private final MessageBroker messageBroker;
+    private final ClientEventsGateway clientEventsGateway;
 
-    private final List<EventChannelSubscriber> subscribers = new ArrayList<>();
+    private final List<EventChannelSubscription> subscriptions = new ArrayList<>();
 
     @Inject
-    public EventDispatcher(final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance) {
+    public EventDispatcher(final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
+                           final ClientEventsGateway clientEventsGateway) {
         this.messageBroker = messageBrokerInstance.get();
+        this.clientEventsGateway = clientEventsGateway;
 
-        this.messageBroker.subscribe(UserEventMessage.class).next(this::onUserEvent);
-        this.messageBroker.subscribe(ClientEventMessage.class).next(this::onClientEvent);
+        this.messageBroker.subscribe(EventForUserMessage.class).next(this::onEventForUser);
+        this.messageBroker.subscribe(EventForClientMessage.class).next(this::onEventForClient);
         this.messageBroker.subscribe(BroadcastEventMessage.class).next(this::onBroadcastEvent);
+        this.messageBroker.subscribe(ClientEventCarrierMessage.class).next(this::onEventReceivedFromClient);
     }
 
-    public void subscribe(final EventChannelSubscriber subscriber) {
-        subscribers.add(subscriber);
+    public EventChannelSubscription subscribe(final String clientId, final String userId, final EventHandler eventHandler) {
+        final EventChannelSubscription subscription = new EventChannelSubscription(clientId, userId, eventHandler);
+        this.subscriptions.add(subscription);
+        return subscription;
     }
 
-    public void unsubscribe(final EventChannelSubscriber subscriber) {
-        subscribers.remove(subscriber);
+    public void unsubscribe(final EventChannelSubscription subscription) {
+        this.subscriptions.remove(subscription);
     }
 
-    public void sendUserEvent(final String userId, Object event) {
-        this.messageBroker.broadcast(new UserEventMessage(userId, event));
+    public void forwardEventFromClient(final String clientId, final ClientEventCarrier clientEventCarrier) {
+        this.messageBroker.broadcast(new ClientEventCarrierMessage(clientId, clientEventCarrier));
     }
 
-    public void sendClientEvent(final String clientId, Object event) {
-        this.messageBroker.broadcast(new ClientEventMessage(clientId, event));
+    public void sendEventToUser(final String userId, Object event) {
+        this.messageBroker.broadcast(new EventForUserMessage(userId, event));
+    }
+
+    public void sendEventToClient(final String clientId, Object event) {
+        this.messageBroker.broadcast(new EventForClientMessage(clientId, event));
     }
 
     public void broadcastEvent(Object event) {
         this.messageBroker.broadcast(new BroadcastEventMessage(event));
     }
 
-    private void onUserEvent(final UserEventMessage message) {
-        this.subscribers.stream()
-            .filter(subscriber -> subscriber.userId().equals(message.userId()))
+    private void onEventForUser(final EventForUserMessage message) {
+        this.subscriptions.stream()
+            .filter(subscription -> subscription.userId().equals(message.userId()))
             .forEach(subscriber -> subscriber.onEvent(message.event()));
     }
 
-    private void onClientEvent(final ClientEventMessage message) {
-        this.subscribers.stream()
-            .filter(subscriber -> subscriber.clientId().equals(message.clientId()))
+    private void onEventForClient(final EventForClientMessage message) {
+        this.subscriptions.stream()
+            .filter(subscription -> subscription.clientId().equals(message.clientId()))
             .forEach(subscriber -> subscriber.onEvent(message.event()));
     }
 
     private void onBroadcastEvent(final BroadcastEventMessage message) {
-        this.subscribers.forEach(subscriber -> subscriber.onEvent(message.event()));
+        this.subscriptions.forEach(subscription -> subscription.onEvent(message.event()));
+    }
+
+    private void onEventReceivedFromClient(final ClientEventCarrierMessage clientEventCarrierMessage) {
+        this.clientEventsGateway.onEvent(clientEventCarrierMessage.clientId(), clientEventCarrierMessage.event());
     }
 
 }

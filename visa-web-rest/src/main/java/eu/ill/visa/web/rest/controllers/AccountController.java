@@ -1,9 +1,6 @@
 package eu.ill.visa.web.rest.controllers;
 
-import eu.ill.visa.business.services.ExperimentService;
-import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.business.services.InstrumentService;
-import eu.ill.visa.business.services.UserService;
+import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.domain.ExperimentFilter;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
@@ -20,6 +17,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.SecurityContext;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static eu.ill.visa.core.entity.Role.*;
 import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
+import static org.jboss.resteasy.reactive.RestResponse.Status.CREATED;
 
 @Path("/account")
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,18 +39,21 @@ public class AccountController extends AbstractController {
     private final ExperimentService experimentService;
     private final InstanceService instanceService;
     private final ClientConfiguration clientConfiguration;
+    private final ClientAuthenticationTokenService clientAuthenticationTokenService;
 
     @Inject
     public AccountController(final UserService userService,
                              final InstrumentService instrumentService,
                              final InstanceService instanceService,
                              final ExperimentService experimentService,
-                             final ClientConfiguration clientConfiguration) {
+                             final ClientConfiguration clientConfiguration,
+                             final ClientAuthenticationTokenService clientAuthenticationTokenService) {
         this.userService = userService;
         this.instrumentService = instrumentService;
         this.instanceService = instanceService;
         this.experimentService = experimentService;
         this.clientConfiguration = clientConfiguration;
+        this.clientAuthenticationTokenService = clientAuthenticationTokenService;
     }
 
     @GET
@@ -66,6 +68,16 @@ public class AccountController extends AbstractController {
         }
 
         return createResponse(userDto);
+    }
+
+    @POST
+    @Path("/clients/{clientId}/auth/token")
+    public RestResponse<MetaResponse<ClientAuthenticationTokenDto>> createClientAuthenticationTicket(@Context final SecurityContext securityContext, @PathParam("clientId") String clientId) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        final ClientAuthenticationToken token = clientAuthenticationTokenService.create(user, clientId);
+
+        return createResponse(new ClientAuthenticationTokenDto(token), CREATED);
     }
 
     @GET
