@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.business.services;
 
+import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.InstanceExpirationService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
@@ -10,8 +11,7 @@ import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
-import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
-import eu.ill.visa.vdi.brokers.messages.*;
+import eu.ill.visa.vdi.broker.*;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
@@ -46,7 +46,7 @@ public class DesktopSessionService {
     private final InstanceExpirationService instanceExpirationService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
 
-    private final RemoteDesktopBroker remoteDesktopBroker;
+    private final MessageBroker messageBroker;
 
     private final List<PendingDesktopSessionMember> pendingDesktopSessionMembers = new ArrayList<>();
     private final List<DesktopSession> desktopSessions = new ArrayList<>();
@@ -59,7 +59,7 @@ public class DesktopSessionService {
                                  final WebXDesktopService webXDesktopService,
                                  final InstanceExpirationService instanceExpirationService,
                                  final VirtualDesktopConfiguration virtualDesktopConfiguration,
-                                 final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
+                                 final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.userService = userService;
@@ -68,25 +68,25 @@ public class DesktopSessionService {
         this.instanceExpirationService = instanceExpirationService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
 
-        this.remoteDesktopBroker = remoteDesktopBrokerInstance.get();
+        this.messageBroker = messageBrokerInstance.get();
 
-        this.remoteDesktopBroker.subscribe(UserConnectedMessage.class)
+        this.messageBroker.subscribe(UserConnectedMessage.class)
             .next((message) -> this.onUserConnected(message.sessionId(), message.desktopSessionMemberId(), message.user()));
-        this.remoteDesktopBroker.subscribe(UserDisconnectedMessage.class)
+        this.messageBroker.subscribe(UserDisconnectedMessage.class)
             .next((message) -> this.onUserDisconnected(message.sessionId(), message.desktopSessionMemberId(), message.user()));
-        this.remoteDesktopBroker.subscribe(AccessRevokedMessage.class)
+        this.messageBroker.subscribe(AccessRevokedMessage.class)
             .next((message) -> this.onAccessRevoked(message.sessionId(), message.userId()));
-        this.remoteDesktopBroker.subscribe(SessionClosedMessage.class)
+        this.messageBroker.subscribe(SessionClosedMessage.class)
             .next((message) -> this.onSessionClosed(message.sessionId()));
-        this.remoteDesktopBroker.subscribe(SessionLockedMessage.class)
+        this.messageBroker.subscribe(SessionLockedMessage.class)
             .next((message) -> this.onSessionLocked(message.sessionId(), message.user()));
-        this.remoteDesktopBroker.subscribe(SessionUnlockedMessage.class)
+        this.messageBroker.subscribe(SessionUnlockedMessage.class)
             .next((message) -> this.onSessionUnlocked(message.sessionId()));
     }
 
     @Shutdown
     public void shutdown() {
-        this.remoteDesktopBroker.shutdown();
+        this.messageBroker.shutdown();
     }
 
     public synchronized DesktopSessionMember createDesktopSessionMember(final SocketClient client, final PendingDesktopSessionMember pendingDesktopSessionMember) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
@@ -192,30 +192,30 @@ public class DesktopSessionService {
     }
 
     public void connectUser(final Long sessionId, final String desktopSessionMemberId, final ConnectedUser user) {
-        this.remoteDesktopBroker.broadcast(new UserConnectedMessage(sessionId, desktopSessionMemberId, user));
+        this.messageBroker.broadcast(new UserConnectedMessage(sessionId, desktopSessionMemberId, user));
     }
 
     public void disconnectUser(final Long sessionId, final String desktopSessionMemberId, final ConnectedUser user) {
-        this.remoteDesktopBroker.broadcast(new UserDisconnectedMessage(sessionId, desktopSessionMemberId, user));
+        this.messageBroker.broadcast(new UserDisconnectedMessage(sessionId, desktopSessionMemberId, user));
     }
 
     public void revokeUserAccess(final DesktopSessionMember ownerSessionMember, final String userId) {
         // Verify that we have a connection and that the user is the owner
         if (ownerSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)) {
-            this.remoteDesktopBroker.broadcast(new AccessRevokedMessage(ownerSessionMember.getSession().getSessionId(), userId));
+            this.messageBroker.broadcast(new AccessRevokedMessage(ownerSessionMember.getSession().getSessionId(), userId));
         }
     }
 
     public void closeSession(final Long sessionId) {
-        this.remoteDesktopBroker.broadcast(new SessionClosedMessage(sessionId));
+        this.messageBroker.broadcast(new SessionClosedMessage(sessionId));
     }
 
     public void lockSession(final Long sessionId, final ConnectedUser user) {
-        this.remoteDesktopBroker.broadcast(new SessionLockedMessage(sessionId, user));
+        this.messageBroker.broadcast(new SessionLockedMessage(sessionId, user));
     }
 
     public void unlockSession(final Long sessionId) {
-        this.remoteDesktopBroker.broadcast(new SessionUnlockedMessage(sessionId));
+        this.messageBroker.broadcast(new SessionUnlockedMessage(sessionId));
     }
 
     public synchronized Optional<DesktopSession> findDesktopSession(final Long sessionId) {

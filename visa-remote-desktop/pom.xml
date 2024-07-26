@@ -13,7 +13,6 @@
 
     <properties>
         <guacamole.version>1.5.5</guacamole.version>
-        <netty.socketio.version>2.0.9</netty.socketio.version>
         <webx-relay.version>0.1.0</webx-relay.version>
     </properties>
 
@@ -23,10 +22,10 @@
             <artifactId>visa-business</artifactId>
             <version>3.0.0</version>
         </dependency>
-
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-redis-client</artifactId>
+            <groupId>eu.ill.visa</groupId>
+            <artifactId>visa-message-broker</artifactId>
+            <version>3.0.0</version>
         </dependency>
 
         <dependency>

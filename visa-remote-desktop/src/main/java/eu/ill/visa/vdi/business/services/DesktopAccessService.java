@@ -1,14 +1,14 @@
 package eu.ill.visa.vdi.business.services;
 
+import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
-import eu.ill.visa.vdi.brokers.RemoteDesktopBroker;
-import eu.ill.visa.vdi.brokers.messages.AccessRequestCancellationMessage;
-import eu.ill.visa.vdi.brokers.messages.AccessRequestMessage;
-import eu.ill.visa.vdi.brokers.messages.AccessRequestResponseMessage;
+import eu.ill.visa.vdi.broker.AccessRequestCancellationMessage;
+import eu.ill.visa.vdi.broker.AccessRequestMessage;
+import eu.ill.visa.vdi.broker.AccessRequestResponseMessage;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
@@ -38,7 +38,7 @@ public class DesktopAccessService {
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
 
-    private final RemoteDesktopBroker remoteDesktopBroker;
+    private final MessageBroker messageBroker;
 
     private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
 
@@ -48,17 +48,17 @@ public class DesktopAccessService {
     public DesktopAccessService(final DesktopSessionService desktopSessionService,
                                 final InstanceService instanceService,
                                 final InstanceSessionService instanceSessionService,
-                                final jakarta.enterprise.inject.Instance<RemoteDesktopBroker> remoteDesktopBrokerInstance) {
+                                final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance) {
         this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
-        this.remoteDesktopBroker = remoteDesktopBrokerInstance.get();
+        this.messageBroker = messageBrokerInstance.get();
 
-        this.remoteDesktopBroker.subscribe(AccessRequestMessage.class)
+        this.messageBroker.subscribe(AccessRequestMessage.class)
             .next((message) -> this.onAccessRequested(message.sessionId(), message.user(), message.requesterConnectionId()));
-        this.remoteDesktopBroker.subscribe(AccessRequestCancellationMessage.class)
+        this.messageBroker.subscribe(AccessRequestCancellationMessage.class)
             .next((message) -> this.onAccessRequestCancelled(message.sessionId(), message.user(), message.requesterConnectionId()));
-        this.remoteDesktopBroker.subscribe(AccessRequestResponseMessage.class)
+        this.messageBroker.subscribe(AccessRequestResponseMessage.class)
             .next((message) -> this.onAccessRequestResponse(message.sessionId(), message.requesterConnectionId(), message.role()));
 
         Thread keepAliveThread = new Thread(() -> {
@@ -84,7 +84,7 @@ public class DesktopAccessService {
 
         pendingDesktopSessionMember.eventChannel().sendEvent(SessionEvent.ACCESS_PENDING_EVENT);
 
-        this.remoteDesktopBroker.broadcast(new AccessRequestMessage(sessionId, pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().token()));
+        this.messageBroker.broadcast(new AccessRequestMessage(sessionId, pendingDesktopSessionMember.connectedUser(), desktopCandidate.client().token()));
     }
 
     public void cancelAccessRequest(final SocketClient client) {
@@ -92,13 +92,13 @@ public class DesktopAccessService {
         this.removeCandidate(client.token()).ifPresent(desktopCandidate -> {
             // A desktop request was in progress
             final PendingDesktopSessionMember pendingDesktopSessionMember = desktopCandidate.pendingDesktopSessionMember();
-            this.remoteDesktopBroker.broadcast(new AccessRequestCancellationMessage(desktopCandidate.sessionId(), pendingDesktopSessionMember.connectedUser(), client.token()));
+            this.messageBroker.broadcast(new AccessRequestCancellationMessage(desktopCandidate.sessionId(), pendingDesktopSessionMember.connectedUser(), client.token()));
         });
     }
 
     public void respondToAccessRequest(final Long sessionId, final String requesterConnectionId, final InstanceMemberRole role) {
         // Forward reply to broker
-        this.remoteDesktopBroker.broadcast(new AccessRequestResponseMessage(sessionId, requesterConnectionId, role));
+        this.messageBroker.broadcast(new AccessRequestResponseMessage(sessionId, requesterConnectionId, role));
     }
 
     private void onAccessRequested(final Long sessionId, final ConnectedUser user, final String requesterConnectionId) {

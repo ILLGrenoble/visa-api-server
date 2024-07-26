@@ -11,6 +11,7 @@
         <module>visa-core</module>
         <module>visa-persistence</module>
         <module>visa-cloud</module>
+        <module>visa-message-broker</module>
         <module>visa-business</module>
         <module>visa-scheduler</module>
         <module>visa-security</module>

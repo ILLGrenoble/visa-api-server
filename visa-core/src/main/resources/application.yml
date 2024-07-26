@@ -119,12 +119,14 @@ business:
     url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
     authToken: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_AUTH_TOKEN}
 
-vdi:
-  enabled: ${VISA_VDI_ENABLED:true}
+broker:
   redisEnabled: ${VISA_VDI_REDIS_ENABLED:false}
   redisURL: ${VISA_VDI_REDIS_URL}
   redisPassword: ${VISA_VDI_REDIS_PASSWORD}
   redisDatabase: ${VISA_VDI_REDIS_DATABASE:0}
+
+vdi:
+  enabled: ${VISA_VDI_ENABLED:true}
   ownerDisconnectionPolicy: ${VISA_VDI_OWNER_DISCONNECTION_POLICY:DISCONNECT_ALL}
   cleanupSessionsOnStartup: ${VISA_VDI_CLEANUP_SESSIONS_ON_STARTUP:false}
   protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}
