@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.business.services;
 
+import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.InstanceExpirationService;
 import eu.ill.visa.business.services.InstanceService;
@@ -45,10 +46,10 @@ public class DesktopSessionService {
     private final WebXDesktopService webXDesktopService;
     private final InstanceExpirationService instanceExpirationService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
+    private final EventDispatcher eventDispatcher;
 
     private final MessageBroker messageBroker;
 
-    private final List<PendingDesktopSessionMember> pendingDesktopSessionMembers = new ArrayList<>();
     private final List<DesktopSession> desktopSessions = new ArrayList<>();
 
     @Inject
@@ -59,7 +60,8 @@ public class DesktopSessionService {
                                  final WebXDesktopService webXDesktopService,
                                  final InstanceExpirationService instanceExpirationService,
                                  final VirtualDesktopConfiguration virtualDesktopConfiguration,
-                                 final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance) {
+                                 final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
+                                 final EventDispatcher eventDispatcher) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.userService = userService;
@@ -67,13 +69,13 @@ public class DesktopSessionService {
         this.webXDesktopService = webXDesktopService;
         this.instanceExpirationService = instanceExpirationService;
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
-
         this.messageBroker = messageBrokerInstance.get();
+        this.eventDispatcher = eventDispatcher;
 
         this.messageBroker.subscribe(UserConnectedMessage.class)
-            .next((message) -> this.onUserConnected(message.sessionId(), message.desktopSessionMemberId(), message.user()));
+            .next((message) -> this.onUserConnected(message.sessionId(), message.clientId(), message.user()));
         this.messageBroker.subscribe(UserDisconnectedMessage.class)
-            .next((message) -> this.onUserDisconnected(message.sessionId(), message.desktopSessionMemberId(), message.user()));
+            .next((message) -> this.onUserDisconnected(message.sessionId(), message.clientId(), message.user()));
         this.messageBroker.subscribe(AccessRevokedMessage.class)
             .next((message) -> this.onAccessRevoked(message.sessionId(), message.userId()));
         this.messageBroker.subscribe(SessionClosedMessage.class)
@@ -89,25 +91,15 @@ public class DesktopSessionService {
         this.messageBroker.shutdown();
     }
 
-    public synchronized DesktopSessionMember createDesktopSessionMember(final SocketClient client, final PendingDesktopSessionMember pendingDesktopSessionMember) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
-        final ConnectedUser user = pendingDesktopSessionMember.connectedUser();
-        final Long instanceId = pendingDesktopSessionMember.instanceId();
-        final Instance instance = this.instanceService.getFullById(instanceId);
-        if (instance == null) {
-            throw new ConnectionException(String.format("Instance %d no longer exists for connection", instanceId));
-        }
-
-        final EventChannel eventChannel = pendingDesktopSessionMember.eventChannel();
-        final String token = pendingDesktopSessionMember.token();
-        final String protocol = pendingDesktopSessionMember.protocol();
+    public synchronized DesktopSessionMember createDesktopSessionMember(final SocketClient client, final ConnectedUser user, final Instance instance) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
 
         final InstanceMemberRole role = user.getRole();
         if (role == InstanceMemberRole.NONE) {
-            throw new UnauthorizedException("User " + user.getFullName() + " is unauthorised to access the instance " + instanceId);
+            throw new UnauthorizedException("User " + user.getFullName() + " is unauthorised to access the instance " + instance.getId());
         }
 
         // Create RemoteDesktopConnection (guacamole or webx)
-        boolean isWebX = protocol != null && protocol.equals(DesktopService.WEBX_PROTOCOL);
+        boolean isWebX = client.protocol().equals(DesktopService.WEBX_PROTOCOL);
         final RemoteDesktopConnection remoteDesktopConnection;
         if (isWebX) {
             logger.info("User {} creating WebX desktop connection to instance {}", (user.getFullName() + " (" + role.toString() + ")"), instance.getId());
@@ -118,11 +110,11 @@ public class DesktopSessionService {
         }
 
         // Get or create a new DesktopSession: use the ID of the InstanceSession
-        final InstanceSession instanceSession = this.instanceSessionService.getByInstanceAndProtocol(instance, protocol);
-        DesktopSession desktopSession = this.getOrCreateDesktopSession(instanceSession.getId(), instance.getId(), protocol);
+        final InstanceSession instanceSession = this.instanceSessionService.getByInstanceAndProtocol(instance, client.protocol());
+        DesktopSession desktopSession = this.getOrCreateDesktopSession(instanceSession.getId(), instance.getId(), client.protocol());
 
         // Create session member
-        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(token, user, eventChannel, remoteDesktopConnection, desktopSession);
+        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession);
         desktopSession.addMember(desktopSessionMember);
 
         boolean unlockSession = virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
@@ -130,7 +122,7 @@ public class DesktopSessionService {
             && !this.isOwnerConnected(instanceSession.getId());
 
         // Update the connected clients of the session
-        this.instanceSessionService.addInstanceSessionMember(instanceSession, desktopSessionMember.getToken(), this.userService.getById(user.getId()), role.toString());
+        this.instanceSessionService.addInstanceSessionMember(instanceSession, desktopSessionMember.clientId(), this.userService.getById(user.getId()), role.toString());
 
         // Remove instance from instance_expiration table if it is there due to inactivity
         this.instanceExpirationService.onInstanceActivated(instanceSession.getInstance());
@@ -140,28 +132,28 @@ public class DesktopSessionService {
             this.unlockSession(desktopSession.getSessionId());
 
         } else {
-            this.connectUser(desktopSession.getSessionId(), desktopSessionMember.getToken(), user);
+            this.connectUser(desktopSession.getSessionId(), desktopSessionMember.clientId(), user);
         }
 
         return desktopSessionMember;
     }
 
     public synchronized void onDesktopMemberDisconnect(final DesktopSessionMember desktopSessionMember) {
-        desktopSessionMember.getRemoteDesktopConnection().getConnectionThread().closeTunnel();
+        desktopSessionMember.remoteDesktopConnection().getConnectionThread().closeTunnel();
 
-        DesktopSession desktopSession = desktopSessionMember.getSession();
+        DesktopSession desktopSession = desktopSessionMember.session();
         final Long sessionId = desktopSession.getSessionId();
-        InstanceSession session = instanceSessionService.getById(sessionId);
 
         this.removeDesktopSessionMember(desktopSession, desktopSessionMember);
 
+        InstanceSession session = instanceSessionService.getById(sessionId);
         if (session != null) {
             // Remove client/member from instance session
-            instanceSessionService.removeInstanceSessionMember(session, desktopSessionMember.getToken());
+            instanceSessionService.removeInstanceSessionMember(session, desktopSessionMember.clientId());
 
             if (desktopSessionMember.isRole(InstanceMemberRole.OWNER) && !this.isOwnerConnected(sessionId)) {
                 if (this.virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
-                    this.lockSession(sessionId, desktopSessionMember.getConnectedUser());
+                    this.lockSession(sessionId, desktopSessionMember.connectedUser());
 
                 } else {
                     logger.info("There is no owner ar admin connected so all clients will be disconnected");
@@ -170,7 +162,7 @@ public class DesktopSessionService {
 
             } else {
                 // broadcast events for a user disconnected and current users
-                this.disconnectUser(sessionId, desktopSessionMember.getToken(),desktopSessionMember.getConnectedUser());
+                this.disconnectUser(sessionId, desktopSessionMember.clientId(), desktopSessionMember.connectedUser());
             }
 
         } else {
@@ -191,18 +183,19 @@ public class DesktopSessionService {
         return false;
     }
 
-    public void connectUser(final Long sessionId, final String desktopSessionMemberId, final ConnectedUser user) {
-        this.messageBroker.broadcast(new UserConnectedMessage(sessionId, desktopSessionMemberId, user));
+    public void connectUser(final Long sessionId, final String clientId, final ConnectedUser user) {
+        this.messageBroker.broadcast(new UserConnectedMessage(sessionId, clientId, user));
     }
 
-    public void disconnectUser(final Long sessionId, final String desktopSessionMemberId, final ConnectedUser user) {
-        this.messageBroker.broadcast(new UserDisconnectedMessage(sessionId, desktopSessionMemberId, user));
+    public void disconnectUser(final Long sessionId, final String clientId, final ConnectedUser user) {
+        this.messageBroker.broadcast(new UserDisconnectedMessage(sessionId, clientId, user));
     }
 
     public void revokeUserAccess(final DesktopSessionMember ownerSessionMember, final String userId) {
         // Verify that we have a connection and that the user is the owner
-        if (ownerSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER)) {
-            this.messageBroker.broadcast(new AccessRevokedMessage(ownerSessionMember.getSession().getSessionId(), userId));
+        if (ownerSessionMember.connectedUser().getRole().equals(InstanceMemberRole.OWNER)) {
+            // Forward reply to broker once we've verified that the revoke command comes from the owner
+            this.messageBroker.broadcast(new AccessRevokedMessage(ownerSessionMember.session().getSessionId(), userId));
         }
     }
 
@@ -224,57 +217,37 @@ public class DesktopSessionService {
             .findAny();
     }
 
-    public synchronized void addPendingDesktopSessionMember(final PendingDesktopSessionMember pendingDesktopSessionMember) {
-        this.pendingDesktopSessionMembers.add(pendingDesktopSessionMember);
-    }
-
-    public synchronized Optional<PendingDesktopSessionMember> getPendingDesktopSessionMember(final String token) {
-        return this.pendingDesktopSessionMembers.stream()
-            .filter(item -> item.token().equals(token))
-            .findFirst();
-    }
-
-    public synchronized void removePendingDesktopSessionMember(final PendingDesktopSessionMember pendingDesktopSessionMember) {
-        this.pendingDesktopSessionMembers.remove(pendingDesktopSessionMember);
-    }
-
-    public synchronized Optional<DesktopSessionMember> findDesktopSessionMember(final SocketClient client) {
+    public synchronized Optional<DesktopSessionMember> findDesktopSessionMemberByClientId(final String clientId) {
         return this.desktopSessions.stream()
             .flatMap(desktopSession -> desktopSession.getMembers().stream())
-            .filter(desktopSessionMember -> desktopSessionMember.getRemoteDesktopConnection().getClient().equals(client))
+            .filter(desktopSessionMember -> desktopSessionMember.clientId().equals(clientId))
             .findAny();
     }
 
-    public synchronized Optional<DesktopSessionMember> findDesktopSessionMemberByToken(final String token) {
-        return this.desktopSessions.stream()
-            .flatMap(desktopSession -> desktopSession.getMembers().stream())
-            .filter(desktopSessionMember -> desktopSessionMember.getToken().equals(token))
-            .findAny();
-    }
-    private void onUserConnected(final Long sessionId, final String desktopSessionMemberId, final ConnectedUser user) {
+    private void onUserConnected(final Long sessionId, final String clientId, final ConnectedUser user) {
         this.getDesktopSession(sessionId).ifPresent(desktopSession -> {
             final Long instanceId = desktopSession.getInstanceId();
             final String protocol = desktopSession.getProtocol();
             logger.info("User {} connected to instance {} with protocol {}", user, instanceId, protocol);
 
-            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getToken().equals(desktopSessionMemberId))
+            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.clientId().equals(clientId))
                 .forEach(desktopSessionMember -> {
-                    desktopSessionMember.sendEvent(USER_CONNECTED_EVENT, new UserConnectedEvent(user, instanceId));
+                    this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), USER_CONNECTED_EVENT, new UserConnectedEvent(user, instanceId));
                 });
 
             this.sendUsersConnectedEvent(desktopSession);
         });
     }
 
-    private void onUserDisconnected(final Long sessionId, final String desktopSessionMemberId, final ConnectedUser user) {
+    private void onUserDisconnected(final Long sessionId, final String clientId, final ConnectedUser user) {
         this.getDesktopSession(sessionId).ifPresent(desktopSession -> {
             final Long instanceId = desktopSession.getInstanceId();
             final String protocol = desktopSession.getProtocol();
             logger.info("User {} disconnected from instance {} with protocol {}", user, instanceId, protocol);
 
-            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getToken().equals(desktopSessionMemberId))
+            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.clientId().equals(clientId))
                 .forEach(desktopSessionMember -> {
-                    desktopSessionMember.sendEvent(USER_DISCONNECTED_EVENT, new UserDisconnectedEvent(user, instanceId));
+                    this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), USER_DISCONNECTED_EVENT, new UserDisconnectedEvent(user, instanceId));
                 });
 
             this.sendUsersConnectedEvent(desktopSession);
@@ -286,10 +259,11 @@ public class DesktopSessionService {
             final Long instanceId = desktopSession.getInstanceId();
             logger.info("Access revoked for user with id: {} in instance {}", userId, instanceId);
 
-            desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.getConnectedUser().getId().equals(userId))
+            this.eventDispatcher.sendEventToUser(userId, ACCESS_REVOKED_EVENT);
+
+            desktopSession.filterMembers(desktopSessionMember -> desktopSessionMember.connectedUser().getId().equals(userId))
                 .forEach(desktopSessionMember -> {
-                    logger.info("Revoking access to remote desktop for instance {} with protocol {} for user {} with connection ID {}", instanceId, desktopSession.getProtocol(), desktopSessionMember.getConnectedUser().getFullName(), desktopSessionMember.getToken());
-                    desktopSessionMember.sendEvent(ACCESS_REVOKED_EVENT);
+                    logger.info("Revoking access to remote desktop for instance {} with protocol {} for user {} with client ID {}", instanceId, desktopSession.getProtocol(), desktopSessionMember.connectedUser().getFullName(), desktopSessionMember.clientId());
                     desktopSessionMember.disconnect();
                 });
         });
@@ -299,9 +273,9 @@ public class DesktopSessionService {
         this.getDesktopSession(sessionId).ifPresent(desktopSession -> {
             logger.info("Session closed (owner away) for instance {} with protocol {}: disconnecting all clients", desktopSession.getInstanceId(), desktopSession.getProtocol());
 
-            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
+            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.connectedUser().getRole().equals(InstanceMemberRole.OWNER))
                 .forEach(desktopSessionMember -> {
-                    desktopSessionMember.sendEvent(OWNER_AWAY_EVENT);
+                    this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), ACCESS_REVOKED_EVENT);
                     desktopSessionMember.disconnect();
                 });
         });
@@ -312,21 +286,14 @@ public class DesktopSessionService {
             logger.info("Session locked (owner away) for instance {} with protocol {}: making all clients read-only", desktopSession.getInstanceId(), desktopSession.getProtocol());
             desktopSession.setLocked(true);
 
-            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
+            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.connectedUser().getRole().equals(InstanceMemberRole.OWNER))
                 .forEach(desktopSessionMember -> {
-                    // Check that the events channel is connected: if not connected disconnect the remote desktop
-                    if (desktopSessionMember.isEventChannelOpen()) {
-                        final Instance instance = this.instanceService.getFullById(desktopSession.getInstanceId());
-                        if (desktopSessionMember.getConnectedUser().isRole(InstanceMemberRole.SUPPORT) && instanceSessionService.canConnectWhileOwnerAway(instance, desktopSessionMember.getConnectedUser().getId())) {
-                            desktopSessionMember.sendEvent(USER_DISCONNECTED_EVENT, new UserDisconnectedEvent(user, desktopSession.getInstanceId()));
-
-                        } else {
-                            desktopSessionMember.sendEvent(SESSION_LOCKED_EVENT);
-                        }
+                    final Instance instance = this.instanceService.getFullById(desktopSession.getInstanceId());
+                    if (desktopSessionMember.connectedUser().isRole(InstanceMemberRole.SUPPORT) && instanceSessionService.canConnectWhileOwnerAway(instance, desktopSessionMember.connectedUser().getId())) {
+                        this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), USER_DISCONNECTED_EVENT, new UserDisconnectedEvent(user, desktopSession.getInstanceId()));
 
                     } else {
-                        logger.info("Event channel for Desktop Session Member {} is not open so disconnecting the user", desktopSessionMember.toString());
-                        desktopSessionMember.disconnect();
+                        this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), SESSION_LOCKED_EVENT);
                     }
 
                 });
@@ -340,9 +307,9 @@ public class DesktopSessionService {
             logger.info("Session unlocked (owner back) for instance {} with protocol {}: all clients resume original roles", desktopSession.getInstanceId(), desktopSession.getProtocol());
             desktopSession.setLocked(false);
 
-            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.getConnectedUser().getRole().equals(InstanceMemberRole.OWNER))
+            desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.connectedUser().getRole().equals(InstanceMemberRole.OWNER))
                 .forEach(desktopSessionMember -> {
-                    desktopSessionMember.sendEvent(SESSION_UNLOCKED_EVENT);
+                    this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), SESSION_UNLOCKED_EVENT);
                 });
 
             this.sendUsersConnectedEvent(desktopSession);
@@ -356,7 +323,7 @@ public class DesktopSessionService {
         if (!users.isEmpty()) {
             logger.info("Instance {} with protocol {} has the following users connected: {}", instanceId, protocol, users.stream().map(ConnectedUser::toString).toList());
             desktopSession.getMembers().forEach(desktopSessionMember -> {
-                desktopSessionMember.sendEvent(USERS_CONNECTED_EVENT, new UsersConnectedEvent(users, instanceId));
+                this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), USERS_CONNECTED_EVENT, new UsersConnectedEvent(users, instanceId));
             });
         }
     }

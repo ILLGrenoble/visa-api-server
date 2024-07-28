@@ -62,6 +62,8 @@ public class GatewaySocket {
             final ClientAuthenticationToken clientAuthenticationToken = authenticator.authenticate(token, clientId);
             final User user = clientAuthenticationToken.getUser();
 
+            logger.info("Gateway websocket connected for user {} (id = {}) with client Id {}", user.getFullName(), user.getId(), clientId);
+
             final GatewayClient gatewayClient = new GatewayClient(session, token, clientId);
 
             final EventChannelSubscription subscription = this.eventDispatcher.subscribe(clientId, user.getId(), gatewayClient::sendEvent);
@@ -82,12 +84,13 @@ public class GatewaySocket {
         if (subscription != null) {
             this.subscriptions.remove(subscription);
             this.eventDispatcher.unsubscribe(subscription);
+
+            logger.info("Gateway websocket closed for user with Id {} with client Id {}", subscription.userId(), subscription.clientId());
         }
     }
 
     @OnMessage
     private void onMessage(Session session, @PathParam("token") String token, @PathParam("clientId") String clientId, ClientEventCarrier clientEventCarrier) {
-        // TODO verify that session exists?
         this.eventDispatcher.forwardEventFromClient(clientId, clientEventCarrier);
     }
 

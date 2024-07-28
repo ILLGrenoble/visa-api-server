@@ -16,7 +16,7 @@
         <module>visa-scheduler</module>
         <module>visa-security</module>
         <module>visa-remote-desktop</module>
-        <module>visa-web-events</module>
+        <module>visa-web-gateway</module>
         <module>visa-web-rest</module>
         <module>visa-web-graphql</module>
         <module>visa-app</module>

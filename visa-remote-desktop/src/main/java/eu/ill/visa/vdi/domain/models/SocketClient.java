@@ -7,23 +7,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Objects;
 
-public class SocketClient {
+public record SocketClient(Session session, String clientId, String protocol) {
     private static final Logger logger = LoggerFactory.getLogger(SocketClient.class);
 
-    private final String token;
-    private final Session session;
-
-    public SocketClient(final Session session, final String token) {
-        this.session = session;
-        this.token = token;
-    }
-
-    public String token() {
-        return token;
-    }
-
-    public String getRequestParameter(final String key) {
-        return this.session.getRequestParameterMap().get(key).getFirst();
+    public String getPathParameter(String parameterName) {
+        return this.session.getPathParameters().get(parameterName);
     }
 
     public void sendEvent(Object data) {
@@ -33,7 +21,7 @@ public class SocketClient {
                 if (dataString.length() > 20) {
                     dataString = dataString.substring(0, 20) + "...";
                 }
-                logger.error("Unable to send message {} to client {}: {}", dataString, this.token, result.getException().getMessage());
+                logger.error("Unable to send message {} to client {}: {}", dataString, this.clientId, result.getException().getMessage());
             }
         });
     }
@@ -41,7 +29,7 @@ public class SocketClient {
         try {
             this.session.close();
         } catch (IOException e) {
-            logger.error("Failed to disconnect from WebSocket client {}: {}", this.token, e.getMessage());
+            logger.error("Failed to disconnect from WebSocket client {}: {}", this.clientId, e.getMessage());
         }
     }
 
@@ -55,13 +43,14 @@ public class SocketClient {
         if (o == null || getClass() != o.getClass()) return false;
 
         SocketClient that = (SocketClient) o;
-        return Objects.equals(token, that.token) && Objects.equals(session, that.session);
+        return Objects.equals(session, that.session) && Objects.equals(clientId, that.clientId) && Objects.equals(protocol, that.protocol);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(token);
-        result = 31 * result + Objects.hashCode(session);
+        int result = Objects.hashCode(session);
+        result = 31 * result + Objects.hashCode(clientId);
+        result = 31 * result + Objects.hashCode(protocol);
         return result;
     }
 }

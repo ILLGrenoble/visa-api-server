@@ -1,5 +1,7 @@
 package eu.ill.visa.vdi;
 
+import eu.ill.visa.broker.EventDispatcher;
+import eu.ill.visa.broker.gateway.ClientEventsGateway;
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
 import eu.ill.visa.business.services.InstanceService;
@@ -7,19 +9,16 @@ import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.SessionEvent;
-import eu.ill.visa.vdi.gateway.dispatcher.ClientEventsGateway;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
-import eu.ill.visa.vdi.gateway.sockets.GuacamoleRemoteDesktopSocket;
-import eu.ill.visa.vdi.gateway.sockets.WebXRemoteDesktopSocket;
-import eu.ill.visa.vdi.gateway.subscribers.display.GuacamoleRemoteDesktopEventSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.display.RemoteDesktopConnectSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.display.RemoteDesktopDisconnectSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.display.WebXRemoteDesktopEventSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelAccessRequestResponseSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelAccessRevokedSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelConnectSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.events.EventChannelDisconnectSubscriber;
+import eu.ill.visa.vdi.display.sockets.GuacamoleRemoteDesktopSocket;
+import eu.ill.visa.vdi.display.sockets.WebXRemoteDesktopSocket;
+import eu.ill.visa.vdi.display.subscribers.GuacamoleRemoteDesktopEventSubscriber;
+import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
+import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
+import eu.ill.visa.vdi.display.subscribers.WebXRemoteDesktopEventSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.AccessRequestResponseSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.AccessRevokedSubscriber;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -39,6 +38,7 @@ public class RemoteDesktopServer {
     private final DesktopAccessService desktopAccessService;
     private final VirtualDesktopConfiguration configuration;
     private final ClientEventsGateway clientEventsGateway;
+    private final EventDispatcher eventDispatcher;
     private final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket;
     private final WebXRemoteDesktopSocket webXRemoteDesktopSocket;
 
@@ -51,6 +51,7 @@ public class RemoteDesktopServer {
                                final VirtualDesktopConfiguration configuration,
                                final InstanceActivityService instanceActivityService,
                                final ClientEventsGateway clientEventsGateway,
+                               final EventDispatcher eventDispatcher,
                                final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket,
                                final WebXRemoteDesktopSocket webXRemoteDesktopSocket) {
         this.instanceSessionService = instanceSessionService;
@@ -61,6 +62,7 @@ public class RemoteDesktopServer {
         this.configuration = configuration;
         this.instanceActivityService = instanceActivityService;
         this.clientEventsGateway = clientEventsGateway;
+        this.eventDispatcher = eventDispatcher;
         this.guacamoleRemoteDesktopSocket = guacamoleRemoteDesktopSocket;
         this.webXRemoteDesktopSocket = webXRemoteDesktopSocket;
     }
@@ -82,20 +84,18 @@ public class RemoteDesktopServer {
 
     private void bindSubscribers() {
         // Set up event channel
-        this.clientEventsGateway.addConnectSubscriber(new EventChannelConnectSubscriber(this.desktopConnectionService, this.instanceSessionService, this.authenticator));
-        this.clientEventsGateway.addDisconnectSubscriber(new EventChannelDisconnectSubscriber(this.desktopConnectionService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class)
-            .next(new EventChannelAccessRequestResponseSubscriber(this.desktopAccessService));
+            .next(new AccessRequestResponseSubscriber(this.desktopAccessService, this.desktopConnectionService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class)
-            .next(new EventChannelAccessRevokedSubscriber(this.desktopConnectionService));
+            .next(new AccessRevokedSubscriber(this.desktopConnectionService));
 
         // Set up guacamole display listeners
-        this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService));
+        this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService, this.authenticator, this.eventDispatcher));
         this.guacamoleRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
         this.guacamoleRemoteDesktopSocket.setEventSubscriber(new GuacamoleRemoteDesktopEventSubscriber(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
 
         // Set up webx display listeners
-        this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService));
+        this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceService, this.instanceSessionService, this.authenticator, this.eventDispatcher));
         this.webXRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
         this.webXRemoteDesktopSocket.setEventSubscriber(new WebXRemoteDesktopEventSubscriber(this.desktopConnectionService, this.instanceService, this.instanceSessionService, this.instanceActivityService));
     }

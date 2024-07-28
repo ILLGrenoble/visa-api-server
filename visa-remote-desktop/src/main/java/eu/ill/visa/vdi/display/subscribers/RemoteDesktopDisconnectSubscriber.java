@@ -1,13 +1,12 @@
-package eu.ill.visa.vdi.gateway.subscribers.display;
+package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import eu.ill.visa.vdi.gateway.dispatcher.SocketDisconnectSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RemoteDesktopDisconnectSubscriber implements SocketDisconnectSubscriber {
+public class RemoteDesktopDisconnectSubscriber {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopDisconnectSubscriber.class);
 
@@ -20,11 +19,10 @@ public class RemoteDesktopDisconnectSubscriber implements SocketDisconnectSubscr
         this.desktopAccessService = desktopAccessService;
     }
 
-    @Override
     public void onDisconnect(final SocketClient socketClient) {
-        this.desktopSessionService.findDesktopSessionMemberByToken(socketClient.token())
+        this.desktopSessionService.findDesktopSessionMemberByClientId(socketClient.clientId())
             .ifPresentOrElse(desktopSessionMember -> {
-                logger.info("Remote Desktop Connection disconnected by client {}: disconnecting Session Member: {}", socketClient.token(), desktopSessionMember);
+                logger.info("Remote Desktop Connection disconnected by client {}: disconnecting Session Member: {}", socketClient.clientId(), desktopSessionMember);
                 this.desktopSessionService.onDesktopMemberDisconnect(desktopSessionMember);
             }, () -> {
                 this.desktopAccessService.cancelAccessRequest(socketClient);

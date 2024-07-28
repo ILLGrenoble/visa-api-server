@@ -48,16 +48,28 @@ public class EventDispatcher {
         this.messageBroker.broadcast(new ClientEventCarrierMessage(clientId, clientEventCarrier));
     }
 
-    public void sendEventToUser(final String userId, Object event) {
-        this.messageBroker.broadcast(new EventForUserMessage(userId, event));
+    public void sendEventToUser(final String userId, String type) {
+        this.sendEventToUser(userId, type, null);
     }
 
-    public void sendEventToClient(final String clientId, Object event) {
-        this.messageBroker.broadcast(new EventForClientMessage(clientId, event));
+    public void sendEventToUser(final String userId, String type, Object event) {
+        this.messageBroker.broadcast(new EventForUserMessage(userId, new ClientEventCarrier(type, event)));
     }
 
-    public void broadcastEvent(Object event) {
-        this.messageBroker.broadcast(new BroadcastEventMessage(event));
+    public void sendEventToClient(final String clientId, String type) {
+        this.sendEventToClient(clientId, type, null);
+    }
+
+    public void sendEventToClient(final String clientId, String type, Object event) {
+        this.messageBroker.broadcast(new EventForClientMessage(clientId, new ClientEventCarrier(type, event)));
+    }
+
+    public void broadcastEvent(String type) {
+        this.broadcastEvent(type, null);
+    }
+
+    public void broadcastEvent(String type, Object event) {
+        this.messageBroker.broadcast(new BroadcastEventMessage(new ClientEventCarrier(type, event)));
     }
 
     private void onEventForUser(final EventForUserMessage message) {

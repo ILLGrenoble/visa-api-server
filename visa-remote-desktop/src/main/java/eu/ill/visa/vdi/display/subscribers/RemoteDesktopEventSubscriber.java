@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.subscribers.display;
+package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
@@ -12,7 +12,6 @@ import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import eu.ill.visa.vdi.gateway.dispatcher.SocketEventSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ import java.util.Date;
 
 import static java.lang.String.format;
 
-public abstract class RemoteDesktopEventSubscriber<T> implements SocketEventSubscriber<T> {
+public abstract class RemoteDesktopEventSubscriber<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopEventSubscriber.class);
 
@@ -39,24 +38,23 @@ public abstract class RemoteDesktopEventSubscriber<T> implements SocketEventSubs
         this.instanceActivityService = instanceActivityService;
     }
 
-    @Override
     public void onEvent(final SocketClient socketClient, final T data) {
-        this.desktopSessionService.findDesktopSessionMemberByToken(socketClient.token()).ifPresent(desktopSessionMember -> {
+        this.desktopSessionService.findDesktopSessionMemberByClientId(socketClient.clientId()).ifPresent(desktopSessionMember -> {
 
-            final DesktopSession desktopSession = desktopSessionMember.getSession();
+            final DesktopSession desktopSession = desktopSessionMember.session();
 
             final Instance instance = this.instanceService.getById(desktopSession.getInstanceId());
             if (instance == null) {
                 return;
             }
 
-            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.getRemoteDesktopConnection();
+            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
             InstanceActivityType controlActivityType = this.getControlActivityType(data);
             if (controlActivityType != null) {
                 remoteDesktopConnection.setInstanceActivity(controlActivityType);
             }
 
-            InstanceMemberRole role = desktopSessionMember.getConnectedUser().getRole();
+            InstanceMemberRole role = desktopSessionMember.connectedUser().getRole();
             if (controlActivityType == null || role.equals(InstanceMemberRole.OWNER) || role.equals(InstanceMemberRole.SUPPORT) || (role.equals(InstanceMemberRole.USER) && !desktopSession.isLocked())) {
                 this.writeData(remoteDesktopConnection.getConnectionThread(), data);
             }
@@ -73,7 +71,7 @@ public abstract class RemoteDesktopEventSubscriber<T> implements SocketEventSubs
 
                 instanceService.save(instance);
 
-                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.getToken());
+                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.clientId());
                 if (instanceSessionMember == null) {
                     logger.warn(format("Instance session member not found for instance %d", instance.getId()));
                 } else {

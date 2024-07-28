@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.gateway.subscribers.display;
+package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
