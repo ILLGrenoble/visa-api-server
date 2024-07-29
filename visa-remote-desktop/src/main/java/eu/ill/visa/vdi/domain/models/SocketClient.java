@@ -21,7 +21,7 @@ public record SocketClient(Session session, String clientId, String protocol) {
                 if (dataString.length() > 20) {
                     dataString = dataString.substring(0, 20) + "...";
                 }
-                logger.error("Unable to send message {} to client {}: {}", dataString, this.clientId, result.getException().getMessage());
+                logger.error("Unable to send message {} of type {} to client {}: {}", dataString, data.getClass().getName(), this.clientId, result.getException().getMessage());
             }
         });
     }

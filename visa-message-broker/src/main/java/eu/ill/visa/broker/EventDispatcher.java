@@ -1,14 +1,20 @@
 package eu.ill.visa.broker;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.ill.visa.broker.domain.exceptions.MessageMarshallingException;
 import eu.ill.visa.broker.domain.messages.BroadcastEventMessage;
 import eu.ill.visa.broker.domain.messages.ClientEventCarrierMessage;
 import eu.ill.visa.broker.domain.messages.EventForClientMessage;
 import eu.ill.visa.broker.domain.messages.EventForUserMessage;
-import eu.ill.visa.broker.domain.models.*;
+import eu.ill.visa.broker.domain.models.ClientEventCarrier;
+import eu.ill.visa.broker.domain.models.EventChannelSubscription;
+import eu.ill.visa.broker.domain.models.EventHandler;
 import eu.ill.visa.broker.gateway.ClientEventsGateway;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +23,11 @@ import java.util.List;
 @ApplicationScoped
 public class EventDispatcher {
 
+    private static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
+
     private final MessageBroker messageBroker;
     private final ClientEventsGateway clientEventsGateway;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     private final List<EventChannelSubscription> subscriptions = new ArrayList<>();
 
@@ -73,23 +82,53 @@ public class EventDispatcher {
     }
 
     private void onEventForUser(final EventForUserMessage message) {
-        this.subscriptions.stream()
-            .filter(subscription -> subscription.userId().equals(message.userId()))
-            .forEach(subscriber -> subscriber.onEvent(message.event()));
+        try {
+            this.subscriptions.stream()
+                .filter(subscription -> subscription.userId().equals(message.userId()))
+                .forEach(subscriber -> subscriber.onEvent(this.deserializeClientEventCarrier(message.event())));
+
+        } catch (MessageMarshallingException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     private void onEventForClient(final EventForClientMessage message) {
-        this.subscriptions.stream()
-            .filter(subscription -> subscription.clientId().equals(message.clientId()))
-            .forEach(subscriber -> subscriber.onEvent(message.event()));
+        try {
+            this.subscriptions.stream()
+                .filter(subscription -> subscription.clientId().equals(message.clientId()))
+                .forEach(subscriber -> subscriber.onEvent(this.deserializeClientEventCarrier(message.event())));
+
+        } catch (MessageMarshallingException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     private void onBroadcastEvent(final BroadcastEventMessage message) {
-        this.subscriptions.forEach(subscription -> subscription.onEvent(message.event()));
+        try {
+            this.subscriptions.forEach(subscription -> subscription.onEvent(this.deserializeClientEventCarrier(message.event())));
+
+        } catch (MessageMarshallingException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     private void onEventReceivedFromClient(final ClientEventCarrierMessage clientEventCarrierMessage) {
         this.clientEventsGateway.onEvent(clientEventCarrierMessage.clientId(), clientEventCarrierMessage.event());
+    }
+
+    private ClientEventCarrier deserializeClientEventCarrier(final Object message) throws MessageMarshallingException {
+        try {
+            // Need to recreate the message if it has gone through redis and been serialised
+            if (message instanceof ClientEventCarrier) {
+                return (ClientEventCarrier) message;
+
+            } else {
+                return this.mapper.convertValue(message, ClientEventCarrier.class);
+            }
+
+        } catch (Exception e) {
+            throw new MessageMarshallingException(String.format("Failed to deserialize ClientEventCarrier from message of type %s: %s", message.getClass().getName(), e.getMessage()));
+        }
     }
 
 }

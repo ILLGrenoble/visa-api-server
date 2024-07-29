@@ -17,7 +17,7 @@ public record GatewayClient(Session session, String token, String clientId) {
                 if (dataString.length() > 20) {
                     dataString = dataString.substring(0, 20) + "...";
                 }
-                logger.error("Unable to send message {} to client {}: {}", dataString, this.token, result.getException().getMessage());
+                logger.error("Unable to send message {} of type {} to client {}: {}", dataString, data.getClass().getName(), this.token, result.getException().getMessage());
             }
         });
     }

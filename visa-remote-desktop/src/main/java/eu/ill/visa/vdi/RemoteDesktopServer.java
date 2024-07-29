@@ -17,7 +17,7 @@ import eu.ill.visa.vdi.display.subscribers.GuacamoleRemoteDesktopEventSubscriber
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.WebXRemoteDesktopEventSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.AccessRequestResponseSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.EventChannelAccessRequestResponseSubscriber;
 import eu.ill.visa.vdi.gateway.subscribers.AccessRevokedSubscriber;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -85,7 +85,7 @@ public class RemoteDesktopServer {
     private void bindSubscribers() {
         // Set up event channel
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REPLY_EVENT, AccessRequestResponseEvent.class)
-            .next(new AccessRequestResponseSubscriber(this.desktopAccessService, this.desktopConnectionService));
+            .next(new EventChannelAccessRequestResponseSubscriber(this.desktopAccessService, this.desktopConnectionService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class)
             .next(new AccessRevokedSubscriber(this.desktopConnectionService));
 

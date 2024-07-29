@@ -5,13 +5,13 @@ import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 
-public class AccessRequestResponseSubscriber implements ClientEventSubscriber<AccessRequestResponseEvent> {
+public class EventChannelAccessRequestResponseSubscriber implements ClientEventSubscriber<AccessRequestResponseEvent> {
 
     private final DesktopAccessService desktopAccessService;
     private final DesktopSessionService desktopSessionService;
 
-    public AccessRequestResponseSubscriber(final DesktopAccessService desktopAccessService,
-                                           final DesktopSessionService desktopSessionService) {
+    public EventChannelAccessRequestResponseSubscriber(final DesktopAccessService desktopAccessService,
+                                                       final DesktopSessionService desktopSessionService) {
         this.desktopAccessService = desktopAccessService;
         this.desktopSessionService = desktopSessionService;
     }

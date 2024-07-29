@@ -26,6 +26,8 @@ import static eu.ill.visa.vdi.domain.models.SessionEvent.OWNER_AWAY_EVENT;
 
 public class RemoteDesktopConnectSubscriber {
 
+    public final static String TOKEN_PATH_PARAMETER = "token";
+
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopConnectSubscriber.class);
 
     private final DesktopSessionService desktopSessionService;
@@ -55,7 +57,7 @@ public class RemoteDesktopConnectSubscriber {
 
         try {
             // Validate the token and get the user and instance
-            final String token = socketClient.getPathParameter("token");
+            final String token = socketClient.getPathParameter(TOKEN_PATH_PARAMETER);
             final InstanceAuthenticationToken instanceAuthenticationToken = authenticator.authenticate(token);
             final User user = instanceAuthenticationToken.getUser();
             final Instance instance = instanceAuthenticationToken.getInstance();
