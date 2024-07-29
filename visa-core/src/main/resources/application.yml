@@ -168,6 +168,9 @@ graphql:
       jdbc:
         url: ${VISA_DATABASE_URL}
       db-kind: postgresql
+    hibernate-orm:
+      database:
+        generation: none
     redis:
       hosts-provider-name: redis-pubsub-hosts-provider
       #    max-pool-size: 24
