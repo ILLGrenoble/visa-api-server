@@ -52,7 +52,7 @@ public class GatewaySocket {
                 .with((voidItem) -> this.handleOpen(session, token, clientId));
 
         } catch (Exception e) {
-            logger.error("Failed to connect to ClientEventsSocket: {}", e.getMessage());
+            logger.error("Failed to connect to GatewaySocket: {}", e.getMessage());
         }
     }
 
@@ -91,7 +91,17 @@ public class GatewaySocket {
 
     @OnMessage
     private void onMessage(Session session, @PathParam("token") String token, @PathParam("clientId") String clientId, ClientEventCarrier clientEventCarrier) {
-        this.eventDispatcher.forwardEventFromClient(clientId, clientEventCarrier);
+        try {
+            // Execute handler on worker thread to allow JTA transactions
+            Uni.createFrom()
+                .voidItem()
+                .emitOn(Infrastructure.getDefaultWorkerPool())
+                .subscribe()
+                .with((voidItem) -> this.eventDispatcher.forwardEventFromClient(clientId, clientEventCarrier));
+
+        } catch (Exception e) {
+            logger.error("Failed to handle message on GatewaySocket: {}", e.getMessage());
+        }
     }
 
     @OnError
