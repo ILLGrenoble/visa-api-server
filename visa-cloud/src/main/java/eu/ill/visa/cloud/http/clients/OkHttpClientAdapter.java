@@ -21,7 +21,10 @@ public class OkHttpClientAdapter implements HttpClient {
     private final OkHttpClient client;
 
     public OkHttpClientAdapter() {
-        this.client = new OkHttpClient.Builder().callTimeout(60, TimeUnit.SECONDS).build();
+        this.client = new OkHttpClient.Builder()
+            .callTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .build();
     }
 
     private Headers buildHeaders(Map<String, String> headers) {
