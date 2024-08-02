@@ -3,6 +3,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.core.domain.ImageProtocol;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,12 +57,12 @@ public class PortService {
      * Check if a port is open for a given hostname
      */
     public static boolean isPortOpen(String hostname, int port) {
-        try (Socket ignored = new Socket(hostname, port)) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(hostname, port), 2000);
             return true;
         } catch (IOException exception) {
             return false;
         }
-
     }
 
     public static void main(String[] args) {

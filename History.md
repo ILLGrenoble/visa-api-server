@@ -1,3 +1,7 @@
+2.11.2 02/08/2024
+================
+* Hotfix: set a 2s timeout when checking if a port is open on an instance 
+
 2.11.1 02/08/2024
 ================
 * Hotfix: set the read timeout to 60s for openstack calls 
