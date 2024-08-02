@@ -1,3 +1,7 @@
+2.11.1 02/08/2024
+================
+* Hotfix: set the read timeout to 60s for openstack calls 
+
 2.11.0 09/01/2024
 ================
 * Integrate visa-print to enable printing to a local printer from the remote desktop
