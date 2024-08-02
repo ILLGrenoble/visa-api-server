@@ -1,15 +1,11 @@
 package eu.ill.visa.web.graphql.resolvers;
 
 import eu.ill.preql.exception.InvalidQueryException;
-import eu.ill.visa.business.services.CloudClientService;
-import eu.ill.visa.business.services.ExperimentService;
-import eu.ill.visa.business.services.InstanceMemberService;
-import eu.ill.visa.business.services.InstanceSessionService;
+import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.persistence.repositories.InstanceAttributeRepository;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.*;
 import jakarta.inject.Inject;
@@ -21,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static eu.ill.visa.business.services.PortService.isPortOpen;
 import static java.util.Objects.requireNonNullElseGet;
 import static java.util.concurrent.CompletableFuture.runAsync;
 
@@ -33,19 +28,22 @@ public class InstanceResolver {
     private final InstanceSessionService instanceSessionService;
     private final InstanceMemberService instanceMemberService;
     private final ExperimentService experimentService;
-    private final InstanceAttributeRepository instanceAttributeRepository;
+    private final InstanceAttributeService instanceAttributeService;
+    private final PortService portService;
 
     @Inject
     public InstanceResolver(final CloudClientService cloudClientService,
                             final InstanceSessionService instanceSessionService,
                             final InstanceMemberService instanceMemberService,
                             final ExperimentService experimentService,
-                            final InstanceAttributeRepository instanceAttributeRepository) {
+                            final InstanceAttributeService instanceAttributeService,
+                            final PortService portService) {
         this.cloudClientService = cloudClientService;
         this.instanceSessionService = instanceSessionService;
         this.instanceMemberService = instanceMemberService;
         this.experimentService = experimentService;
-        this.instanceAttributeRepository = instanceAttributeRepository;
+        this.instanceAttributeService = instanceAttributeService;
+        this.portService = portService;
     }
 
     public List<InstanceMemberType> members(@Source InstanceType instance) {
@@ -61,7 +59,7 @@ public class InstanceResolver {
     }
 
     public List<InstanceAttributeType> attributes(@Source InstanceType instance) {
-        return this.instanceAttributeRepository.getAllForInstanceId(instance.getId()).stream()
+        return this.instanceAttributeService.getAllForInstanceId(instance.getId()).stream()
             .map(InstanceAttributeType::new)
             .toList();
     }
@@ -85,7 +83,7 @@ public class InstanceResolver {
                         for (final ImageProtocolType protocol : protocols) {
                             final String address = cloudInstance.getAddress();
                             final int port = protocol.getPort();
-                            final boolean active = isPortOpen(address, port);
+                            final boolean active = this.portService.isPortOpen(address, port);
                             results.add(new ProtocolStatusType(protocol, active));
                         }
                         future.complete(results);

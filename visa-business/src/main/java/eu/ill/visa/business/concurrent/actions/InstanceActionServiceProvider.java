@@ -23,6 +23,7 @@ public class InstanceActionServiceProvider {
     private final InstrumentService instrumentService;
     private final SignatureService signatureService;
     private final CloudClientService cloudClientService;
+    private final PortService portService;
 
 
     @Inject
@@ -33,7 +34,8 @@ public class InstanceActionServiceProvider {
                                          final InstrumentService instrumentService,
                                          final CloudClientService cloudClientService,
                                          final EmailManager emailManager,
-                                         final SignatureService signatureService) {
+                                         final SignatureService signatureService,
+                                         final PortService portService) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceCommandService = instanceCommandService;
@@ -42,6 +44,7 @@ public class InstanceActionServiceProvider {
         this.cloudClientService = cloudClientService;
         this.emailManager = emailManager;
         this.signatureService = signatureService;
+        this.portService = portService;
     }
 
     /**
@@ -89,5 +92,9 @@ public class InstanceActionServiceProvider {
 
     public SignatureService getSignatureService() {
         return signatureService;
+    }
+
+    public PortService getPortService() {
+        return portService;
     }
 }

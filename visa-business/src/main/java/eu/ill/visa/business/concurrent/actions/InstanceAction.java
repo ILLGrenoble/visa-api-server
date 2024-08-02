@@ -53,6 +53,10 @@ public abstract class InstanceAction {
         return this.serviceProvider.getSignatureService();
     }
 
+    public PortService getPortService() {
+        return this.serviceProvider.getPortService();
+    }
+
     public InstanceCommand getCommand() {
         return command;
     }

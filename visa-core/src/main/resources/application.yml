@@ -96,6 +96,7 @@ business:
     staffMaxInactivityDurationHours: ${VISA_INSTANCE_STAFF_MAX_INACTIVITY_DURATION_HOURS:192}
     defaultUserInstanceQuota: ${VISA_INSTANCE_USER_DEFAULT_QUOTA:2}
     activityRetentionPeriodDays: ${VISA_INSTANCE_ACTIVITY_RETENTION_PERIOD_DAYS:0}
+    portCheckTimeoutMs: ${VISA_INSTANCE_PORT_CHECK_TIMEOUT_MS:1000}
   mailer:
     rootURL: ${VISA_ROOT_URL}
     enabled: ${VISA_NOTIFICATION_EMAIL_ADAPTER_ENABLED:false}

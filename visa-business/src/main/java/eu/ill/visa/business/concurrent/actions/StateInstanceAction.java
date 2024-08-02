@@ -1,7 +1,6 @@
 package eu.ill.visa.business.concurrent.actions;
 
 import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionException;
-import eu.ill.visa.business.services.PortService;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceState;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -63,12 +62,12 @@ public class StateInstanceAction extends InstanceAction {
                         final Plan plan = instance.getPlan();
                         final Image image = plan.getImage();
                         final List<ImageProtocol> protocols = image.getProtocols();
-                        boolean instanceIsUpAndRunning = PortService.areMandatoryPortsOpen(cloudInstance.getAddress(), protocols);
+                        boolean instanceIsUpAndRunning = this.getPortService().areMandatoryPortsOpen(cloudInstance.getAddress(), protocols);
                         if (!instanceIsUpAndRunning) {
                             instanceState = InstanceState.STARTING;
 
                         } else {
-                            List<ImageProtocol> activeProtocols = PortService.getActiveProtocols(cloudInstance.getAddress(), protocols);
+                            List<ImageProtocol> activeProtocols = this.getPortService().getActiveProtocols(cloudInstance.getAddress(), protocols);
                             if (activeProtocols.size() < protocols.size()) {
                                 instanceState = InstanceState.PARTIALLY_ACTIVE;
                             } else {

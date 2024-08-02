@@ -1,18 +1,25 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.business.BusinessConfiguration;
 import eu.ill.visa.core.entity.ImageProtocol;
+import jakarta.inject.Singleton;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+@Singleton
 public class PortService {
 
-    public record Service(String hostname, int port) {
+    private final int portCheckTimeoutMs;
+
+    public PortService(final BusinessConfiguration configuration) {
+        this.portCheckTimeoutMs =configuration.instance().portCheckTimeoutMs();
     }
 
-    public static boolean areMandatoryPortsOpen(String hostname, List<ImageProtocol> protocols) {
+    public boolean areMandatoryPortsOpen(String hostname, List<ImageProtocol> protocols) {
         if (!protocols.isEmpty()) {
             for (ImageProtocol protocol : protocols) {
                 if (!protocol.isOptional() && !isPortOpen(hostname, protocol.getPort())) {
@@ -25,7 +32,7 @@ public class PortService {
         return true;
     }
 
-    public static List<ImageProtocol> getActiveProtocols(String hostname, List<ImageProtocol> protocols) {
+    public List<ImageProtocol> getActiveProtocols(String hostname, List<ImageProtocol> protocols) {
         List<ImageProtocol> activeProtocols = new ArrayList<>();
         if (!protocols.isEmpty()) {
             for (ImageProtocol protocol : protocols) {
@@ -40,24 +47,13 @@ public class PortService {
     /**
      * Check if a port is open for a given hostname
      */
-    public static boolean isPortOpen(String hostname, int port) {
-        try (Socket ignored = new Socket(hostname, port)) {
+    public boolean isPortOpen(String hostname, int port) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(hostname, port), this.portCheckTimeoutMs);
             return true;
         } catch (IOException exception) {
             return false;
         }
 
-    }
-
-    public static void main(String[] args) {
-        if (isPortOpen("localhost", 3389)) {
-            System.out.println("Yes");
-        } else {
-            System.out.println("No");
-        }
-    }
-
-    public static Service createService(String hostname, int port) {
-        return new Service(hostname, port);
     }
 }

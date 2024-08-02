@@ -8,5 +8,6 @@ public interface InstanceConfiguration {
     Integer staffMaxInactivityDurationHours();
     Integer defaultUserInstanceQuota();
     Integer activityRetentionPeriodDays();
+    Integer portCheckTimeoutMs();
 
 }
