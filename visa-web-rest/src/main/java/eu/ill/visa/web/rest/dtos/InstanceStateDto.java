@@ -10,13 +10,14 @@ public class InstanceStateDto {
 
     private final InstanceState state;
     private final Date terminationDate;
-    private Date expirationDate;
+    private final Date expirationDate;
     private final boolean deleteRequested;
     private final List<String> activeProtocols;
 
     public InstanceStateDto(final Instance instance) {
         this.state = instance.getState();
         this.terminationDate = instance.getTerminationDate();
+        this.expirationDate = instance.getExpirationDate();
         this.deleteRequested = instance.getDeleteRequested();
         this.activeProtocols = instance.getActiveProtocols();
     }
@@ -31,10 +32,6 @@ public class InstanceStateDto {
 
     public Date getExpirationDate() {
         return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
     }
 
     public boolean isDeleteRequested() {

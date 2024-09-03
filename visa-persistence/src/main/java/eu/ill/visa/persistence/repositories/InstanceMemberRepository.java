@@ -3,7 +3,6 @@ package eu.ill.visa.persistence.repositories;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -54,11 +53,16 @@ public class InstanceMemberRepository extends AbstractRepository<InstanceMember>
         return query.getResultList();
     }
 
-    public List<InstanceMember> getAllByInstanceIdAndRole(Long instanceId, InstanceMemberRole role) {
-        final TypedQuery<InstanceMember> query = getEntityManager().createNamedQuery("instanceMember.getAllByInstanceIdAndRole", InstanceMember.class);
-        query.setParameter("instanceId", instanceId);
-        query.setParameter("role", role);
-        return query.getResultList();
+    public InstanceMember getOwnerByInstanceId(Long instanceId) {
+        try {
+            final TypedQuery<InstanceMember> query = getEntityManager().createNamedQuery("instanceMember.getOwnerByInstanceId", InstanceMember.class);
+            query.setParameter("instanceId", instanceId);
+            query.setMaxResults(1);
+            return query.getSingleResult();
+
+        } catch (NoResultException exception) {
+            return null;
+        }
     }
 
     public void save(InstanceMember instanceMember) {

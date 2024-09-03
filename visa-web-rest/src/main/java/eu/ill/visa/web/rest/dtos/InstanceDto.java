@@ -24,7 +24,7 @@ public class InstanceDto {
     private final Date lastSeenAt;
     private final Date lastInteractionAt;
     private final Date terminationDate;
-    private Date expirationDate;
+    private final Date expirationDate;
     private final boolean deleteRequested;
     private boolean canConnectWhileOwnerAway;
     private final String keyboardLayout;
@@ -49,6 +49,7 @@ public class InstanceDto {
         this.lastSeenAt = instance.getLastSeenAt();
         this.lastInteractionAt = instance.getLastInteractionAt();
         this.terminationDate = instance.getTerminationDate();
+        this.expirationDate = instance.getExpirationDate();
         this.deleteRequested = instance.getDeleteRequested();
         this.keyboardLayout = instance.getKeyboardLayout();
         this.activeProtocols = instance.getActiveProtocols();
@@ -124,10 +125,6 @@ public class InstanceDto {
 
     public Date getExpirationDate() {
         return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
     }
 
     public Date getCreatedAt() {

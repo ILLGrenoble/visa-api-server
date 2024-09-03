@@ -27,12 +27,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
             where i.deletedAt IS NULL
             and i.id = :instanceId
     """),
-    @NamedQuery(name = "instanceMember.getAllByInstanceIdAndRole", query = """
+    @NamedQuery(name = "instanceMember.getOwnerByInstanceId", query = """
             SELECT DISTINCT m FROM Instance i
             LEFT JOIN i.members m
-            where i.deletedAt IS NULL
-            and i.id = :instanceId
-            and m.role = :role
+            where i.id = :instanceId
+            and m.role = 'OWNER'
     """),
 })
 @Table(name = "instance_member")

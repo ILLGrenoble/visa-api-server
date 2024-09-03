@@ -137,11 +137,20 @@ public class InstanceExpirationService {
 
     }
 
-    public void delete(@NotNull InstanceExpiration InstanceExpiration) {
-        this.repository.delete(InstanceExpiration);
+    public void delete(@NotNull InstanceExpiration instanceExpiration) {
+        Instance instance = instanceExpiration.getInstance();
+        instance.setExpirationDate(null);
+        this.instanceService.save(instance);
+
+        this.repository.delete(instanceExpiration);
+
     }
 
     public void save(@NotNull InstanceExpiration instanceExpiration) {
+        Instance instance = instanceExpiration.getInstance();
+        instance.setExpirationDate(instanceExpiration.getExpirationDate());
+        this.instanceService.save(instance);
+
         this.repository.save(instanceExpiration);
     }
 

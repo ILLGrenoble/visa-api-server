@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+
 @ApplicationScoped
 public class RedisMessageCarrierCodec implements Codec {
 
@@ -18,6 +20,7 @@ public class RedisMessageCarrierCodec implements Codec {
 
     public RedisMessageCarrierCodec() {
         this.mapper = new ObjectMapper();
+        this.mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
     }
 
     @Override

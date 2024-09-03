@@ -1,19 +1,18 @@
 package eu.ill.visa.scheduler.jobs;
 
-import eu.ill.visa.core.entity.Instance;
-import io.quarkus.scheduler.Scheduled;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.core.entity.Instance;
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class CloudInstanceCleanupJob {
@@ -45,7 +44,7 @@ public class CloudInstanceCleanupJob {
                 List<CloudInstanceIdentifier> zombieCloudInstances = cloudInstances.stream().filter(cloudInstance -> {
                     boolean instanceNotExists = instances.stream().noneMatch(instance -> cloudInstance.getId().equals(instance.getComputeId()));
                     return instanceNotExists && cloudInstance.getName().startsWith(serverNamePrefix);
-                }).collect(Collectors.toUnmodifiableList());
+                }).toList();
 
                 logger.info("Found {} cloud instances, on Cloud \"{}\", that no longer exist in the database", zombieCloudInstances.size(), cloudClient.getName());
                 for (CloudInstanceIdentifier cloudInstance : zombieCloudInstances) {

@@ -97,13 +97,14 @@ public abstract class InstanceAction {
         }
     }
 
-    public void updateInstanceProtocols(List<ImageProtocol> activeProtocols) {
+    public void updateInstanceProtocols(InstanceState instanceState, List<ImageProtocol> activeProtocols) {
         Instance commandInstance = this.command.getInstance();
         List<String> protocolNames = activeProtocols.stream().map(ImageProtocol::getName).collect(Collectors.toList());
         commandInstance.setActiveProtocols(protocolNames);
 
         Instance instance = this.getInstance();
         if (instance != null) {
+            instance.setState(instanceState);
             instance.setActiveProtocols(protocolNames);
             this.getInstanceService().save(instance);
         }

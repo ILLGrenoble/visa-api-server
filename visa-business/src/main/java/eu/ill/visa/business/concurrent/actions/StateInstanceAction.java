@@ -38,7 +38,7 @@ public class StateInstanceAction extends InstanceAction {
 
             InstanceState instanceState;
             if (cloudInstance == null) {
-                logger.warn("Instance {} has been deleted on the Open Stack server", instance.getComputeId());
+                logger.warn("Instance {} has been deleted on the cloud provider", instance.getComputeId());
                 instanceState = InstanceState.DELETED;
                 this.updateInstanceState(instanceState);
                 this.updateInstanceIpAddress(null);
@@ -70,10 +70,8 @@ public class StateInstanceAction extends InstanceAction {
                             List<ImageProtocol> activeProtocols = this.getPortService().getActiveProtocols(cloudInstance.getAddress(), protocols);
                             if (activeProtocols.size() < protocols.size()) {
                                 instanceState = InstanceState.PARTIALLY_ACTIVE;
-                            } else {
-
                             }
-                            this.updateInstanceProtocols(activeProtocols);
+                            this.updateInstanceProtocols(instanceState, activeProtocols);
                         }
                     }
                     this.updateInstanceState(instanceState);

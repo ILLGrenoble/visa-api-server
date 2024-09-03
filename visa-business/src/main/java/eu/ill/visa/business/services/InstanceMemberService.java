@@ -3,7 +3,6 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.persistence.repositories.InstanceMemberRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -13,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
 
 @Transactional
 @Singleton
@@ -45,15 +42,13 @@ public class InstanceMemberService {
         return this.repository.getAllByInstanceId(instanceId);
     }
 
-    public List<InstanceMember> getAllByInstanceIdAndRole(Long instanceId, InstanceMemberRole role) {
-        return this.repository.getAllByInstanceIdAndRole(instanceId, role);
-    }
-
     public User getOwnerByInstanceId(Long instanceId) {
-        return repository.getAllByInstanceIdAndRole(instanceId, OWNER).stream()
-            .findFirst()
-            .map(InstanceMember::getUser)
-            .orElse(null);
+        final InstanceMember instanceOwner = repository.getOwnerByInstanceId(instanceId);
+        if (instanceOwner != null) {
+            return instanceOwner.getUser();
+        }
+
+        return null;
     }
 
     public void save(@NotNull InstanceMember instanceMember) {

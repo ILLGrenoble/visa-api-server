@@ -55,7 +55,6 @@ public class AccountInstanceController extends AbstractController {
     private final InstanceMemberService instanceMemberService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceCommandService instanceCommandService;
-    private final InstanceExpirationService instanceExpirationService;
     private final InstanceExtensionRequestService instanceExtensionRequestService;
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
     private final PlanService planService;
@@ -71,7 +70,6 @@ public class AccountInstanceController extends AbstractController {
                                      final InstanceMemberService instanceMemberService,
                                      final InstanceSessionService instanceSessionService,
                                      final InstanceCommandService instanceCommandService,
-                                     final InstanceExpirationService instanceExpirationService,
                                      final InstanceExtensionRequestService instanceExtensionRequestService,
                                      final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
                                      final PlanService planService,
@@ -84,7 +82,6 @@ public class AccountInstanceController extends AbstractController {
         this.instanceMemberService = instanceMemberService;
         this.instanceSessionService = instanceSessionService;
         this.instanceCommandService = instanceCommandService;
-        this.instanceExpirationService = instanceExpirationService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
         this.planService = planService;
@@ -204,7 +201,6 @@ public class AccountInstanceController extends AbstractController {
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
             InstanceStateDto instanceStateDto = new InstanceStateDto(instance);
-            instanceStateDto.setExpirationDate(instanceExpirationService.getExpirationDate(instance));
             return createResponse(instanceStateDto);
         }
 
@@ -562,7 +558,6 @@ public class AccountInstanceController extends AbstractController {
         } else if (user.hasAnyRole(List.of(Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
             instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
         }
-        instanceDto.setExpirationDate(instanceExpirationService.getExpirationDate(instance));
         instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user.getId()));
         instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
 

@@ -22,11 +22,6 @@
             <artifactId>visa-business</artifactId>
             <version>3.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>eu.ill.visa</groupId>
-            <artifactId>visa-message-broker</artifactId>
-            <version>3.0.0</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.guacamole</groupId>

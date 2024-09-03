@@ -223,6 +223,9 @@ public class Instance extends Timestampable {
     @Column(name = "termination_date", nullable = true)
     private Date terminationDate;
 
+    @Column(name = "expiration_date", nullable = true)
+    private Date expirationDate;
+
     @Column(name = "deleted_at", nullable = true)
     private Date deletedAt;
 
@@ -258,6 +261,10 @@ public class Instance extends Timestampable {
     @Convert(converter = CommaSeparatedListConverter.class)
     @Column(name = "active_protocols", nullable = true, columnDefinition = "TEXT")
     private List<String> activeProtocols = new ArrayList<>();
+
+    @Column(name = "state_hash", nullable = true)
+    private Integer stateHash;
+
 
     public Instance() {
     }
@@ -402,6 +409,14 @@ public class Instance extends Timestampable {
 
     public void setTerminationDate(Date terminationDate) {
         this.terminationDate = terminationDate;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     @Transient
@@ -592,6 +607,29 @@ public class Instance extends Timestampable {
             }
         }
         return false;
+    }
+
+    public Integer getStateHash() {
+        return stateHash;
+    }
+
+    public void setStateHash(Integer stateHash) {
+        this.stateHash = stateHash;
+    }
+
+    public void updateStateHash() {
+        this.stateHash = new HashCodeBuilder(17, 37)
+            .append(state)
+            .append(computeId)
+            .append(name)
+            .append(comments)
+            .append(ipAddress)
+            .append(terminationDate)
+            .append(expirationDate)
+            .append(deleteRequested)
+            .append(unrestrictedMemberAccess)
+            .append(activeProtocols)
+            .toHashCode();
     }
 
     @Transient

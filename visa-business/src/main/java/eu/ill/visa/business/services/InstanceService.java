@@ -1,6 +1,9 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.InstanceConfiguration;
+import eu.ill.visa.business.gateway.UserEvent;
+import eu.ill.visa.business.gateway.events.InstanceStateChangedEvent;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.entity.*;
@@ -28,6 +31,8 @@ public class InstanceService {
     private final InstanceRepository repository;
     private final InstanceConfiguration configuration;
     private final CloudClientService cloudClientService;
+    private final InstanceMemberService instanceMemberService;
+    private final EventDispatcher eventDispatcher;
 
     // Specifies a window in which to look for instances for which an instrument control support user can provider support.
     // Defines a window and looks for experiment schedules that overlap this window
@@ -36,10 +41,14 @@ public class InstanceService {
     @Inject
     public InstanceService(final InstanceRepository repository,
                            final InstanceConfiguration configuration,
-                           final CloudClientService cloudClientService) {
+                           final CloudClientService cloudClientService,
+                           final InstanceMemberService instanceMemberService,
+                           final EventDispatcher eventDispatcher) {
         this.repository = repository;
         this.configuration = configuration;
         this.cloudClientService = cloudClientService;
+        this.instanceMemberService = instanceMemberService;
+        this.eventDispatcher = eventDispatcher;
     }
 
     public Long countAll() {
@@ -104,11 +113,24 @@ public class InstanceService {
 
         this.save(instance);
 
+        this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCES_CHANGED_EVENT);
+
         return instance;
     }
 
     public void save(Instance instance) {
+        Integer oldStateHash = instance.getStateHash();
+        instance.updateStateHash();
         this.repository.save(instance);
+
+        if (!instance.getStateHash().equals(oldStateHash)) {
+            if (Boolean.TRUE.equals(instance.getDeleted())) {
+                this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCES_CHANGED_EVENT);
+
+            } else {
+                this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCE_STATE_CHANGED_EVENT, new InstanceStateChangedEvent(instance));
+            }
+        }
     }
 
     public List<Instance> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
@@ -274,6 +296,17 @@ public class InstanceService {
 
     public List<NumberInstancesByCloudClient> countByCloudClient() {
         return this.repository.countByCloudClient();
+    }
+
+    private void sendOwnerInstanceEvent(final Instance instance, final String eventType) {
+        this.sendOwnerInstanceEvent(instance, eventType, null);
+    }
+
+    private void sendOwnerInstanceEvent(final Instance instance, final String eventType, final Object event) {
+        final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+        if (owner != null) {
+            this.eventDispatcher.sendEventToUser(owner.getId(), eventType, event);
+        }
     }
 
     private List<Instance> getAllForSupportByUserRole(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
