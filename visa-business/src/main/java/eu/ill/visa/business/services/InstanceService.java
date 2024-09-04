@@ -4,6 +4,7 @@ import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.business.gateway.UserEvent;
 import eu.ill.visa.business.gateway.events.InstanceStateChangedEvent;
+import eu.ill.visa.business.gateway.events.InstanceThumbnailUpdatedEvent;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.entity.*;
@@ -340,6 +341,9 @@ public class InstanceService {
         }
         thumbnail.setData(data);
         this.repository.saveThumbnail(thumbnail);
+
+        this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCE_THUMBNAIL_UPDATED_EVENT, new InstanceThumbnailUpdatedEvent(instance));
+
         return thumbnail;
     }
 
