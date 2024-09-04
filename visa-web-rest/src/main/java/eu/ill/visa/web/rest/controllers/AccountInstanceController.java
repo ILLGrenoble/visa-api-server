@@ -632,14 +632,14 @@ public class AccountInstanceController extends AbstractController {
     @Path("/{instance}/extension")
     public MetaResponse<InstanceExtensionRequestDto> createInstanceExtensionRequest(@Context final SecurityContext securityContext,
                               @PathParam("instance") final Instance instance,
-                              @Valid @NotNull final InstanceExtensionRequestDto instanceExtensionRequestDto) {
+                              @Valid @NotNull final InstanceExtensionRequestInput instanceExtensionRequestInput) {
         final User user = this.getUserPrincipal(securityContext);
         if (this.instanceService.isOwnerOrAdmin(user, instance)) {
 
             // Check an existing request hasn't already been made
             InstanceExtensionRequest request = this.instanceExtensionRequestService.getForInstance(instance);
             if (request == null) {
-                request = this.instanceExtensionRequestService.create(instance, instanceExtensionRequestDto.getComments());
+                request = this.instanceExtensionRequestService.create(instance, instanceExtensionRequestInput.getComments());
             }
             InstanceExtensionRequestDto requestDto = new InstanceExtensionRequestDto(request);
             return createResponse(requestDto);

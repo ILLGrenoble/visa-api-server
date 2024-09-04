@@ -2,10 +2,7 @@ package eu.ill.visa.broker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ill.visa.broker.domain.exceptions.MessageMarshallingException;
-import eu.ill.visa.broker.domain.messages.BroadcastEventMessage;
-import eu.ill.visa.broker.domain.messages.ClientEventCarrierMessage;
-import eu.ill.visa.broker.domain.messages.EventForClientMessage;
-import eu.ill.visa.broker.domain.messages.EventForUserMessage;
+import eu.ill.visa.broker.domain.messages.*;
 import eu.ill.visa.broker.domain.models.ClientEventCarrier;
 import eu.ill.visa.broker.domain.models.EventChannelSubscription;
 import eu.ill.visa.broker.domain.models.EventHandler;
@@ -38,13 +35,14 @@ public class EventDispatcher {
         this.clientEventsGateway = clientEventsGateway;
 
         this.messageBroker.subscribe(EventForUserMessage.class).next(this::onEventForUser);
+        this.messageBroker.subscribe(EventForRoleMessage.class).next(this::onEventForRole);
         this.messageBroker.subscribe(EventForClientMessage.class).next(this::onEventForClient);
         this.messageBroker.subscribe(BroadcastEventMessage.class).next(this::onBroadcastEvent);
         this.messageBroker.subscribe(ClientEventCarrierMessage.class).next(this::onEventReceivedFromClient);
     }
 
-    public EventChannelSubscription subscribe(final String clientId, final String userId, final EventHandler eventHandler) {
-        final EventChannelSubscription subscription = new EventChannelSubscription(clientId, userId, eventHandler);
+    public EventChannelSubscription subscribe(final String clientId, final String userId, final List<String> roles, final EventHandler eventHandler) {
+        final EventChannelSubscription subscription = new EventChannelSubscription(clientId, userId, roles, eventHandler);
         this.subscriptions.add(subscription);
         return subscription;
     }
@@ -63,6 +61,14 @@ public class EventDispatcher {
 
     public void sendEventToUser(final String userId, String type, Object event) {
         this.messageBroker.broadcast(new EventForUserMessage(userId, new ClientEventCarrier(type, event)));
+    }
+
+    public void sendEventForRole(String role, String type) {
+        this.sendEventForRole(role, type, null);
+    }
+
+    public void sendEventForRole(String role, String type, Object event) {
+        this.messageBroker.broadcast(new EventForRoleMessage(role, new ClientEventCarrier(type, event)));
     }
 
     public void sendEventToClient(final String clientId, String type) {
@@ -85,6 +91,17 @@ public class EventDispatcher {
         try {
             this.subscriptions.stream()
                 .filter(subscription -> subscription.userId().equals(message.userId()))
+                .forEach(subscriber -> subscriber.onEvent(this.deserializeClientEventCarrier(message.event())));
+
+        } catch (MessageMarshallingException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void onEventForRole(final EventForRoleMessage message) {
+        try {
+            this.subscriptions.stream()
+                .filter(subscription -> subscription.roles().contains(message.role()))
                 .forEach(subscriber -> subscriber.onEvent(this.deserializeClientEventCarrier(message.event())));
 
         } catch (MessageMarshallingException e) {
@@ -130,5 +147,4 @@ public class EventDispatcher {
             throw new MessageMarshallingException(String.format("Failed to deserialize ClientEventCarrier from message of type %s: %s", message.getClass().getName(), e.getMessage()));
         }
     }
-
 }

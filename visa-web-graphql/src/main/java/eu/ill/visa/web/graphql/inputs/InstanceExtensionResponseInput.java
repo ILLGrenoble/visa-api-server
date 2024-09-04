@@ -7,7 +7,7 @@ import org.eclipse.microprofile.graphql.Input;
 public class InstanceExtensionResponseInput {
 
     private @NotNull String handlerId;
-    private @NotNull String handlerComments;
+    private String handlerComments;
     private @NotNull String terminationDate;
     private @NotNull Boolean accepted;
 

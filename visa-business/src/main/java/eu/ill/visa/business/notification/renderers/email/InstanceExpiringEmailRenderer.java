@@ -1,12 +1,11 @@
 package eu.ill.visa.business.notification.renderers.email;
 
-import io.pebbletemplates.pebble.PebbleEngine;
-import io.pebbletemplates.pebble.template.PebbleTemplate;
 import eu.ill.visa.business.NotificationRendererException;
 import eu.ill.visa.business.notification.NotificationRenderer;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
-public class InstanceExpiringEmailRenderer implements NotificationRenderer {
+public class InstanceExpiringEmailRenderer extends BaseRenderer implements NotificationRenderer {
 
     private final Instance instance;
     private final User     user;
@@ -59,8 +58,7 @@ public class InstanceExpiringEmailRenderer implements NotificationRenderer {
     @Override
     public String render() throws NotificationRendererException {
         try {
-            final PebbleEngine engine = new PebbleEngine.Builder().build();
-            final PebbleTemplate compiledTemplate = engine.getTemplate(emailTemplatesDirectory + "instance-expiring.twig");
+            final PebbleTemplate compiledTemplate = this.getTemplate(emailTemplatesDirectory + "instance-expiring.twig");
             final Writer writer = new StringWriter();
             final Map<String, Object> variables = new HashMap<>();
 

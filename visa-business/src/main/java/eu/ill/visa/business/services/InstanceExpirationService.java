@@ -90,22 +90,17 @@ public class InstanceExpirationService {
                 instance.setState(InstanceState.DELETING);
                 this.instanceService.save(instance);
 
-                InstanceCommand command = instanceCommandService.create(null, instance, InstanceCommandType.DELETE);
                 try {
-                    // Execute deletion - futureInstance should be null since no longer exists in DB
-                    Instance futureInstance = this.instanceCommandService.execute(command).getFutureInstance();
-                    if (futureInstance == null) {
-                        logger.info("Deleted expired instance {}", instance.getId());
+                    InstanceCommand command = instanceCommandService.create(null, instance, InstanceCommandType.DELETE);
+                    this.instanceCommandService.execute(command);
 
-                        // Remove the InstanceExpiration
-                        this.delete(instanceExpiration);
+                    logger.info("Deleted expired instance {}", instance.getId());
 
-                        // Email user
-                        emailManager.sendInstanceDeletedNotification(instance, instanceExpiration);
+                    // Remove the InstanceExpiration
+                    this.delete(instanceExpiration);
 
-                    } else {
-                        logger.error("Failed to delete expired instance {}, current state is {}", instance.getId(), instance.getState().toString());
-                    }
+                    // Email user
+                    emailManager.sendInstanceDeletedNotification(instance, instanceExpiration);
 
                 } catch (Exception e) {
                     logger.error("Caught an exception while deleting instance {}: {}", instance.getId(), e.getMessage());

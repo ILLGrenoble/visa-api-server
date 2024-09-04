@@ -4,6 +4,7 @@ import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.business.MailerConfiguration;
 import eu.ill.visa.business.NotificationRendererException;
 import eu.ill.visa.business.notification.renderers.email.*;
+import eu.ill.visa.business.services.InstanceMemberService;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.quarkus.mailer.Mail;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -37,10 +37,15 @@ public class EmailManager {
     private final Integer userMaxLifetimeDurationHours;
     private final Integer staffMaxLifetimeDurationHours;
 
+    private final InstanceMemberService instanceMemberService;
+
     @Inject
     public EmailManager(final MailerConfiguration mailerConfiguration,
                         final InstanceConfiguration instanceConfiguration,
+                        final InstanceMemberService instanceMemberService,
                         final Mailer mailer) {
+
+        this.instanceMemberService = instanceMemberService;
 
         this.enabled = mailerConfiguration.enabled();
         this.rootURL = mailerConfiguration.rootURL().orElse(null);
@@ -93,14 +98,11 @@ public class EmailManager {
 
     public void sendInstanceExpiringNotification(final Instance instance, final Date expirationDate) {
         try {
-            final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
-                .findFirst();
-            if (member.isPresent()) {
-                final User user = member.get().getUser();
+            final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+            if (owner != null) {
                 final String subject = "[VISA] Your instance will soon expire due to inactivity";
-                final NotificationRenderer renderer = new InstanceExpiringEmailRenderer(instance, expirationDate, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
-                final Mail email = buildEmail(user.getEmail(), subject, renderer.render());
+                final NotificationRenderer renderer = new InstanceExpiringEmailRenderer(instance, expirationDate, owner, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
+                final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
                 this.sendMail(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
@@ -114,14 +116,11 @@ public class EmailManager {
 
     public void sendInstanceDeletedNotification(Instance instance, InstanceExpiration instanceExpiration) {
         try {
-            final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
-                .findFirst();
-            if (member.isPresent()) {
-                final User user = member.get().getUser();
+            final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+            if (owner != null) {
                 final String subject = "[VISA] Your instance has been deleted";
-                final NotificationRenderer renderer = new InstanceDeletedEmailRenderer(instance, instanceExpiration, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
-                final Mail email = buildEmail(user.getEmail(), subject, renderer.render());
+                final NotificationRenderer renderer = new InstanceDeletedEmailRenderer(instance, instanceExpiration, owner, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
+                final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
                 this.sendMail(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
@@ -135,14 +134,11 @@ public class EmailManager {
 
     public void sendInstanceLifetimeNotification(Instance instance) {
         try {
-            final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
-                .findFirst();
-            if (member.isPresent()) {
-                final User user = member.get().getUser();
+            final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+            if (owner != null) {
                 final String subject = "[VISA] Your instance will soon be deleted due to reaching its maximum lifetime";
-                final NotificationRenderer renderer = new InstanceLifetimeEmailRenderer(instance, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
-                final Mail email = buildEmail(user.getEmail(), subject, renderer.render());
+                final NotificationRenderer renderer = new InstanceLifetimeEmailRenderer(instance, owner, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours, userMaxLifetimeDurationHours, staffMaxLifetimeDurationHours);
+                final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
                 this.sendMail(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());
@@ -157,13 +153,11 @@ public class EmailManager {
     public void sendInstanceMemberAddedNotification(Instance instance, InstanceMember member) {
         try {
             if (!member.isRole(InstanceMemberRole.OWNER)) {
-                final Optional<InstanceMember> owner = instance.getMembers().stream()
-                    .filter(object -> object.isRole(InstanceMemberRole.OWNER))
-                    .findFirst();
-                if (owner.isPresent()) {
+                final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+                if (owner != null) {
                     final String subject = "[VISA] You have been added as a member to an instance";
-                    final NotificationRenderer renderer = new InstanceMemberAddedRenderer(instance, emailTemplatesDirectory, owner.get().getUser(), member, rootURL, adminEmailAddress);
-                    final Mail email = buildEmail(member.getUser().getEmail(), subject, renderer.render());
+                    final NotificationRenderer renderer = new InstanceMemberAddedRenderer(instance, emailTemplatesDirectory, owner, member, rootURL, adminEmailAddress);
+                    final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
                     this.sendMail(email);
                 } else {
                     logger.error("Unable to find owner for instance: {}", instance.getId());
@@ -179,15 +173,12 @@ public class EmailManager {
     public void sendInstanceCreatedNotification(final Instance instance) {
         if (!devEmailAddress.isEmpty()) {
             try {
-                final Optional<InstanceMember> member = instance.getMembers().stream()
-                    .filter(object -> object.isRole(InstanceMemberRole.OWNER))
-                    .findFirst();
-                if (member.isPresent()) {
-                    final User user = member.get().getUser();
+                final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+                if (owner != null) {
                     final Plan plan = instance.getPlan();
                     final Flavour flavour = plan.getFlavour();
                     final String text = format("%s created a new instance '%s' (%d) with the flavour of %s",
-                        user.getFullName(),
+                        owner.getFullName(),
                         instance.getName(),
                         instance.getId(),
                         flavour.getName()
@@ -211,12 +202,8 @@ public class EmailManager {
     public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments) {
         if (!adminEmailAddress.isEmpty()) {
             try {
-                final Optional<InstanceMember> member = instance.getMembers().stream()
-                    .filter(object -> object.isRole(InstanceMemberRole.OWNER))
-                    .findFirst();
-                if (member.isPresent()) {
-                    final User owner = member.get().getUser();
-
+                final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+                if (owner != null) {
                     final String subject = "[VISA] An instance extension request has been made";
                     final NotificationRenderer renderer = new InstanceExtensionRequestRenderer(instance, emailTemplatesDirectory, owner, comments, rootURL);
                     final Mail email = buildEmail(adminEmailAddress, subject, renderer.render());
@@ -238,14 +225,11 @@ public class EmailManager {
 
     public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {
         try {
-            final Optional<InstanceMember> member = instance.getMembers().stream()
-                .filter(object -> object.isRole(InstanceMemberRole.OWNER))
-                .findFirst();
-            if (member.isPresent()) {
-                final User user = member.get().getUser();
+            final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
+            if (owner != null) {
                 final String subject = extensionGranted ? "[VISA] Your instance has been granted an extended lifetime" : "[VISA] Your instance has been refused an extended lifetime";
-                final NotificationRenderer renderer = new InstanceExtensionRenderer(instance, extensionGranted, handlerComments, user, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours);
-                final Mail email = buildEmail(user.getEmail(), adminEmailAddress, subject, renderer.render());
+                final NotificationRenderer renderer = new InstanceExtensionRenderer(instance, extensionGranted, handlerComments, owner, emailTemplatesDirectory, rootURL, adminEmailAddress, userMaxInactivityDurationHours, staffMaxInactivityDurationHours);
+                final Mail email = buildEmail(owner.getEmail(), adminEmailAddress, subject, renderer.render());
                 this.sendMail(email);
             } else {
                 logger.error("Unable to find owner for instance: {}", instance.getId());

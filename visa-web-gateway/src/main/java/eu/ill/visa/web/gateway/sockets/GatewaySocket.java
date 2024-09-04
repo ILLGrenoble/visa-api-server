@@ -6,6 +6,7 @@ import eu.ill.visa.broker.domain.models.EventChannelSubscription;
 import eu.ill.visa.business.InvalidTokenException;
 import eu.ill.visa.business.services.ClientAuthenticationTokenService;
 import eu.ill.visa.core.entity.ClientAuthenticationToken;
+import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.gateway.models.GatewayClient;
 import io.smallrye.mutiny.Uni;
@@ -66,7 +67,7 @@ public class GatewaySocket {
 
             final GatewayClient gatewayClient = new GatewayClient(session, token, clientId);
 
-            final EventChannelSubscription subscription = this.eventDispatcher.subscribe(clientId, user.getId(), gatewayClient::sendEvent);
+            final EventChannelSubscription subscription = this.eventDispatcher.subscribe(clientId, user.getId(), user.getRoles().stream().map(Role::getName).toList(), gatewayClient::sendEvent);
             this.subscriptions.add(subscription);
 
         } catch (InvalidTokenException e) {

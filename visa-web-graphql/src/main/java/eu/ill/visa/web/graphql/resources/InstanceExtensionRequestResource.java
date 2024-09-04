@@ -32,7 +32,7 @@ import java.util.List;
 @RolesAllowed(Role.ADMIN_ROLE)
 public class InstanceExtensionRequestResource {
 
-    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:s");
+    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     private final InstanceExtensionRequestService instanceExtensionRequestService;
     private final UserService userService;

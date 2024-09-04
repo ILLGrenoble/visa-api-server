@@ -1,6 +1,7 @@
 package eu.ill.visa.business.concurrent.actions;
 
 import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionException;
+import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceState;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -33,6 +34,8 @@ public class StateInstanceAction extends InstanceAction {
             if (cloudClient == null) {
                 return;
             }
+
+            InstanceState oldState = instance.getState();
 
             CloudInstance cloudInstance = cloudClient.instance(instance.getComputeId());
 
@@ -76,6 +79,11 @@ public class StateInstanceAction extends InstanceAction {
                     }
                     this.updateInstanceState(instanceState);
                 }
+            }
+
+            // Check to see if instance state has changed from or to an error
+            if ((oldState.equals(InstanceState.ERROR) && !instanceState.equals(InstanceState.ERROR)) || (!oldState.equals(InstanceState.ERROR) && instanceState.equals(InstanceState.ERROR))) {
+                this.getEventDispatcher().sendEventForRole(Role.ADMIN_ROLE, AdminEvent.INSTANCE_ERRORS_CHANGED);
             }
 
         } catch (Exception exception) {

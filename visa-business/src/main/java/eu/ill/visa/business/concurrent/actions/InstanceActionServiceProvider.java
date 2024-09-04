@@ -1,5 +1,6 @@
 package eu.ill.visa.business.concurrent.actions;
 
+import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -24,6 +25,7 @@ public class InstanceActionServiceProvider {
     private final SignatureService signatureService;
     private final CloudClientService cloudClientService;
     private final PortService portService;
+    private final EventDispatcher eventDispatcher;
 
 
     @Inject
@@ -35,7 +37,8 @@ public class InstanceActionServiceProvider {
                                          final CloudClientService cloudClientService,
                                          final EmailManager emailManager,
                                          final SignatureService signatureService,
-                                         final PortService portService) {
+                                         final PortService portService,
+                                         final EventDispatcher eventDispatcher) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceCommandService = instanceCommandService;
@@ -45,6 +48,7 @@ public class InstanceActionServiceProvider {
         this.emailManager = emailManager;
         this.signatureService = signatureService;
         this.portService = portService;
+        this.eventDispatcher = eventDispatcher;
     }
 
     /**
@@ -96,5 +100,9 @@ public class InstanceActionServiceProvider {
 
     public PortService getPortService() {
         return portService;
+    }
+
+    public EventDispatcher getEventDispatcher() {
+        return eventDispatcher;
     }
 }

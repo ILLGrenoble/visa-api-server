@@ -1,9 +1,12 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.broker.EventDispatcher;
+import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceExpiration;
 import eu.ill.visa.core.entity.InstanceExtensionRequest;
+import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.persistence.repositories.InstanceExtensionRequestRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -25,16 +28,18 @@ public class InstanceExtensionRequestService {
     private final InstanceService instanceService;
     private final InstanceExpirationService instanceExpirationService;
     private final EmailManager emailManager;
+    private final EventDispatcher eventDispatcher;
 
     @Inject
     public InstanceExtensionRequestService(final InstanceExtensionRequestRepository repository,
                                            final InstanceService instanceService,
                                            final InstanceExpirationService instanceExpirationService,
-                                           final EmailManager emailManager) {
+                                           final EmailManager emailManager, EventDispatcher eventDispatcher) {
         this.repository = repository;
         this.instanceService = instanceService;
         this.instanceExpirationService = instanceExpirationService;
         this.emailManager = emailManager;
+        this.eventDispatcher = eventDispatcher;
     }
 
     public InstanceExtensionRequest getById(Long id) {
@@ -50,6 +55,9 @@ public class InstanceExtensionRequestService {
     }
 
     public void save(@NotNull InstanceExtensionRequest instanceMember) {
+        // Event notification to admin
+        this.eventDispatcher.sendEventForRole(Role.ADMIN_ROLE, AdminEvent.EXTENSION_REQUESTS_CHANGED);
+
         this.repository.save(instanceMember);
     }
 

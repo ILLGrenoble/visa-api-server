@@ -1,5 +1,7 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.broker.EventDispatcher;
+import eu.ill.visa.business.gateway.GlobalEvent;
 import eu.ill.visa.core.domain.ClientNotification;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceExtensionRequest;
@@ -25,14 +27,17 @@ public class ClientNotificationService {
 
     private final static String INSTANCES_IN_ERROR = "instance.errors";
     private final static String INSTANCE_EXTENSION_REQUESTS = "instance.extension.requests";
+    private final EventDispatcher eventDispatcher;
 
     @Inject
     public ClientNotificationService(final SystemNotificationRepository systemNotificationRepository,
                                      final InstanceService instanceService,
-                                     final InstanceExtensionRequestService instanceExtensionRequestService) {
+                                     final InstanceExtensionRequestService instanceExtensionRequestService,
+                                     final EventDispatcher eventDispatcher) {
         this.systemNotificationRepository = systemNotificationRepository;
         this.instanceService = instanceService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
+        this.eventDispatcher = eventDispatcher;
     }
 
     public List<SystemNotification> getAllSystemNotifications() {
@@ -49,11 +54,15 @@ public class ClientNotificationService {
 
     public void saveSystemNotification(@NotNull SystemNotification systemNotification) {
         this.systemNotificationRepository.save(systemNotification);
+
+        this.eventDispatcher.broadcastEvent(GlobalEvent.NOTIFICATIONS_CHANGED_EVENT);
     }
 
     public void deleteSystemNotification(SystemNotification systemNotification) {
         systemNotification.setDeletedAt(new Date());
         this.saveSystemNotification(systemNotification);
+
+        this.eventDispatcher.broadcastEvent(GlobalEvent.NOTIFICATIONS_CHANGED_EVENT);
     }
 
     public List<ClientNotification> getAllAdminNotifications() {
@@ -61,13 +70,13 @@ public class ClientNotificationService {
 
         // Instances in error
         List<Instance> instances = this.instanceService.getAllWithStates(List.of(InstanceState.ERROR));
-        if (instances.size() > 0) {
+        if (!instances.isEmpty()) {
             clientNotifications.add(new ClientNotification(INSTANCES_IN_ERROR, instances.size()));
         }
 
         // Instance extension requests
         List<InstanceExtensionRequest> instanceExtensionRequests = this.instanceExtensionRequestService.getAll();
-        if (instanceExtensionRequests.size() > 0) {
+        if (!instanceExtensionRequests.isEmpty()) {
             clientNotifications.add(new ClientNotification(INSTANCE_EXTENSION_REQUESTS, instanceExtensionRequests.size()));
         }
 
