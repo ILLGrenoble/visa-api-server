@@ -21,7 +21,7 @@ public class UserDto {
         this.lastName = user.getLastName();
         this.fullName = user.getFullName();
         this.email = user.getEmail();
-        this.affiliation = new EmployerDto(user.getAffiliation());
+        this.affiliation = user.getAffiliation() == null ? null : new EmployerDto(user.getAffiliation());
     }
 
     public String getId() {

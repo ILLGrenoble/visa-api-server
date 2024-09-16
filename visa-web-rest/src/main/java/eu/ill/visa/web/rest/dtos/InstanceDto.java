@@ -22,6 +22,7 @@ public class InstanceDto {
     private final List<ExperimentDto> experiments;
     private InstanceMemberDto membership;
     private final Date lastSeenAt;
+    private final Date createdAt;
     private final Date lastInteractionAt;
     private final Date terminationDate;
     private final Date expirationDate;
@@ -30,8 +31,6 @@ public class InstanceDto {
     private final String keyboardLayout;
     private boolean unrestrictedAccess;
     private final List<String> activeProtocols;
-
-    private Date createdAt;
 
     public InstanceDto(Instance instance) {
         this.id = instance.getId();
@@ -46,6 +45,7 @@ public class InstanceDto {
         this.screenHeight = instance.getScreenHeight();
         this.members = instance.getMembers().stream().map(InstanceMemberDto::new).toList();
         this.experiments = instance.getExperiments().stream().map(ExperimentDto::new).toList();
+        this.createdAt = instance.getCreatedAt();
         this.lastSeenAt = instance.getLastSeenAt();
         this.lastInteractionAt = instance.getLastInteractionAt();
         this.terminationDate = instance.getTerminationDate();
