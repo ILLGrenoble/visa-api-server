@@ -114,7 +114,7 @@ public class InstanceResolver {
                 if (cloudInstance != null) {
                     return new CloudInstanceType(cloudInstance);
                 } else {
-                    throw new DataFetchingException("Cloud Instance with compute ID " + instance.getComputeId() + " does not exist");
+                    return null;
                 }
             }
 
