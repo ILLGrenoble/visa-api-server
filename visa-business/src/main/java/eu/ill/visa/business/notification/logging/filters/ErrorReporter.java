@@ -1,9 +1,12 @@
 package eu.ill.visa.business.notification.logging.filters;
 
+import eu.ill.visa.business.ErrorReportEmailConfiguration;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
+import io.quarkus.mailer.MailerName;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.logmanager.ExtLogRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,13 +15,16 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.LogRecord;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
-public class ErrorReporter implements Runnable {
+@ApplicationScoped
+public class ErrorReporter {
 
     public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final Logger logger = LoggerFactory.getLogger(ErrorReporter.class);
@@ -30,67 +36,65 @@ public class ErrorReporter implements Runnable {
     private final String fromAddress;
     private final int maxErrorsPerReport;
 
+    private final boolean enabled;
 
-    private boolean running = false;
-    private Date lastReportingTime = null;
     private List<ErrorEvent> events = new ArrayList<>();
 
 
-    public ErrorReporter(final Mailer mailer,
-                         final String subject,
-                         final String toAddress,
-                         final List<String> ccAddresses,
-                         final String fromAddress,
-                         final int maxErrorsPerReport) {
+    public ErrorReporter(final @MailerName("logging") Mailer mailer,
+                         final ErrorReportEmailConfiguration configuration) {
         this.mailer = mailer;
-        this.subject = subject;
-        this.toAddress = toAddress;
-        this.ccAddresses = ccAddresses;
-        this.fromAddress = fromAddress;
-        this.maxErrorsPerReport = maxErrorsPerReport;
-    }
 
-    @Override
-    public void run() {
-        this.running = true;
+        List<String> addresses = configuration.to().orElse(null);
+        if (addresses != null && !addresses.isEmpty()) {
+            this.toAddress = addresses.removeFirst();
+            this.ccAddresses = addresses;
 
-        while (running) {
-            try {
-                Thread.sleep(1000);
-                this.work();
-            } catch (InterruptedException ignored) {
-            }
+        } else {
+            this.toAddress = null;
+            this.ccAddresses = new ArrayList<>();
         }
 
+        this.fromAddress = configuration.from().orElse(null);
+        this.subject = configuration.subject().orElse(null);
+        this.maxErrorsPerReport = configuration.maxErrors();
+
+        this.enabled =  (toAddress != null && fromAddress != null && subject != null && configuration.enabled());
     }
 
-    public void stop() {
-        this.running = false;
+    public synchronized void handleMaxErrors() {
+        if (this.events.size() >= this.maxErrorsPerReport) {
+            this.generateReportInVirtualThread(events);
+        }
     }
 
-    public synchronized void work() {
-        Date currentTime = new Date();
-        Long elapsedTime = this.lastReportingTime == null ? null : currentTime.getTime() - this.lastReportingTime.getTime();
-        if ((!this.events.isEmpty() && (elapsedTime == null || elapsedTime >= 60000)) || this.events.size() >= this.maxErrorsPerReport) {
-
-            final List<ErrorEvent> events = this.events;
-            this.events = new ArrayList<>();
-
-            Uni.createFrom()
-                .item(events)
-                .emitOn(Infrastructure.getDefaultWorkerPool())
-                .subscribe()
-                .with(this::generateReport, Throwable::printStackTrace);
-
-            this.lastReportingTime = currentTime;
+    public synchronized void handleCurrentErrors() {
+        if (!this.events.isEmpty()) {
+            this.generateReportInVirtualThread(events);
         }
     }
 
     public synchronized void onRecord(LogRecord record) {
-        this.events.add(new ErrorEvent(new Date(), record, Thread.currentThread().getStackTrace()));
+        if (this.enabled) {
+            this.events.add(new ErrorEvent(new Date(), record, Thread.currentThread().getStackTrace()));
+        }
+    }
+
+    private void generateReportInVirtualThread(final List<ErrorEvent> events) {
+        this.events = new ArrayList<>();
+
+        Uni.createFrom()
+            .item(events)
+            .emitOn(Infrastructure.getDefaultWorkerPool())
+            .subscribe()
+            .with(this::generateReport, Throwable::printStackTrace);
     }
 
     private void generateReport(final List<ErrorEvent> events) {
+        if (!this.enabled) {
+            return;
+        }
+
         logger.info("Generating error report for {} events ", events.size());
 
         String errors = events.stream()
