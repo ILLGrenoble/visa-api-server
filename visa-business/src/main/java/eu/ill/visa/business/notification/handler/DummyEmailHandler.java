@@ -1,50 +1,46 @@
-package eu.ill.visa.business.notification;
+package eu.ill.visa.business.notification.handler;
 
-import eu.ill.visa.business.notification.handler.EmailHandler;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceExpiration;
 import eu.ill.visa.core.entity.InstanceMember;
+import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
+@LookupIfProperty(name = "business.mailer.enabled", stringValue = "false")
 @Singleton
-public class EmailManager {
+public class DummyEmailHandler implements EmailHandler {
 
-    private final EmailHandler emailHandler;
+    private static final Logger logger = LoggerFactory.getLogger(DummyEmailHandler.class);
 
     @Inject
-    public EmailManager(final jakarta.enterprise.inject.Instance<EmailHandler> emailHandlerInstance) {
-        this.emailHandler = emailHandlerInstance.get();
+    public DummyEmailHandler() {
+        logger.info("Email notification disabled");
     }
 
     public void sendInstanceExpiringNotification(final Instance instance, final Date expirationDate) {
-        this.emailHandler.sendInstanceExpiringNotification(instance, expirationDate);
     }
 
     public void sendInstanceDeletedNotification(Instance instance, InstanceExpiration instanceExpiration) {
-        this.emailHandler.sendInstanceDeletedNotification(instance, instanceExpiration);
     }
 
     public void sendInstanceLifetimeNotification(Instance instance) {
-        this.emailHandler.sendInstanceLifetimeNotification(instance);
     }
 
     public void sendInstanceMemberAddedNotification(Instance instance, InstanceMember member) {
-        this.emailHandler.sendInstanceMemberAddedNotification(instance, member);
     }
 
     public void sendInstanceCreatedNotification(final Instance instance) {
-        this.emailHandler.sendInstanceCreatedNotification(instance);
     }
 
     public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments) {
-        this.emailHandler.sendInstanceExtensionRequestNotification(instance, comments);
     }
 
     public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {
-        this.emailHandler.sendInstanceExtensionNotification(instance, extensionGranted, handlerComments);
     }
 
 }

@@ -21,13 +21,16 @@ quarkus:
     enabled: true
   mailer:
     mock: ${VISA_NOTIFICATION_EMAIL_ADAPTER_MOCKED:false}
-    host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST}
-    port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT}
+    host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST:change.mail.com}
+    port: ${VISA_NOTIFICATION_EMAIL_ADAPTER_PORT:25}
+    tls: ${VISA_NOTIFICATION_EMAIL_ADAPTER_TLS:false}
+    start-tls: ${VISA_NOTIFICATION_EMAIL_ADAPTER_START_TLS:DISABLED}
     logging:
-      mock: ${VISA_LOGGING_EMAIL_APPENDER_MOCKED:true}
-      host: ${VISA_LOGGING_EMAIL_APPENDER_HOST}
+      mock: ${VISA_LOGGING_EMAIL_APPENDER_MOCKED:false}
+      host: ${VISA_LOGGING_EMAIL_APPENDER_HOST:change.mail.com}
       port: ${VISA_LOGGING_EMAIL_APPENDER_PORT:25}
-      ssl: ${VISA_LOGGING_EMAIL_APPENDER_SSL:false}
+      tls: ${VISA_LOGGING_EMAIL_APPENDER_TLS:false}
+      start-tls: ${VISA_LOGGING_EMAIL_APPENDER_START_TLS:DISABLED}
   rest-client:
 #    logging:
 #      scope: request-response
@@ -51,7 +54,7 @@ quarkus:
     syslog:
       enable: ${VISA_LOGGING_SYSLOG_ENABLED:true}
       syslog-type: ${VISA_LOGGING_SYSLOG_TYPE:rfc3164}
-      endpoint: ${VISA_LOGGING_SYSLOG_ENDPOINT:logsrv.ill.fr:514}
+      endpoint: ${VISA_LOGGING_SYSLOG_ENDPOINT:change.logs.com:514}
       format: ${VISA_LOGGING_SYSLOG_FORMAT}
       app-name: ${VISA_LOGGING_SYSLOG_APP_NAME}
       facility: ${VISA_LOGGING_SYSLOG_FACILITY:local-use-0}
@@ -107,7 +110,7 @@ business:
     adminEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS:}
     emailTemplatesDirectory: ${VISA_NOTIFICATION_EMAIL_ADAPTER_TEMPLATES_DIRECTORY:emails/templates/}
   errorReportEmail:
-    enabled: ${VISA_LOGGING_EMAIL_APPENDER_ENABLED:true}
+    enabled: ${VISA_LOGGING_EMAIL_APPENDER_ENABLED:false}
     to:
       - ${VISA_LOGGING_EMAIL_APPENDER_RECIPIENT_ADDRESS}
     from: ${VISA_LOGGING_EMAIL_APPENDER_FROM_ADDRESS}
