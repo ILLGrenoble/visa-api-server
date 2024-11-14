@@ -173,6 +173,7 @@ graphql:
       jdbc:
         url: ${VISA_DATABASE_URL}
       db-kind: postgresql
+      db-version: ${VISA_DATABASE_VERSION}
     redis:
       hosts-provider-name: redis-pubsub-hosts-provider
       #    max-pool-size: 24
@@ -187,6 +188,7 @@ graphql:
       jdbc:
         url: ${VISA_DATABASE_URL}
       db-kind: postgresql
+      db-version: ${VISA_DATABASE_VERSION}
     redis:
       hosts-provider-name: redis-pubsub-hosts-provider
       #    max-pool-size: 24
