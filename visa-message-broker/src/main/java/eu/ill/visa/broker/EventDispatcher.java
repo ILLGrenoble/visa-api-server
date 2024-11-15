@@ -52,7 +52,13 @@ public class EventDispatcher {
     }
 
     public void forwardEventFromClient(final String clientId, final ClientEventCarrier clientEventCarrier) {
-        this.messageBroker.broadcast(new ClientEventCarrierMessage(clientId, clientEventCarrier));
+        if (clientEventCarrier.type().equals("ping")) {
+            // Handle simple ping-pong keep-alive messages
+            this.sendEventToClient(clientId, "pong");
+
+        } else {
+            this.messageBroker.broadcast(new ClientEventCarrierMessage(clientId, clientEventCarrier));
+        }
     }
 
     public void sendEventToUser(final String userId, String type) {

@@ -1,5 +1,6 @@
 package eu.ill.visa.web.gateway.sockets;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ill.visa.broker.domain.models.ClientEventCarrier;
@@ -11,6 +12,10 @@ public class ClientEventCarrierEncoderDecoder implements Encoder.Text<ClientEven
 
     private static final Logger logger = LoggerFactory.getLogger(ClientEventCarrierEncoderDecoder.class);
     private final ObjectMapper mapper = new ObjectMapper();
+
+    public ClientEventCarrierEncoderDecoder() {
+        this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
 
     @Override
     public ClientEventCarrier decode(String message) throws DecodeException {
