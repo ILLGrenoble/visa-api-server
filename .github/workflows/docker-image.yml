@@ -42,3 +42,11 @@ jobs:
           file       : ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Trigger external deploy pipeline
+        run: |
+          if [ -z "${{ secrets.DEPLOY_PIPELINE_URL }}" ]; then
+            echo "Error: DEPLOY_PIPELINE_URL is not set"
+          else
+            curl -X POST "${{ secrets.DEPLOY_PIPELINE_URL }}"
+          fi
