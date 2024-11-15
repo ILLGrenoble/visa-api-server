@@ -47,7 +47,7 @@ public class StateInstanceAction extends InstanceAction {
                 this.updateInstanceIpAddress(null);
 
             } else {
-                logger.debug("Fetched cloud instance with address :{}", cloudInstance.getAddress());
+                logger.trace("Fetched cloud instance with address :{}", cloudInstance.getAddress());
                 CloudInstanceState cloudInstanceState = cloudInstance.getState();
                 if (cloudInstanceState.equals(CloudInstanceState.ACTIVE)) {
                     this.updateInstanceIpAddress(cloudInstance.getAddress());
