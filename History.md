@@ -1,3 +1,25 @@
+3.0.0 15/11/2024
+================
+ * Use a scheduler to handle error report emails (regroup multiple errors into a single email)
+ * Send events to clients for instance list changes, instance state changes, general notifications, thumbnail updates
+ * Send thumbnails using REST API rather than websocket
+ * Add dedicated, authenticated websocket (events gateway) for all client events (in parallel to a WebX/SocketIO one)
+ * Guacamole and WebX communication over a dedicated standard websocket rather than socket.io protocol 
+ * Recoding of all load-balanced server communication (via Redis) (mono-server still possible without Redis)
+ * Use explicit Quarkus Redis client and Quarkus websocket (running on same port as REST API)
+ * Refactoring of remote desktop and use a standard websocket (remove socket.io implementation)
+ * All dependencies updated
+ * Build Docker image with Java 21
+ * Remove joda-time, dozer and jackson-joda
+ * Improve OpenStack API calls (including do not authenticate on every request)
+ * Remove OkHttp and use Quarkus HttpClients for all REST API calls (OpenStack, Web providers, visa-accounts, visa-security-groups) 
+ * Use Smallrye graphql (quarkus framework) and annotate all graphql queries, types and inputs
+ * Separate visa-web into visa-web-rest and visa-web-graphql
+ * Use Quarkus scheduler annotations
+ * Use Quarkus mailer rather than SimpleJavaMail
+ * Use JPA Annotations rather than XML files and improve lazy loading
+ * Project migrated from Dropwizard to Quarkus
+
 2.11.0 09/01/2024
 ================
 * Integrate visa-print to enable printing to a local printer from the remote desktop
