@@ -61,32 +61,32 @@ public class CloudClient {
     }
 
     public List<CloudImage> images() throws CloudException {
-        logger.debug("Fetching cloud images");
+        logger.trace("Fetching cloud images");
         return provider.images();
     }
 
     public CloudImage image(String id) throws CloudException {
-        logger.debug("Fetching image with id: {}", id);
+        logger.trace("Fetching image with id: {}", id);
         return provider.image(id);
     }
 
     public List<CloudFlavour> flavours() throws CloudException {
-        logger.debug("Fetching cloud flavours");
+        logger.trace("Fetching cloud flavours");
         return provider.flavors();
     }
 
     public CloudFlavour flavour(String id) throws CloudException {
-        logger.debug("Fetching flavour with id: {}", id);
+        logger.trace("Fetching flavour with id: {}", id);
         return provider.flavor(id);
     }
 
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
-        logger.debug("Fetching cloud instance identifiers");
+        logger.trace("Fetching cloud instance identifiers");
         return provider.instanceIdentifiers();
     }
 
     public List<CloudInstance> instances() throws CloudException {
-        logger.debug("Fetching cloud instances");
+        logger.trace("Fetching cloud instances");
         return provider.instances();
     }
 
@@ -94,7 +94,7 @@ public class CloudClient {
         if (id == null) {
             return null;
         }
-        logger.debug("Fetching cloud instance with id: {}", id);
+        logger.trace("Fetching cloud instance with id: {}", id);
         return provider.instance(id);
     }
 
