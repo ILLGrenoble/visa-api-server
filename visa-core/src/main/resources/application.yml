@@ -58,6 +58,7 @@ quarkus:
       format: ${VISA_LOGGING_SYSLOG_FORMAT}
       app-name: ${VISA_LOGGING_SYSLOG_APP_NAME}
       facility: ${VISA_LOGGING_SYSLOG_FACILITY:local-use-0}
+      level: ${VISA_LOGGING_SYSLOG_THRESHOLD:INFO}
       truncate: false
     category:
       "eu.ill":
@@ -156,14 +157,6 @@ client:
   contactEmail: ${VISA_CLIENT_CONFIG_CONTACT_EMAIL}
   experiments:
     openDataIncluded: ${VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA:false}
-
-graphql:
-  tracing: ${VISA_GRAPHQL_TRACING_ENABLED:false}
-  resultsLimit: 50
-  files:
-    - graphql/inputs.graphql
-    - graphql/types.graphql
-    - graphql/schema.graphql
 
 "%prod":
   quarkus:
