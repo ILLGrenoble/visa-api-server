@@ -169,7 +169,9 @@ client:
       db-version: ${VISA_DATABASE_VERSION}
     redis:
       hosts-provider-name: redis-pubsub-hosts-provider
-      #    max-pool-size: 24
+      tls:
+        enabled: ${VISA_VDI_REDIS_TLS_ENABLED:false}
+        trust-all: ${VISA_VDI_REDIS_TLS_TRUST_ALL:false}
       devservices:
         enabled: false
 
@@ -184,7 +186,9 @@ client:
       db-version: ${VISA_DATABASE_VERSION}
     redis:
       hosts-provider-name: redis-pubsub-hosts-provider
-      #    max-pool-size: 24
+      tls:
+        enabled: ${VISA_VDI_REDIS_TLS_ENABLED:false}
+        trust-all: ${VISA_VDI_REDIS_TLS_TRUST_ALL:false}
       devservices:
         enabled: false
 

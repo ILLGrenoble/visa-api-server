@@ -5,6 +5,7 @@ import io.quarkus.redis.client.RedisHostsProvider;
 import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -19,6 +20,9 @@ public class RedisPubSubHostsProvider implements RedisHostsProvider {
 
     private final MessageBrokerConfiguration configuration;
 
+    @ConfigProperty(name = "quarkus.redis.tls.enabled")
+    Boolean tlsEnabled;
+
     @Inject
     public RedisPubSubHostsProvider(final MessageBrokerConfiguration configuration) {
         this.configuration = configuration;
@@ -27,16 +31,17 @@ public class RedisPubSubHostsProvider implements RedisHostsProvider {
     @Override
     public Set<URI> getHosts() {
         if (this.configuration.redisEnabled()) {
-            String url = this.configuration.redisURL().orElse(null);
-            Integer database = this.configuration.redisDatabase();
-            String password = this.configuration.redisPassword().orElse(null);
+            final String url = this.configuration.redisURL().orElse(null);
+            final Integer database = this.configuration.redisDatabase();
+            final String password = this.configuration.redisPassword().orElse(null);
+            final String protocol = this.tlsEnabled ? "rediss" : "redis";
 
             if (url != null && database != null && password != null) {
                 URI originalUri = URI.create(url);
                 String host = originalUri.getHost();
                 int port = originalUri.getPort();
 
-                URI uri = URI.create(String.format("redis://:%s@%s:%d/%d", URLEncoder.encode(password, StandardCharsets.UTF_8), host, port, database));
+                URI uri = URI.create(String.format("%s://:%s@%s:%d/%d", protocol, URLEncoder.encode(password, StandardCharsets.UTF_8), host, port, database));
 
                 return Collections.singleton(uri);
             }
