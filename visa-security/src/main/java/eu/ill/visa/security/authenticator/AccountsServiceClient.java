@@ -1,5 +1,6 @@
 package eu.ill.visa.security.authenticator;
 
+import eu.ill.visa.security.exceptions.UnauthorizedRuntimeException;
 import eu.ill.visa.security.tokens.AccountToken;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import jakarta.ws.rs.GET;
@@ -21,7 +22,7 @@ public interface AccountsServiceClient {
     @ClientExceptionMapper
     static RuntimeException toException(Response response) {
         if (response.getStatus() == 401) {
-            return new RuntimeException("[AccountToken] Caught unauthenticated access to VISA: " + response.readEntity(String.class));
+            return new UnauthorizedRuntimeException("[AccountToken] Caught unauthenticated access to VISA: " + response.readEntity(String.class));
 
         } else if (response.getStatus() != 200) {
             return new RuntimeException("[AccountToken] Caught HTTP error (" + response.getStatus() + ": " + response.readEntity(String.class) + ") authenticating user access token");

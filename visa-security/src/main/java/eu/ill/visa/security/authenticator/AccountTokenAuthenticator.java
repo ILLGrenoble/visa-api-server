@@ -2,6 +2,7 @@ package eu.ill.visa.security.authenticator;
 
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.entity.User;
+import eu.ill.visa.security.exceptions.UnauthorizedRuntimeException;
 import eu.ill.visa.security.tokens.AccountToken;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -59,8 +60,12 @@ public class AccountTokenAuthenticator {
         try {
             // Make REST API call to Accounts Service
             return this.accountsServiceClient.getAccountToken(token);
+        } catch (UnauthorizedRuntimeException unauthorizedRuntimeException) {
+            logger.warn(unauthorizedRuntimeException.getMessage());
+
         } catch (RuntimeException runtimeException) {
             logger.error(runtimeException.getMessage());
+
         } catch (Exception e) {
             logger.error("[Token] Error obtaining account from access token: {}", e.getMessage());
         }
