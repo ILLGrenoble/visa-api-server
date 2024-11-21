@@ -1,3 +1,9 @@
+3.0.1 21/11/2024
+================
+ * Add TLS options for Redis
+ * Ensure that the instance activity recording is synchronised with any disconnection event to ensure we don't resave an instance session as active when it has already been closed
+ * Modify logging of unauthorized access (warn rather than error) 
+
 3.0.0 15/11/2024
 ================
  * Use a scheduler to handle error report emails (regroup multiple errors into a single email)
