@@ -1,8 +1,6 @@
 package eu.ill.visa.vdi.display.subscribers;
 
-import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
@@ -10,10 +8,8 @@ import eu.ill.visa.vdi.business.services.DesktopSessionService;
 public class GuacamoleRemoteDesktopEventSubscriber extends RemoteDesktopEventSubscriber<String> {
 
     public GuacamoleRemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
-                                                 final InstanceService instanceService,
-                                                 final InstanceSessionService instanceSessionService,
-                                                 final InstanceActivityService instanceActivityService) {
-        super(desktopSessionService, instanceService, instanceSessionService, instanceActivityService);
+                                                 final InstanceService instanceService) {
+        super(desktopSessionService, instanceService);
     }
 
     @Override

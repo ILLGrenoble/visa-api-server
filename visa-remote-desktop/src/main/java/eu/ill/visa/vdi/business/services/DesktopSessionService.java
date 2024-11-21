@@ -2,14 +2,12 @@ package eu.ill.visa.vdi.business.services;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
-import eu.ill.visa.business.services.InstanceExpirationService;
-import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.business.services.UserService;
+import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.broker.*;
@@ -28,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +40,7 @@ public class DesktopSessionService {
 
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
+    private final InstanceActivityService instanceActivityService;
     private final UserService userService;
     private final GuacamoleDesktopService guacamoleDesktopService;
     private final WebXDesktopService webXDesktopService;
@@ -55,6 +55,7 @@ public class DesktopSessionService {
     @Inject
     public DesktopSessionService(final InstanceService instanceService,
                                  final InstanceSessionService instanceSessionService,
+                                 final InstanceActivityService instanceActivityService,
                                  final UserService userService,
                                  final GuacamoleDesktopService guacamoleDesktopService,
                                  final WebXDesktopService webXDesktopService,
@@ -64,6 +65,7 @@ public class DesktopSessionService {
                                  final EventDispatcher eventDispatcher) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
+        this.instanceActivityService = instanceActivityService;
         this.userService = userService;
         this.guacamoleDesktopService = guacamoleDesktopService;
         this.webXDesktopService = webXDesktopService;
@@ -222,6 +224,48 @@ public class DesktopSessionService {
             .flatMap(desktopSession -> desktopSession.getMembers().stream())
             .filter(desktopSessionMember -> desktopSessionMember.clientId().equals(clientId))
             .findAny();
+    }
+
+    public synchronized void updateSessionMemberActivity(final String clientId) {
+        this.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
+
+            final DesktopSession desktopSession = desktopSessionMember.session();
+            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
+            final Instance instance = this.instanceService.getById(desktopSession.getInstanceId());
+            if (instance == null) {
+                return;
+            }
+
+            // Update last seen time of instance if more than one minute
+            final Date lastSeenDate = remoteDesktopConnection.getLastSeenAt();
+            final Date currentDate = new Date();
+            if (lastSeenDate == null || (currentDate.getTime() - lastSeenDate.getTime() > 5 * 1000)) {
+                instance.updateLastSeenAt();
+
+                if (lastSeenDate == null || lastSeenDate.getTime() <= remoteDesktopConnection.getLastInteractionAt().getTime()) {
+                    instance.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
+                }
+
+                instanceService.save(instance);
+
+                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.clientId());
+                if (instanceSessionMember == null) {
+                    logger.warn("Instance session member not found for instance {}", instance.getId());
+
+                } else {
+                    instanceSessionMember.updateLastSeenAt();
+                    instanceSessionMember.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
+                    instanceSessionService.saveInstanceSessionMember(instanceSessionMember);
+
+                    InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
+                    if (instanceActivityType != null) {
+                        this.instanceActivityService.create(instanceSessionMember.getUser(), instance, instanceActivityType);
+                        remoteDesktopConnection.resetInstanceActivity();
+                    }
+                }
+                remoteDesktopConnection.setLastSeenAt(instance.getLastSeenAt());
+            }
+        });
     }
 
     private void onUserConnected(final Long sessionId, final String clientId, final ConnectedUser user) {
