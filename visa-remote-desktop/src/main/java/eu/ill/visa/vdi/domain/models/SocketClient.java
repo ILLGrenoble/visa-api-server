@@ -15,15 +15,23 @@ public record SocketClient(Session session, String clientId, String protocol) {
     }
 
     public void sendEvent(Object data) {
-        this.session.getAsyncRemote().sendObject(data, result -> {
-            if (result.getException() != null) {
-                String dataString = data.toString();
-                if (dataString.length() > 20) {
-                    dataString = dataString.substring(0, 20) + "...";
+        if (session.isOpen()) {
+            this.session.getAsyncRemote().sendObject(data, result -> {
+                if (result.getException() != null) {
+                    String dataString = data.toString();
+                    if (dataString.length() > 20) {
+                        dataString = dataString.substring(0, 20) + "...";
+                    }
+                    logger.error("Unable to send message {} of type {} to client {}: {}", dataString, data.getClass().getName(), this.clientId, result.getException().getMessage());
                 }
-                logger.error("Unable to send message {} of type {} to client {}: {}", dataString, data.getClass().getName(), this.clientId, result.getException().getMessage());
+            });
+        } else {
+            String dataString = data.toString();
+            if (dataString.length() > 20) {
+                dataString = dataString.substring(0, 20) + "...";
             }
-        });
+            logger.warn("Unable to send message {} of type {} to client {} because the session is already closed", dataString, data.getClass().getName(), this.clientId);
+        }
     }
     public void disconnect() {
         try {
