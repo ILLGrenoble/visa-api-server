@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -226,7 +225,7 @@ public class DesktopSessionService {
             .findAny();
     }
 
-    public synchronized void updateSessionMemberActivity(final String clientId) {
+    public void updateSessionMemberActivity(final String clientId) {
         this.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
 
             final DesktopSession desktopSession = desktopSessionMember.session();
@@ -236,18 +235,7 @@ public class DesktopSessionService {
                 return;
             }
 
-            // Update last seen time of instance if more than one minute
-            final Date lastSeenDate = remoteDesktopConnection.getLastSeenAt();
-            final Date currentDate = new Date();
-            if (lastSeenDate == null || (currentDate.getTime() - lastSeenDate.getTime() > 5 * 1000)) {
-                instance.updateLastSeenAt();
-
-                if (lastSeenDate == null || lastSeenDate.getTime() <= remoteDesktopConnection.getLastInteractionAt().getTime()) {
-                    instance.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
-                }
-
-                instanceService.save(instance);
-
+            synchronized (this) {
                 final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.clientId());
                 if (instanceSessionMember == null) {
                     logger.warn("Instance session member not found for instance {}", instance.getId());
@@ -263,7 +251,6 @@ public class DesktopSessionService {
                         remoteDesktopConnection.resetInstanceActivity();
                     }
                 }
-                remoteDesktopConnection.setLastSeenAt(instance.getLastSeenAt());
             }
         });
     }

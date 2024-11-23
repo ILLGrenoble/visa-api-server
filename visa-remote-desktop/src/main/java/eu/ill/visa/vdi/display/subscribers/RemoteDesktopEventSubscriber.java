@@ -12,6 +12,8 @@ import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+
 public abstract class RemoteDesktopEventSubscriber<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopEventSubscriber.class);
@@ -46,7 +48,19 @@ public abstract class RemoteDesktopEventSubscriber<T> {
                 this.writeData(remoteDesktopConnection.getConnectionThread(), data);
             }
 
-            this.desktopSessionService.updateSessionMemberActivity(socketClient.clientId());
+            // Update last seen time of instance if more than one minute
+            final Date lastSeenDate = remoteDesktopConnection.getLastSeenAt();
+            final Date currentDate = new Date();
+            if (lastSeenDate == null || (currentDate.getTime() - lastSeenDate.getTime() > 5 * 1000)) {
+                instance.updateLastSeenAt();
+                if (lastSeenDate == null || lastSeenDate.getTime() <= remoteDesktopConnection.getLastInteractionAt().getTime()) {
+                    instance.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
+                }
+                instanceService.save(instance);
+                remoteDesktopConnection.setLastSeenAt(instance.getLastSeenAt());
+
+                this.desktopSessionService.updateSessionMemberActivity(socketClient.clientId());
+            }
        });
     }
 
