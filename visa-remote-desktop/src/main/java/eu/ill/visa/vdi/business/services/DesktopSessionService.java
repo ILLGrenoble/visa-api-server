@@ -230,15 +230,11 @@ public class DesktopSessionService {
 
             final DesktopSession desktopSession = desktopSessionMember.session();
             final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
-            final Instance instance = this.instanceService.getById(desktopSession.getInstanceId());
-            if (instance == null) {
-                return;
-            }
 
             synchronized (this) {
                 final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.clientId());
                 if (instanceSessionMember == null) {
-                    logger.warn("Instance session member not found for instance {}", instance.getId());
+                    logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
 
                 } else {
                     instanceSessionMember.updateLastSeenAt();
@@ -247,6 +243,7 @@ public class DesktopSessionService {
 
                     InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
                     if (instanceActivityType != null) {
+                        final Instance instance = instanceSessionMember.getInstanceSession().getInstance();
                         this.instanceActivityService.create(instanceSessionMember.getUser(), instance, instanceActivityType);
                         remoteDesktopConnection.resetInstanceActivity();
                     }
