@@ -1,3 +1,7 @@
+3.0.2 25/11/2024
+================
+ * Fix bug of synchronising all activity updates on user interaction with remote desktop.  
+
 3.0.1 21/11/2024
 ================
  * Determine if sockets are open before sending data
