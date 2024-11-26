@@ -42,7 +42,7 @@ public class AccountTokenAuthenticator {
                     logger.warn("[Token] User {} with login {} has an invalid user id (0)", user.getFullName(), accountToken.getName());
 
                 } else {
-                    logger.debug("[Token] Successfully authenticated user: {} ({})", accountToken.getName(), user.getId());
+                    logger.info("[Token] Successfully authenticated user: {} ({})", accountToken.getName(), user.getId());
                 }
 
                 return Optional.of(accountToken);

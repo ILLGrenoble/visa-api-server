@@ -17,6 +17,7 @@ public class InstanceType {
     private final @NotNull Long id;
     private final @NotNull String uid;
     private final @NotNull String name;
+    private final String ipAddress;
     private final String comments;
     private final @NotNull InstanceState state;
     private final PlanType plan;
@@ -33,6 +34,7 @@ public class InstanceType {
         this.id = instance.getId();
         this.uid = instance.getUid();
         this.name = instance.getName();
+        this.ipAddress = instance.getIpAddress();
         this.comments = instance.getComments();
         this.state = instance.getState();
         this.plan = new PlanType(instance.getPlan());
@@ -56,6 +58,10 @@ public class InstanceType {
 
     public String getName() {
         return name;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
     }
 
     public String getComments() {
