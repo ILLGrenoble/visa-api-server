@@ -2,6 +2,7 @@ package eu.ill.visa.persistence.repositories;
 
 import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceThumbnail;
 import eu.ill.visa.core.entity.User;
@@ -371,18 +372,18 @@ public class InstanceRepository extends AbstractRepository<Instance> {
             queryString += " AND i.id = :id";
             queryParameters.add(new SimpleEntry<>("id", filter.getId()));
         }
-        if (filter != null && filter.getName() != null) {
+        if (filter != null && filter.getNameLike() != null) {
             queryString += " AND LOWER(i.name) like LOWER(:name)";
-            queryParameters.add(new SimpleEntry<>("name", filter.getName() + "%"));
+            queryParameters.add(new SimpleEntry<>("name", filter.getNameLike() + "%"));
         }
         if (filter != null && filter.getInstrumentId() != null) {
             queryString += " AND instr.id = :instrId";
             queryParameters.add(new SimpleEntry<>("instrId", filter.getInstrumentId()));
         }
-        if (filter != null && filter.getOwner() != null) {
+        if (filter != null && filter.getOwnerId() != null) {
             queryString += " AND owner.id = :owner";
 
-            queryParameters.add(new SimpleEntry<>("owner", filter.getOwner()));
+            queryParameters.add(new SimpleEntry<>("owner", filter.getOwnerId()));
         }
 
         if (orderBy != null) {

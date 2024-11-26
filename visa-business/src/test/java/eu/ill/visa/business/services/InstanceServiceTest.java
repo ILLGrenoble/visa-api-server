@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.*;
-import eu.ill.visa.core.entity.enumerations.InstanceState;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.InstanceState;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -274,23 +274,28 @@ public class InstanceServiceTest {
         User user1 = userService.getById("6");
         assertNotNull(user1);
 
-        InstanceFilter filter = new InstanceFilter().id(1000L);
+        InstanceFilter filter = new InstanceFilter();
+        filter.setId(1000L);
         List<Instance> instances = this.instanceService.getAllForInstrumentScientist(user1, filter, null, null);
         assertEquals(1, instances.size());
 
-        filter = new InstanceFilter().name("Instance 1");
+        filter = new InstanceFilter();
+        filter.setNameLike("Instance 1");
         instances = this.instanceService.getAllForInstrumentScientist(user1, filter, null, null);
         assertEquals(3, instances.size());
 
-        filter = new InstanceFilter().owner("1");
+        filter = new InstanceFilter();
+        filter.setOwnerId("1");
         instances = this.instanceService.getAllForInstrumentScientist(user1, filter, null, null);
         assertEquals(2, instances.size());
 
-        filter = new InstanceFilter().instrumentId(1L);
+        filter = new InstanceFilter();
+        filter.setInstrumentId(1L);
         instances = this.instanceService.getAllForInstrumentScientist(user1, filter, null, null);
         assertEquals(8, instances.size());
 
-        filter = new InstanceFilter().instrumentId(2L);
+        filter = new InstanceFilter();
+        filter.setInstrumentId(2L);
         instances = this.instanceService.getAllForInstrumentScientist(user1, filter, null, null);
         assertEquals(0, instances.size());
     }
@@ -305,19 +310,23 @@ public class InstanceServiceTest {
     @Test
     @DisplayName("Get all instances for instrument control support with filters")
     public void instancesAllForScientificSupportWithFilters() {
-        InstanceFilter filter = new InstanceFilter().name("Instance 1");
+        InstanceFilter filter = new InstanceFilter();
+        filter.setNameLike("Instance 1");
         List<Instance> instances = this.instanceService.getAllForInstrumentControlSupport(filter, null, null);
         assertEquals(2 , instances.size());
 
-        filter = new InstanceFilter().id(1008L);
+        filter = new InstanceFilter();
+        filter.setId(1008L);
         instances = this.instanceService.getAllForInstrumentControlSupport(filter, null, null);
         assertEquals(1 , instances.size());
 
-        filter = new InstanceFilter().owner("1");
+        filter = new InstanceFilter();
+        filter.setOwnerId("1");
         instances = this.instanceService.getAllForInstrumentControlSupport(filter, null, null);
         assertEquals(1 , instances.size());
 
-        filter = new InstanceFilter().instrumentId(1L);
+        filter = new InstanceFilter();
+        filter.setInstrumentId(1L);
         instances = this.instanceService.getAllForInstrumentControlSupport(filter, null, null);
         assertEquals(6 , instances.size());
     }

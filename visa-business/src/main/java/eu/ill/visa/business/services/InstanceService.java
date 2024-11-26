@@ -7,6 +7,7 @@ import eu.ill.visa.business.gateway.events.InstanceStateChangedEvent;
 import eu.ill.visa.business.gateway.events.InstanceThumbnailUpdatedEvent;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;

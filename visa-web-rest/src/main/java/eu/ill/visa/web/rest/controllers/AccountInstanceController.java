@@ -2,7 +2,7 @@ package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
-import eu.ill.visa.core.domain.InstanceFilter;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.entity.*;
@@ -152,19 +152,15 @@ public class AccountInstanceController extends AbstractController {
     @GET
     @Path("/support")
     public MetaResponse<List<InstanceDto>> getAllForSupport(@Context final SecurityContext securityContext,
-                                     @QueryParam("id") final Long instanceId,
-                                     @QueryParam("name") final String instanceName,
-                                     @QueryParam("owner") final String owner,
-                                     @QueryParam("instrumentId") final Long instrumentId,
-                                     @QueryParam("page") @DefaultValue("1") @Min(1) final Integer page,
-                                     @QueryParam("limit") @DefaultValue("25") @Min(5) @Max(100) final Integer limit,
-                                     @QueryParam("orderBy") @DefaultValue("id") final String orderByValue,
-                                     @QueryParam("descending") @DefaultValue("false") final boolean descending) {
+                                                            @BeanParam InstanceFilter filter,
+                                                            @QueryParam("page") @DefaultValue("1") @Min(1) final Integer page,
+                                                            @QueryParam("limit") @DefaultValue("25") @Min(5) @Max(100) final Integer limit,
+                                                            @QueryParam("orderBy") @DefaultValue("id") final String orderByValue,
+                                                            @QueryParam("descending") @DefaultValue("false") final boolean descending) {
         final User user = this.getUserPrincipal(securityContext);
 
         final int offset = (page - 1) * limit;
 
-        final InstanceFilter filter = new InstanceFilter(instanceId, owner, instanceName, instrumentId);
         final Pagination pagination = new Pagination(limit, offset);
         final OrderBy orderBy = new OrderBy(orderByValue, !descending);
         final Long total = instanceService.countAllForSupportUser(user, filter);
