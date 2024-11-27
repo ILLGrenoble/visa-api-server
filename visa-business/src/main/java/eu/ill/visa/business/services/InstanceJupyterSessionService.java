@@ -1,8 +1,6 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceJupyterSession;
 import eu.ill.visa.core.entity.User;
@@ -15,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-
-import static java.util.Objects.requireNonNullElseGet;
 
 @Transactional
 @Singleton
@@ -77,12 +73,12 @@ public class InstanceJupyterSessionService {
         }
     }
 
-    public List<InstanceJupyterSession> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
-        return this.repository.getAll(filter, orderBy, pagination);
+    public List<InstanceJupyterSession> getAll(Pagination pagination) {
+        return this.repository.getAll(pagination);
     }
 
-    public Long countAll(QueryFilter filter) {
-        return repository.countAll(requireNonNullElseGet(filter, QueryFilter::new));
+    public Long countAll() {
+        return repository.countAll();
     }
 
     public Long countAllInstances() {

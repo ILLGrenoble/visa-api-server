@@ -5,7 +5,15 @@ import jakarta.persistence.*;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "instanceJupyterSession.getAll", query = """
-            SELECT i FROM InstanceJupyterSession i WHERE i.active = true ORDER BY i.id DESC
+        SELECT i
+        FROM InstanceJupyterSession i
+        WHERE i.active = true
+        ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instanceJupyterSession.countAll", query = """
+        SELECT count(i)
+        FROM InstanceJupyterSession i
+        WHERE i.active = true
     """),
     @NamedQuery(name = "instanceJupyterSession.countAllInstances", query = """
             SELECT count(distinct i.instance)
