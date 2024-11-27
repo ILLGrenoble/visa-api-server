@@ -1,8 +1,6 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.persistence.repositories.InstanceSessionMemberRepository;
 import jakarta.inject.Inject;
@@ -12,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-
-import static java.util.Objects.requireNonNullElseGet;
 
 @Transactional
 @Singleton
@@ -28,15 +24,15 @@ public class InstanceSessionMemberService {
         this.repository = repository;
     }
 
-    public List<InstanceSessionMember> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
-        return this.repository.getAll(filter, orderBy, pagination);
+    public List<InstanceSessionMember> getAll(Pagination pagination) {
+        return this.repository.getAll(pagination);
     }
 
-    public Long countAll(QueryFilter filter) {
-        return repository.countAll(requireNonNullElseGet(filter, QueryFilter::new));
+    public Long countAll() {
+        return repository.countAll();
     }
 
-    public Long countAllActive(QueryFilter filter) {
-        return repository.countAllActive(requireNonNullElseGet(filter, QueryFilter::new));
+    public Long countAllActive() {
+        return repository.countAllActive();
     }
 }

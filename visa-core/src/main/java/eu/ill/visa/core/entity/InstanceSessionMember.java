@@ -13,6 +13,21 @@ import java.util.Date;
             WHERE i.active = true
             AND instance.deletedAt IS NULL
     """),
+    @NamedQuery(name = "instanceSessionMember.countAll", query = """
+            SELECT count(i) FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            LEFT JOIN instanceSession.instance instance
+            WHERE i.active = true
+            AND instance.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instanceSessionMember.countAllActive", query = """
+            SELECT count(i) FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            LEFT JOIN instanceSession.instance instance
+            WHERE i.active = true
+            AND i.lastInteractionAt > :timeAgo
+            AND instance.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instanceSessionMember.getByInstanceSessionAndSessionId", query = """
             SELECT i FROM InstanceSessionMember i
             LEFT JOIN i.instanceSession instanceSession

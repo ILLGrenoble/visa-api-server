@@ -2,16 +2,13 @@ package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.InstanceSessionMemberService;
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
-import eu.ill.visa.web.graphql.inputs.OrderByInput;
 import eu.ill.visa.web.graphql.inputs.PaginationInput;
 import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.types.Connection;
-import eu.ill.visa.web.graphql.types.PageInfo;
 import eu.ill.visa.web.graphql.types.InstanceSessionMemberType;
+import eu.ill.visa.web.graphql.types.PageInfo;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
@@ -22,10 +19,7 @@ import org.eclipse.microprofile.graphql.Query;
 
 import java.util.List;
 
-import static eu.ill.visa.web.graphql.inputs.OrderByInput.toOrderBy;
 import static eu.ill.visa.web.graphql.inputs.PaginationInput.toPagination;
-import static java.util.Objects.requireNonNullElseGet;
-import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
 
 @GraphQLApi
 @RolesAllowed(Role.ADMIN_ROLE)
@@ -49,15 +43,12 @@ public class InstanceSessionMemberResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull Connection<InstanceSessionMemberType> sessions(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<InstanceSessionMemberType> sessions(@NotNull PaginationInput pagination) throws DataFetchingException {
         try {
-            final List<InstanceSessionMemberType> results = instanceSessionMemberService.getAll(
-                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new),
-                requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("id", true)), toPagination(pagination)
-            ).stream()
+            final List<InstanceSessionMemberType> results = instanceSessionMemberService.getAll(toPagination(pagination)).stream()
                 .map(InstanceSessionMemberType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(instanceSessionMemberService.countAll(toQueryFilter(filter)), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(instanceSessionMemberService.countAll(), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -72,9 +63,9 @@ public class InstanceSessionMemberResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countSessions(final QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countSessions() throws DataFetchingException {
         try {
-            return instanceSessionMemberService.countAll(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new));
+            return instanceSessionMemberService.countAll();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -90,7 +81,7 @@ public class InstanceSessionMemberResource {
     @Query
     public @NotNull @AdaptToScalar(Scalar.Int.class) Long countActiveSessions(final QueryFilterInput filter) throws DataFetchingException {
         try {
-            return instanceSessionMemberService.countAllActive(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new));
+            return instanceSessionMemberService.countAllActive();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
