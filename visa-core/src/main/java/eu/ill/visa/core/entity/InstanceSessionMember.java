@@ -38,6 +38,14 @@ import java.util.Date;
             AND i.active = true
             AND instance.deletedAt IS NULL
     """),
+    @NamedQuery(name = "instanceSessionMember.getAllForInstanceIds", query = """
+            SELECT i FROM InstanceSessionMember i
+            LEFT JOIN i.instanceSession instanceSession
+            LEFT JOIN instanceSession.instance instance
+            WHERE instance.id IN :instanceIds
+            AND i.active = true
+            AND instance.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instanceSessionMember.getAllByConnectionId", query = """
             SELECT i FROM InstanceSessionMember i
             LEFT JOIN i.instanceSession instanceSession

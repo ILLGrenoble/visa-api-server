@@ -57,7 +57,7 @@ public class InstanceService {
         return this.repository.countAll();
     }
 
-    public Long countAll(QueryFilter filter) {
+    public Long countAll(final InstanceFilter filter) {
         return this.repository.countAll(filter);
     }
 
@@ -135,7 +135,7 @@ public class InstanceService {
         }
     }
 
-    public List<Instance> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
+    public List<Instance> getAll(final InstanceFilter filter, final OrderBy orderBy, final Pagination pagination) {
         return this.repository.getAll(filter, orderBy, pagination);
     }
 

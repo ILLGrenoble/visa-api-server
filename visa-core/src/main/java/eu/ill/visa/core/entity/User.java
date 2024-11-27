@@ -21,7 +21,9 @@ import java.util.stream.Collectors;
     @NamedQuery(name = "user.getByIdWithRoles", query = """
             SELECT u
             FROM User u
-            LEFT OUTER JOIN FETCH u.userRoles
+            LEFT OUTER JOIN FETCH u.userRoles ur
+            LEFT OUTER JOIN FETCH ur.role r
+            LEFT OUTER JOIN FETCH u.affiliation a
             WHERE u.id = :id
     """),
     @NamedQuery(name = "user.getAll", query = """

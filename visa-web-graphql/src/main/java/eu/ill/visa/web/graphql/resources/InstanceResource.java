@@ -8,7 +8,7 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
 import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
@@ -20,7 +20,6 @@ import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.ValidationException;
 import eu.ill.visa.web.graphql.inputs.OrderByInput;
 import eu.ill.visa.web.graphql.inputs.PaginationInput;
-import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.types.*;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.graphql.api.AdaptToScalar;
@@ -40,7 +39,6 @@ import java.util.List;
 
 import static eu.ill.visa.web.graphql.inputs.OrderByInput.toOrderBy;
 import static eu.ill.visa.web.graphql.inputs.PaginationInput.toPagination;
-import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNullElse;
@@ -80,18 +78,18 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull Connection<InstanceType> instances(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull final PaginationInput pagination) throws DataFetchingException {
+    public @NotNull Connection<InstanceType> instances(final InstanceFilter filter, final OrderByInput orderBy, @NotNull final PaginationInput pagination) throws DataFetchingException {
         try {
             if (!pagination.isLimitBetween(0, 50)) {
                 throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
             }
             final List<InstanceType> results = instanceService.getAll(
-                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new),
+                requireNonNullElseGet(filter, InstanceFilter::new),
                 requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("name", true)), toPagination(pagination)
             ).stream()
                 .map(InstanceType::new)
                 .toList();
-            final PageInfo pageInfo = new PageInfo(instanceService.countAll(toQueryFilter(filter)), pagination.getLimit(), pagination.getOffset());
+            final PageInfo pageInfo = new PageInfo(instanceService.countAll(filter), pagination.getLimit(), pagination.getOffset());
             return new Connection<>(pageInfo, results);
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -106,9 +104,9 @@ public class InstanceResource {
      * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countInstances(final QueryFilterInput filter) throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countInstances(final InstanceFilter filter) throws DataFetchingException {
         try {
-            return instanceService.countAll(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new));
+            return instanceService.countAll(requireNonNullElseGet(filter, InstanceFilter::new));
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
         }
@@ -132,7 +130,7 @@ public class InstanceResource {
      */
     @Query
     public @NotNull Connection<InstanceType> recentInstances(final @NotNull PaginationInput pagination) throws DataFetchingException {
-        return instances(new QueryFilterInput(), new OrderByInput("createdAt", false), pagination);
+        return instances(new InstanceFilter(), new OrderByInput("createdAt", false), pagination);
     }
 
     /**

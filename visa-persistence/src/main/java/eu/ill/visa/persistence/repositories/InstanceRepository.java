@@ -1,20 +1,19 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.preql.FilterQuery;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceThumbnail;
-import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
-import eu.ill.visa.persistence.providers.InstanceFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -22,10 +21,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
-import static java.util.Objects.requireNonNullElseGet;
-
 @Singleton
 public class InstanceRepository extends AbstractRepository<Instance> {
+
+    private static final Logger logger = LoggerFactory.getLogger(InstanceRepository.class);
 
     @Inject
     InstanceRepository(final EntityManager entityManager) {
@@ -99,24 +98,120 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         }
     }
 
-    public List<Instance> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
-        final InstanceFilterProvider provider = new InstanceFilterProvider(getEntityManager());
-        final FilterQuery<Instance> query = createFilterQuery(provider, requireNonNullElseGet(filter, QueryFilter::new), orderBy, pagination);
-        query.addExpression((criteriaBuilder, root) ->
-            criteriaBuilder.isNull(root.get("deletedAt"))
-        );
+    public List<Instance> getAll(final InstanceFilter filter, final OrderBy orderBy, final Pagination pagination) {
+        final CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
+        final CriteriaQuery<Instance> cbQuery = cb.createQuery(Instance.class);
+        final Root<Instance> root = cbQuery.from(Instance.class);
+
+        Fetch<Instance, Plan> planFetch = root.fetch("plan", JoinType.INNER);
+        planFetch.fetch("image", JoinType.INNER);
+        planFetch.fetch("flavour", JoinType.INNER);
+
+        InstanceRequestContext context = new InstanceRequestContext(root);
+        final List<Predicate> predicates = this.convertFilterToPredicates(filter, cbQuery, cb, context);
+        cbQuery.where(cb.and(predicates.toArray(new Predicate[0]))).distinct(true);
+
+        if (orderBy != null) {
+            if (orderBy.getName().equals("id")) {
+                Path<Long> idOrder = root.get("id");
+                cbQuery.orderBy(orderBy.getAscending() ? cb.asc(idOrder) : cb.desc(idOrder));
+
+            } else if (orderBy.getName().equals("createdAt")) {
+                Path<Date> createdAtOrder = root.get("createdAt");
+                cbQuery.orderBy(orderBy.getAscending() ? cb.asc(createdAtOrder) : cb.desc(createdAtOrder));
+
+            }  else if (orderBy.getName().equals("name")) {
+                Path<String> nameOrder = root.get("name");
+                cbQuery.orderBy(orderBy.getAscending() ? cb.asc(nameOrder) : cb.desc(nameOrder));
+
+            }  else if (orderBy.getName().equals("state")) {
+                Path<String> stateOrder = root.get("state");
+                cbQuery.orderBy(orderBy.getAscending() ? cb.asc(stateOrder) : cb.desc(stateOrder));
+
+            } else if (orderBy.getName().equals("terminationDate")) {
+                Path<Date> terminationOrder = root.get("terminationDate");
+                cbQuery.orderBy(orderBy.getAscending() ? cb.asc(terminationOrder) : cb.desc(terminationOrder));
+
+            } else {
+                logger.warn("Client has requested ordering of instances by unknown field: {}", orderBy.getName());
+            }
+        }
+
+        TypedQuery<Instance> query = getEntityManager().createQuery(cbQuery);
+
+
+        if (pagination != null) {
+            query.setFirstResult(pagination.getOffset());
+            query.setMaxResults(pagination.getLimit());
+        }
+
         return query.getResultList();
     }
 
-    public Long countAll(QueryFilter filter) {
-        final InstanceFilterProvider provider = new InstanceFilterProvider(getEntityManager());
-        final FilterQuery<Instance> query = createFilterQuery(provider, requireNonNullElseGet(filter, QueryFilter::new), null, null);
-        query.addExpression((criteriaBuilder, root) ->
-            criteriaBuilder.isNull(root.get("deletedAt"))
-        );
-        return query.count();
+    public Long countAll(final InstanceFilter filter) {
+        final CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
+        final CriteriaQuery<Long> cbQuery = cb.createQuery(Long.class);
+        final Root<Instance> root = cbQuery.from(Instance.class);
+
+        InstanceRequestContext context = new InstanceRequestContext(root);
+        final List<Predicate> predicates = this.convertFilterToPredicates(filter, cbQuery, cb, context);
+
+        cbQuery.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        cbQuery.select(cb.countDistinct(root));
+        TypedQuery<Long> query = getEntityManager().createQuery(cbQuery);
+        return query.getSingleResult();
     }
 
+
+    protected List<Predicate> convertFilterToPredicates(final InstanceFilter filter,
+                                                        final CriteriaQuery cq,
+                                                        final CriteriaBuilder cb,
+                                                        final InstanceRequestContext context) {
+
+        final Root<Instance> root = context.getRoot();
+
+        final List<Predicate> predicates = new ArrayList<>();
+
+        if (filter.getId() != null) {
+            predicates.add(cb.equal(root.get("id"), filter.getId()));
+        }
+
+        if (filter.getNameLike() != null) {
+            String nameLike = String.format("%%%s%%", filter.getNameLike()).toLowerCase();
+            predicates.add(cb.like(cb.lower(root.get("name")), nameLike));
+        }
+
+        if (filter.getOwnerId() != null) {
+            Join<Instance, InstanceMember> memberJoin = context.getMemberJoin();
+            predicates.add(cb.equal(memberJoin.get("user").get("id"), filter.getOwnerId()));
+            predicates.add(cb.equal(memberJoin.get("role"), InstanceMemberRole.OWNER));
+        }
+
+        if (filter.getInstrumentId() != null) {
+            Join<Instance, Experiment> experimentJoin = context.getExperimentJoin();
+            predicates.add(cb.equal(experimentJoin.get("instrument").get("id"), filter.getInstrumentId()));
+        }
+
+        if (filter.getInstrumentId() != null) {
+            Join<Instance, Experiment> experimentJoin = context.getExperimentJoin();
+            predicates.add(cb.equal(experimentJoin.get("instrument").get("id"), filter.getInstrumentId()));
+        }
+
+        if (filter.getImageId() != null) {
+            Join<Instance, Plan> planJoin = context.getPlanJoin();
+            predicates.add(cb.equal(planJoin.get("image").get("id"), filter.getImageId()));
+        }
+
+        if (filter.getFlavourId() != null) {
+            Join<Instance, Plan> planJoin = context.getPlanJoin();
+            predicates.add(cb.equal(planJoin.get("flavour").get("id"), filter.getFlavourId()));
+        }
+
+        predicates.add(cb.isNull(root.get("deletedAt")));
+
+        return predicates;
+    }
 
     /**
      * Get all instances that will soon expire due to inactivity
@@ -456,4 +551,40 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         }
     }
 
+
+    protected static final class InstanceRequestContext {
+        private final Root<Instance> root;
+        private Join<Instance, InstanceMember> memberJoin = null;
+        private Join<Instance, Experiment> experimentJoin = null;
+        private Join<Instance, Plan> planJoin = null;
+
+        public InstanceRequestContext(Root<Instance> root) {
+            this.root = root;
+        }
+
+        public Root<Instance> getRoot() {
+            return root;
+        }
+
+        public Join<Instance, InstanceMember> getMemberJoin() {
+            if (memberJoin == null) {
+                memberJoin = root.join("members", JoinType.INNER);
+            }
+            return memberJoin;
+        }
+
+        public Join<Instance, Experiment> getExperimentJoin() {
+            if (experimentJoin == null) {
+                experimentJoin = root.join("experiments", JoinType.LEFT);
+            }
+            return experimentJoin;
+        }
+
+        public Join<Instance, Plan> getPlanJoin() {
+            if (planJoin == null) {
+                planJoin = root.join("plan", JoinType.INNER);
+            }
+            return planJoin;
+        }
+    }
 }

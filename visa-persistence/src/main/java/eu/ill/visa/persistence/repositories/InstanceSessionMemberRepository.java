@@ -75,6 +75,12 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         return query.getResultList();
     }
 
+    public List<InstanceSessionMember> getAllSessionMembersByInstanceIds(final List<Long> instanceIds) {
+        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceIds", InstanceSessionMember.class);
+        query.setParameter("instanceIds", instanceIds);
+        return query.getResultList();
+    }
+
     public List<InstanceSessionMember> getAllSessionMembersByInstanceSessionId(final Long instanceSessionId) {
         final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllByInstanceSessionId", InstanceSessionMember.class);
         query.setParameter("instanceSessionId", instanceSessionId);

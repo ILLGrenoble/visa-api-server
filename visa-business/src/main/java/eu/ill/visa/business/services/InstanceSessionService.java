@@ -121,6 +121,13 @@ public class InstanceSessionService {
         return this.instanceSessionMemberRepository.getAllSessionMembersByInstanceId(instanceId);
     }
 
+    public List<List<InstanceSessionMember>> getAllSessionMembersByInstanceIds(@NotNull List<Long> instanceIds) {
+        List<InstanceSessionMember> ungroupedSessionMembers = this.instanceSessionMemberRepository.getAllSessionMembersByInstanceIds(instanceIds);
+        return instanceIds.stream().map(id -> {
+            return ungroupedSessionMembers.stream().filter(sessionMember -> sessionMember.getInstanceSession().getInstance().getId().equals(id)).toList();
+        }).toList();
+    }
+
     public InstanceSessionMember getSessionMemberBySessionId(String sessionId) {
         return this.instanceSessionMemberRepository.getBySessionId(sessionId);
     }

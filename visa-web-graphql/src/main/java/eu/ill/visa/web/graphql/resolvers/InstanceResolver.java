@@ -5,7 +5,6 @@ import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.*;
 import jakarta.inject.Inject;
@@ -123,15 +122,16 @@ public class InstanceResolver {
         }
     }
 
-    public UserType owner(@Source final InstanceType instance) {
-        User user = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
-        return new UserType(user);
+    public List<UserType> owner(@Source final List<InstanceType> instances) {
+        return this.instanceMemberService.getOwnersByInstanceIds(instances.stream().map(InstanceType::getId).toList()).stream()
+            .map(UserType::new)
+            .toList();
     }
 
-    public List<InstanceSessionMemberType> activeSessions(@Source final InstanceType instance) throws DataFetchingException {
+    public List<List<InstanceSessionMemberType>> activeSessions(@Source final List<InstanceType> instances) throws DataFetchingException {
         try {
-            return instanceSessionService.getAllSessionMembersByInstanceId(instance.getId()).stream()
-                .map(InstanceSessionMemberType::new)
+            return instanceSessionService.getAllSessionMembersByInstanceIds(instances.stream().map(InstanceType::getId).toList()).stream()
+                .map(instanceSessionMembers -> instanceSessionMembers.stream().map(InstanceSessionMemberType::new).toList())
                 .toList();
         } catch (InvalidQueryException exception) {
             throw new DataFetchingException(exception.getMessage());
@@ -148,12 +148,13 @@ public class InstanceResolver {
         }
     }
 
-    public @NotNull CloudClientType cloudClient(@Source final InstanceType instance) {
-        CloudClient cloudClient = this.cloudClientService.getCloudClient(instance.getCloudId());
-        if (cloudClient != null) {
-            return new CloudClientType(cloudClient);
-        }
-        return null;
+    public @NotNull List<CloudClientType> cloudClient(@Source final List<InstanceType> instances) {
+        List<CloudClient> cloudClients = this.cloudClientService.getCloudClients(instances.stream().map(InstanceType::getCloudId).distinct().toList());
+        return instances.stream().map(instanceType -> {
+            return cloudClients.stream().filter(cloudClient -> {
+                return cloudClient.getId() == -1 ? instanceType.getCloudId() == null : cloudClient.getId().equals(instanceType.getCloudId());
+            }).findFirst().orElse(null);
+        }).map(cloudClient -> cloudClient == null ? null : new CloudClientType(cloudClient)).toList();
     }
 
 }

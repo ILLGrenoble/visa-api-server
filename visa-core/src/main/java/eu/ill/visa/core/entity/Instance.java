@@ -235,8 +235,7 @@ public class Instance extends Timestampable {
     @Column(name = "unrestricted_member_access", nullable = true)
     private Date unrestrictedMemberAccess = null;
 
-    @OneToMany(orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_member_id"), nullable = false)
+    @OneToMany(mappedBy = "instance", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     private List<InstanceMember> members = new ArrayList<>();
 
     @ManyToMany()

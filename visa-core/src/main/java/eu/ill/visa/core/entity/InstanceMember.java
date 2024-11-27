@@ -1,5 +1,6 @@
 package eu.ill.visa.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -33,6 +34,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
             where i.id = :instanceId
             and m.role = 'OWNER'
     """),
+    @NamedQuery(name = "instanceMember.getOwnersByInstanceIds", query = """
+            SELECT m FROM InstanceMember m
+            LEFT JOIN FETCH m.instance i
+            LEFT JOIN FETCH m.user u
+            LEFT JOIN FETCH u.affiliation a
+            where i.id IN :instanceIds
+            and m.role = 'OWNER'
+    """),
 })
 @Table(name = "instance_member")
 public class InstanceMember extends Timestampable {
@@ -49,6 +58,11 @@ public class InstanceMember extends Timestampable {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 255, nullable = false)
     private InstanceMemberRole role;
+
+    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
+    private Instance instance;
 
     private InstanceMember(Builder builder) {
         this.user = builder.user;
@@ -89,6 +103,14 @@ public class InstanceMember extends Timestampable {
 
     public void setRole(InstanceMemberRole role) {
         this.role = role;
+    }
+
+    public Instance getInstance() {
+        return instance;
+    }
+
+    public void setInstance(Instance instance) {
+        this.instance = instance;
     }
 
     @Override

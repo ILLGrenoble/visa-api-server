@@ -65,6 +65,12 @@ public class InstanceMemberRepository extends AbstractRepository<InstanceMember>
         }
     }
 
+    public List<InstanceMember> getOwnersByInstanceIds(List<Long> instanceIds) {
+        final TypedQuery<InstanceMember> query = getEntityManager().createNamedQuery("instanceMember.getOwnersByInstanceIds", InstanceMember.class);
+        query.setParameter("instanceIds", instanceIds);
+        return query.getResultList();
+    }
+
     public void save(InstanceMember instanceMember) {
         if (instanceMember.getId() == null) {
             persist(instanceMember);

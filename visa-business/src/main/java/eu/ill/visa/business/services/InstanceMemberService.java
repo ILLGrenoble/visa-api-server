@@ -51,6 +51,17 @@ public class InstanceMemberService {
         return null;
     }
 
+    public List<User> getOwnersByInstanceIds(final List<Long> instanceIds) {
+        final List<InstanceMember> owners = repository.getOwnersByInstanceIds(instanceIds);
+        return instanceIds.stream().map(instanceId -> owners.stream().filter(owner -> {
+                return owner.getInstance().getId().equals(instanceId);
+            })
+            .findAny()
+            .map(InstanceMember::getUser)
+            .orElse(null))
+            .toList();
+    }
+
     public void save(@NotNull InstanceMember instanceMember) {
         this.repository.save(instanceMember);
     }

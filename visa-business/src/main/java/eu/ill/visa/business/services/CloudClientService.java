@@ -91,6 +91,10 @@ public class CloudClientService {
         return cloudClient;
     }
 
+    public List<CloudClient> getCloudClients(List<Long> ids) {
+        return ids.stream().map(this::getCloudClient).toList();
+    }
+
     public CloudProviderConfiguration getCloudProviderConfiguration(Long id) {
         return this.cloudProviderService.getById(id);
     }
