@@ -19,13 +19,6 @@ import java.util.Set;
             AND e.startDate IS NOT NULL
             AND e.endDate IS NOT NULL
     """),
-    @NamedQuery(name = "experiment.getAll", query = """
-            SELECT e
-            FROM Experiment e
-            WHERE e.startDate IS NOT NULL
-            AND e.endDate IS NOT NULL
-            ORDER BY e.id ASC
-    """),
     @NamedQuery(name = "experiment.getYearsForUser", query = """
             SELECT distinct YEAR(e.startDate)
             FROM Experiment e

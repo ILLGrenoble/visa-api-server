@@ -1,9 +1,9 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.ExperimentFilter;
+import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.entity.Experiment;
 import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.User;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
@@ -11,9 +11,7 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +36,7 @@ public class ExperimentServiceTest {
     @Test
     @DisplayName("Get all experiments")
     void testGetAll() {
-        List<Experiment> experiments = experimentService.getAll();
+        List<Experiment> experiments = experimentService.getAll(new ExperimentFilter());
         assertEquals(9, experiments.size());
     }
 
@@ -63,29 +61,31 @@ public class ExperimentServiceTest {
     @Test
     @DisplayName("Get all experiments for a given user")
     void testGetAllForUser() {
-        User user = userService.getById("1");
-        List<Experiment> experiments = experimentService.getAllForUser(user);
+        ExperimentFilter filter = new ExperimentFilter();
+        filter.setUserId("1");
+        List<Experiment> experiments = experimentService.getAll(filter);
         assertEquals(3, experiments.size());
     }
 
     @Test
     @DisplayName("Count all experiments for a given user")
     void testCountAllForUser() {
-        User user = userService.getById("1");
-        Long count = experimentService.getAllCountForUser(user);
+        ExperimentFilter filter = new ExperimentFilter();
+        filter.setUserId("1");
+        Long count = experimentService.countAll(filter);
         assertEquals(3, count);
     }
 
     @Test
     @DisplayName("Get all experiments for a given user and dates")
-    void testGetAllForUserAndDates() {
+    void testGetAllAndDates() {
         List<Experiment> experiments = new ArrayList<>();
         try {
-            Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-01");
-            Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-05");
-            User user = userService.getById("1");
-            ExperimentFilter filter = new ExperimentFilter(startDate, endDate);
-            experiments = experimentService.getAllForUser(user, filter);
+            ExperimentFilter filter = new ExperimentFilter();
+            filter.setUserId("1");
+            filter.setStartDate(ExperimentFilter.DateParameter.valueOf("2016-01-01"));
+            filter.setEndDate(ExperimentFilter.DateParameter.valueOf("2016-01-05"));
+            experiments = experimentService.getAll(filter);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,11 +98,11 @@ public class ExperimentServiceTest {
     void testCountAllForUserAndDates() {
         Long experiments = 0L;
         try {
-            Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-01");
-            Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-05");
-            User user = userService.getById("1");
-            ExperimentFilter filter = new ExperimentFilter(startDate, endDate);
-            experiments = experimentService.getAllCountForUser(user, filter);
+            ExperimentFilter filter = new ExperimentFilter();
+            filter.setUserId("1");
+            filter.setStartDate(ExperimentFilter.DateParameter.valueOf("2016-01-01"));
+            filter.setEndDate(ExperimentFilter.DateParameter.valueOf("2016-01-05"));
+            experiments = experimentService.countAll(filter);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,15 +113,15 @@ public class ExperimentServiceTest {
 
     @Test
     @DisplayName("Get all experiments for a given user and experiment dates with pagination")
-    void testGetAllForUserAndDatesWithPagination() {
+    void testGetAllAndDatesWithPagination() {
         List<Experiment> experiments = new ArrayList<>();
         try {
-            Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-01");
-            Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-05");
-            User user = userService.getById("1");
-            ExperimentFilter filter = new ExperimentFilter(startDate, endDate);
+            ExperimentFilter filter = new ExperimentFilter();
+            filter.setUserId("1");
+            filter.setStartDate(ExperimentFilter.DateParameter.valueOf("2016-01-01"));
+            filter.setEndDate(ExperimentFilter.DateParameter.valueOf("2016-01-05"));
             Pagination pagination = new Pagination(1, 1);
-            experiments = experimentService.getAllForUser(user, filter, pagination);
+            experiments = experimentService.getAll(filter, pagination);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -131,21 +131,21 @@ public class ExperimentServiceTest {
 
     @Test
     @DisplayName("Get all experiments for a given user and instrument")
-    void testGetAllForUserAndInstrument() {
-        Instrument instrument = instrumentService.getById(1L);
-        User user = userService.getById("1");
-        ExperimentFilter filter = new ExperimentFilter(instrument);
-        List<Experiment> experiments = experimentService.getAllForUser(user, filter);
+    void testGetAllAndInstrument() {
+        ExperimentFilter filter = new ExperimentFilter();
+        filter.setUserId("1");
+        filter.setInstrumentId(1L);
+        List<Experiment> experiments = experimentService.getAll(filter);
         assertEquals(2, experiments.size());
     }
 
     @Test
     @DisplayName("Count all experiments for a given user and instrument")
     void testCountAllForUserAndInstrument() {
-        Instrument instrument = instrumentService.getById(1L);
-        User user = userService.getById("1");
-        ExperimentFilter filter = new ExperimentFilter(instrument);
-        Long experiments = experimentService.getAllCountForUser(user, filter);
+        ExperimentFilter filter = new ExperimentFilter();
+        filter.setUserId("1");
+        filter.setInstrumentId(1L);
+        Long experiments = experimentService.countAll(filter);
         assertEquals(2, experiments);
     }
 
@@ -160,8 +160,8 @@ public class ExperimentServiceTest {
     @Test
     @DisplayName("Get all experiments for a given instrument")
     void testGetAllFilteredByInstrument() {
-        QueryFilter filter = new QueryFilter("instrument.id = :id");
-        filter.addParameter("id", "1");
+        ExperimentFilter filter = new ExperimentFilter();
+        filter.setInstrumentId(1L);
         List<Experiment> experiments = experimentService.getAll(filter, new Pagination(50, 0));
         assertEquals(2, experiments.size());
     }

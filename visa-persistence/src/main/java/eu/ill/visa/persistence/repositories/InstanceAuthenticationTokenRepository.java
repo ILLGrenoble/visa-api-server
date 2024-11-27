@@ -17,7 +17,6 @@ public class InstanceAuthenticationTokenRepository extends AbstractRepository<In
         super(entityManager);
     }
 
-    @Override
     public List<InstanceAuthenticationToken> getAll() {
         TypedQuery<InstanceAuthenticationToken> query = getEntityManager().createNamedQuery("instanceAuthenticationToken.getAll", InstanceAuthenticationToken.class);
         return query.getResultList();

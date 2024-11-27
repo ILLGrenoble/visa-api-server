@@ -1,8 +1,5 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Experiment;
 import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.Plan;
@@ -33,11 +30,6 @@ public class PlanService {
         return this.repository.getAll();
     }
 
-
-    public List<Plan> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
-        return this.repository.getAll(filter, orderBy, pagination);
-    }
-
     public Plan getById(Long id) {
         return this.repository.getById(id);
     }
@@ -52,14 +44,6 @@ public class PlanService {
 
     public void save(@NotNull Plan plan) {
         this.repository.save(plan);
-    }
-
-    public Long countAll() {
-        return repository.countAll(new QueryFilter());
-    }
-
-    public Long countAll(QueryFilter filter) {
-        return repository.countAll(requireNonNullElseGet(filter, QueryFilter::new));
     }
 
     public List<Plan> getAllForAdmin() {

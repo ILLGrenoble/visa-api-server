@@ -19,8 +19,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.SecurityContext;
 import org.jboss.resteasy.reactive.RestResponse;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -119,83 +117,71 @@ public class AccountController extends AbstractController {
     @GET
     @Path("/experiments")
     public MetaResponse<List<ExperimentDto>> experiments(@Context SecurityContext securityContext,
-                                @QueryParam("instrumentId") final Long instrumentId,
-                                @QueryParam("startDate") final String startDateString,
-                                @QueryParam("endDate") final String endDateString,
-                                @QueryParam("proposals") final String proposalsString,
-                                @QueryParam("dois") final String doisString,
-                                @QueryParam("includeOpenData") @DefaultValue("false") Boolean includeOpenData,
+                                @BeanParam ExperimentFilter filter,
                                 @QueryParam("page") @DefaultValue("1") @Min(1) final Integer page,
                                 @QueryParam("limit") @DefaultValue("25") @Min(5) @Max(100) final Integer limit,
                                 @QueryParam("orderBy") final String orderByValue,
                                 @QueryParam("descending") @DefaultValue("false") final boolean descending) {
 
-        try {
-            final Instrument instrument = instrumentId == null ? null : instrumentService.getById(instrumentId);
-            final User user = this.getUserPrincipal(securityContext);
+        final User user = this.getUserPrincipal(securityContext);
+        filter = filter == null ? new ExperimentFilter() : filter;
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        filter.setUserId(user.getId());
+        filter.setIncludeOpenData(Boolean.TRUE.equals(filter.getIncludeOpenData()) && clientConfiguration.experimentsConfiguration().openDataIncluded());
 
-            Date startDate = startDateString == null ? null : simpleDateFormat.parse(startDateString);
-            Date endDate = endDateString == null ? null : simpleDateFormat.parse(endDateString);
-            Set<String> proposalIdentifiers = proposalsString == null ? null : new HashSet<>(Arrays.asList(proposalsString.split(",")));
-            Set<String> dois = doisString == null ? null : new HashSet<>(Arrays.asList(doisString.split(",")));
-
-            includeOpenData = includeOpenData && clientConfiguration.experimentsConfiguration().openDataIncluded();
-
-            final ExperimentFilter filter = new ExperimentFilter(startDate, endDate, instrument, proposalIdentifiers, dois, includeOpenData);
-
-            final Long total = experimentService.getAllCountForUser(user, filter);
-            final int offset = (page - 1) * limit;
-
-            final Pagination pagination = new Pagination(limit, offset);
-            OrderBy orderBy = null;
-            if (orderByValue != null) {
-                orderBy = new OrderBy(orderByValue, !descending);
-            }
-
-            final MetaResponse.MetaData metadata = new MetaResponse.MetaData()
-                .count(total)
-                .page(page)
-                .limit(limit);
-
-            final List<ExperimentDto> experiments = experimentService.getAllForUser(user, filter, pagination, orderBy).stream()
-                .map(ExperimentDto::new)
-                .toList();
-
-            // Check if proposals was specified whether all the proposals have associated experiments
-            List<String> errors = new ArrayList<>();
-            if (proposalIdentifiers != null) {
-                Set<String> experimentProposalIdentifiers = experiments.stream().map(experiment -> experiment.getProposal().getIdentifier()).collect(Collectors.toSet());
-                Set<String> missingProposalIdentifiers = new HashSet<>(proposalIdentifiers);
-                missingProposalIdentifiers.removeAll(experimentProposalIdentifiers);
-                if (!missingProposalIdentifiers.isEmpty()) {
-                    String error = "Could not obtain experiments for the following proposal(s): " + String.join(", ", missingProposalIdentifiers);
-                    errors.add(error);
-                }
-            }
-            if (dois != null) {
-                Set<String> experimentDOIs = experiments.stream().map(experiment -> experiment.getDoi() != null ? experiment.getDoi() : experiment.getProposal().getDoi()).collect(Collectors.toSet());
-                Set<String> missingDOIs = new HashSet<>(dois);
-                missingDOIs.removeAll(experimentDOIs);
-                if (!missingDOIs.isEmpty()) {
-                    String error = "Could not obtain experiments for the following doi(s): " + String.join(", ", missingDOIs);
-                    errors.add(error);
-                }
-            }
-
-            return createResponse(experiments, metadata, errors);
-
-        } catch (ParseException e) {
-            throw new BadRequestException("Could not convert dates");
+        final int offset = (page - 1) * limit;
+        final Pagination pagination = new Pagination(limit, offset);
+        OrderBy orderBy = null;
+        if (orderByValue != null) {
+            orderBy = new OrderBy(orderByValue, !descending);
         }
+
+        final List<ExperimentDto> experiments = experimentService.getAll(filter, pagination, orderBy).stream()
+            .map(ExperimentDto::new)
+            .toList();
+
+        final Long total = experimentService.countAll(filter);
+
+
+        final MetaResponse.MetaData metadata = new MetaResponse.MetaData()
+            .count(total)
+            .page(page)
+            .limit(limit);
+
+        // Check if proposals was specified whether all the proposals have associated experiments
+        List<String> errors = new ArrayList<>();
+        if (filter.getProposals() != null && !filter.getProposals().isEmpty()) {
+            Set<String> experimentProposalIdentifiers = experiments.stream().map(experiment -> experiment.getProposal().getIdentifier()).collect(Collectors.toSet());
+            Set<String> missingProposalIdentifiers = new HashSet<>(filter.getProposals());
+            missingProposalIdentifiers.removeAll(experimentProposalIdentifiers);
+            if (!missingProposalIdentifiers.isEmpty()) {
+                String error = "Could not obtain experiments for the following proposal(s): " + String.join(", ", missingProposalIdentifiers);
+                errors.add(error);
+            }
+        }
+        if (filter.getDois() != null && !filter.getDois().isEmpty()) {
+            Set<String> experimentDOIs = experiments.stream().map(experiment -> experiment.getDoi() != null ? experiment.getDoi() : experiment.getProposal().getDoi()).collect(Collectors.toSet());
+            Set<String> missingDOIs = new HashSet<>(filter.getDois());
+            missingDOIs.removeAll(experimentDOIs);
+            if (!missingDOIs.isEmpty()) {
+                String error = "Could not obtain experiments for the following doi(s): " + String.join(", ", missingDOIs);
+                errors.add(error);
+            }
+        }
+
+        return createResponse(experiments, metadata, errors);
     }
 
     @GET
     @Path("/experiments/_count")
-    public MetaResponse<Long> experiments(@Context SecurityContext securityContext) {
+    public MetaResponse<Long> experiments(@Context SecurityContext securityContext, @BeanParam ExperimentFilter filter) {
         final User user = this.getUserPrincipal(securityContext);
-        final Long total = experimentService.getAllCountForUser(user);
+
+        filter = filter == null ? new ExperimentFilter() : filter;
+        filter.setUserId(user.getId());
+        filter.setIncludeOpenData(Boolean.TRUE.equals(filter.getIncludeOpenData()) && clientConfiguration.experimentsConfiguration().openDataIncluded());
+
+        final Long total = experimentService.countAll(filter);
         return createResponse(total);
     }
 

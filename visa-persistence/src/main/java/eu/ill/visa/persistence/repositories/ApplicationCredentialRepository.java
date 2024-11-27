@@ -17,7 +17,6 @@ public class ApplicationCredentialRepository extends AbstractRepository<Applicat
         super(entityManager);
     }
 
-    @Override
     public List<ApplicationCredential> getAll() {
         final TypedQuery<ApplicationCredential> query = getEntityManager().createNamedQuery("applicationCredential.getAll", ApplicationCredential.class);
         return query.getResultList();

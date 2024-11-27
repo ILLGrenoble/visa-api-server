@@ -17,7 +17,6 @@ public class CloudProviderRepository extends AbstractRepository<CloudProviderCon
         super(entityManager);
     }
 
-    @Override
     public List<CloudProviderConfiguration> getAll() {
         final TypedQuery<CloudProviderConfiguration> query = getEntityManager().createNamedQuery("cloudProviderConfiguration.getAll", CloudProviderConfiguration.class);
         return query.getResultList();

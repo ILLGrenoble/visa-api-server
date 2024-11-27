@@ -24,7 +24,6 @@ public class InstanceJupyterSessionRepository extends AbstractRepository<Instanc
         super(entityManager);
     }
 
-    @Override
     public List<InstanceJupyterSession> getAll() {
         final TypedQuery<InstanceJupyterSession> query = getEntityManager().createNamedQuery("instanceJupyterSession.getAll", InstanceJupyterSession.class);
         return query.getResultList();

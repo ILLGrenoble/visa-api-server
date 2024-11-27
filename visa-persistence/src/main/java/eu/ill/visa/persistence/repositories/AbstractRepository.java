@@ -48,8 +48,6 @@ abstract class AbstractRepository<T> {
         em.flush();
     }
 
-    public abstract List<T> getAll();
-
     public EntityManager getEntityManager() {
         return entityManager;
     }

@@ -3,11 +3,8 @@ package eu.ill.visa.persistence.repositories;
 import eu.ill.visa.core.domain.ExperimentFilter;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Experiment;
-import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.persistence.providers.ExperimentFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -26,21 +23,6 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
     @Inject
     ExperimentRepository(final EntityManager entityManager) {
         super(entityManager);
-    }
-
-    public List<Experiment> getAll() {
-        final TypedQuery<Experiment> query = getEntityManager().createNamedQuery("experiment.getAll", Experiment.class);
-        return query.getResultList();
-    }
-
-    public List<Experiment> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
-        final ExperimentFilterProvider provider = new ExperimentFilterProvider(getEntityManager());
-        return super.getAll(provider, filter, orderBy, pagination);
-    }
-
-    public Long countAll(QueryFilter filter) {
-        final ExperimentFilterProvider provider = new ExperimentFilterProvider(getEntityManager());
-        return super.countAll(provider, filter);
     }
 
     public Experiment getById(final String id) {
@@ -63,18 +45,6 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         final TypedQuery<Integer> query = getEntityManager().createNamedQuery("experiment.getYearsForOpenData", Integer.class);
         query.setParameter("currentDate", new Date());
         return query.getResultList();
-    }
-
-    public List<Experiment> getAllForUser(final User user) {
-        return getAllForUser(user, null);
-    }
-
-    public List<Experiment> getAllForUser(final User user, final ExperimentFilter filter) {
-        return getAllForUser(user, filter, null, null);
-    }
-
-    public List<Experiment> getAllForUser(final User user, final ExperimentFilter filter, final Pagination pagination) {
-        return getAllForUser(user, filter, pagination, null);
     }
 
     public Experiment getByIdAndUser(final String id, final User user) {
@@ -107,14 +77,22 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         return new HashSet<>(query.getResultList());
     }
 
-    public List<Experiment> getAllForUser(final User user, final ExperimentFilter filter, Pagination pagination, OrderBy orderBy) {
+    public List<Experiment> getAll(final ExperimentFilter filter) {
+        return getAll(filter, null, null);
+    }
+
+    public List<Experiment> getAll(final ExperimentFilter filter, final Pagination pagination) {
+        return getAll(filter, pagination, null);
+    }
+
+    public List<Experiment> getAll(final ExperimentFilter filter, Pagination pagination, OrderBy orderBy) {
         final CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
         final CriteriaQuery<Experiment> cbQuery = cb.createQuery(Experiment.class);
         final Root<Experiment> root = cbQuery.from(Experiment.class);
         root.fetch("instrument", JoinType.INNER); // make sure instruments are selected so that the order by works correctly
         root.fetch("proposal", JoinType.INNER); // make sure proposals are selected so that the order by works correctly
 
-        final List<Predicate> predicates = this.getExperimentPredicates(user, filter, cb, root);
+        final List<Predicate> predicates = this.getExperimentPredicates(filter, cb, root);
 
         cbQuery.where(cb.and(predicates.toArray(new Predicate[0]))).distinct(true);
 
@@ -146,12 +124,12 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
         return query.getResultList();
     }
 
-    public Long getAllCountForUser(User user, ExperimentFilter filter) {
+    public Long countAll(ExperimentFilter filter) {
         final CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
         final CriteriaQuery<Long> cbQuery = cb.createQuery(Long.class);
         final Root<Experiment> root = cbQuery.from(Experiment.class);
 
-        final List<Predicate> predicates = this.getExperimentPredicates(user, filter, cb, root);
+        final List<Predicate> predicates = this.getExperimentPredicates(filter, cb, root);
 
         cbQuery.where(cb.and(predicates.toArray(new Predicate[0])));
 
@@ -161,24 +139,40 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
 
     }
 
-    private List<Predicate> getExperimentPredicates(final User user,
-                                                    final ExperimentFilter filter,
+    private List<Predicate> getExperimentPredicates(final ExperimentFilter filter,
                                                     final CriteriaBuilder cb,
                                                     final Root<Experiment> root) {
         final List<Predicate> predicates = new ArrayList<>();
 
-        Boolean includeOpenData = false;
 
         if (filter != null) {
-            final Instrument instrument = filter.getInstrument();
-            final Date startDate = filter.getStartDate();
-            final Date endDate = filter.getEndDate();
-            final Set<String> proposalIdentifiers = filter.getProposalIdentifiers();
-            final Set<String> dois = filter.getDois();
-            includeOpenData = filter.getIncludeOpenData();
+            final Date startDate = filter.getStartDate() == null ? null : filter.getStartDate().getDate();
+            final Date endDate = filter.getEndDate() == null ? null : filter.getEndDate().getDate();;
+            final Set<String> proposals = filter.getProposals() == null || filter.getProposals().isEmpty() ? null : filter.getProposals();
+            final Set<String> dois = filter.getDois() == null || filter.getDois().isEmpty() ? null : filter.getDois();
 
-            if (instrument != null) {
-                predicates.add(cb.equal(root.get("instrument"), instrument));
+            Predicate userPredicate = null;
+            Predicate openDataPredicate = null;
+            if (filter.getUserId() != null) {
+                userPredicate = cb.equal(root.get("users").get("id"), filter.getUserId());
+            }
+
+            if (filter.getIncludeOpenData()) {
+                openDataPredicate = cb.lessThanOrEqualTo(root.get("proposal").get("publicAt"), new Date());
+            }
+
+            if (openDataPredicate != null && userPredicate != null) {
+                predicates.add(cb.or(userPredicate, openDataPredicate));
+
+            } else if (userPredicate != null) {
+                predicates.add(userPredicate);
+
+            } else if (openDataPredicate != null) {
+                predicates.add(openDataPredicate);
+            }
+
+            if (filter.getInstrumentId() != null) {
+                predicates.add(cb.equal(root.get("instrument").get("id"), filter.getInstrumentId()));
             }
 
             if (startDate != null) {
@@ -189,14 +183,19 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
                 predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), endDate));
             }
 
-            if (proposalIdentifiers != null && dois != null) {
-                Predicate proposalIdentifierPredicate = root.get("proposal").get("identifier").in(proposalIdentifiers);
+            if (filter.getProposalLike() != null) {
+                String identifierLike = String.format("%s%%", filter.getProposalLike()).toLowerCase();
+                predicates.add(cb.like(cb.lower(root.get("proposal").get("identifier")), identifierLike));
+            }
+
+            if (proposals != null && dois != null) {
+                Predicate proposalIdentifierPredicate = root.get("proposal").get("identifier").in(proposals);
                 Predicate proposalDOIPredicate = root.get("proposal").get("doi").in(dois);
                 Predicate experimentDOIPredicate = root.get("doi").in(dois);
                 predicates.add(cb.or(proposalIdentifierPredicate, proposalDOIPredicate, experimentDOIPredicate));
 
-            } else if (proposalIdentifiers != null) {
-                predicates.add(root.get("proposal").get("identifier").in(proposalIdentifiers));
+            } else if (proposals != null) {
+                predicates.add(root.get("proposal").get("identifier").in(proposals));
 
             } else if (dois != null) {
                 Predicate proposalDOIPredicate = root.get("proposal").get("doi").in(dois);
@@ -205,14 +204,6 @@ public class ExperimentRepository extends AbstractRepository<Experiment> {
             }
         }
 
-        Predicate userPredicate = cb.equal(root.join("users"), user);
-        if (includeOpenData) {
-            Predicate openDataPredicate = cb.lessThanOrEqualTo(root.get("proposal").get("publicAt"), new Date());
-            predicates.add(cb.or(userPredicate, openDataPredicate));
-
-        } else {
-            predicates.add(userPredicate);
-        }
 
         return predicates;
     }

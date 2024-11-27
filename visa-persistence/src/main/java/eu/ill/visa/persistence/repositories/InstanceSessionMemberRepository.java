@@ -26,7 +26,6 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         super(entityManager);
     }
 
-    @Override
     public List<InstanceSessionMember> getAll() {
         final TypedQuery<InstanceSessionMember> query = getEntityManager()
             .createNamedQuery("instanceSessionMember.getAll", InstanceSessionMember.class);

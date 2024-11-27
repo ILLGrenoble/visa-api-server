@@ -3,6 +3,7 @@ package eu.ill.visa.web.graphql.resolvers;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.UserService;
+import eu.ill.visa.core.domain.ExperimentFilter;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.graphql.types.ExperimentType;
 import eu.ill.visa.web.graphql.types.InstanceType;
@@ -37,8 +38,9 @@ public class UserResolver {
     }
 
     public List<ExperimentType> experiments(@Source UserType userType) {
-        final User user = userService.getById(userType.getId());
-        return experimentService.getAllForUser(user).stream()
+        ExperimentFilter filter = new ExperimentFilter();
+        filter.setUserId(userType.getId());
+        return experimentService.getAll(filter).stream()
             .map(ExperimentType::new)
             .toList();
     }

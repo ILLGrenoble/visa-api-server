@@ -1,13 +1,9 @@
 package eu.ill.visa.persistence.repositories;
 
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Experiment;
 import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.Plan;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.persistence.providers.PlanFilterProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -29,16 +25,6 @@ public class PlanRepository extends AbstractRepository<Plan> {
     public List<Plan> getAll() {
         final TypedQuery<Plan> query = getEntityManager().createNamedQuery("plan.getAll", Plan.class);
         return query.getResultList();
-    }
-
-    public List<Plan> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
-        final PlanFilterProvider provider = new PlanFilterProvider(getEntityManager());
-        return super.getAll(provider, filter, orderBy, pagination);
-    }
-
-    public Long countAll(QueryFilter filter) {
-        final PlanFilterProvider provider = new PlanFilterProvider(getEntityManager());
-        return super.countAll(provider, filter);
     }
 
     public Plan getById(final Long id) {

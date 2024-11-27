@@ -17,7 +17,6 @@ public class ClientAuthenticationTokenRepository extends AbstractRepository<Clie
         super(entityManager);
     }
 
-    @Override
     public List<ClientAuthenticationToken> getAll() {
         TypedQuery<ClientAuthenticationToken> query = getEntityManager().createNamedQuery("clientAuthenticationToken.getAll", ClientAuthenticationToken.class);
         return query.getResultList();
