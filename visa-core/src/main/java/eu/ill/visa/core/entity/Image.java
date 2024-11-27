@@ -29,7 +29,8 @@ import java.util.List;
     @NamedQuery(name = "image.getAllForAdmin", query = """
             SELECT i
             FROM Image i
-            LEFT JOIN i.cloudProviderConfiguration cpc
+            LEFT JOIN FETCH i.cloudProviderConfiguration cpc
+            LEFT JOIN FETCH i.protocols p
             WHERE i.deleted = false
             AND cpc.deletedAt IS NULL
             ORDER BY i.id

@@ -26,7 +26,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
     @NamedQuery(name = "flavour.getAllForAdmin", query = """
             SELECT f
             FROM Flavour f
-            LEFT JOIN f.cloudProviderConfiguration cpc
+            LEFT JOIN FETCH f.cloudProviderConfiguration cpc
             WHERE f.deleted = false
             AND cpc.deletedAt IS NULL
             ORDER BY f.cpu, f.memory, f.id
