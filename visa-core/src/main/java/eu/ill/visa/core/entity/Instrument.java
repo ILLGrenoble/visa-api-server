@@ -1,5 +1,6 @@
 package eu.ill.visa.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -64,6 +65,7 @@ public class Instrument {
     @Column(name = "name", length = 250, nullable = false)
     private String name;
 
+    @JsonIgnore
     @ManyToMany()
     @JoinTable(
         name = "instrument_scientist",
