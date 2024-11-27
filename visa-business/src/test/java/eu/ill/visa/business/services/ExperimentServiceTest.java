@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.ExperimentFilter;
+import eu.ill.visa.core.domain.filters.ExperimentFilter;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.entity.Experiment;
 import eu.ill.visa.core.entity.Instance;

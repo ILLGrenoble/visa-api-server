@@ -1,7 +1,7 @@
 package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.business.services.*;
-import eu.ill.visa.core.domain.ExperimentFilter;
+import eu.ill.visa.core.domain.filters.ExperimentFilter;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.entity.*;

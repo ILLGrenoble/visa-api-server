@@ -2,7 +2,7 @@ package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.ExperimentService;
-import eu.ill.visa.core.domain.ExperimentFilter;
+import eu.ill.visa.core.domain.filters.ExperimentFilter;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;

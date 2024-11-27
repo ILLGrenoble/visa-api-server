@@ -1,4 +1,4 @@
-package eu.ill.visa.core.domain;
+package eu.ill.visa.core.domain.filters;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.QueryParam;

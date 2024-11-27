@@ -3,7 +3,7 @@ package eu.ill.visa.web.graphql.resolvers;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.UserService;
-import eu.ill.visa.core.domain.ExperimentFilter;
+import eu.ill.visa.core.domain.filters.ExperimentFilter;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.graphql.types.ExperimentType;
 import eu.ill.visa.web.graphql.types.InstanceType;
