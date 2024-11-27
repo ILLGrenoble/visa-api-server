@@ -67,11 +67,12 @@ public class JupyterController extends AbstractController {
     @POST
     @Path("/{instance}/notebook/open")
     @Authenticated
-    public void jupyterSessionOpen(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionInput input) {
+    public MetaResponse<String> jupyterSessionOpen(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionInput input) {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
             this.instanceJupyterSessionService.create(instance, user, input.getKernelId(), input.getSessionId());
+            return createResponse();
         }
 
         throw new NotFoundException();
@@ -79,9 +80,10 @@ public class JupyterController extends AbstractController {
 
     @POST
     @Path("/{instance}/notebook/close")
-    public void jupyterSessionClose(@PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionInput input) {
+    public MetaResponse<String> jupyterSessionClose(@PathParam("instance") Instance instance, @NotNull @Valid final JupyterNotebookSessionInput input) {
         // Allow any access this endpoint: allows the visa-jupyter-proxy to remove zombie sessions without authentication (needs to know both kernelId and sessionId so security risk is low)
         this.instanceJupyterSessionService.destroy(instance, input.getKernelId(), input.getSessionId());
+        return createResponse();
     }
 
     private boolean isAuthorisedForJupyter(User user, Instance instance) {

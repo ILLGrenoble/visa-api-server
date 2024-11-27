@@ -1,3 +1,8 @@
+3.0.3 27/11/2024
+================
+ * FIX #6: Add responses for POST Requests in JupyterController
+ * FIX #5: Avoid json serialization of instrument scientists  
+
 3.0.2 25/11/2024
 ================
  * Fix bug of synchronising all activity updates on user interaction with remote desktop.  
