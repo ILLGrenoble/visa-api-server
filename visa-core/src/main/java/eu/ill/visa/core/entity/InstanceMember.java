@@ -39,6 +39,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
             LEFT JOIN i.members m
             LEFT JOIN FETCH m.user u
             LEFT JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.userRoles ur
+            LEFT JOIN FETCH ur.role r
             where i.id IN :instanceIds
             and m.role = 'OWNER'
     """),
