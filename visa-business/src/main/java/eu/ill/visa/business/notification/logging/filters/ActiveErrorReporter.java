@@ -1,6 +1,7 @@
 package eu.ill.visa.business.notification.logging.filters;
 
 import eu.ill.visa.business.ErrorReportEmailConfiguration;
+import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
+@Unremovable
 @LookupIfProperty(name = "business.errorReportEmail.enabled", stringValue = "true")
 @Singleton
 public class ActiveErrorReporter implements ErrorReporter {

@@ -35,8 +35,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
             and m.role = 'OWNER'
     """),
     @NamedQuery(name = "instanceMember.getOwnersByInstanceIds", query = """
-            SELECT m FROM InstanceMember m
-            LEFT JOIN FETCH m.instance i
+            SELECT DISTINCT m FROM Instance i
+            LEFT JOIN i.members m
             LEFT JOIN FETCH m.user u
             LEFT JOIN FETCH u.affiliation a
             where i.id IN :instanceIds
@@ -60,9 +60,8 @@ public class InstanceMember extends Timestampable {
     private InstanceMemberRole role;
 
     @JsonIgnore
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
-    private Instance instance;
+    @Column(name = "instance_id", nullable = false, insertable = false, updatable = false)
+    private Long instanceId;
 
     private InstanceMember(Builder builder) {
         this.user = builder.user;
@@ -105,12 +104,12 @@ public class InstanceMember extends Timestampable {
         this.role = role;
     }
 
-    public Instance getInstance() {
-        return instance;
+    public Long getInstanceId() {
+        return instanceId;
     }
 
-    public void setInstance(Instance instance) {
-        this.instance = instance;
+    public void setInstanceId(Long instanceId) {
+        this.instanceId = instanceId;
     }
 
     @Override

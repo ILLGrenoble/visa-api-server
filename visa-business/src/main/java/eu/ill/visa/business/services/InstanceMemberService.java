@@ -54,7 +54,7 @@ public class InstanceMemberService {
     public List<User> getOwnersByInstanceIds(final List<Long> instanceIds) {
         final List<InstanceMember> owners = repository.getOwnersByInstanceIds(instanceIds);
         return instanceIds.stream().map(instanceId -> owners.stream().filter(owner -> {
-                return owner.getInstance().getId().equals(instanceId);
+                return owner.getInstanceId().equals(instanceId);
             })
             .findAny()
             .map(InstanceMember::getUser)
