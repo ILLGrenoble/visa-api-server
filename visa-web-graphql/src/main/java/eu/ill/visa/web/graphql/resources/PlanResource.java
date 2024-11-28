@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.FlavourService;
 import eu.ill.visa.business.services.ImageService;
 import eu.ill.visa.business.services.PlanService;
@@ -8,7 +7,6 @@ import eu.ill.visa.core.entity.Flavour;
 import eu.ill.visa.core.entity.Image;
 import eu.ill.visa.core.entity.Plan;
 import eu.ill.visa.core.entity.Role;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.inputs.PlanInput;
 import eu.ill.visa.web.graphql.types.PlanType;
@@ -45,17 +43,12 @@ public class PlanResource {
      * Get a list of plans
      *
      * @return a list of plans
-     * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull List<PlanType> plans() throws DataFetchingException {
-        try {
-            return this.planService.getAllForAdmin().stream()
-                .map(PlanType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<PlanType> plans() {
+        return this.planService.getAllForAdmin().stream()
+            .map(PlanType::new)
+            .toList();
     }
 
 

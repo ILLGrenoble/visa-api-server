@@ -20,7 +20,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
             WHERE cpc.deletedAt IS NULL
             ORDER BY sg.name
     """),
-    @NamedQuery(name = "securityGroup.getByName", query = """
+    @NamedQuery(name = "securityGroup.getAllByName", query = """
             SELECT sg
             FROM SecurityGroup sg
             LEFT JOIN sg.cloudProviderConfiguration cpc

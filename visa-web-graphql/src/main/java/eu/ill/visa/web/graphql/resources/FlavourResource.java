@@ -1,12 +1,10 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.*;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.inputs.FlavourInput;
@@ -58,18 +56,12 @@ public class FlavourResource {
      * Get a list of flavours
      *
      * @return a list of flavours
-     * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull List<FlavourType> flavours() throws DataFetchingException {
-        try {
-
-            return this.flavourService.getAllForAdmin().stream()
-            .map(FlavourType::new)
-            .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<FlavourType> flavours() {
+        return this.flavourService.getAllForAdmin().stream()
+        .map(FlavourType::new)
+        .toList();
     }
 
 
@@ -77,15 +69,10 @@ public class FlavourResource {
      * Count all flavours
      *
      * @return a count of images
-     * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countFlavours() throws DataFetchingException {
-        try {
-            return flavourService.countAllForAdmin();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countFlavours() {
+        return flavourService.countAllForAdmin();
     }
 
 

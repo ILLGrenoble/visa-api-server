@@ -2,8 +2,6 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.SecurityGroupServiceClientConfiguration;
 import eu.ill.visa.business.http.SecurityGroupServiceClient;
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.persistence.repositories.SecurityGroupRepository;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
@@ -61,6 +59,10 @@ public class SecurityGroupService {
 
     public List<SecurityGroup> getAll() {
         return this.repository.getAll();
+    }
+
+    public List<SecurityGroup> getAllByName(String name) {
+        return this.repository.getAllByName(name);
     }
 
     public List<SecurityGroup> getAllForCloudClient(Long cloudClientId) {
@@ -123,10 +125,6 @@ public class SecurityGroupService {
             }
         }
         return securityGroupNames;
-    }
-
-    public List<SecurityGroup> getAll(QueryFilter filter, OrderBy orderBy) {
-        return repository.getAll(filter, orderBy);
     }
 
     public List<SecurityGroup> getDefaultSecurityGroups(Long cloudClientId) {

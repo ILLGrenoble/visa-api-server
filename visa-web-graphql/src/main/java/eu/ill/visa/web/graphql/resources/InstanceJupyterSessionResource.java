@@ -1,9 +1,7 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.InstanceJupyterSessionService;
 import eu.ill.visa.core.entity.Role;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.inputs.PaginationInput;
 import eu.ill.visa.web.graphql.types.Connection;
 import eu.ill.visa.web.graphql.types.InstanceJupyterSessionType;
@@ -37,29 +35,23 @@ public class InstanceJupyterSessionResource {
      *
      * @param pagination the pagination (limit and offset)
      * @return a list of jupyter sessions
-     * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull Connection<InstanceJupyterSessionType> jupyterSessions(@NotNull PaginationInput pagination) throws DataFetchingException {
-        try {
-            final List<InstanceJupyterSessionType> results = instanceJupyterSessionService.getAll(toPagination(pagination)).stream()
-                .map(InstanceJupyterSessionType::new)
-                .toList();
-            final PageInfo pageInfo = new PageInfo(instanceJupyterSessionService.countAll(), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull Connection<InstanceJupyterSessionType> jupyterSessions(@NotNull PaginationInput pagination) {
+        final List<InstanceJupyterSessionType> results = instanceJupyterSessionService.getAll(toPagination(pagination)).stream()
+            .map(InstanceJupyterSessionType::new)
+            .toList();
+        final PageInfo pageInfo = new PageInfo(instanceJupyterSessionService.countAll(), pagination.getLimit(), pagination.getOffset());
+        return new Connection<>(pageInfo, results);
     }
 
     /**
      * Count all active jupyter sessions
      *
      * @return a count of active Jupyter sessions
-     * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countJupyterSessions() throws DataFetchingException {
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countJupyterSessions() {
         return instanceJupyterSessionService.countAllInstances();
     }
 

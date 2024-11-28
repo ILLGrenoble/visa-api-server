@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.InstanceActionScheduler;
 import eu.ill.visa.business.services.InstanceExtensionRequestService;
@@ -79,21 +78,17 @@ public class InstanceResource {
      */
     @Query
     public @NotNull Connection<InstanceType> instances(final InstanceFilter filter, final OrderByInput orderBy, @NotNull final PaginationInput pagination) throws DataFetchingException {
-        try {
-            if (!pagination.isLimitBetween(0, 50)) {
-                throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
-            }
-            final List<InstanceType> results = instanceService.getAll(
-                requireNonNullElseGet(filter, InstanceFilter::new),
-                requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("name", true)), toPagination(pagination)
-            ).stream()
-                .map(InstanceType::new)
-                .toList();
-            final PageInfo pageInfo = new PageInfo(instanceService.countAll(filter), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
+        if (!pagination.isLimitBetween(0, 50)) {
+            throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
         }
+        final List<InstanceType> results = instanceService.getAll(
+            requireNonNullElseGet(filter, InstanceFilter::new),
+            requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("name", true)), toPagination(pagination)
+        ).stream()
+            .map(InstanceType::new)
+            .toList();
+        final PageInfo pageInfo = new PageInfo(instanceService.countAll(filter), pagination.getLimit(), pagination.getOffset());
+        return new Connection<>(pageInfo, results);
     }
 
     /**
@@ -101,15 +96,10 @@ public class InstanceResource {
      *
      * @param filter a filter to filter the results
      * @return a count of instances
-     * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countInstances(final InstanceFilter filter) throws DataFetchingException {
-        try {
-            return instanceService.countAll(requireNonNullElseGet(filter, InstanceFilter::new));
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countInstances(final InstanceFilter filter) {
+        return instanceService.countAll(requireNonNullElseGet(filter, InstanceFilter::new));
     }
 
     @Query
@@ -161,40 +151,28 @@ public class InstanceResource {
     }
 
     @Query
-    public @NotNull List<NumberInstancesByFlavourType> countInstancesByFlavours() throws DataFetchingException {
-        try {
-            return instanceService.countByFlavour().stream()
-                .map(NumberInstancesByFlavourType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<NumberInstancesByFlavourType> countInstancesByFlavours() {
+        return instanceService.countByFlavour().stream()
+            .map(NumberInstancesByFlavourType::new)
+            .toList();
     }
 
     @Query
-    public @NotNull List<NumberInstancesByImageType> countInstancesByImages() throws DataFetchingException {
-        try {
-            return instanceService.countByImage().stream()
-                .map(NumberInstancesByImageType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<NumberInstancesByImageType> countInstancesByImages() {
+        return instanceService.countByImage().stream()
+            .map(NumberInstancesByImageType::new)
+            .toList();
     }
 
     @Query
-    public @NotNull List<NumberInstancesByCloudClientType> countInstancesByCloudClients() throws DataFetchingException {
-        try {
-            return instanceService.countByCloudClient().stream()
-                .map(countByCloudClient -> {
-                    CloudClient cloudClient = this.cloudClientService.getCloudClient(countByCloudClient.getId());
-                    return new NumberInstancesByCloudClient(cloudClient.getId(), cloudClient.getName(), countByCloudClient.getTotal());
-                })
-                .map(NumberInstancesByCloudClientType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<NumberInstancesByCloudClientType> countInstancesByCloudClients() {
+        return instanceService.countByCloudClient().stream()
+            .map(countByCloudClient -> {
+                CloudClient cloudClient = this.cloudClientService.getCloudClient(countByCloudClient.getId());
+                return new NumberInstancesByCloudClient(cloudClient.getId(), cloudClient.getName(), countByCloudClient.getTotal());
+            })
+            .map(NumberInstancesByCloudClientType::new)
+            .toList();
     }
 
     /**

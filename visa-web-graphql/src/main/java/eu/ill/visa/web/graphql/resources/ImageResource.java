@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.CloudProviderService;
 import eu.ill.visa.business.services.ImageProtocolService;
@@ -12,7 +11,6 @@ import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Image;
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Role;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.inputs.ImageInput;
@@ -54,32 +52,22 @@ public class ImageResource {
      * Get a list of images
      *
      * @return a list of images
-     * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull List<ImageType> images() throws DataFetchingException {
-        try {
-            return this.imageService.getAllForAdmin().stream()
-                .map(ImageType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<ImageType> images() {
+        return this.imageService.getAllForAdmin().stream()
+            .map(ImageType::new)
+            .toList();
     }
 
     /**
      * Count all images
      *
      * @return a count of images
-     * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countImages() throws DataFetchingException {
-        try {
-            return imageService.countAllForAdmin();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countImages() {
+        return imageService.countAllForAdmin();
     }
 
     /**

@@ -1,21 +1,16 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.CloudProviderService;
 import eu.ill.visa.business.services.SecurityGroupFilterService;
 import eu.ill.visa.business.services.SecurityGroupService;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.SecurityGroup;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
-import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.inputs.SecurityGroupInput;
 import eu.ill.visa.web.graphql.types.SecurityGroupType;
 import io.smallrye.graphql.api.AdaptToScalar;
@@ -29,9 +24,6 @@ import org.eclipse.microprofile.graphql.Query;
 
 import java.util.List;
 import java.util.Optional;
-
-import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
-import static java.util.Objects.requireNonNullElseGet;
 
 @GraphQLApi
 @RolesAllowed(Role.ADMIN_ROLE)
@@ -57,17 +49,24 @@ public class SecurityGroupResource {
      * Get a list of securityGroups
      *
      * @return a list of securityGroups
-     * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull List<SecurityGroupType> securityGroups(QueryFilterInput filter) throws DataFetchingException {
-        try {
-            return securityGroupService.getAll(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new), new OrderBy("name", true)).stream()
-                .map(SecurityGroupType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<SecurityGroupType> securityGroups() {
+        return securityGroupService.getAll().stream()
+            .map(SecurityGroupType::new)
+            .toList();
+    }
+
+    /**
+     * Get a list of securityGroup by name
+     *
+     * @return a securityGroups with the given name
+     */
+    @Query
+    public @NotNull List<SecurityGroupType> securityGroupsByName(@NotNull String name) {
+        return securityGroupService.getAllByName(name).stream()
+            .map(SecurityGroupType::new)
+            .toList();
     }
 
 

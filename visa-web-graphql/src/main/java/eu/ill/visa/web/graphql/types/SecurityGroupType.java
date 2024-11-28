@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.types;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.SecurityGroup;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
@@ -29,7 +28,6 @@ public class SecurityGroupType {
         return name;
     }
 
-    @JsonIgnore
     public Long getCloudId() {
         return cloudId;
     }
