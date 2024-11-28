@@ -1,10 +1,8 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.ClientNotificationService;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.SystemNotification;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.inputs.SystemNotificationInput;
@@ -37,14 +35,10 @@ public class SystemNotificationResource {
     }
 
     @Query
-    public @NotNull List<SystemNotificationType> systemNotifications() throws DataFetchingException {
-        try {
-            return clientNotificationService.getAllSystemNotifications().stream()
-                .map(SystemNotificationType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<SystemNotificationType> systemNotifications() {
+        return clientNotificationService.getAllSystemNotifications().stream()
+            .map(SystemNotificationType::new)
+            .toList();
     }
 
 

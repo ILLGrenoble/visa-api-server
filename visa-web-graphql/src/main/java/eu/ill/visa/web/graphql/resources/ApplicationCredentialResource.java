@@ -1,10 +1,8 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.ApplicationCredentialService;
 import eu.ill.visa.core.entity.ApplicationCredential;
 import eu.ill.visa.core.entity.Role;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.inputs.ApplicationCredentialInput;
 import eu.ill.visa.web.graphql.types.ApplicationCredentialDetailType;
@@ -34,14 +32,10 @@ public class ApplicationCredentialResource {
 
 
     @Query
-    public @NotNull List<ApplicationCredentialDetailType> applicationCredentials() throws DataFetchingException {
-        try {
-            return applicationCredentialService.getAll().stream()
-                .map(ApplicationCredentialDetailType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<ApplicationCredentialDetailType> applicationCredentials() {
+        return applicationCredentialService.getAll().stream()
+            .map(ApplicationCredentialDetailType::new)
+            .toList();
     }
 
     /**

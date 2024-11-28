@@ -1,13 +1,11 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.InstanceExtensionRequestService;
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.entity.InstanceExtensionRequest;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceExtensionRequestState;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.ValidationException;
 import eu.ill.visa.web.graphql.inputs.InstanceExtensionResponseInput;
@@ -45,14 +43,10 @@ public class InstanceExtensionRequestResource {
     }
 
     @Query
-    public @NotNull List<InstanceExtensionRequestType> instanceExtensionRequests() throws DataFetchingException {
-        try {
-            return this.instanceExtensionRequestService.getAll().stream()
-                .map(InstanceExtensionRequestType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<InstanceExtensionRequestType> instanceExtensionRequests() {
+        return this.instanceExtensionRequestService.getAll().stream()
+            .map(InstanceExtensionRequestType::new)
+            .toList();
     }
 
     @Mutation

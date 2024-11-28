@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.resolvers;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -128,24 +127,16 @@ public class InstanceResolver {
             .toList();
     }
 
-    public List<List<InstanceSessionMemberType>> activeSessions(@Source final List<InstanceType> instances) throws DataFetchingException {
-        try {
-            return instanceSessionService.getAllSessionMembersByInstanceIds(instances.stream().map(InstanceType::getId).toList()).stream()
-                .map(instanceSessionMembers -> instanceSessionMembers.stream().map(InstanceSessionMemberType::new).toList())
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public List<List<InstanceSessionMemberType>> activeSessions(@Source final List<InstanceType> instances) {
+        return instanceSessionService.getAllSessionMembersByInstanceIds(instances.stream().map(InstanceType::getId).toList()).stream()
+            .map(instanceSessionMembers -> instanceSessionMembers.stream().map(InstanceSessionMemberType::new).toList())
+            .toList();
     }
 
-    public List<InstanceSessionMemberType> sessions(@Source final InstanceType instance) throws DataFetchingException {
-        try {
-            return instanceSessionService.getAllHistorySessionMembersByInstanceId(instance.getId()).stream()
-                .map(InstanceSessionMemberType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public List<InstanceSessionMemberType> sessions(@Source final InstanceType instance) {
+        return instanceSessionService.getAllHistorySessionMembersByInstanceId(instance.getId()).stream()
+            .map(InstanceSessionMemberType::new)
+            .toList();
     }
 
     public @NotNull List<CloudClientType> cloudClient(@Source final List<InstanceType> instances) {
