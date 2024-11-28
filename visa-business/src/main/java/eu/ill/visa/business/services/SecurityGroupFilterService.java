@@ -1,7 +1,5 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.SecurityGroupFilter;
 import eu.ill.visa.persistence.repositories.SecurityGroupFilterRepository;
 import jakarta.inject.Inject;
@@ -26,10 +24,6 @@ public class SecurityGroupFilterService {
         return this.repository.getById(id);
     }
 
-    public List<SecurityGroupFilter> getAll(QueryFilter filter, OrderBy orderBy) {
-        return this.repository.getAll(filter, orderBy);
-    }
-
     public void delete(SecurityGroupFilter securityGroupFilter) {
         this.repository.delete(securityGroupFilter);
     }
@@ -38,7 +32,7 @@ public class SecurityGroupFilterService {
         this.repository.save(securityGroupFilter);
     }
 
-    public SecurityGroupFilter securityGroupFilterBySecurityIdAndObjectIdAndType(@NotNull final Long securityGroupId, @NotNull final Long objectId, @NotNull final String objectType) {
+    public SecurityGroupFilter getSecurityGroupFilterBySecurityIdAndObjectIdAndType(@NotNull final Long securityGroupId, @NotNull final Long objectId, @NotNull final String objectType) {
         return this.repository.securityGroupFilterBySecurityIdAndObjectIdAndType(securityGroupId, objectId, objectType);
     }
 

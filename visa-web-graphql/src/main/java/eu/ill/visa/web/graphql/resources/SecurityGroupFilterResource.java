@@ -1,16 +1,11 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.*;
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.QueryFilter;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.SecurityGroup;
 import eu.ill.visa.core.entity.SecurityGroupFilter;
-import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
-import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.inputs.SecurityGroupFilterInput;
 import eu.ill.visa.web.graphql.types.SecurityGroupFilterType;
 import io.smallrye.graphql.api.AdaptToScalar;
@@ -25,9 +20,6 @@ import org.eclipse.microprofile.graphql.Query;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
-import static java.util.Objects.requireNonNullElseGet;
 
 @GraphQLApi
 @RolesAllowed(Role.ADMIN_ROLE)
@@ -57,21 +49,24 @@ public class SecurityGroupFilterResource {
      * Get a list of securityGroupFilters
      *
      * @return a list of security group filters
-     * @throws DataFetchingException thrown if there was an error fetching the results
      */
     @Query
-    public @NotNull List<SecurityGroupFilterType> securityGroupFilters(final QueryFilterInput filter) throws DataFetchingException {
-        try {
-            return securityGroupFilterService.getAll(
-                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new), new OrderBy("objectType", true)
-            ).stream()
-                .map(SecurityGroupFilterType::new)
-                .toList();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull List<SecurityGroupFilterType> securityGroupFilters() {
+        return securityGroupFilterService.getAll().stream()
+            .map(SecurityGroupFilterType::new)
+            .toList();
     }
 
+    /**
+     * Get a specific security group filter
+     *
+     * @return a security group filter
+     */
+    @Query
+    public SecurityGroupFilterType securityGroupFilter(@NotNull @AdaptToScalar(Scalar.Int.class) Long securityGroupId, @NotNull @AdaptToScalar(Scalar.Int.class) Long objectId, @NotNull String objectType) {
+        SecurityGroupFilter filter = securityGroupFilterService.getSecurityGroupFilterBySecurityIdAndObjectIdAndType(securityGroupId, objectId, objectType);
+        return filter == null ? null : new SecurityGroupFilterType(filter);
+    }
 
     /**
      * Create a new securityGroupFilter
@@ -81,7 +76,7 @@ public class SecurityGroupFilterResource {
      */
     @Mutation
     public @NotNull SecurityGroupFilterType createSecurityGroupFilter(@NotNull @Valid SecurityGroupFilterInput input) throws EntityNotFoundException, InvalidInputException {
-        if (securityGroupFilterService.securityGroupFilterBySecurityIdAndObjectIdAndType(input.getSecurityGroupId(), input.getObjectId(), input.getObjectType()) == null) {
+        if (securityGroupFilterService.getSecurityGroupFilterBySecurityIdAndObjectIdAndType(input.getSecurityGroupId(), input.getObjectId(), input.getObjectType()) == null) {
 
             // Validate the input data
             SecurityGroup securityGroup = this.validateSecurityGroupFilterInput(input);

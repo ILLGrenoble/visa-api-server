@@ -10,18 +10,37 @@ import static java.util.Objects.requireNonNull;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "securityGroupFilter.getById", query = """
-            SELECT l FROM SecurityGroupFilter l WHERE l.id = :id
+        SELECT sgf
+        FROM SecurityGroupFilter sgf
+        JOIN SecurityGroup sg ON sgf.securityGroup = sg
+        LEFT JOIN sg.cloudProviderConfiguration cpc
+        WHERE sgf.id = :id
+        AND cpc.deletedAt IS NULL
     """),
     @NamedQuery(name = "securityGroupFilter.securityGroupFilterBySecurityIdAndObjectIdAndType", query = """
-               SELECT l FROM SecurityGroupFilter l
-               JOIN l.securityGroup sg
-               WHERE sg.id = :securityGroupId AND l.objectId = :objectId AND l.objectType = :objectType
+        SELECT sgf
+        FROM SecurityGroupFilter sgf
+        JOIN sgf.securityGroup sg ON sgf.securityGroup = sg
+        LEFT JOIN sg.cloudProviderConfiguration cpc
+        WHERE sg.id = :securityGroupId
+        AND sgf.objectId = :objectId
+        AND sgf.objectType = :objectType
+        AND cpc.deletedAt IS NULL
     """),
     @NamedQuery(name = "securityGroupFilter.getAll", query = """
-               SELECT l FROM SecurityGroupFilter l
+        SELECT sgf
+        FROM SecurityGroupFilter sgf
+        JOIN SecurityGroup sg ON sgf.securityGroup = sg
+        LEFT JOIN sg.cloudProviderConfiguration cpc
+        WHERE cpc.deletedAt IS NULL
+        ORDER BY sgf.objectType
     """),
     @NamedQuery(name = "securityGroupFilter.countAll", query = """
-               SELECT count(sgf.id) FROM SecurityGroupFilter sgf
+        SELECT count(sgf.id)
+        FROM SecurityGroupFilter sgf
+        JOIN SecurityGroup sg ON sgf.securityGroup = sg
+        LEFT JOIN sg.cloudProviderConfiguration cpc
+        WHERE cpc.deletedAt IS NULL
     """),
 })
 @Table(name = "security_group_filter")
