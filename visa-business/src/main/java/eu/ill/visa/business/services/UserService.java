@@ -4,7 +4,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.domain.filters.UserFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.UserRepository;
@@ -40,10 +40,10 @@ public class UserService {
     }
 
     public List<User> getAll(OrderBy orderBy, Pagination pagination) {
-        return this.getAll(new QueryFilter(), orderBy, pagination);
+        return this.getAll(new UserFilter(), orderBy, pagination);
     }
 
-    public List<User> getAll(QueryFilter filter, OrderBy orderBy, Pagination pagination) {
+    public List<User> getAll(UserFilter filter, OrderBy orderBy, Pagination pagination) {
         return this.repository.getAll(filter, orderBy, pagination);
     }
 
@@ -83,8 +83,8 @@ public class UserService {
         return repository.countAll();
     }
 
-    public Long countAll(QueryFilter filter) {
-        return repository.countAll(requireNonNullElseGet(filter, QueryFilter::new));
+    public Long countAll(UserFilter filter) {
+        return repository.countAll(requireNonNullElseGet(filter, UserFilter::new));
     }
 
     public Long countAllActivated() {

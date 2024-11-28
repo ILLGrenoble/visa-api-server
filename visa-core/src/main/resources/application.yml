@@ -16,7 +16,7 @@ quarkus:
     database:
       generation: update
     log:
-      sql: false
+      sql: true
   scheduler:
     enabled: ${VISA_SCHEDULER_ENABLED:true}
   devservices:

@@ -1,10 +1,9 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.preql.exception.InvalidQueryException;
 import eu.ill.visa.business.services.RoleService;
 import eu.ill.visa.business.services.UserService;
 import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.QueryFilter;
+import eu.ill.visa.core.domain.filters.UserFilter;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
@@ -12,7 +11,6 @@ import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.ValidationException;
 import eu.ill.visa.web.graphql.inputs.OrderByInput;
 import eu.ill.visa.web.graphql.inputs.PaginationInput;
-import eu.ill.visa.web.graphql.inputs.QueryFilterInput;
 import eu.ill.visa.web.graphql.inputs.UserInput;
 import eu.ill.visa.web.graphql.types.Connection;
 import eu.ill.visa.web.graphql.types.PageInfo;
@@ -36,7 +34,6 @@ import java.util.Objects;
 
 import static eu.ill.visa.web.graphql.inputs.OrderByInput.toOrderBy;
 import static eu.ill.visa.web.graphql.inputs.PaginationInput.toPagination;
-import static eu.ill.visa.web.graphql.inputs.QueryFilterInput.toQueryFilter;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNullElseGet;
 
@@ -64,25 +61,21 @@ public class UserResource {
      * @param orderBy    the ordering of results
      * @param pagination the pagination (limit and offset)
      * @return a list of users
-     * @throws DataFetchingException thrown if there was an error fetching the results
+     * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull Connection<UserType> users(final QueryFilterInput filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
-        try {
-            if (!pagination.isLimitBetween(0, 200)) {
-                throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
-            }
-            final List<UserType> results = userService.getAll(
-                requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new),
-                requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("activatedAt", false)), toPagination(pagination)
-            ).stream()
-                .map(UserType::new)
-                .toList();
-            final PageInfo pageInfo = new PageInfo(userService.countAll(toQueryFilter(filter)), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
+    public @NotNull Connection<UserType> users(final UserFilter filter, final OrderByInput orderBy, @NotNull PaginationInput pagination) throws DataFetchingException {
+        if (!pagination.isLimitBetween(0, 200)) {
+            throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
         }
+        final List<UserType> results = userService.getAll(
+            requireNonNullElseGet(filter, UserFilter::new),
+            requireNonNullElseGet(toOrderBy(orderBy), () -> new OrderBy("activatedAt", false)), toPagination(pagination)
+        ).stream()
+            .map(UserType::new)
+            .toList();
+        final PageInfo pageInfo = new PageInfo(userService.countAll(filter), pagination.getLimit(), pagination.getOffset());
+        return new Connection<>(pageInfo, results);
     }
 
     /**
@@ -94,24 +87,21 @@ public class UserResource {
      */
     @Query
     public @NotNull Connection<UserType> recentActiveUsers(@NotNull final PaginationInput pagination) throws DataFetchingException {
-        final QueryFilterInput filter = new QueryFilterInput("lastSeenAt IS NOT NULL AND activatedAt IS NOT NULL");
+        UserFilter filter = new UserFilter();
+        filter.setActivated(true);
         return users(filter, new OrderByInput("lastSeenAt", false), pagination);
     }
 
     @Query
     public @NotNull Connection<UserType> searchForUserByLastName(@NotNull final String lastName, @NotNull Boolean onlyActivatedUsers, @NotNull final PaginationInput pagination) throws DataFetchingException {
-        try {
-            if (!pagination.isLimitBetween(0, 200)) {
-                throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
-            }
-            final List<UserType> results = userService.getAllLikeLastName(lastName, onlyActivatedUsers, toPagination(pagination)).stream()
-                .map(UserType::new)
-                .toList();
-            final PageInfo pageInfo = new PageInfo(userService.countAllLikeLastName(lastName, onlyActivatedUsers), pagination.getLimit(), pagination.getOffset());
-            return new Connection<>(pageInfo, results);
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
+        if (!pagination.isLimitBetween(0, 200)) {
+            throw new DataFetchingException(format("Limit must be between %d and %d", 0, 200));
         }
+        final List<UserType> results = userService.getAllLikeLastName(lastName, onlyActivatedUsers, toPagination(pagination)).stream()
+            .map(UserType::new)
+            .toList();
+        final PageInfo pageInfo = new PageInfo(userService.countAllLikeLastName(lastName, onlyActivatedUsers), pagination.getLimit(), pagination.getOffset());
+        return new Connection<>(pageInfo, results);
     }
 
 
@@ -120,24 +110,15 @@ public class UserResource {
      *
      * @param filter a filter to filter the results
      * @return a count of users
-     * @throws DataFetchingException thrown if there was an error fetching the result
      */
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countUsers(final QueryFilterInput filter) throws DataFetchingException {
-        try {
-            return userService.countAll(requireNonNullElseGet(toQueryFilter(filter), QueryFilter::new));
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countUsers(final UserFilter filter) {
+        return userService.countAll(requireNonNullElseGet(filter, UserFilter::new));
     }
 
     @Query
-    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countActivatedUsers() throws DataFetchingException {
-        try {
-            return userService.countAllActivated();
-        } catch (InvalidQueryException exception) {
-            throw new DataFetchingException(exception.getMessage());
-        }
+    public @NotNull @AdaptToScalar(Scalar.Int.class) Long countActivatedUsers() {
+        return userService.countAllActivated();
     }
 
     /**

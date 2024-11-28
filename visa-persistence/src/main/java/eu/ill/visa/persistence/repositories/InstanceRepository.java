@@ -109,7 +109,7 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         planFetch.fetch("flavour", JoinType.INNER);
 
         InstanceRequestContext context = new InstanceRequestContext(root);
-        final List<Predicate> predicates = this.convertFilterToPredicates(filter, cbQuery, cb, context);
+        final List<Predicate> predicates = this.convertFilterToPredicates(filter, cb, context);
         cbQuery.where(cb.and(predicates.toArray(new Predicate[0]))).distinct(true);
 
         if (orderBy != null) {
@@ -155,7 +155,7 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         final Root<Instance> root = cbQuery.from(Instance.class);
 
         InstanceRequestContext context = new InstanceRequestContext(root);
-        final List<Predicate> predicates = this.convertFilterToPredicates(filter, cbQuery, cb, context);
+        final List<Predicate> predicates = this.convertFilterToPredicates(filter, cb, context);
 
         cbQuery.where(cb.and(predicates.toArray(new Predicate[0])));
 
@@ -166,7 +166,6 @@ public class InstanceRepository extends AbstractRepository<Instance> {
 
 
     protected List<Predicate> convertFilterToPredicates(final InstanceFilter filter,
-                                                        final CriteriaQuery cq,
                                                         final CriteriaBuilder cb,
                                                         final InstanceRequestContext context) {
 
