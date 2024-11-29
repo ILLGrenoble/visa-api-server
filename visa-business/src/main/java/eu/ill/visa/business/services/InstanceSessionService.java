@@ -155,6 +155,10 @@ public class InstanceSessionService {
 
     public boolean canConnectWhileOwnerAway(Instance instance, String userId) {
         final User user = this.userService.getById(userId);
+        return this.canConnectWhileOwnerAway(instance, user);
+    }
+
+    public boolean canConnectWhileOwnerAway(Instance instance, User user) {
         boolean userIsOwner = instance.isOwner(user);
 
         // The user is the owner

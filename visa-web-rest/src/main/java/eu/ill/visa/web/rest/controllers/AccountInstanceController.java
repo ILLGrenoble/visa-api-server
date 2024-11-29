@@ -2,9 +2,10 @@ package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
-import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.fetches.InstanceFetch;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
@@ -41,7 +42,6 @@ import java.util.List;
 import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
 import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.SUPPORT;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.jboss.resteasy.reactive.RestResponse.Status.CREATED;
 
@@ -96,25 +96,7 @@ public class AccountInstanceController extends AbstractController {
                                                   @QueryParam("roles") String roles,
                                                   @QueryParam("experiments") String experiments) {
         final User user = this.getUserPrincipal(securityContext);
-        final List<InstanceDto> instances = instanceService.getAllForUser(user).stream()
-            .filter(instance -> {
-                final InstanceMember member = instanceMemberService.getByInstanceAndUser(instance, user);
-                if (member == null) {
-                    return false;
-                }
-                if (roles == null) {
-                    return true;
-                }
-                return asList(roles.split(",")).contains(member.getRole().name());
-            })
-            .filter(instance -> {
-                if (experiments == null) {
-                    return true;
-                }
-                return instance.getExperiments().stream().anyMatch(experiment -> {
-                    return asList(experiments.split(",")).contains(experiment.getId());
-                });
-            })
+        final List<InstanceDto> instances = instanceService.getAllForUser(user, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes)).stream()
             .map(instance -> this.mapInstance(instance, user))
             .collect(toList());
         return createResponse(instances);
@@ -132,19 +114,12 @@ public class AccountInstanceController extends AbstractController {
     @Path("/experiments")
     public MetaResponse<List<ExperimentDto>> getAllExperiments(@Context final SecurityContext securityContext) {
         final User user = this.getUserPrincipal(securityContext);
-        final List<Experiment> experiments = new ArrayList<>();
-        for (final Instance instance : instanceService.getAllForUser(user)) {
-            for (final Experiment experiment : instance.getExperiments()) {
-                if (!experiments.contains(experiment)) {
-                    experiments.add(experiment);
-                }
-            }
-        }
-        final List<ExperimentDto> data = experiments
-            .stream()
-            .map(ExperimentDto::new)
-            .collect(toList());
 
+        final List<ExperimentDto> data = instanceService.getAllForUser(user, List.of(InstanceFetch.experiments)).stream()
+            .flatMap(instance -> instance.getExperiments().stream())
+            .distinct()
+            .map(ExperimentDto::new)
+            .toList();
         return createResponse(data);
     }
 
@@ -475,7 +450,7 @@ public class AccountInstanceController extends AbstractController {
 
     @DELETE
     @Path("/{instance}/members/{member}")
-    public void removeMember(@Context final SecurityContext securityContext,
+    public MetaResponse<InstanceMemberDto> removeMember(@Context final SecurityContext securityContext,
                                              @PathParam("instance") Instance instance,
                                              @PathParam("member") InstanceMember instanceMember) {
         final User user = this.getUserPrincipal(securityContext);
@@ -484,6 +459,7 @@ public class AccountInstanceController extends AbstractController {
                 instance.removeMember(instanceMember);
 
                 instanceService.save(instance);
+                return createResponse();
             }
 
         } else if (instance.isMember(user)) {
@@ -544,7 +520,7 @@ public class AccountInstanceController extends AbstractController {
 
     private InstanceDto mapInstance(Instance instance, User user) {
         InstanceDto instanceDto = new InstanceDto(instance);
-        InstanceMember instanceMember = instanceMemberService.getByInstanceAndUser(instance, user);
+        InstanceMember instanceMember = instance.getMember(user);
         if (instanceMember != null) {
             instanceDto.setMembership(new InstanceMemberDto(instanceMember));
 
@@ -554,7 +530,7 @@ public class AccountInstanceController extends AbstractController {
         } else if (user.hasAnyRole(List.of(Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
             instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
         }
-        instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user.getId()));
+        instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));
         instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
 
         return instanceDto;
@@ -567,7 +543,7 @@ public class AccountInstanceController extends AbstractController {
     @POST
     @Path("/{instance}/thumbnail")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public void createThumbnail(@Context final SecurityContext securityContext,
+    public MetaResponse<String> createThumbnail(@Context final SecurityContext securityContext,
                                 @PathParam("instance") final Instance instance,
                                 @NotNull @RestForm("file") final InputStream is) {
         try {
@@ -583,6 +559,8 @@ public class AccountInstanceController extends AbstractController {
         } catch (Exception exception) {
             logger.error("Error creating thumbnail for instance: {}", instance.getId(), exception);
         }
+
+        return createResponse();
     }
 
     @GET

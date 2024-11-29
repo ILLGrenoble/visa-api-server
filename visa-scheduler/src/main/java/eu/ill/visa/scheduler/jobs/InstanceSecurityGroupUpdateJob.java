@@ -1,5 +1,6 @@
 package eu.ill.visa.scheduler.jobs;
 
+import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,7 +39,7 @@ public class InstanceSecurityGroupUpdateJob {
     public void execute() {
         logger.info("Executing instance security group update job");
 
-        List<Instance> instances = this.instanceService.getAllFull();
+        List<Instance> instances = this.instanceService.getAll(List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
 
         // Determine which instances have changed security groups
         for (Instance instance : instances) {

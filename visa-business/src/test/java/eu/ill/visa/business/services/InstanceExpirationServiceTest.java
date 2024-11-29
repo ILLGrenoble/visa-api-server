@@ -103,12 +103,12 @@ public class InstanceExpirationServiceTest {
     @DisplayName("Delete expired instances")
     void testDeleteInstanceExpiration() {
         List<InstanceExpiration> expirations1 = instanceExpirationService.getAllExpired();
-        List<Instance> instances1 = instanceService.getAll();
+        List<Instance> instances1 = instanceService.getAll(List.of());
         for (InstanceExpiration instanceExpiration : expirations1) {
             instanceExpirationService.delete(instanceExpiration);
         }
         List<InstanceExpiration> expirations2 = instanceExpirationService.getAllExpired();
-        List<Instance> instances2 = instanceService.getAll();
+        List<Instance> instances2 = instanceService.getAll(List.of());
 
         assertEquals(0, expirations2.size());
         assertEquals(instances1.size(), instances2.size());

@@ -318,11 +318,6 @@ public class User {
             .toString();
     }
 
-    public User lazyLoadInit() {
-        this.userRoles.size();
-        return this;
-    }
-
     public static final class Builder {
         private String  id;
         private String  firstName;

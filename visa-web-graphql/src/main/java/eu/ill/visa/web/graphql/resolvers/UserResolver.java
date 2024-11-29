@@ -32,7 +32,7 @@ public class UserResolver {
 
     public List<InstanceType> instances(@Source UserType userType) {
         final User user = userService.getById(userType.getId());
-        return instanceService.getAllForUser(user).stream()
+        return instanceService.getAllForUser(user, List.of()).stream()
             .map(InstanceType::new)
             .toList();
     }

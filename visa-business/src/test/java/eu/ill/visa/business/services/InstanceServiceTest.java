@@ -35,7 +35,7 @@ public class InstanceServiceTest {
     @Test
     @DisplayName("Get all instances")
     void testGetAll() {
-        List<Instance> results = instanceService.getAll();
+        List<Instance> results = instanceService.getAll(List.of());
         assertEquals(11, results.size());
     }
 
@@ -360,7 +360,7 @@ public class InstanceServiceTest {
     public void instancesForUser() {
         User user = userService.getById("1");
         assertNotNull(user);
-        assertEquals(3, instanceService.getAllForUser(user).size());
+        assertEquals(3, instanceService.getAllForUser(user, List.of()).size());
     }
 
     @Test

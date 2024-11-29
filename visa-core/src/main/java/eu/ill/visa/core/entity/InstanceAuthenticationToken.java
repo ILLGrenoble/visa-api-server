@@ -92,12 +92,6 @@ public class InstanceAuthenticationToken extends Timestampable {
         this.instance = instance;
     }
 
-    public InstanceAuthenticationToken lazyLoadInit() {
-        this.instance.lazyLoadInit();
-        this.user.lazyLoadInit();
-        return this;
-    }
-
     public static final class Builder {
         private Long   id;
         private String token;

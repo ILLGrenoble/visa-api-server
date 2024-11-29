@@ -43,6 +43,27 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         return query.getResultList();
     }
 
+    public List<Instance> getAllWithMembersForInstances(List<Instance> instances) {
+        final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getAllWithMembersForInstances", Instance.class);
+        query.setParameter("instances", instances);
+
+        return query.getResultList();
+    }
+
+    public List<Instance> getAllWithExperimentsForInstances(List<Instance> instances) {
+        final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getAllWithExperimentsForInstances", Instance.class);
+        query.setParameter("instances", instances);
+
+        return query.getResultList();
+    }
+
+    public List<Instance> getAllWithAttributesForInstances(List<Instance> instances) {
+        final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getAllWithAttributesForInstances", Instance.class);
+        query.setParameter("instances", instances);
+
+        return query.getResultList();
+    }
+
     public List<Instance> getAllWithStates(List<InstanceState> states) {
         final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getAllWithStates", Instance.class);
         query.setParameter("states", states);

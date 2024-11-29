@@ -1,6 +1,7 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.InvalidTokenException;
+import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import eu.ill.visa.core.entity.User;
@@ -17,10 +18,13 @@ import java.util.UUID;
 public class InstanceAuthenticationTokenService {
 
     private final InstanceAuthenticationTokenRepository repository;
+    final InstanceService instanceService;
 
     @Inject
-    public InstanceAuthenticationTokenService(InstanceAuthenticationTokenRepository repository) {
+    public InstanceAuthenticationTokenService(final InstanceAuthenticationTokenRepository repository,
+                                              final InstanceService instanceService) {
         this.repository = repository;
+        this.instanceService = instanceService;
     }
 
     public List<InstanceAuthenticationToken> getAll() {
@@ -28,7 +32,10 @@ public class InstanceAuthenticationTokenService {
     }
 
     public InstanceAuthenticationToken getByToken(String token) {
-        return this.repository.getByToken(token).lazyLoadInit();
+        InstanceAuthenticationToken instanceAuthenticationToken = this.repository.getByToken(token);
+        Instance instance = instanceAuthenticationToken.getInstance();
+        instanceAuthenticationToken.setInstance(this.instanceService.handleFetches(instance, List.of(InstanceFetch.members)));
+        return instanceAuthenticationToken;
     }
 
     public InstanceAuthenticationToken create(User user, Instance instance) {
