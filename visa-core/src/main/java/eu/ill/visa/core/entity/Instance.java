@@ -23,6 +23,17 @@ import java.util.List;
             WHERE i.id = :id
             AND i.deletedAt IS NULL
     """),
+    @NamedQuery(name = "instance.getByUidForOwner", query = """
+            SELECT i FROM Instance i
+            JOIN i.members m
+            JOIN FETCH i.plan p
+            JOIN FETCH p.image im
+            JOIN FETCH p.flavour f
+            WHERE m.user = :user
+            AND m.role = 'OWNER'
+            AND i.uid = :instanceUid
+            AND i.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instance.getByUID", query = """
             SELECT i FROM Instance i
             LEFT JOIN i.members m

@@ -567,10 +567,10 @@ public class AccountInstanceController extends AbstractController {
     @Path("/{instance}/thumbnail")
     @Produces("image/jpeg")
     public Response getThumbnail(@Context final SecurityContext securityContext,
-                                 @PathParam("instance") final Instance instance) {
+                                 @PathParam("instance") final String instanceUid) {
         final User user = this.getUserPrincipal(securityContext);
-        if (this.instanceService.isOwnerOrAdmin(user, instance)) {
-            final InstanceThumbnail thumbnail = instanceService.getThumbnailForInstance(instance);
+        if (this.instanceService.isOwnerOrAdmin(user, instanceUid)) {
+            final InstanceThumbnail thumbnail = instanceService.getThumbnailForInstanceUid(instanceUid);
             if (thumbnail != null) {
                 final ResponseBuilder response = Response.ok(thumbnail.getData());
                 return response.build();

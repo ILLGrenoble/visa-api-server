@@ -423,6 +423,22 @@ public class InstanceRepository extends AbstractRepository<Instance> {
     }
 
     /**
+     * Get an instance for an owner
+     */
+    public Instance getByIdForOwner(User user, String instanceUid) {
+        try {
+            final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getByUidForOwner", Instance.class);
+            query.setParameter("user", user);
+            query.setParameter("instanceUid", instanceUid);
+
+            return query.getSingleResult();
+
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
+    /**
      * Get an instance that is visible for an instrument scientist (instrument match)
      */
     public Instance getByIdForInstrumentScientist(User user, Long instanceId) {
@@ -552,10 +568,10 @@ public class InstanceRepository extends AbstractRepository<Instance> {
     /**
      * Get thumbnail for the given instance
      */
-    public InstanceThumbnail getThumbnailForInstance(Instance instance) {
+    public InstanceThumbnail getThumbnailForInstanceUid(String instanceUid) {
         try {
-            final TypedQuery<InstanceThumbnail> query = getEntityManager().createNamedQuery("instanceThumbnail.getForInstance", InstanceThumbnail.class);
-            query.setParameter("instance", instance);
+            final TypedQuery<InstanceThumbnail> query = getEntityManager().createNamedQuery("instanceThumbnail.getForInstanceUid", InstanceThumbnail.class);
+            query.setParameter("instanceUid", instanceUid);
             return query.getSingleResult();
 
         } catch (NoResultException exception) {

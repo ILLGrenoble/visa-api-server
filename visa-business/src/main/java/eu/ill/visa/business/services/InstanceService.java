@@ -220,6 +220,10 @@ public class InstanceService {
         return this.repository.getAllForITSupport(filter, orderBy, pagination);
     }
 
+    public Instance getByUidForOwner(User user, String instanceUid) {
+        return this.repository.getByIdForOwner(user, instanceUid);
+    }
+
     public Instance getByIdForInstrumentScientist(User user, Long instanceId) {
         return this.repository.getByIdForInstrumentScientist(user, instanceId);
     }
@@ -252,6 +256,13 @@ public class InstanceService {
 
     public boolean isOwnerOrAdmin(User user, Instance instance) {
         return instance.isOwner(user) || user.hasRole(Role.ADMIN_ROLE);
+    }
+
+    public boolean isOwnerOrAdmin(User user, String instanceUid) {
+        if (user.hasRole(Role.ADMIN_ROLE)) {
+            return true;
+        }
+        return this.getByUidForOwner(user, instanceUid) != null;
     }
 
     public boolean isAuthorisedForInstance(User user, Instance instance) {
@@ -330,7 +341,7 @@ public class InstanceService {
     }
 
     public InstanceThumbnail createOrUpdateThumbnail(Instance instance, byte[] data) {
-        final InstanceThumbnail thumbnail = requireNonNullElse(repository.getThumbnailForInstance(instance), new InstanceThumbnail());
+        final InstanceThumbnail thumbnail = requireNonNullElse(repository.getThumbnailForInstanceUid(instance.getUid()), new InstanceThumbnail());
         if (thumbnail.getInstance() == null) {
             thumbnail.setInstance(instance);
         }
@@ -343,7 +354,11 @@ public class InstanceService {
     }
 
     public InstanceThumbnail getThumbnailForInstance(Instance instance) {
-        return repository.getThumbnailForInstance(instance);
+        return this.getThumbnailForInstanceUid(instance.getUid());
+    }
+
+    public InstanceThumbnail getThumbnailForInstanceUid(String instanceUid) {
+        return repository.getThumbnailForInstanceUid(instanceUid);
     }
 
     public String getUID() {
