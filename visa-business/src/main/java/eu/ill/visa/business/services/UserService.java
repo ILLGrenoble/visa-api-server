@@ -35,10 +35,6 @@ public class UserService {
         return repository.getById(id);
     }
 
-    public User getByIdWithRoles(final String id) {
-        return repository.getByIdWithRoles(id);
-    }
-
     public List<User> getAll(OrderBy orderBy, Pagination pagination) {
         return this.getAll(new UserFilter(), orderBy, pagination);
     }

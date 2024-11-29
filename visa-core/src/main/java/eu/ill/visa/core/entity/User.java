@@ -16,19 +16,17 @@ import java.util.stream.Collectors;
     @NamedQuery(name = "user.getById", query = """
             SELECT u
             FROM User u
-            WHERE u.id = :id
-    """),
-    @NamedQuery(name = "user.getByIdWithRoles", query = """
-            SELECT u
-            FROM User u
-            LEFT OUTER JOIN FETCH u.userRoles ur
-            LEFT OUTER JOIN FETCH ur.role r
-            LEFT OUTER JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.userRoles ur
+            LEFT JOIN FETCH ur.role r
             WHERE u.id = :id
     """),
     @NamedQuery(name = "user.getAll", query = """
             SELECT u
             FROM User u
+            LEFT JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.userRoles ur
+            LEFT JOIN FETCH ur.role r
             ORDER BY u.lastName ASC
     """),
     @NamedQuery(name = "user.countAll", query = """
@@ -44,12 +42,18 @@ import java.util.stream.Collectors;
     @NamedQuery(name = "user.getAllLikeLastName", query = """
             SELECT DISTINCT(u)
             FROM User u
+            LEFT JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.userRoles ur
+            LEFT JOIN FETCH ur.role r
             WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
             ORDER BY u.lastName, u.firstName ASC
     """),
     @NamedQuery(name = "user.getAllActivatedLikeLastName", query = """
             SELECT DISTINCT(u)
             FROM User u
+            LEFT JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.userRoles ur
+            LEFT JOIN FETCH ur.role r
             WHERE LOWER(u.lastName) LIKE LOWER(:lastName) || '%'
             AND u.activatedAt IS NOT NULL
             ORDER BY u.lastName, u.firstName ASC
@@ -68,16 +72,18 @@ import java.util.stream.Collectors;
     @NamedQuery(name = "user.getAllStaff", query = """
             SELECT DISTINCT u
             FROM User u
-            JOIN u.userRoles ur
-            JOIN ur.role r
+            LEFT JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.userRoles ur
+            LEFT JOIN FETCH ur.role r
             WHERE r.name = 'STAFF'
             ORDER BY u.lastName
     """),
     @NamedQuery(name = "user.getAllSupport", query = """
             SELECT DISTINCT u
             FROM User u
-            LEFT OUTER JOIN FETCH u.userRoles ur
-            JOIN ur.role r
+            LEFT JOIN FETCH u.affiliation a
+            LEFT JOIN FETCH u.userRoles ur
+            LEFT JOIN ur.role r
             WHERE r.name in ('INSTRUMENT_SCIENTIST', 'INSTRUMENT_CONTROL', 'IT_SUPPORT', 'SCIENTIFIC_COMPUTING')
             ORDER BY u.lastName
     """),

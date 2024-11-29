@@ -42,16 +42,6 @@ public class UserRepository extends AbstractRepository<User> {
         }
     }
 
-    public User getByIdWithRoles(String id) {
-        try {
-            final TypedQuery<User> query = getEntityManager().createNamedQuery("user.getByIdWithRoles", User.class);
-            query.setParameter("id", id);
-            return query.getSingleResult();
-        } catch (NoResultException exception) {
-            return null;
-        }
-    }
-
     public List<User> getAllLikeLastName(String lastName, boolean onlyActivatedUsers) {
         return getAllLikeLastName(lastName, onlyActivatedUsers, null);
     }

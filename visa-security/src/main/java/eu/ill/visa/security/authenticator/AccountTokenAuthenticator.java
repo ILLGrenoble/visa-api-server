@@ -131,7 +131,7 @@ public class AccountTokenAuthenticator {
         }
 
         // Generate a persisted version of the User object
-        user = userService.getByIdWithRoles(id);
+        user = userService.getById(id);
         if (user == null) {
             user = createUserFromData(id, firstName, lastName, email);
         }
