@@ -5,9 +5,9 @@ import jakarta.persistence.*;
 
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "instanceThumbnail.getForInstance", query = """
+    @NamedQuery(name = "instanceThumbnail.getForInstanceUid", query = """
             SELECT it FROM InstanceThumbnail it
-            WHERE it.instance = :instance
+            WHERE it.instance.uid = :instanceUid
     """),
 })
 @Table(name = "instance_thumbnail", uniqueConstraints = {

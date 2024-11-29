@@ -15,12 +15,13 @@ public class UserRole {
     @EmbeddedId
     private UserRoleKey id;
 
+    @JsonIgnore
     @ManyToOne(optional = false)
     @MapsId("userId")
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"))
     private User user;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @MapsId("roleId")
     @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role_id"))
     private Role role;

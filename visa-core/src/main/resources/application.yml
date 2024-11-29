@@ -15,8 +15,6 @@ quarkus:
   hibernate-orm:
     database:
       generation: update
-    log:
-      sql: true
   scheduler:
     enabled: ${VISA_SCHEDULER_ENABLED:true}
   devservices:
@@ -179,6 +177,9 @@ client:
 
 "%dev":
   quarkus:
+    hibernate-orm:
+      log:
+        sql: ${VISA_LOGGING_SQL_ENABLED:false}
     datasource:
       username: ${VISA_DATABASE_USERNAME}
       password: ${VISA_DATABASE_PASSWORD}

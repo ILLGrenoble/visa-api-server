@@ -23,6 +23,17 @@ import java.util.List;
             WHERE i.id = :id
             AND i.deletedAt IS NULL
     """),
+    @NamedQuery(name = "instance.getByUidForOwner", query = """
+            SELECT i FROM Instance i
+            JOIN i.members m
+            JOIN FETCH i.plan p
+            JOIN FETCH p.image im
+            JOIN FETCH p.flavour f
+            WHERE m.user = :user
+            AND m.role = 'OWNER'
+            AND i.uid = :instanceUid
+            AND i.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instance.getByUID", query = """
             SELECT i FROM Instance i
             LEFT JOIN i.members m
@@ -31,19 +42,19 @@ import java.util.List;
     """),
     @NamedQuery(name = "instance.getAll", query = """
             SELECT DISTINCT i FROM Instance i
-            LEFT JOIN i.members m
+            JOIN FETCH i.plan p
+            JOIN FETCH p.image im
+            JOIN FETCH p.flavour f
             WHERE i.deletedAt IS NULL
     """),
     @NamedQuery(name = "instance.getAllInactive", query = """
             SELECT DISTINCT i FROM Instance i
-            LEFT JOIN i.members m
             WHERE i.deletedAt IS NULL
             AND i.terminationDate IS NOT NULL
             AND i.lastSeenAt < :date
     """),
     @NamedQuery(name = "instance.getAllNewInactive", query = """
             SELECT DISTINCT i FROM Instance i
-            LEFT JOIN i.members m
             LEFT OUTER JOIN InstanceExpiration ie on ie.instance = i
             WHERE i.deletedAt IS NULL
             AND i.terminationDate IS NOT NULL
@@ -52,7 +63,6 @@ import java.util.List;
     """),
     @NamedQuery(name = "instance.getAllNewTerminations", query = """
             SELECT DISTINCT i FROM Instance i
-            LEFT JOIN i.members m
             LEFT OUTER JOIN InstanceExpiration ie on ie.instance = i
             WHERE i.deletedAt IS NULL
             AND i.terminationDate IS NOT NULL
@@ -71,8 +81,32 @@ import java.util.List;
     @NamedQuery(name = "instance.getAllForUser", query = """
             SELECT i FROM Instance i
             JOIN i.members m
+            JOIN FETCH i.plan p
+            JOIN FETCH p.image im
+            JOIN FETCH p.flavour f
             WHERE m.user = :user
             AND i.deletedAt IS NULL
+            ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instance.getAllWithMembersForInstances", query = """
+            SELECT i FROM Instance i
+            LEFT JOIN FETCH i.members m
+            LEFT JOIN FETCH m.user u
+            LEFT JOIN FETCH u.affiliation a
+            WHERE i IN :instances
+            ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instance.getAllWithExperimentsForInstances", query = """
+            SELECT i FROM Instance i
+            LEFT JOIN FETCH i.experiments e
+            LEFT JOIN FETCH e.instrument instr
+            WHERE i IN :instances
+            ORDER BY i.id DESC
+    """),
+    @NamedQuery(name = "instance.getAllWithAttributesForInstances", query = """
+            SELECT i FROM Instance i
+            LEFT JOIN FETCH i.attributes a
+            WHERE i IN :instances
             ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instance.countAllForUser", query = """
@@ -688,13 +722,6 @@ public class Instance extends Timestampable {
         this.addMember(instanceMember);
 
         return instanceMember;
-    }
-
-    public Instance lazyLoadInit() {
-        this.getExperiments().size();
-        this.getAttributes().size();
-        this.getMembers().stream().peek(member -> member.getUser().lazyLoadInit()).toList().size();
-        return this;
     }
 
     public static final class Builder {

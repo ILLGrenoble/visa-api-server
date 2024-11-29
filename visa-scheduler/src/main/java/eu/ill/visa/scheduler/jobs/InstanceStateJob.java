@@ -33,7 +33,7 @@ public class InstanceStateJob {
     // Run every minute
     @Scheduled(cron="0 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public void updateAllInstancesStates() {
-        List<Instance> instances = this.instanceService.getAll();
+        List<Instance> instances = this.instanceService.getAll(List.of());
         logger.debug("Job running to update all instance states ({} instances)", instances.size());
 
         this.updateInstancesStates(instances);

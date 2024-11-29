@@ -7,6 +7,7 @@ import eu.ill.visa.business.gateway.events.InstanceStateChangedEvent;
 import eu.ill.visa.business.gateway.events.InstanceThumbnailUpdatedEvent;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
@@ -15,6 +16,7 @@ import eu.ill.visa.persistence.repositories.InstanceRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,10 +67,10 @@ public class InstanceService {
         return this.repository.countAllForState(state);
     }
 
-    public List<Instance> getAllForUser(User user) {
-        return this.repository.getAllForUser(user).stream()
-            .map(Instance::lazyLoadInit)
-            .toList();
+    public List<Instance> getAllForUser(User user, @NotNull List<InstanceFetch> fetches) {
+        List<Instance> instances = this.repository.getAllForUser(user);
+
+        return this.handleFetches(instances, fetches);
     }
 
     public Long countAllForUser(User user) {
@@ -84,7 +86,8 @@ public class InstanceService {
     }
 
     public Instance getFullById(Long id) {
-        return this.repository.getById(id).lazyLoadInit();
+        Instance instance = this.repository.getById(id);
+        return this.handleFetches(instance, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
     }
 
     public Instance getByUID(String uid) {
@@ -92,7 +95,8 @@ public class InstanceService {
     }
 
     public Instance getFullByUID(String uid) {
-        return this.repository.getByUID(uid).lazyLoadInit();
+        Instance instance = this.repository.getByUID(uid);
+        return this.handleFetches(instance, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
     }
 
     public Instance create(Instance.Builder instanceBuilder) {
@@ -139,18 +143,12 @@ public class InstanceService {
         return this.repository.getAll(filter, orderBy, pagination);
     }
 
-    public List<Instance> getAllFull() {
-        return this.repository.getAll().stream()
-            .map(Instance::lazyLoadInit)
-            .toList();
-    }
-
-    public List<Instance> getAll() {
-        return this.repository.getAll();
+    public List<Instance> getAll(List<InstanceFetch> fetches) {
+        return this.handleFetches(this.repository.getAll(), fetches);
     }
 
     public Map<CloudClient, List<Instance>> getAllByCloud() {
-        List<Instance> instances = this.getAll();
+        List<Instance> instances = this.getAll(List.of());
 
         List<CloudClient> cloudClients = this.cloudClientService.getAll();
         Map<CloudClient, List<Instance>> cloudInstances = new HashMap<>();
@@ -195,9 +193,7 @@ public class InstanceService {
     }
 
     public List<Instance> getAllToDelete() {
-        return this.repository.getAllToDelete().stream()
-            .map(Instance::lazyLoadInit)
-            .toList();
+        return this.handleFetches(this.repository.getAllToDelete(), List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
     }
 
     public Long countAllForInstrumentScientist(User user, InstanceFilter filter) {
@@ -222,6 +218,10 @@ public class InstanceService {
 
     public List<Instance> getAllForITSupport(InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
         return this.repository.getAllForITSupport(filter, orderBy, pagination);
+    }
+
+    public Instance getByUidForOwner(User user, String instanceUid) {
+        return this.repository.getByIdForOwner(user, instanceUid);
     }
 
     public Instance getByIdForInstrumentScientist(User user, Long instanceId) {
@@ -256,6 +256,13 @@ public class InstanceService {
 
     public boolean isOwnerOrAdmin(User user, Instance instance) {
         return instance.isOwner(user) || user.hasRole(Role.ADMIN_ROLE);
+    }
+
+    public boolean isOwnerOrAdmin(User user, String instanceUid) {
+        if (user.hasRole(Role.ADMIN_ROLE)) {
+            return true;
+        }
+        return this.getByUidForOwner(user, instanceUid) != null;
     }
 
     public boolean isAuthorisedForInstance(User user, Instance instance) {
@@ -326,9 +333,7 @@ public class InstanceService {
     }
 
     public List<Instance> getAllForSupportUser(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
-        return this.getAllForSupportByUserRole(user, filter, orderBy, pagination).stream()
-            .map(Instance::lazyLoadInit)
-            .toList();
+        return this.handleFetches(this.getAllForSupportByUserRole(user, filter, orderBy, pagination), List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
     }
 
     public Long countAllForUserAndRole(User user, InstanceMemberRole role) {
@@ -336,7 +341,7 @@ public class InstanceService {
     }
 
     public InstanceThumbnail createOrUpdateThumbnail(Instance instance, byte[] data) {
-        final InstanceThumbnail thumbnail = requireNonNullElse(repository.getThumbnailForInstance(instance), new InstanceThumbnail());
+        final InstanceThumbnail thumbnail = requireNonNullElse(repository.getThumbnailForInstanceUid(instance.getUid()), new InstanceThumbnail());
         if (thumbnail.getInstance() == null) {
             thumbnail.setInstance(instance);
         }
@@ -349,7 +354,11 @@ public class InstanceService {
     }
 
     public InstanceThumbnail getThumbnailForInstance(Instance instance) {
-        return repository.getThumbnailForInstance(instance);
+        return this.getThumbnailForInstanceUid(instance.getUid());
+    }
+
+    public InstanceThumbnail getThumbnailForInstanceUid(String instanceUid) {
+        return repository.getThumbnailForInstanceUid(instanceUid);
     }
 
     public String getUID() {
@@ -366,5 +375,33 @@ public class InstanceService {
                 return uid;
             }
         } while (true);
+    }
+
+    public Instance handleFetches(Instance instance, List<InstanceFetch> fetches) {
+        if (instance != null) {
+            return this.handleFetches(List.of(instance), fetches)
+                .stream()
+                .findAny()
+                .orElse(null);
+        }
+        return null;
+    }
+
+    public List<Instance> handleFetches(List<Instance> instances, List<InstanceFetch> fetches) {
+        if (fetches != null) {
+            if (fetches.contains(InstanceFetch.members)) {
+                instances = this.repository.getAllWithMembersForInstances(instances);
+            }
+
+            if (fetches.contains(InstanceFetch.experiments)) {
+                instances = this.repository.getAllWithExperimentsForInstances(instances);
+            }
+
+            if (fetches.contains(InstanceFetch.attributes)) {
+                instances = this.repository.getAllWithAttributesForInstances(instances);
+            }
+        }
+
+        return instances;
     }
 }
