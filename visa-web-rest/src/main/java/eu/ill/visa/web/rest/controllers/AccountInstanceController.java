@@ -376,9 +376,10 @@ public class AccountInstanceController extends AbstractController {
 
 
     @POST
-    @Path("/{instance}/auth/token")
-    public RestResponse<MetaResponse<InstanceAuthenticationTokenDto>> createInstanceAuthenticationTicket(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+    @Path("/{instanceUid}/auth/token")
+    public RestResponse<MetaResponse<InstanceAuthenticationTokenDto>> createInstanceAuthenticationTicket(@Context final SecurityContext securityContext, @PathParam("instanceUid") String instanceUid) {
         final User user = this.getUserPrincipal(securityContext);
+        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members));
         final InstanceMember member = instance.getMember(user);
 
         if (!this.instanceService.isAuthorisedForInstance(user, instance)) {
@@ -564,10 +565,10 @@ public class AccountInstanceController extends AbstractController {
     }
 
     @GET
-    @Path("/{instance}/thumbnail")
+    @Path("/{instanceUid}/thumbnail")
     @Produces("image/jpeg")
     public Response getThumbnail(@Context final SecurityContext securityContext,
-                                 @PathParam("instance") final String instanceUid) {
+                                 @PathParam("instanceUid") final String instanceUid) {
         final User user = this.getUserPrincipal(securityContext);
         if (this.instanceService.isOwnerOrAdmin(user, instanceUid)) {
             final InstanceThumbnail thumbnail = instanceService.getThumbnailForInstanceUid(instanceUid);
