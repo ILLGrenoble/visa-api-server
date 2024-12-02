@@ -82,21 +82,27 @@ public class InstanceService {
     }
 
     public Instance getById(Long id) {
-        return this.repository.getById(id);
+        return this.getById(id, null);
+    }
+
+    public Instance getById(Long id, List<InstanceFetch> fetches) {
+        return this.handleFetches(this.repository.getById(id), fetches);
     }
 
     public Instance getFullById(Long id) {
-        Instance instance = this.repository.getById(id);
-        return this.handleFetches(instance, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
+        return this.getById(id, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
     }
 
     public Instance getByUID(String uid) {
-        return this.repository.getByUID(uid);
+        return this.getByUID(uid, null);
+    }
+
+    public Instance getByUID(String uid, List<InstanceFetch> fetches) {
+        return this.handleFetches(this.repository.getByUID(uid), fetches);
     }
 
     public Instance getFullByUID(String uid) {
-        Instance instance = this.repository.getByUID(uid);
-        return this.handleFetches(instance, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
+        return this.getByUID(uid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
     }
 
     public Instance create(Instance.Builder instanceBuilder) {
