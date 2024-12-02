@@ -8,9 +8,24 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class RemoteDesktopSocket {
+
+    protected interface WorkerHandler {
+        void doWork();
+    }
+
+    private enum WorkerEventType {
+        CONNECT,
+        DISCONNECT,
+        MESSAGE,
+    }
+
+    private record WorkerEvent(SocketClient socketClient, WorkerHandler worker, WorkerEventType type) { }
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopSocket.class);
 
@@ -18,6 +33,8 @@ public abstract class RemoteDesktopSocket {
     private RemoteDesktopDisconnectSubscriber disconnectSubscriber;
 
     private final ConcurrentHashMap<String, Object> sessionLocks = new ConcurrentHashMap<>();
+    private final Map<String, LinkedList<WorkerEvent>> sessionEventQueues = new HashMap<>();
+
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {
         this.connectSubscriber = connectSubscriber;
@@ -27,68 +44,69 @@ public abstract class RemoteDesktopSocket {
         this.disconnectSubscriber = disconnectSubscriber;
     }
 
-    protected interface WorkerHandler {
-        void onWork();
+    private void queueEvent(final WorkerEvent workerEvent) {
+        Object lock = sessionLocks.computeIfAbsent(workerEvent.socketClient().clientId(), id -> new Object());
+        synchronized (lock) {
+            // Check if lock still valid
+            if (sessionLocks.containsKey(workerEvent.socketClient().clientId())) {
+                final LinkedList<WorkerEvent> sessionEventQueue = sessionEventQueues.computeIfAbsent(workerEvent.socketClient.clientId(), id -> new LinkedList<>());
+                sessionEventQueue.addLast(workerEvent);
+
+                // Run event immediately if it is the only one on the queue
+                if (sessionEventQueue.size() == 1) {
+                    this.runEvent(workerEvent);
+                }
+            }
+        }
     }
 
-    private void runOnWorker(final WorkerHandler handler) {
+    private void onWorkerEventTerminated(final WorkerEvent event) {
+        Object lock = sessionLocks.computeIfAbsent(event.socketClient().clientId(), id -> new Object());
+        synchronized (lock) {
+            final LinkedList<WorkerEvent> sessionEventQueue = sessionEventQueues.get(event.socketClient().clientId());
+            sessionEventQueue.removeFirst();
+
+            if (event.type().equals(WorkerEventType.DISCONNECT)) {
+                sessionLocks.remove(event.socketClient().clientId());
+                sessionEventQueues.remove(event.socketClient().clientId());
+
+            } else {
+                if (!sessionEventQueue.isEmpty()) {
+                    final WorkerEvent nextWorkerEvent = sessionEventQueue.getFirst();
+                    this.runEvent(nextWorkerEvent);
+                }
+            }
+        }
+    }
+
+    private void runEvent(final WorkerEvent event) {
         // Execute handler on worker thread to allow JTA transactions
         Uni.createFrom()
             .voidItem()
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .subscribe()
-            .with(Void -> handler.onWork());
-    }
+            .with(Void -> {
+                try {
+                    event.worker().doWork();
 
-    protected void connectOnWorker(final SocketClient socketClient, final WorkerHandler handler) {
-        Object lock = sessionLocks.computeIfAbsent(socketClient.clientId(), id -> new Object());
-        synchronized (lock) {
-            this.runOnWorker(handler);
-        }
-    }
+                } catch (Exception error) {
+                    logger.error("Remote Desktop Event ({}) failed with protocol {}: {}", event.type(), event.socketClient().protocol(), error.getMessage());
+                }
 
-    protected void disconnectOnWorker(final SocketClient socketClient, final WorkerHandler handler) {
-        Object lock = sessionLocks.computeIfAbsent(socketClient.clientId(), id -> new Object());
-        synchronized (lock) {
-            this.runOnWorker(handler);
-            sessionLocks.remove(socketClient.clientId());
-        }
-    }
-
-    protected void messageOnWorker(final SocketClient socketClient, final WorkerHandler handler) {
-        Object lock = sessionLocks.get(socketClient.clientId());
-        if (lock != null) {
-            synchronized (lock) {
-                this.runOnWorker(handler);
-            }
-        }
+                this.onWorkerEventTerminated(event);
+            });
     }
 
     protected void onOpen(final SocketClient socketClient) {
-        try {
-            this.connectOnWorker(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop));
-
-        } catch (Exception e) {
-            logger.error("Failed to connect to RemoteDesktopSocket with protocol {}: {}", socketClient.protocol(), e.getMessage());
-        }
+        this.queueEvent(new WorkerEvent(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT));
     }
 
     protected void onClose(final SocketClient socketClient) {
-        try {
-            this.disconnectOnWorker(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient));
-
-        } catch (Exception e) {
-            logger.error("Failed to disconnect from RemoteDesktopSocket with protocol {}: {}", socketClient.protocol(), e.getMessage());
-        }
+        this.queueEvent(new WorkerEvent(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT));
     }
 
     protected void onMessage(final SocketClient socketClient, WorkerHandler handler) {
-        try {
-            this.messageOnWorker(socketClient, handler);
-
-        } catch (Exception e) {
-            logger.error("Failed to handle message on RemoteDesktopSocket with protocol {}: {}", socketClient.protocol(), e.getMessage());
-        }
+        this.queueEvent(new WorkerEvent(socketClient, handler, WorkerEventType.MESSAGE));
     }
 
     protected abstract void sendNop(final SocketClient socketClient);
