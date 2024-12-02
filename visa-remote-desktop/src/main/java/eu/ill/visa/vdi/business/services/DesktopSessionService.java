@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -225,7 +226,7 @@ public class DesktopSessionService {
             .findAny();
     }
 
-    public void updateSessionMemberActivity(final String clientId) {
+    public void updateSessionMemberActivity(final String clientId, final Date instanceInteractionTime) {
         this.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
 
             final DesktopSession desktopSession = desktopSessionMember.session();
@@ -237,8 +238,7 @@ public class DesktopSessionService {
                     logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
 
                 } else {
-                    instanceSessionMember.updateLastSeenAt();
-                    instanceSessionMember.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
+                    instanceSessionMember.setLastInteractionAt(instanceInteractionTime);
                     instanceSessionService.saveInstanceSessionMember(instanceSessionMember);
 
                     InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();

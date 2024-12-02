@@ -8,12 +8,16 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public abstract class RemoteDesktopSocket {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopSocket.class);
 
     private RemoteDesktopConnectSubscriber connectSubscriber;
     private RemoteDesktopDisconnectSubscriber disconnectSubscriber;
+
+    private final ConcurrentHashMap<String, Object> sessionLocks = new ConcurrentHashMap<>();
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {
         this.connectSubscriber = connectSubscriber;
@@ -23,46 +27,67 @@ public abstract class RemoteDesktopSocket {
         this.disconnectSubscriber = disconnectSubscriber;
     }
 
-    protected interface SocketClientWorkerConnectionHandler {
-        void onWork(final SocketClient socketClient);
+    protected interface WorkerHandler {
+        void onWork();
     }
 
-    protected interface SocketClientWorkerEventHandler<T> {
-        void onWork(final SocketClient socketClient, final T data);
-    }
-
-    protected void runOnWorker(final SocketClient socketClient, final SocketClientWorkerConnectionHandler handler) {
+    private void runOnWorker(final WorkerHandler handler) {
         // Execute handler on worker thread to allow JTA transactions
         Uni.createFrom()
-            .item(socketClient)
+            .voidItem()
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .subscribe()
-            .with(handler::onWork);
+            .with(Void -> handler.onWork());
     }
 
-    protected <T> void runOnWorker(final SocketClient socketClient, final T data, final SocketClientWorkerEventHandler<T> handler) {
-        // Execute handler on worker thread to allow JTA transactions
-        Uni.createFrom()
-            .item(socketClient)
-            .emitOn(Infrastructure.getDefaultWorkerPool())
-            .subscribe()
-            .with(client -> handler.onWork(client, data));
+    protected void connectOnWorker(final SocketClient socketClient, final WorkerHandler handler) {
+        Object lock = sessionLocks.computeIfAbsent(socketClient.clientId(), id -> new Object());
+        synchronized (lock) {
+            this.runOnWorker(handler);
+        }
     }
+
+    protected void disconnectOnWorker(final SocketClient socketClient, final WorkerHandler handler) {
+        Object lock = sessionLocks.computeIfAbsent(socketClient.clientId(), id -> new Object());
+        synchronized (lock) {
+            this.runOnWorker(handler);
+            sessionLocks.remove(socketClient.clientId());
+        }
+    }
+
+    protected void messageOnWorker(final SocketClient socketClient, final WorkerHandler handler) {
+        Object lock = sessionLocks.get(socketClient.clientId());
+        if (lock != null) {
+            synchronized (lock) {
+                this.runOnWorker(handler);
+            }
+        }
+    }
+
     protected void onOpen(final SocketClient socketClient) {
         try {
-            this.runOnWorker(socketClient, (client) -> this.connectSubscriber.onConnect(client, this::sendNop));
+            this.connectOnWorker(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop));
 
         } catch (Exception e) {
-            logger.error("Failed to connect to RemoteDesktopSocket: {}", e.getMessage());
+            logger.error("Failed to connect to RemoteDesktopSocket with protocol {}: {}", socketClient.protocol(), e.getMessage());
         }
     }
 
     protected void onClose(final SocketClient socketClient) {
         try {
-            this.runOnWorker(socketClient, this.disconnectSubscriber::onDisconnect);
+            this.disconnectOnWorker(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient));
 
         } catch (Exception e) {
-            logger.error("Failed to disconnect from RemoteDesktopSocket: {}", e.getMessage());
+            logger.error("Failed to disconnect from RemoteDesktopSocket with protocol {}: {}", socketClient.protocol(), e.getMessage());
+        }
+    }
+
+    protected void onMessage(final SocketClient socketClient, WorkerHandler handler) {
+        try {
+            this.messageOnWorker(socketClient, handler);
+
+        } catch (Exception e) {
+            logger.error("Failed to handle message on RemoteDesktopSocket with protocol {}: {}", socketClient.protocol(), e.getMessage());
         }
     }
 

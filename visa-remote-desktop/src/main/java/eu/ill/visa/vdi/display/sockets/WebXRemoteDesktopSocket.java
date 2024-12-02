@@ -42,11 +42,7 @@ public class WebXRemoteDesktopSocket extends RemoteDesktopSocket {
 
     @OnMessage
     private void onMessage(Session session, @PathParam("clientId") String clientId, byte[] data) {
-        try {
-            this.runOnWorker(new SocketClient(session, clientId, DesktopService.WEBX_PROTOCOL), data, this.webXRemoteDesktopEventSubscriber::onEvent);
-
-        } catch (Exception e) {
-            logger.error("Failed to handle message from GuacamoleRemoteDesktopSocket: {}", e.getMessage());
-        }
+        final SocketClient socketClient = new SocketClient(session, clientId, DesktopService.WEBX_PROTOCOL);
+        this.onMessage(socketClient, () -> this.webXRemoteDesktopEventSubscriber.onEvent(socketClient, data));
     }
 }

@@ -43,11 +43,7 @@ public class GuacamoleRemoteDesktopSocket extends RemoteDesktopSocket {
 
     @OnMessage
     private void onMessage(Session session, @PathParam("clientId") String clientId, String data) {
-        try {
-            this.runOnWorker(new SocketClient(session, clientId, DesktopService.GUACAMOLE_PROTOCOL), data,  this.guacamoleRemoteDesktopEventSubscriber::onEvent);
-
-        } catch (Exception e) {
-            logger.error("Failed to handle message from GuacamoleRemoteDesktopSocket: {}", e.getMessage());
-        }
+        final SocketClient socketClient = new SocketClient(session, clientId, DesktopService.GUACAMOLE_PROTOCOL);
+        this.onMessage(socketClient, () -> this.guacamoleRemoteDesktopEventSubscriber.onEvent(socketClient, data));
     }
 }

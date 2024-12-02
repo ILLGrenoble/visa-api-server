@@ -10,8 +10,7 @@ public class RemoteDesktopConnection {
     private final SocketClient client;
     private final ConnectionThread connectionThread;
 
-    private Date lastSeenAt;
-    private Date lastInteractionAt = new Date();
+    private Date lastInstanceUpdateTime;
     private InstanceActivityType instanceActivityType;
 
     public RemoteDesktopConnection(SocketClient client, ConnectionThread connectionThread) {
@@ -27,20 +26,12 @@ public class RemoteDesktopConnection {
         return connectionThread;
     }
 
-    public Date getLastSeenAt() {
-        return lastSeenAt;
+    public Date getLastInstanceUpdateTime() {
+        return lastInstanceUpdateTime;
     }
 
-    public void setLastSeenAt(Date lastSeenAt) {
-        this.lastSeenAt = lastSeenAt;
-    }
-
-    public Date getLastInteractionAt() {
-        return lastInteractionAt;
-    }
-
-    public void setLastInteractionAt(Date lastInteractionAt) {
-        this.lastInteractionAt = lastInteractionAt;
+    public void setLastInstanceUpdateTime(Date lastInstanceUpdateTime) {
+        this.lastInstanceUpdateTime = lastInstanceUpdateTime;
     }
 
     public InstanceActivityType getInstanceActivity() {
@@ -61,11 +52,6 @@ public class RemoteDesktopConnection {
         } else if (instanceActivityType.equals(InstanceActivityType.KEYBOARD) && this.instanceActivityType.equals(InstanceActivityType.MOUSE)) {
             this.instanceActivityType = InstanceActivityType.MOUSE_AND_KEYBOARD;
         }
-        this.updateLastInteractionAt();
-    }
-
-    public void updateLastInteractionAt() {
-        this.lastInteractionAt = new Date();
     }
 
     public void disconnect() {
