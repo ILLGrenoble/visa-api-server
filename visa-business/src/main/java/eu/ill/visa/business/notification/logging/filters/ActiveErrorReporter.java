@@ -6,6 +6,8 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.MailerName;
+import io.quarkus.runtime.Shutdown;
+import io.quarkus.runtime.Startup;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.inject.Singleton;
@@ -30,6 +32,9 @@ import static java.lang.String.format;
 @Singleton
 public class ActiveErrorReporter implements ErrorReporter {
 
+    private final int MAX_ERRORS_WORKER_TIME_MS = 5000;
+    private final int CURRENT_ERROR_WORKER_TIME_MS = 60000;
+
     public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final Logger logger = LoggerFactory.getLogger(ActiveErrorReporter.class);
 
@@ -41,6 +46,9 @@ public class ActiveErrorReporter implements ErrorReporter {
     private final int maxErrorsPerReport;
 
     private final boolean enabled;
+    private final Thread reportedThread;
+    private boolean running = true;
+    private Date lastReportingTime = new Date();
 
     private List<ErrorEvent> events = new ArrayList<>();
 
@@ -69,17 +77,56 @@ public class ActiveErrorReporter implements ErrorReporter {
         } else {
             logger.info("Error reporting is disabled (configuration is not valid)");
         }
+
+        this.reportedThread = new Thread(this::run);
+    }
+
+    @Startup
+    public void start() {
+        this.reportedThread.start();
+    }
+
+    @Shutdown
+    public void stop() {
+        this.running = false;
+        try {
+            this.reportedThread.join();
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    public void run() {
+        while (running) {
+            try {
+                Thread.sleep(MAX_ERRORS_WORKER_TIME_MS);
+                this.work();
+
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
+    private void work() {
+        this.handleMaxErrors();
+
+        Date currentTime = new Date();
+        long elapsedTime = currentTime.getTime() - this.lastReportingTime.getTime();
+        if (elapsedTime > CURRENT_ERROR_WORKER_TIME_MS) {
+            this.handleCurrentErrors();
+        }
     }
 
     public synchronized void handleMaxErrors() {
         if (this.events.size() >= this.maxErrorsPerReport) {
             this.generateReportInVirtualThread(events);
+            this.lastReportingTime = new Date();
         }
     }
 
     public synchronized void handleCurrentErrors() {
         if (!this.events.isEmpty()) {
             this.generateReportInVirtualThread(events);
+            this.lastReportingTime = new Date();
         }
     }
 
