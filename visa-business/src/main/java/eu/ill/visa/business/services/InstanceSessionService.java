@@ -72,8 +72,8 @@ public class InstanceSessionService {
         return this.repository.getByInstanceIdAndProtocol(instanceId, protocol);
     }
 
-    public void deleteSessionMember(@NotNull InstanceSession instanceSession, String memberId) {
-        InstanceSessionMemberPartial sessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndSessionId(instanceSession.getId(), memberId);
+    public void deleteSessionMember(@NotNull InstanceSession instanceSession, String clientId) {
+        InstanceSessionMemberPartial sessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSession.getId(), clientId);
         if (sessionMember != null) {
             sessionMember.setActive(false);
             this.instanceSessionMemberService.updatePartial(sessionMember);
@@ -87,7 +87,7 @@ public class InstanceSessionService {
             this.updatePartial(instanceSession);
 
         } else {
-            logger.warn("Got a null session member (memberId {}) for instance {}", memberId, instanceSession.getInstanceId());
+            logger.warn("Got a null session member (clientId {}) for instance {}", clientId, instanceSession.getInstanceId());
         }
     }
 

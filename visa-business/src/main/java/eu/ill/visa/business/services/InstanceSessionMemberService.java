@@ -42,23 +42,19 @@ public class InstanceSessionMemberService {
         return repository.countAllActive();
     }
 
-    public void create(@NotNull InstanceSession instanceSession, String memberId, User user, InstanceMemberRole role) {
+    public void create(@NotNull InstanceSession instanceSession, String clientId, User user, InstanceMemberRole role) {
         // Ensure we do not have any previous InstanceSessionMembers that have not been deactivated correctly
-        InstanceSessionMemberPartial instanceSessionMemberPartial = this.getPartialByInstanceSessionIdAndSessionId(instanceSession.getId(), memberId);
+        InstanceSessionMemberPartial instanceSessionMemberPartial = this.getPartialByInstanceSessionIdAndClientId(instanceSession.getId(), clientId);
         if (instanceSessionMemberPartial != null) {
             instanceSessionMemberPartial.setActive(false);
             this.updatePartial(instanceSessionMemberPartial);
-            logger.warn("Deleting a InstanceSessionMember for instance {} with session Id {} that was not previously deleted", instanceSession.getInstanceId(), memberId);
+            logger.warn("Deleting a InstanceSessionMember for instance {} with client Id {} that was not previously deleted", instanceSession.getInstanceId(), clientId);
         }
 
-        InstanceSessionMember sessionMember = new InstanceSessionMember(instanceSession, memberId, user, role);
+        InstanceSessionMember sessionMember = new InstanceSessionMember(instanceSession, clientId, user, role);
         sessionMember.setActive(true);
 
         this.repository.save(sessionMember);
-    }
-
-    public List<InstanceSessionMember> getAllByInstanceSessionId(@NotNull Long sessionId) {
-        return this.repository.getAllByInstanceSessionId(sessionId);
     }
 
     public List<InstanceSessionMember> getAllHistorySessionMembersByInstanceId(final Long instanceId) {
@@ -92,8 +88,8 @@ public class InstanceSessionMemberService {
         return this.repository.getAllPartialsByInstanceId(instanceId);
     }
 
-    public InstanceSessionMemberPartial getPartialByInstanceSessionIdAndSessionId(Long instanceSessionId, final String sessionId) {
-        return this.repository.getPartialByInstanceSessionIdAndSessionId(instanceSessionId, sessionId);
+    public InstanceSessionMemberPartial getPartialByInstanceSessionIdAndClientId(Long instanceSessionId, final String clientId) {
+        return this.repository.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
 
     }
 

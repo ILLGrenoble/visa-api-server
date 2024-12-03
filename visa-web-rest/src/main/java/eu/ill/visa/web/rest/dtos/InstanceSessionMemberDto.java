@@ -20,7 +20,7 @@ public class InstanceSessionMemberDto {
         this.id = instanceSessionMember.getId();
         this.createdAt = instanceSessionMember.getCreatedAt();
         this.instanceSession = new InstanceSessionDto(instanceSessionMember.getInstanceSession());
-        this.sessionId = instanceSessionMember.getSessionId();
+        this.sessionId = instanceSessionMember.getClientId();
         this.user = new UserDto(instanceSessionMember.getUser());
         this.role = instanceSessionMember.getRole();
         this.active = instanceSessionMember.isActive();

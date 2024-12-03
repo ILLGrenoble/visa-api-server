@@ -29,7 +29,7 @@ public class InstanceSessionMemberType {
         this.updatedAt = member.getUpdatedAt();
         this.lastInteractionAt = member.getLastInteractionAt();
         this.instanceSession = new InstanceSessionType(member.getInstanceSession());
-        this.sessionId = member.getSessionId();
+        this.sessionId = member.getClientId();
         this.user = new UserType(member.getUser());
         this.role = member.getRole();
         this.active = member.isActive();

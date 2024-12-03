@@ -29,14 +29,6 @@ import java.util.Date;
             AND i.lastInteractionAt > :timeAgo
             AND instance.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instanceSessionMember.getAllByInstanceSessionId", query = """
-            SELECT i FROM InstanceSessionMember i
-            LEFT JOIN FETCH i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE i.instanceSession.id = :instanceSessionId
-            AND i.active = true
-            AND instance.deletedAt IS NULL
-    """),
     @NamedQuery(name = "instanceSessionMember.getAllForInstanceId", query = """
             SELECT i FROM InstanceSessionMember i
             LEFT JOIN FETCH i.instanceSession instanceSession
@@ -89,14 +81,14 @@ import java.util.Date;
             AND i.active = true
             AND instance.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instanceSessionMember.getPartialByInstanceSessionIdAndSessionId", query = """
+    @NamedQuery(name = "instanceSessionMember.getPartialByInstanceSessionIdAndClientId", query = """
             SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
             FROM InstanceSessionMember i
             LEFT JOIN i.user u
             LEFT JOIN i.instanceSession instanceSession
             LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
             WHERE instanceSession.id = :instanceSessionId
-            AND i.sessionId = :sessionId
+            AND i.clientId = :clientId
             AND i.active = true
             AND instance.deletedAt IS NULL
     """),
@@ -129,7 +121,7 @@ public class InstanceSessionMember extends Timestampable {
     private InstanceSession instanceSession;
 
     @Column(name = "session_id", length = 150, nullable = false)
-    private String sessionId;
+    private String clientId; // Renamed from sessionId (previously was socket session Id, now is a client Id
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = false)
@@ -149,9 +141,9 @@ public class InstanceSessionMember extends Timestampable {
     public InstanceSessionMember() {
     }
 
-    public InstanceSessionMember(InstanceSession instanceSession, String sessionId, User user, InstanceMemberRole role) {
+    public InstanceSessionMember(InstanceSession instanceSession, String clientId, User user, InstanceMemberRole role) {
         this.instanceSession = instanceSession;
-        this.sessionId = sessionId;
+        this.clientId = clientId;
         this.user = user;
         this.role = role;
     }
@@ -172,12 +164,12 @@ public class InstanceSessionMember extends Timestampable {
         this.instanceSession = instanceSession;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String getClientId() {
+        return clientId;
     }
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public User getUser() {

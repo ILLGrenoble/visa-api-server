@@ -229,7 +229,7 @@ public class DesktopSessionService {
             final Long instanceSessionId = desktopSession.getSessionId();
 
             synchronized (this) {
-                final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndSessionId(instanceSessionId, desktopSessionMember.clientId());
+                final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
                 if (instanceSessionMember == null) {
                     logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
 

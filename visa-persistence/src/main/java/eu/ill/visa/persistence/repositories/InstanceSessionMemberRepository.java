@@ -60,12 +60,6 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         return query.getResultList();
     }
 
-    public List<InstanceSessionMember> getAllByInstanceSessionId(final Long instanceSessionId) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllByInstanceSessionId", InstanceSessionMember.class);
-        query.setParameter("instanceSessionId", instanceSessionId);
-        return query.getResultList();
-    }
-
     public List<InstanceSessionMember> getAllHistorySessionMembersByInstanceId(final Long instanceId) {
         final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllHistoryForInstanceId", InstanceSessionMember.class);
         query.setParameter("instanceId", instanceId);
@@ -81,11 +75,11 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         }
     }
 
-    public InstanceSessionMemberPartial getPartialByInstanceSessionIdAndSessionId(final Long instanceSessionId, final String sessionId) {
+    public InstanceSessionMemberPartial getPartialByInstanceSessionIdAndClientId(final Long instanceSessionId, final String clientId) {
         try {
-            final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getPartialByInstanceSessionIdAndSessionId", InstanceSessionMemberPartial.class);
+            final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getPartialByInstanceSessionIdAndClientId", InstanceSessionMemberPartial.class);
             query.setParameter("instanceSessionId", instanceSessionId);
-            query.setParameter("sessionId", sessionId);
+            query.setParameter("clientId", clientId);
             return query.getSingleResult();
         } catch (NoResultException exception) {
             return null;
