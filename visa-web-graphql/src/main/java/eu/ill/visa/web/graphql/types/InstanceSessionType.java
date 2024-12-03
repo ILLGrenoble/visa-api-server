@@ -13,11 +13,14 @@ public class InstanceSessionType {
     private final @NotNull Long id;
     private final @NotNull String connectionId;
     private final @NotNull boolean current;
+    @AdaptToScalar(Scalar.Int.class)
+    private final @NotNull Long instanceId;
 
     public InstanceSessionType(final InstanceSession session) {
         this.id = session.getId();
         this.connectionId = session.getConnectionId();
         this.current = session.getCurrent();
+        this.instanceId = session.getInstanceId();
     }
 
     public Long getId() {
@@ -30,5 +33,9 @@ public class InstanceSessionType {
 
     public boolean isCurrent() {
         return current;
+    }
+
+    public @NotNull Long getInstanceId() {
+        return instanceId;
     }
 }

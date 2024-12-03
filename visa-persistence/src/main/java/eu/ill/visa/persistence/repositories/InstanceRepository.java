@@ -205,8 +205,8 @@ public class InstanceRepository extends AbstractRepository<Instance> {
 
         final List<Predicate> predicates = new ArrayList<>();
 
-        if (filter.getId() != null) {
-            predicates.add(cb.equal(root.get("id"), filter.getId()));
+        if (filter.getIds() != null && !filter.getIds().isEmpty()) {
+            predicates.add(root.get("id").in(filter.getIds()));
         }
 
         if (filter.getNameLike() != null) {
@@ -511,9 +511,9 @@ public class InstanceRepository extends AbstractRepository<Instance> {
    private <T> TypedQuery<T> createFilteredQuery(String queryString, InstanceFilter filter, OrderBy orderBy, Pagination pagination, Class<T> type) {
         List<Entry<String, Object>> queryParameters = new ArrayList<>();
 
-        if (filter != null && filter.getId() != null) {
-            queryString += " AND i.id = :id";
-            queryParameters.add(new SimpleEntry<>("id", filter.getId()));
+        if (filter != null && filter.getIds() != null && !filter.getIds().isEmpty()) {
+            queryString += " AND i.id IN (:ids)";
+            queryParameters.add(new SimpleEntry<>("ids", filter.getIds()));
         }
         if (filter != null && filter.getNameLike() != null) {
             queryString += " AND LOWER(i.name) like LOWER(:name)";

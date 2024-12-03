@@ -275,7 +275,7 @@ public class InstanceServiceTest {
         assertNotNull(user1);
 
         InstanceFilter filter = new InstanceFilter();
-        filter.setId(1000L);
+        filter.setIds(List.of(1000L));
         List<Instance> instances = this.instanceService.getAllForInstrumentScientist(user1, filter, null, null);
         assertEquals(1, instances.size());
 
@@ -316,7 +316,7 @@ public class InstanceServiceTest {
         assertEquals(2 , instances.size());
 
         filter = new InstanceFilter();
-        filter.setId(1008L);
+        filter.setIds(List.of(1008L));
         instances = this.instanceService.getAllForInstrumentControlSupport(filter, null, null);
         assertEquals(1 , instances.size());
 

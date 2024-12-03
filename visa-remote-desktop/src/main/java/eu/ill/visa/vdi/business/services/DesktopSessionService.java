@@ -3,6 +3,7 @@ package eu.ill.visa.vdi.business.services;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.*;
+import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
@@ -311,7 +312,7 @@ public class DesktopSessionService {
 
             desktopSession.filterMembers(desktopSessionMember -> !desktopSessionMember.connectedUser().getRole().equals(InstanceMemberRole.OWNER))
                 .forEach(desktopSessionMember -> {
-                    final Instance instance = this.instanceService.getFullById(desktopSession.getInstanceId());
+                    final Instance instance = this.instanceService.getById(desktopSession.getInstanceId(), List.of(InstanceFetch.members));
                     if (desktopSessionMember.connectedUser().isRole(InstanceMemberRole.SUPPORT) && instanceSessionService.canConnectWhileOwnerAway(instance, desktopSessionMember.connectedUser().getId())) {
                         this.eventDispatcher.sendEventToClient(desktopSessionMember.clientId(), USER_DISCONNECTED_EVENT, new UserDisconnectedEvent(user, desktopSession.getInstanceId()));
 

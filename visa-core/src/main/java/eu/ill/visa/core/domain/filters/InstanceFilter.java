@@ -4,10 +4,12 @@ package eu.ill.visa.core.domain.filters;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import jakarta.ws.rs.QueryParam;
 
+import java.util.List;
+
 public class InstanceFilter {
 
     @QueryParam("id")
-    private Long id;
+    private List<Long> ids;
 
     @QueryParam("nameLike")
     private String nameLike;
@@ -27,12 +29,12 @@ public class InstanceFilter {
     @QueryParam("ownerId")
     private String ownerId;
 
-    public Long getId() {
-        return id;
+    public List<Long> getIds() {
+        return ids;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIds(List<Long> ids) {
+        this.ids = ids;
     }
 
     public String getNameLike() {

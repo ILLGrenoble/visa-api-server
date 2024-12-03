@@ -150,6 +150,14 @@ public class InstanceService {
         }
     }
 
+    public List<Instance> getAll(final InstanceFilter filter) {
+        return this.getAll(filter, null, null);
+    }
+
+    public List<Instance> getAll(final InstanceFilter filter, final OrderBy orderBy) {
+        return this.getAll(filter, orderBy, null);
+    }
+
     public List<Instance> getAll(final InstanceFilter filter, final OrderBy orderBy, final Pagination pagination) {
         return this.repository.getAll(filter, orderBy, pagination);
     }
