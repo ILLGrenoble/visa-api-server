@@ -54,6 +54,7 @@ public class AccountInstanceController extends AbstractController {
     private final InstanceService instanceService;
     private final InstanceMemberService instanceMemberService;
     private final InstanceSessionService instanceSessionService;
+    private final InstanceSessionMemberService instanceSessionMemberService;
     private final InstanceCommandService instanceCommandService;
     private final InstanceExtensionRequestService instanceExtensionRequestService;
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
@@ -69,6 +70,7 @@ public class AccountInstanceController extends AbstractController {
                                      final InstanceService instanceService,
                                      final InstanceMemberService instanceMemberService,
                                      final InstanceSessionService instanceSessionService,
+                                     final InstanceSessionMemberService instanceSessionMemberService,
                                      final InstanceCommandService instanceCommandService,
                                      final InstanceExtensionRequestService instanceExtensionRequestService,
                                      final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
@@ -81,6 +83,7 @@ public class AccountInstanceController extends AbstractController {
         this.instanceService = instanceService;
         this.instanceMemberService = instanceMemberService;
         this.instanceSessionService = instanceSessionService;
+        this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceCommandService = instanceCommandService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
@@ -363,10 +366,9 @@ public class AccountInstanceController extends AbstractController {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
-            List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembersByInstance(instance);
+            List<InstanceSessionMember> sessionMembers = this.instanceSessionMemberService.getAllByInstance(instance);
 
             return createResponse(sessionMembers.stream()
-                .peek(instanceSessionMember -> instanceSessionMember.getInstanceSession().setInstance(instance))
                 .map(InstanceSessionMemberDto::new)
                 .collect(toList()));
         }
@@ -542,23 +544,23 @@ public class AccountInstanceController extends AbstractController {
     }
 
     @POST
-    @Path("/{instance}/thumbnail")
+    @Path("/{instanceUid}/thumbnail")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public MetaResponse<String> createThumbnail(@Context final SecurityContext securityContext,
-                                @PathParam("instance") final Instance instance,
+                                @PathParam("instanceUid") final String instanceUid,
                                 @NotNull @RestForm("file") final InputStream is) {
         try {
             final User user = this.getUserPrincipal(securityContext);
-            if (this.instanceService.isOwnerOrAdmin(user, instance)) {
+            if (this.instanceService.isOwnerOrAdmin(user, instanceUid)) {
                 final byte[] data = is.readAllBytes();
                 final ImageFormat mimeType = Imaging.guessFormat(data);
                 if (mimeType == ImageFormats.JPEG) {
-                    instanceService.createOrUpdateThumbnail(instance, data);
+                    instanceService.createOrUpdateThumbnailByInstanceUid(instanceUid, data);
                 }
             }
 
         } catch (Exception exception) {
-            logger.error("Error creating thumbnail for instance: {}", instance.getId(), exception);
+            logger.error("Error creating thumbnail for instance with UID {}: {}", instanceUid, exception.getMessage());
         }
 
         return createResponse();

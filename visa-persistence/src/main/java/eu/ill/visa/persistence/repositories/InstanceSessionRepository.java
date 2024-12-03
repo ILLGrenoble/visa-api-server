@@ -72,4 +72,11 @@ public class InstanceSessionRepository extends AbstractRepository<InstanceSessio
             merge(instanceSession);
         }
     }
+
+    public void updatePartial(final InstanceSession instanceSession) {
+        getEntityManager().createNamedQuery("instanceSession.updatePartialById")
+            .setParameter("id", instanceSession.getId())
+            .setParameter("current", instanceSession.getCurrent())
+            .executeUpdate();
+    }
 }

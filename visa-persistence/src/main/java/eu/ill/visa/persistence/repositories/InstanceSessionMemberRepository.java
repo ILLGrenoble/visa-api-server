@@ -1,8 +1,8 @@
 package eu.ill.visa.persistence.repositories;
 
 import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
+import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -48,33 +48,15 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
     }
 
 
-    public InstanceSessionMember getSessionMember(final InstanceSession instanceSession, final String sessionId) {
-        try {
-            final TypedQuery<InstanceSessionMember> query = getEntityManager()
-                .createNamedQuery("instanceSessionMember.getByInstanceSessionAndSessionId", InstanceSessionMember.class);
-            query.setParameter("instanceSession", instanceSession);
-            query.setParameter("sessionId", sessionId);
-            return query.getSingleResult();
-        } catch (NoResultException exception) {
-            return null;
-        }
-    }
-
-    public List<InstanceSessionMember> getAllSessionMembersByInstanceId(final Long instanceId) {
+    public List<InstanceSessionMember> getAllByInstanceId(final Long instanceId) {
         final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceId", InstanceSessionMember.class);
         query.setParameter("instanceId", instanceId);
         return query.getResultList();
     }
 
-    public List<InstanceSessionMember> getAllSessionMembersByInstanceIds(final List<Long> instanceIds) {
+    public List<InstanceSessionMember> getAllByInstanceIds(final List<Long> instanceIds) {
         final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllForInstanceIds", InstanceSessionMember.class);
         query.setParameter("instanceIds", instanceIds);
-        return query.getResultList();
-    }
-
-    public List<InstanceSessionMember> getAllSessionMembersByInstanceSessionId(final Long instanceSessionId) {
-        final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllByInstanceSessionId", InstanceSessionMember.class);
-        query.setParameter("instanceSessionId", instanceSessionId);
         return query.getResultList();
     }
 
@@ -93,13 +75,39 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         }
     }
 
-    public InstanceSessionMember getBySessionId(String sessionId) {
+    public InstanceSessionMemberPartial getPartialByInstanceSessionIdAndClientId(final Long instanceSessionId, final String clientId) {
         try {
-            final TypedQuery<InstanceSessionMember> query = getEntityManager().createNamedQuery("instanceSessionMember.getBySessionId", InstanceSessionMember.class);
-            query.setParameter("sessionId", sessionId);
+            final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getPartialByInstanceSessionIdAndClientId", InstanceSessionMemberPartial.class);
+            query.setParameter("instanceSessionId", instanceSessionId);
+            query.setParameter("clientId", clientId);
             return query.getSingleResult();
         } catch (NoResultException exception) {
             return null;
         }
+    }
+
+    public List<InstanceSessionMemberPartial> getAllPartials() {
+        final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllPartials", InstanceSessionMemberPartial.class);
+        return query.getResultList();
+    }
+
+    public List<InstanceSessionMemberPartial> getAllPartialsByInstanceId(final Long instanceId) {
+        final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllPartialsForInstanceId", InstanceSessionMemberPartial.class);
+        query.setParameter("instanceId", instanceId);
+        return query.getResultList();
+    }
+
+    public List<InstanceSessionMemberPartial> getAllPartialsByInstanceSessionId(final Long instanceSessionId) {
+        final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllPartialByInstanceSessionId", InstanceSessionMemberPartial.class);
+        query.setParameter("instanceSessionId", instanceSessionId);
+        return query.getResultList();
+    }
+
+    public void updatePartial(final InstanceSessionMemberPartial instanceSessionMember) {
+        getEntityManager().createNamedQuery("instanceSessionMember.updatePartialById")
+            .setParameter("id", instanceSessionMember.getId())
+            .setParameter("active", instanceSessionMember.getActive())
+            .setParameter("lastInteractionAt", instanceSessionMember.getLastInteractionAt())
+            .executeUpdate();
     }
 }

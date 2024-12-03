@@ -1,13 +1,12 @@
 package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
-import eu.ill.visa.vdi.domain.models.DesktopSessionMember;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import io.smallrye.mutiny.Uni;
@@ -47,36 +46,33 @@ public abstract class RemoteDesktopEventSubscriber<T> {
             }
 
             // Update last seen time of instance if more than one minute
-            final Date lastSeenDate = remoteDesktopConnection.getLastSeenAt();
-            final Date currentDate = new Date();
-            if (lastSeenDate == null || (currentDate.getTime() - lastSeenDate.getTime() > 15 * 1000)) {
+            final Date lastInstanceUpdateTime = remoteDesktopConnection.getLastInstanceUpdateTime();
+            final Date instanceInteractionTime = new Date();
+            if (lastInstanceUpdateTime == null || (instanceInteractionTime.getTime() - lastInstanceUpdateTime.getTime() > 15 * 1000)) {
+                remoteDesktopConnection.setLastInstanceUpdateTime(instanceInteractionTime);
+
                 // Use virtual thread to update interaction times so that the websocket can return ASAP
                 Uni.createFrom()
                     .voidItem()
                     .emitOn(Infrastructure.getDefaultWorkerPool())
                     .subscribe()
-                    .with((voidItem) -> this.updateInstanceActivity(desktopSessionMember, lastSeenDate, socketClient.clientId()));
+                    .with((voidItem) -> this.updateInstanceActivity(desktopSession.getInstanceId(), instanceInteractionTime, socketClient.clientId()));
             }
        });
     }
 
-    private void updateInstanceActivity(final DesktopSessionMember desktopSessionMember, final Date lastSeenDate, final String clientId) {
-        final DesktopSession desktopSession = desktopSessionMember.session();
-        final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
-
-        final Instance instance = this.instanceService.getById(desktopSession.getInstanceId());
+    private void updateInstanceActivity(final Long instanceId, final Date instanceInteractionTime, final String clientId) {
+        final InstancePartial instance = this.instanceService.getPartialById(instanceId);
         if (instance == null) {
             return;
         }
 
-        instance.updateLastSeenAt();
-        if (lastSeenDate == null || lastSeenDate.getTime() <= remoteDesktopConnection.getLastInteractionAt().getTime()) {
-            instance.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
-        }
-        instanceService.save(instance);
-        remoteDesktopConnection.setLastSeenAt(instance.getLastSeenAt());
+        // Update instance
+        instance.setLastSeenAt(instanceInteractionTime);
+        instance.setLastInteractionAt(instanceInteractionTime);
+        instanceService.updatePartial(instance);
 
-        this.desktopSessionService.updateSessionMemberActivity(clientId);
+        this.desktopSessionService.updateSessionMemberActivity(clientId, instanceInteractionTime);
     }
 
     protected abstract InstanceActivityType getControlActivityType(T data);

@@ -34,6 +34,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
             where i.id = :instanceId
             and m.role = 'OWNER'
     """),
+    @NamedQuery(name = "instanceMember.getOwnerIdByInstanceId", query = """
+            SELECT DISTINCT u.id
+            FROM Instance i
+            LEFT JOIN i.members m
+            LEFT JOIN m.user u
+            where i.id = :instanceId
+            and m.role = 'OWNER'
+    """),
     @NamedQuery(name = "instanceMember.getOwnersByInstanceIds", query = """
             SELECT DISTINCT m FROM Instance i
             LEFT JOIN i.members m

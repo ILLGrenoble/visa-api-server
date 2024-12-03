@@ -5,9 +5,16 @@ import jakarta.persistence.*;
 
 @Entity
 @NamedQueries({
+    @NamedQuery(name = "instanceThumbnail.getForInstanceId", query = """
+        SELECT it
+        FROM InstanceThumbnail it
+        WHERE it.instanceId = :instanceId
+    """),
     @NamedQuery(name = "instanceThumbnail.getForInstanceUid", query = """
-            SELECT it FROM InstanceThumbnail it
-            WHERE it.instance.uid = :instanceUid
+        SELECT it
+        FROM InstanceThumbnail it
+        JOIN Instance i ON it.instanceId = i.id
+        WHERE i.uid = :instanceUid
     """),
 })
 @Table(name = "instance_thumbnail", uniqueConstraints = {
@@ -24,15 +31,15 @@ public class InstanceThumbnail extends Timestampable {
     @Column(name = "data", nullable = false, columnDefinition = "TEXT")
     private byte[] data;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
-    private Instance instance;
+    @Column(name = "instance_id")
+    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id", foreignKeyDefinition = "FOREIGN KEY (instance_id) REFERENCES instance(id)"), nullable = false)
+    private Long instanceId;
 
     public InstanceThumbnail() {
     }
 
-    public InstanceThumbnail(byte[] data) {
-        this.data = data;
+    public InstanceThumbnail(Long instanceId) {
+        this.instanceId = instanceId;
     }
 
     public Long getId() {
@@ -51,11 +58,11 @@ public class InstanceThumbnail extends Timestampable {
         this.data = thumbnail;
     }
 
-    public Instance getInstance() {
-        return instance;
+    public Long getInstanceId() {
+        return instanceId;
     }
 
-    public void setInstance(Instance instance) {
-        this.instance = instance;
+    public void setInstanceId(Long instanceId) {
+        this.instanceId = instanceId;
     }
 }

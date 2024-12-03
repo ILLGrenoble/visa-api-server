@@ -1,12 +1,13 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.InstanceSessionMember;
-import eu.ill.visa.core.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestTransaction
 public class InstanceSessionServiceTest {
+
+    @Inject
+    InstanceSessionMemberService instanceSessionMemberService;
 
     @Inject
     private InstanceSessionService instanceSessionService;
@@ -72,7 +76,7 @@ public class InstanceSessionServiceTest {
     @DisplayName("Create a new instance session")
     void create() {
         Instance instance = instanceService.getById(1000L);
-        InstanceSession session = new InstanceSession(instance, "guacamole", "a-connection-id");
+        InstanceSession session = new InstanceSession(instance.getId(), "guacamole", "a-connection-id");
         instanceSessionService.save(session);
         InstanceSession persistedInstanceSession = instanceSessionService.getById(session.getId());
         assertNotNull(persistedInstanceSession);
@@ -83,12 +87,12 @@ public class InstanceSessionServiceTest {
     @DisplayName("Increment the client count for a given instance session")
     void incrementClientCountForSession() {
         User user = this.userService.getById("1");
-        String sessionId = UUID.randomUUID().toString();
+        String clientId = UUID.randomUUID().toString();
 
         InstanceSession instanceSession = instanceSessionService.getById(1000L);
-        List<InstanceSessionMember> members1 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
-        instanceSessionService.addInstanceSessionMember(instanceSession, sessionId, user, "OWNER");
-        List<InstanceSessionMember> members2 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
+        List<InstanceSessionMemberPartial> members1 = instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
+        instanceSessionMemberService.create(instanceSession, clientId, user, InstanceMemberRole.OWNER);
+        List<InstanceSessionMemberPartial> members2 = instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
         assertEquals(members1.size() + 1, members2.size());
     }
 
@@ -96,9 +100,9 @@ public class InstanceSessionServiceTest {
     @DisplayName("Decrement the client count for a given instance session")
     void decrementClientCountForSession() {
         InstanceSession instanceSession = instanceSessionService.getById(1000L);
-        List<InstanceSessionMember> members1 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
-        instanceSessionService.removeInstanceSessionMember(instanceSession, "24e7437a-eae5-48c4-823e-778c42a6acf8");
-        List<InstanceSessionMember> members2 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
+        List<InstanceSessionMemberPartial> members1 = instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
+        instanceSessionService.deleteSessionMember(instanceSession, "24e7437a-eae5-48c4-823e-778c42a6acf8");
+        List<InstanceSessionMemberPartial> members2 = instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
         assertEquals(members1.size() - 1, members2.size());
     }
 
@@ -106,21 +110,21 @@ public class InstanceSessionServiceTest {
     @DisplayName("Test deleted when client count zero")
     void testDeletedWhenClientCountZero() {
         User user = this.userService.getById("1");
-        String sessionId = UUID.randomUUID().toString();
+        String clientId = UUID.randomUUID().toString();
 
         Instance instance = instanceService.getById(1000L);
-        InstanceSession session = instanceSessionService.create(instance, "guacamole", "a-connection-id");
+        InstanceSession session = instanceSessionService.create(instance.getId(), "guacamole", "a-connection-id");
 
         InstanceSession persistedInstanceSession = instanceSessionService.getById(session.getId());
         assertNotNull(persistedInstanceSession);
-        List<InstanceSessionMember> members1 = instanceSessionService.getAllSessionMembersByInstanceSession(persistedInstanceSession);
+        List<InstanceSessionMemberPartial> members1 = instanceSessionMemberService.getAllPartialsByInstanceSessionId(persistedInstanceSession.getId());
         assertEquals(0, members1.size());
 
-        instanceSessionService.addInstanceSessionMember(persistedInstanceSession, sessionId, user, "OWNER");
-        List<InstanceSessionMember> members2 = instanceSessionService.getAllSessionMembersByInstanceSession(persistedInstanceSession);
+        instanceSessionMemberService.create(persistedInstanceSession, clientId, user, InstanceMemberRole.OWNER);
+        List<InstanceSessionMemberPartial> members2 = instanceSessionMemberService.getAllPartialsByInstanceSessionId(persistedInstanceSession.getId());
         assertEquals(1, members2.size());
-        instanceSessionService.removeInstanceSessionMember(persistedInstanceSession, sessionId);
-        List<InstanceSessionMember> members3 = instanceSessionService.getAllSessionMembersByInstanceSession(persistedInstanceSession);
+        instanceSessionService.deleteSessionMember(persistedInstanceSession, clientId);
+        List<InstanceSessionMemberPartial> members3 = instanceSessionMemberService.getAllPartialsByInstanceSessionId(persistedInstanceSession.getId());
         assertEquals(0, members3.size());
 
         InstanceSession deletedInstanceSession = instanceSessionService.getById(session.getId());

@@ -17,9 +17,17 @@ import java.util.List;
 
 @Entity
 @NamedQueries({
+    @NamedQuery(name = "instance.getIdByUid", query = """
+            SELECT i.id
+            FROM Instance i
+            WHERE i.uid = :uid
+            AND i.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instance.getById", query = """
             SELECT i FROM Instance i
-            LEFT JOIN i.members m
+            JOIN FETCH i.plan p
+            JOIN FETCH p.image im
+            JOIN FETCH p.flavour f
             WHERE i.id = :id
             AND i.deletedAt IS NULL
     """),
@@ -36,7 +44,9 @@ import java.util.List;
     """),
     @NamedQuery(name = "instance.getByUID", query = """
             SELECT i FROM Instance i
-            LEFT JOIN i.members m
+            JOIN FETCH i.plan p
+            JOIN FETCH p.image im
+            JOIN FETCH p.flavour f
             WHERE i.uid = :uid
             AND i.deletedAt IS NULL
     """),
@@ -154,6 +164,17 @@ import java.util.List;
             SELECT i FROM Instance i
             WHERE i.computeId = :computeId
             AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.getPartialById", query = """
+            SELECT new eu.ill.visa.core.entity.partial.InstancePartial(i.id, i.lastSeenAt, i.lastInteractionAt)
+            FROM Instance i
+            WHERE i.id = :id
+            AND i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instance.updatePartialById", query = """
+            UPDATE Instance i
+            SET i.lastSeenAt = :lastSeenAt, i.lastInteractionAt = :lastInteractionAt
+            WHERE i.id = :id
     """),
 })
 @NamedNativeQueries({

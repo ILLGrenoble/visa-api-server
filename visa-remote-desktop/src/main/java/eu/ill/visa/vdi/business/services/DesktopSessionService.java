@@ -5,10 +5,9 @@ import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.InstanceSessionMember;
-import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.broker.*;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
@@ -26,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +39,7 @@ public class DesktopSessionService {
 
     private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
+    private final InstanceSessionMemberService instanceSessionMemberService;
     private final InstanceActivityService instanceActivityService;
     private final UserService userService;
     private final GuacamoleDesktopService guacamoleDesktopService;
@@ -54,6 +55,7 @@ public class DesktopSessionService {
     @Inject
     public DesktopSessionService(final InstanceService instanceService,
                                  final InstanceSessionService instanceSessionService,
+                                 final InstanceSessionMemberService instanceSessionMemberService,
                                  final InstanceActivityService instanceActivityService,
                                  final UserService userService,
                                  final GuacamoleDesktopService guacamoleDesktopService,
@@ -64,6 +66,7 @@ public class DesktopSessionService {
                                  final EventDispatcher eventDispatcher) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
+        this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceActivityService = instanceActivityService;
         this.userService = userService;
         this.guacamoleDesktopService = guacamoleDesktopService;
@@ -123,10 +126,10 @@ public class DesktopSessionService {
             && !this.isOwnerConnected(instanceSession.getId());
 
         // Update the connected clients of the session
-        this.instanceSessionService.addInstanceSessionMember(instanceSession, desktopSessionMember.clientId(), this.userService.getById(user.getId()), role.toString());
+        this.instanceSessionMemberService.create(instanceSession, desktopSessionMember.clientId(), this.userService.getById(user.getId()), role);
 
         // Remove instance from instance_expiration table if it is there due to inactivity
-        this.instanceExpirationService.onInstanceActivated(instanceSession.getInstance());
+        this.instanceExpirationService.onInstanceActivated(instance);
 
         if (unlockSession) {
             // Unlock session for all clients
@@ -150,7 +153,7 @@ public class DesktopSessionService {
         InstanceSession session = instanceSessionService.getById(sessionId);
         if (session != null) {
             // Remove client/member from instance session
-            instanceSessionService.removeInstanceSessionMember(session, desktopSessionMember.clientId());
+            instanceSessionService.deleteSessionMember(session, desktopSessionMember.clientId());
 
             if (desktopSessionMember.isRole(InstanceMemberRole.OWNER) && !this.isOwnerConnected(sessionId)) {
                 if (this.virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
@@ -173,15 +176,8 @@ public class DesktopSessionService {
     }
 
     public boolean isOwnerConnected(final Long sessionId) {
-        List<InstanceSessionMember> instanceSessionMembers = this.instanceSessionService.getAllSessionMembersByInstanceSessionId(sessionId);
-        for (final InstanceSessionMember instanceSessionMember : instanceSessionMembers) {
-            String role = instanceSessionMember.getRole();
-            if (role.equals(InstanceMemberRole.OWNER.toString())) {
-                return true;
-            }
-        }
-
-        return false;
+        List<InstanceSessionMemberPartial> instanceSessionMembers = this.instanceSessionMemberService.getAllPartialsByInstanceSessionId(sessionId);
+        return instanceSessionMembers.stream().anyMatch(instanceSessionMember -> instanceSessionMember.getRole().equals(InstanceMemberRole.OWNER));
     }
 
     public void connectUser(final Long sessionId, final String clientId, final ConnectedUser user) {
@@ -225,26 +221,25 @@ public class DesktopSessionService {
             .findAny();
     }
 
-    public void updateSessionMemberActivity(final String clientId) {
+    public void updateSessionMemberActivity(final String clientId, final Date instanceInteractionTime) {
         this.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
 
             final DesktopSession desktopSession = desktopSessionMember.session();
             final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
+            final Long instanceSessionId = desktopSession.getSessionId();
 
             synchronized (this) {
-                final InstanceSessionMember instanceSessionMember = this.instanceSessionService.getSessionMemberBySessionId(desktopSessionMember.clientId());
+                final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
                 if (instanceSessionMember == null) {
                     logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
 
                 } else {
-                    instanceSessionMember.updateLastSeenAt();
-                    instanceSessionMember.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
-                    instanceSessionService.saveInstanceSessionMember(instanceSessionMember);
+                    instanceSessionMember.setLastInteractionAt(instanceInteractionTime);
+                    instanceSessionMemberService.updatePartial(instanceSessionMember);
 
                     InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
                     if (instanceActivityType != null) {
-                        final Instance instance = instanceSessionMember.getInstanceSession().getInstance();
-                        this.instanceActivityService.create(instanceSessionMember.getUser(), instance, instanceActivityType);
+                        this.instanceActivityService.create(instanceSessionMember.getUserId(), instanceSessionMember.getInstanceId(), instanceActivityType);
                         remoteDesktopConnection.resetInstanceActivity();
                     }
                 }
@@ -384,15 +379,14 @@ public class DesktopSessionService {
 
     private List<ConnectedUser> getConnectedUsers(final DesktopSession desktopSession) {
         final Long instanceId = desktopSession.getInstanceId();
-        List<InstanceSessionMember> instanceSessionMembers = this.instanceSessionService.getAllSessionMembersByInstanceSessionId(desktopSession.getSessionId());
+        List<InstanceSessionMemberPartial> instanceSessionMembers = this.instanceSessionMemberService.getAllPartialsByInstanceSessionId(desktopSession.getSessionId());
         logger.info("Instance {} has {} connected users", instanceId, instanceSessionMembers.size());
         return instanceSessionMembers.stream().map(instanceSessionMember -> {
-            User user = instanceSessionMember.getUser();
-            InstanceMemberRole role = InstanceMemberRole.valueOf(instanceSessionMember.getRole());
+            InstanceMemberRole role = instanceSessionMember.getRole();
             if (desktopSession.isLocked() && role.equals(InstanceMemberRole.USER)) {
                 role= InstanceMemberRole.GUEST;
             }
-            return new ConnectedUser(user.getId(), user.getFullName(), role);
+            return new ConnectedUser(instanceSessionMember.getUserId(), instanceSessionMember.getUserFullName(), role);
         }).toList();
     }
 }

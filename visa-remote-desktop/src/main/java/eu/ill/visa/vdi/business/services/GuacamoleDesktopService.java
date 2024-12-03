@@ -110,7 +110,7 @@ public class GuacamoleDesktopService extends DesktopService {
         // Create new session if user is owner
         if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final ConfiguredGuacamoleSocket socket = buildSocket(instance);
-            InstanceSession session = instanceSessionService.create(instance, GUACAMOLE_PROTOCOL, socket.getConnectionID());
+            InstanceSession session = instanceSessionService.create(instance.getId(), GUACAMOLE_PROTOCOL, socket.getConnectionID());
             logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
             return socket;
@@ -137,7 +137,7 @@ public class GuacamoleDesktopService extends DesktopService {
                 logger.error("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
                 // If it fails then invalidate current session
                 session.setCurrent(false);
-                this.instanceSessionService.save(session);
+                this.instanceSessionService.updatePartial(session);
 
                 // Create a new session
                 return this.createSocketAndSession(instance, user);

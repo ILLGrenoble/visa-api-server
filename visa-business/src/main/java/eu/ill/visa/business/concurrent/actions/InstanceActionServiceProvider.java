@@ -6,7 +6,7 @@ import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.InstanceSessionMember;
+import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -19,6 +19,7 @@ public class InstanceActionServiceProvider {
     private final InstanceService instanceService;
 
     private final InstanceSessionService instanceSessionService;
+    private final InstanceSessionMemberService instanceSessionMemberService;
     private final InstanceCommandService instanceCommandService;
     private final SecurityGroupService securityGroupService;
     private final InstrumentService instrumentService;
@@ -31,6 +32,7 @@ public class InstanceActionServiceProvider {
     @Inject
     public InstanceActionServiceProvider(final InstanceService instanceService,
                                          final InstanceSessionService instanceSessionService,
+                                         final InstanceSessionMemberService instanceSessionMemberService,
                                          final InstanceCommandService instanceCommandService,
                                          final SecurityGroupService securityGroupService,
                                          final InstrumentService instrumentService,
@@ -41,6 +43,7 @@ public class InstanceActionServiceProvider {
                                          final EventDispatcher eventDispatcher) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
+        this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceCommandService = instanceCommandService;
         this.securityGroupService = securityGroupService;
         this.instrumentService = instrumentService;
@@ -60,13 +63,13 @@ public class InstanceActionServiceProvider {
         final List<InstanceSession> sessions = this.instanceSessionService.getAllByInstance(instance);
         for (InstanceSession session : sessions) {
             session.setCurrent(false);
-            this.instanceSessionService.save(session);
+            this.instanceSessionService.updatePartial(session);
         }
 
-        final List<InstanceSessionMember> sessionMembers = this.instanceSessionService.getAllSessionMembersByInstance(instance);
-        for (InstanceSessionMember member : sessionMembers) {
+        final List<InstanceSessionMemberPartial> sessionMembers = this.instanceSessionMemberService.getAllPartialsByInstanceId(instance.getId());
+        for (InstanceSessionMemberPartial member : sessionMembers) {
             member.setActive(false);
-            this.instanceSessionService.saveInstanceSessionMember(member);
+            this.instanceSessionMemberService.updatePartial(member);
         }
     }
 

@@ -1,6 +1,7 @@
 package eu.ill.visa.web.rest.dtos;
 
 import eu.ill.visa.core.entity.InstanceSessionMember;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 
 import java.util.Date;
 
@@ -11,20 +12,18 @@ public class InstanceSessionMemberDto {
     private final InstanceSessionDto instanceSession;
     private final String sessionId;
     private final UserDto user;
-    private final String role;
+    private final InstanceMemberRole role;
     private final boolean active;
-    private final Date lastSeenAt;
 
 
     public InstanceSessionMemberDto(final InstanceSessionMember instanceSessionMember) {
         this.id = instanceSessionMember.getId();
         this.createdAt = instanceSessionMember.getCreatedAt();
         this.instanceSession = new InstanceSessionDto(instanceSessionMember.getInstanceSession());
-        this.sessionId = instanceSessionMember.getSessionId();
+        this.sessionId = instanceSessionMember.getClientId();
         this.user = new UserDto(instanceSessionMember.getUser());
         this.role = instanceSessionMember.getRole();
         this.active = instanceSessionMember.isActive();
-        this.lastSeenAt = instanceSessionMember.getLastSeenAt();
     }
 
     public Long getId() {
@@ -47,15 +46,11 @@ public class InstanceSessionMemberDto {
         return user;
     }
 
-    public String getRole() {
+    public InstanceMemberRole getRole() {
         return role;
     }
 
     public boolean isActive() {
         return active;
-    }
-
-    public Date getLastSeenAt() {
-        return lastSeenAt;
     }
 }
