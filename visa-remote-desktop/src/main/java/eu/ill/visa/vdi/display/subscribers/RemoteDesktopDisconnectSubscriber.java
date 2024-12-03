@@ -20,6 +20,7 @@ public class RemoteDesktopDisconnectSubscriber {
     }
 
     public void onDisconnect(final SocketClient socketClient) {
+        socketClient.setDisconnected(true);
         this.desktopSessionService.findDesktopSessionMemberByClientId(socketClient.clientId())
             .ifPresentOrElse(desktopSessionMember -> {
                 logger.info("Remote Desktop Connection disconnected by client {}: disconnecting Session Member: {}", socketClient.clientId(), desktopSessionMember);

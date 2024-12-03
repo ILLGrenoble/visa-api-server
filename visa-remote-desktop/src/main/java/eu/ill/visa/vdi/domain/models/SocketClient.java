@@ -7,15 +7,50 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Objects;
 
-public record SocketClient(Session session, String clientId, String protocol) {
+public class SocketClient {
+
     private static final Logger logger = LoggerFactory.getLogger(SocketClient.class);
+
+    private final Session session;
+    private final String clientId;
+    private final String protocol;
+    private boolean disconnected = false;
+
+    public SocketClient(Session session, String clientId, String protocol) {
+        this.session = session;
+        this.clientId = clientId;
+        this.protocol = protocol;
+    }
+
+    public Session session() {
+        return session;
+    }
+
+    public String clientId() {
+        return clientId;
+    }
+
+    public String protocol() {
+        return protocol;
+    }
+
+    public boolean isDisconnected() {
+        return disconnected;
+    }
+
+    /**
+     * Sets the socket client state to disconnected, before potentially the end of the disconnection method
+     */
+    public void setDisconnected(boolean disconnected) {
+        this.disconnected = disconnected;
+    }
 
     public String getPathParameter(String parameterName) {
         return this.session.getPathParameters().get(parameterName);
     }
 
     public void sendEvent(Object data) {
-        if (session.isOpen()) {
+        if (!this.disconnected && session.isOpen()) {
             this.session.getAsyncRemote().sendObject(data, result -> {
                 if (result.getException() != null) {
                     String dataString = data.toString();
@@ -25,16 +60,12 @@ public record SocketClient(Session session, String clientId, String protocol) {
                     logger.error("Unable to send message {} of type {} to client {}: {}", dataString, data.getClass().getName(), this.clientId, result.getException().getMessage());
                 }
             });
-        } else {
-            String dataString = data.toString();
-            if (dataString.length() > 20) {
-                dataString = dataString.substring(0, 20) + "...";
-            }
-            logger.warn("Unable to send message {} of type {} to client {} because the session is already closed", dataString, data.getClass().getName(), this.clientId);
         }
     }
+
     public void disconnect() {
         try {
+            this.disconnected = true;
             this.session.close();
         } catch (IOException e) {
             logger.error("Failed to disconnect from WebSocket client {}: {}", this.clientId, e.getMessage());
