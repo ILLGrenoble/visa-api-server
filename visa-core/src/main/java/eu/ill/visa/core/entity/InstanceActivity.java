@@ -5,20 +5,6 @@ import jakarta.persistence.*;
 
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "instanceActivity.getAll", query = """
-            SELECT a FROM InstanceActivity a
-            ORDER BY a.id
-    """),
-    @NamedQuery(name = "instanceActivity.getAllForUser", query = """
-            SELECT a FROM InstanceActivity a
-            WHERE a.user = :user
-            ORDER BY a.id
-    """),
-    @NamedQuery(name = "instanceActivity.getAllForInstance", query = """
-            SELECT a FROM InstanceActivity a
-            WHERE a.instance = :instance
-            ORDER BY a.id
-    """),
     @NamedQuery(name = "instanceActivity.cleanup", query = """
             DELETE FROM InstanceActivity a
             WHERE a.createdAt < :date
@@ -32,13 +18,13 @@ public class InstanceActivity extends Timestampable {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = true)
-    private User user;
+    @Column(name = "user_id")
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id", foreignKeyDefinition = "FOREIGN KEY (user_id) REFERENCES users(id)"), nullable = true)
+    private String userId;
 
-    @ManyToOne
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
-    private Instance instance;
+    @Column(name = "instance_id")
+    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id", foreignKeyDefinition = "FOREIGN KEY (instance_id) REFERENCES instance(id)"), nullable = false)
+    private Long instanceId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_type", length = 50, nullable = false)
@@ -52,9 +38,9 @@ public class InstanceActivity extends Timestampable {
         this.instanceActivityType = type;
     }
 
-    public InstanceActivity(User user, Instance instance, InstanceActivityType type) {
-        this.user = user;
-        this.instance = instance;
+    public InstanceActivity(String userId, Long instanceId, InstanceActivityType type) {
+        this.userId = userId;
+        this.instanceId = instanceId;
         this.instanceActivityType = type;
     }
 
@@ -66,20 +52,20 @@ public class InstanceActivity extends Timestampable {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public Instance getInstance() {
-        return instance;
+    public Long getInstanceId() {
+        return instanceId;
     }
 
-    public void setInstance(Instance instance) {
-        this.instance = instance;
+    public void setInstanceId(Long instanceId) {
+        this.instanceId = instanceId;
     }
 
     public InstanceActivityType getInstanceActivityType() {

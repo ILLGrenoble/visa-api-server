@@ -1,5 +1,6 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -18,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 @TestTransaction
 public class InstanceSessionServiceTest {
+
+    @Inject
+    InstanceSessionMemberService instanceSessionMemberService;
 
     @Inject
     private InstanceSessionService instanceSessionService;
@@ -72,7 +76,7 @@ public class InstanceSessionServiceTest {
     @DisplayName("Create a new instance session")
     void create() {
         Instance instance = instanceService.getById(1000L);
-        InstanceSession session = new InstanceSession(instance, "guacamole", "a-connection-id");
+        InstanceSession session = new InstanceSession(instance.getId(), "guacamole", "a-connection-id");
         instanceSessionService.save(session);
         InstanceSession persistedInstanceSession = instanceSessionService.getById(session.getId());
         assertNotNull(persistedInstanceSession);
@@ -86,9 +90,9 @@ public class InstanceSessionServiceTest {
         String sessionId = UUID.randomUUID().toString();
 
         InstanceSession instanceSession = instanceSessionService.getById(1000L);
-        List<InstanceSessionMember> members1 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
-        instanceSessionService.addInstanceSessionMember(instanceSession, sessionId, user, "OWNER");
-        List<InstanceSessionMember> members2 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
+        List<InstanceSessionMember> members1 = instanceSessionMemberService.getAllByInstanceSessionId(instanceSession.getId());
+        instanceSessionMemberService.create(instanceSession, sessionId, user, InstanceMemberRole.OWNER);
+        List<InstanceSessionMember> members2 = instanceSessionMemberService.getAllByInstanceSessionId(instanceSession.getId());
         assertEquals(members1.size() + 1, members2.size());
     }
 
@@ -96,9 +100,9 @@ public class InstanceSessionServiceTest {
     @DisplayName("Decrement the client count for a given instance session")
     void decrementClientCountForSession() {
         InstanceSession instanceSession = instanceSessionService.getById(1000L);
-        List<InstanceSessionMember> members1 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
-        instanceSessionService.removeInstanceSessionMember(instanceSession, "24e7437a-eae5-48c4-823e-778c42a6acf8");
-        List<InstanceSessionMember> members2 = instanceSessionService.getAllSessionMembersByInstanceSession(instanceSession);
+        List<InstanceSessionMember> members1 = instanceSessionMemberService.getAllByInstanceSessionId(instanceSession.getId());
+        instanceSessionService.deleteSessionMember(instanceSession, "24e7437a-eae5-48c4-823e-778c42a6acf8");
+        List<InstanceSessionMember> members2 = instanceSessionMemberService.getAllByInstanceSessionId(instanceSession.getId());
         assertEquals(members1.size() - 1, members2.size());
     }
 
@@ -109,18 +113,18 @@ public class InstanceSessionServiceTest {
         String sessionId = UUID.randomUUID().toString();
 
         Instance instance = instanceService.getById(1000L);
-        InstanceSession session = instanceSessionService.create(instance, "guacamole", "a-connection-id");
+        InstanceSession session = instanceSessionService.create(instance.getId(), "guacamole", "a-connection-id");
 
         InstanceSession persistedInstanceSession = instanceSessionService.getById(session.getId());
         assertNotNull(persistedInstanceSession);
-        List<InstanceSessionMember> members1 = instanceSessionService.getAllSessionMembersByInstanceSession(persistedInstanceSession);
+        List<InstanceSessionMember> members1 = instanceSessionMemberService.getAllByInstanceSessionId(persistedInstanceSession.getId());
         assertEquals(0, members1.size());
 
-        instanceSessionService.addInstanceSessionMember(persistedInstanceSession, sessionId, user, "OWNER");
-        List<InstanceSessionMember> members2 = instanceSessionService.getAllSessionMembersByInstanceSession(persistedInstanceSession);
+        instanceSessionMemberService.create(persistedInstanceSession, sessionId, user, InstanceMemberRole.OWNER);
+        List<InstanceSessionMember> members2 = instanceSessionMemberService.getAllByInstanceSessionId(persistedInstanceSession.getId());
         assertEquals(1, members2.size());
-        instanceSessionService.removeInstanceSessionMember(persistedInstanceSession, sessionId);
-        List<InstanceSessionMember> members3 = instanceSessionService.getAllSessionMembersByInstanceSession(persistedInstanceSession);
+        instanceSessionService.deleteSessionMember(persistedInstanceSession, sessionId);
+        List<InstanceSessionMember> members3 = instanceSessionMemberService.getAllByInstanceSessionId(persistedInstanceSession.getId());
         assertEquals(0, members3.size());
 
         InstanceSession deletedInstanceSession = instanceSessionService.getById(session.getId());

@@ -1,9 +1,9 @@
 package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
@@ -62,7 +62,7 @@ public abstract class RemoteDesktopEventSubscriber<T> {
     }
 
     private void updateInstanceActivity(final Long instanceId, final Date instanceInteractionTime, final String clientId) {
-        final Instance instance = this.instanceService.getById(instanceId);
+        final InstancePartial instance = this.instanceService.getPartialById(instanceId);
         if (instance == null) {
             return;
         }
@@ -70,7 +70,7 @@ public abstract class RemoteDesktopEventSubscriber<T> {
         // Update instance
         instance.setLastSeenAt(instanceInteractionTime);
         instance.setLastInteractionAt(instanceInteractionTime);
-        instanceService.save(instance);
+        instanceService.updatePartial(instance);
 
         this.desktopSessionService.updateSessionMemberActivity(clientId, instanceInteractionTime);
     }

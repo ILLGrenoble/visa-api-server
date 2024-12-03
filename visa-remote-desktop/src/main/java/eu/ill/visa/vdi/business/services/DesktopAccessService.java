@@ -4,6 +4,7 @@ import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
+import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
@@ -172,7 +173,7 @@ public class DesktopAccessService {
         if (client.isChannelOpen()) {
             final ConnectedUser user = candidate.connectedUser();
             final Long instanceId = candidate.instanceId();
-            final Instance instance = this.instanceService.getFullById(instanceId);
+            final Instance instance = this.instanceService.getById(instanceId, List.of(InstanceFetch.members));
             if (instance != null) {
                 // Convert the support role to a normal user one if the owner of the instance is staff
                 InstanceMemberRole role = this.convertAccessReplyRole(replyRole, instance, user);

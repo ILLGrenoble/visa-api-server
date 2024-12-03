@@ -10,14 +10,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
     @NamedQuery(name = "instanceSession.getById", query = """
         SELECT isess
         FROM InstanceSession isess
-        LEFT JOIN isess.instance i
+        LEFT JOIN Instance i on isess.instanceId = i.id
         WHERE isess.id = :id
         AND i.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceSession.getAll", query = """
         SELECT isess
         FROM InstanceSession isess
-        LEFT JOIN isess.instance i
+        LEFT JOIN Instance i on isess.instanceId = i.id
         WHERE isess.current = true
         AND i.deletedAt IS NULL
         ORDER BY isess.id DESC
@@ -25,7 +25,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
     @NamedQuery(name = "instanceSession.getAllByInstance", query = """
         SELECT isess
         FROM InstanceSession isess
-        LEFT JOIN isess.instance i
+        LEFT JOIN Instance i on isess.instanceId = i.id
         WHERE i = :instance
         AND isess.current = true
         AND i.deletedAt IS NULL
@@ -34,12 +34,17 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
     @NamedQuery(name = "instanceSession.getByInstanceIdAndProtocol", query = """
         SELECT isess
         FROM InstanceSession isess
-        LEFT JOIN isess.instance i
+        LEFT JOIN Instance i on isess.instanceId = i.id
         WHERE i.id = :instanceId
         AND isess.protocol = :protocol
         AND isess.current = true
         AND i.deletedAt IS NULL
         ORDER BY isess.id DESC
+    """),
+    @NamedQuery(name = "instanceSession.updatePartialById", query = """
+            UPDATE InstanceSession i
+            SET i.current = :current
+            WHERE i.id = :id
     """),
 })
 @Table(name = "instance_session")
@@ -56,9 +61,9 @@ public class InstanceSession extends Timestampable {
     @Column(name = "protocol", length = 150, nullable = true)
     private String protocol;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
-    private Instance instance;
+    @Column(name = "instance_id")
+    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id", foreignKeyDefinition = "FOREIGN KEY (instance_id) REFERENCES instance(id)"), nullable = false)
+    private Long instanceId;
 
     @Column(name = "current", nullable = false)
     private Boolean current;
@@ -66,8 +71,8 @@ public class InstanceSession extends Timestampable {
     public InstanceSession() {
     }
 
-    public InstanceSession(Instance instance, String protocol, String connectionId) {
-        this.instance = instance;
+    public InstanceSession(Long instanceId, String protocol, String connectionId) {
+        this.instanceId = instanceId;
         this.protocol = protocol;
         this.connectionId = connectionId;
         this.current = true;
@@ -81,12 +86,12 @@ public class InstanceSession extends Timestampable {
         this.id = id;
     }
 
-    public Instance getInstance() {
-        return instance;
+    public Long getInstanceId() {
+        return instanceId;
     }
 
-    public void setInstance(Instance instance) {
-        this.instance = instance;
+    public void setInstanceId(Long instanceId) {
+        this.instanceId = instanceId;
     }
 
     public String getConnectionId() {

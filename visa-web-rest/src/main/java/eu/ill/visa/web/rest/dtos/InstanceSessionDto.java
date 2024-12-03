@@ -6,13 +6,13 @@ public class InstanceSessionDto {
 
     private final Long id;
     private final String connectionId;
-    private final InstanceDto instance;
+    private final Long instanceId;
     private final boolean current;
 
     public InstanceSessionDto(final InstanceSession instanceSession) {
         this.id = instanceSession.getId();
         this.connectionId = instanceSession.getConnectionId();
-        this.instance = new InstanceDto(instanceSession.getInstance());
+        this.instanceId = instanceSession.getInstanceId();
         this.current = instanceSession.getCurrent();
     }
 
@@ -24,8 +24,8 @@ public class InstanceSessionDto {
         return connectionId;
     }
 
-    public InstanceDto getInstance() {
-        return instance;
+    public Long getInstanceId() {
+        return instanceId;
     }
 
     public boolean isCurrent() {

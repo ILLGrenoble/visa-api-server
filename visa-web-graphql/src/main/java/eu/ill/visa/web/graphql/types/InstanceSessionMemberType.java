@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.InstanceSessionMember;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +20,7 @@ public class InstanceSessionMemberType {
     private final @NotNull InstanceSessionType instanceSession;
     private final @NotNull String sessionId;
     private final @NotNull UserType user;
-    private final String role;
+    private final InstanceMemberRole role;
     private final Boolean active;
 
     public InstanceSessionMemberType(final InstanceSessionMember member) {
@@ -62,7 +63,7 @@ public class InstanceSessionMemberType {
         return user;
     }
 
-    public String getRole() {
+    public InstanceMemberRole getRole() {
         return role;
     }
 

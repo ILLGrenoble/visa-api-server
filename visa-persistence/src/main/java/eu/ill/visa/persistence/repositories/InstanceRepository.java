@@ -5,6 +5,7 @@ import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
+import eu.ill.visa.core.entity.partial.InstancePartial;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -586,6 +587,24 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         } else {
             entityManager.merge(thumbnail);
         }
+    }
+
+    public InstancePartial getPartialById(Long id) {
+        try {
+            final TypedQuery<InstancePartial> query = getEntityManager().createNamedQuery("instance.getPartialById", InstancePartial.class);
+            query.setParameter("id", id);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
+    public void updatePartialById(InstancePartial instance) {
+        getEntityManager().createNamedQuery("instance.updatePartialById")
+            .setParameter("id", instance.getId())
+            .setParameter("lastSeenAt", instance.getLastSeenAt())
+            .setParameter("lastInteractionAt", instance.getLastInteractionAt())
+            .executeUpdate();
     }
 
 

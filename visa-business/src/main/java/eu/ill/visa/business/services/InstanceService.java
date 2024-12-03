@@ -12,6 +12,7 @@ import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
+import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.persistence.repositories.InstanceRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -410,4 +411,13 @@ public class InstanceService {
 
         return instances;
     }
+
+    public InstancePartial getPartialById(Long id) {
+        return this.repository.getPartialById(id);
+    }
+
+    public void updatePartial(InstancePartial instance) {
+        this.repository.updatePartialById(instance);
+    }
+
 }
