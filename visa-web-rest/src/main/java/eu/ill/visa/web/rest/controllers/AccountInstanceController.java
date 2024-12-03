@@ -544,23 +544,23 @@ public class AccountInstanceController extends AbstractController {
     }
 
     @POST
-    @Path("/{instance}/thumbnail")
+    @Path("/{instanceUid}/thumbnail")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public MetaResponse<String> createThumbnail(@Context final SecurityContext securityContext,
-                                @PathParam("instance") final Instance instance,
+                                @PathParam("instanceUid") final String instanceUid,
                                 @NotNull @RestForm("file") final InputStream is) {
         try {
             final User user = this.getUserPrincipal(securityContext);
-            if (this.instanceService.isOwnerOrAdmin(user, instance)) {
+            if (this.instanceService.isOwnerOrAdmin(user, instanceUid)) {
                 final byte[] data = is.readAllBytes();
                 final ImageFormat mimeType = Imaging.guessFormat(data);
                 if (mimeType == ImageFormats.JPEG) {
-                    instanceService.createOrUpdateThumbnail(instance, data);
+                    instanceService.createOrUpdateThumbnailByInstanceUid(instanceUid, data);
                 }
             }
 
         } catch (Exception exception) {
-            logger.error("Error creating thumbnail for instance: {}", instance.getId(), exception);
+            logger.error("Error creating thumbnail for instance with UID {}: {}", instanceUid, exception.getMessage());
         }
 
         return createResponse();

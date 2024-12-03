@@ -82,6 +82,10 @@ public class InstanceService {
         return this.repository.getAllWithStates(states);
     }
 
+    public Long getIdByUid(final String uid) {
+        return this.repository.getIdByUid(uid);
+    }
+
     public Instance getById(Long id) {
         return this.getById(id, null);
     }
@@ -126,7 +130,7 @@ public class InstanceService {
 
         this.save(instance);
 
-        this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCES_CHANGED_EVENT);
+        this.sendOwnerInstanceEvent(instance.getId(), UserEvent.INSTANCES_CHANGED_EVENT);
 
         return instance;
     }
@@ -138,10 +142,10 @@ public class InstanceService {
 
         if (!instance.getStateHash().equals(oldStateHash)) {
             if (Boolean.TRUE.equals(instance.getDeleted())) {
-                this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCES_CHANGED_EVENT);
+                this.sendOwnerInstanceEvent(instance.getId(), UserEvent.INSTANCES_CHANGED_EVENT);
 
             } else {
-                this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCE_STATE_CHANGED_EVENT, new InstanceStateChangedEvent(instance));
+                this.sendOwnerInstanceEvent(instance.getId(), UserEvent.INSTANCE_STATE_CHANGED_EVENT, new InstanceStateChangedEvent(instance));
             }
         }
     }
@@ -314,14 +318,14 @@ public class InstanceService {
         return this.repository.countByCloudClient();
     }
 
-    private void sendOwnerInstanceEvent(final Instance instance, final String eventType) {
-        this.sendOwnerInstanceEvent(instance, eventType, null);
+    private void sendOwnerInstanceEvent(final Long instanceId, final String eventType) {
+        this.sendOwnerInstanceEvent(instanceId, eventType, null);
     }
 
-    private void sendOwnerInstanceEvent(final Instance instance, final String eventType, final Object event) {
-        final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
-        if (owner != null) {
-            this.eventDispatcher.sendEventToUser(owner.getId(), eventType, event);
+    private void sendOwnerInstanceEvent(final Long instanceId, final String eventType, final Object event) {
+        final String ownerId = this.instanceMemberService.getOwnerIdByInstanceId(instanceId);
+        if (ownerId != null) {
+            this.eventDispatcher.sendEventToUser(ownerId, eventType, event);
         }
     }
 
@@ -347,17 +351,14 @@ public class InstanceService {
         return repository.countAllForUserAndRole(user, role);
     }
 
-    public InstanceThumbnail createOrUpdateThumbnail(Instance instance, byte[] data) {
-        final InstanceThumbnail thumbnail = requireNonNullElse(repository.getThumbnailForInstanceUid(instance.getUid()), new InstanceThumbnail());
-        if (thumbnail.getInstance() == null) {
-            thumbnail.setInstance(instance);
-        }
+    public void createOrUpdateThumbnailByInstanceUid(String instanceUid, byte[] data) {
+        Long instanceId = this.getIdByUid(instanceUid);
+
+        final InstanceThumbnail thumbnail = requireNonNullElse(repository.getThumbnailForInstanceUid(instanceUid), new InstanceThumbnail(instanceId));
         thumbnail.setData(data);
         this.repository.saveThumbnail(thumbnail);
 
-        this.sendOwnerInstanceEvent(instance, UserEvent.INSTANCE_THUMBNAIL_UPDATED_EVENT, new InstanceThumbnailUpdatedEvent(instance));
-
-        return thumbnail;
+        this.sendOwnerInstanceEvent(instanceId, UserEvent.INSTANCE_THUMBNAIL_UPDATED_EVENT, new InstanceThumbnailUpdatedEvent(instanceId, instanceUid));
     }
 
     public InstanceThumbnail getThumbnailForInstance(Instance instance) {

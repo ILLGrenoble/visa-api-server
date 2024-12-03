@@ -17,6 +17,12 @@ import java.util.List;
 
 @Entity
 @NamedQueries({
+    @NamedQuery(name = "instance.getIdByUid", query = """
+            SELECT i.id
+            FROM Instance i
+            WHERE i.uid = :uid
+            AND i.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instance.getById", query = """
             SELECT i FROM Instance i
             JOIN FETCH i.plan p
