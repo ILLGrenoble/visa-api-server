@@ -10,22 +10,29 @@ public class IdleSessionHandler {
 
     private static final int IDLE_TIMEOUT_SECONDS = 30;
 
+    private final boolean enabled;
     private Runnable onIdleCallback;
     private Cancellable timer;
 
+    public IdleSessionHandler(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public void start(Runnable onIdleCallback) {
-        if (this.timer != null) {
-            this.timer.cancel();
+        if (enabled) {
+            if (this.timer != null) {
+                this.timer.cancel();
+            }
+            this.onIdleCallback = onIdleCallback;
+            this.createTimer();
         }
-        this.onIdleCallback = onIdleCallback;
-        this.createTimer();
     }
 
     public void reset() {
         if (this.timer != null) {
             this.timer.cancel();
+            this.createTimer();
         }
-        this.createTimer();
     }
 
     public void stop() {
