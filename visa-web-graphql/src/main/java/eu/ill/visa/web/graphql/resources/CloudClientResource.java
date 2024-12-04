@@ -3,7 +3,6 @@ package eu.ill.visa.web.graphql.resources;
 import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudLimit;
-import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
@@ -116,7 +115,7 @@ public class CloudClientResource {
                     try {
                         CloudLimit cloudLimit = cloudClient.limits();
                         future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), cloudLimit));
-                    } catch (CloudException exception) {
+                    } catch (Exception exception) {
                         future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), exception.getMessage()));
                     }
                 });

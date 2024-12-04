@@ -36,8 +36,8 @@ public class ActiveErrorReporter implements ErrorReporter {
 
     private final static int MAX_ERRORS_WORKER_TIME_MS = 5000;
     private final static int PENDING_ERRORS_WORKER_TIME_MS = 60000;
+    private final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final Logger logger = LoggerFactory.getLogger(ActiveErrorReporter.class);
 
     private final Mailer mailer;
