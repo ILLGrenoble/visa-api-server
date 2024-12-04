@@ -122,6 +122,9 @@ public class DesktopSessionService {
         DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession);
         desktopSession.addMember(desktopSessionMember);
 
+        // Activate idle session timer
+        desktopSessionMember.idleSessionHandler().start(() -> this.onDesktopMemberIdle(desktopSessionMember));
+
         boolean unlockSession = virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
             && role.equals(InstanceMemberRole.OWNER)
             && !this.isOwnerConnected(instanceSession.getId());
@@ -144,6 +147,9 @@ public class DesktopSessionService {
     }
 
     public synchronized void onDesktopMemberDisconnect(final DesktopSessionMember desktopSessionMember) {
+        // Stop the idle handler
+        desktopSessionMember.idleSessionHandler().stop();
+
         desktopSessionMember.remoteDesktopConnection().getConnectionThread().closeTunnel();
 
         DesktopSession desktopSession = desktopSessionMember.session();
@@ -174,6 +180,11 @@ public class DesktopSessionService {
             logger.info("There is no active instance session so all clients will be disconnected");
             this.closeSession(sessionId);
         }
+    }
+
+    private synchronized void onDesktopMemberIdle(final DesktopSessionMember desktopSessionMember) {
+        logger.warn("Idle timeout for desktop session member {}: disconnecting", desktopSessionMember);
+        this.onDesktopMemberDisconnect(desktopSessionMember);
     }
 
     public boolean isOwnerConnected(final Long sessionId) {

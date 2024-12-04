@@ -6,8 +6,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
-public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session) {
+public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleSessionHandler idleSessionHandler) {
     private static final Logger logger = LoggerFactory.getLogger(DesktopSessionMember.class);
+
+    public DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session) {
+        this(clientId, connectedUser, remoteDesktopConnection, session, new IdleSessionHandler());
+    }
 
     public void disconnect() {
         try {
