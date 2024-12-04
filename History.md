@@ -1,3 +1,19 @@
+3.0.4 04/12/2024
+================
+ * Automatically disconnect guacamole sessions if no ping event has been received in 30 seconds
+ * Use smallrye timers to send error report emails rather than scheduler so that they can be sent even if scheduler is disabled
+ * Properly queue desktop events and ensure they are run sequentially for a specific desktop session
+ * Use of partial (or dto) objects and simplified models to reduce sql select and update overheads
+ * Remove preql library
+ * Many SQL optimisations to reduce loading time of several pages and also to minimise time spent in remote desktop event handler
+ * FIX #15: Improve loading time of admin user page by removing calls to cloud provider for each user instance
+ * FIX #14: Ensure client forces user to re-authenticate when token is no longer valid
+ * FIX #13: Ensure that instance sessions members are deleted
+ * FIX #12: Bug fix on instance interactivity being stored during many consecutive remote desktop events rather than just one 
+ * FIX #11: Set socket state to disconnected immediately on disconnect event to avoid further data being sent to client
+ * FIX #10: Avoid calls to cloud provider to ensure rapid response for admin instances page (ip address already in database)
+ * FIX #9: SQL optimisations to obtain instance data, rapid load of home page with many instances
+ 
 3.0.3 27/11/2024
 ================
  * FIX #6: Add responses for POST Requests in JupyterController
