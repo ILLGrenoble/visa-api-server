@@ -22,7 +22,7 @@ public class DummyErrorReporter implements ErrorReporter {
     public void handleMaxErrors() {
     }
 
-    public void handleCurrentErrors() {
+    public void handlePendingErrors() {
     }
 
     public void onRecord(LogRecord record) {

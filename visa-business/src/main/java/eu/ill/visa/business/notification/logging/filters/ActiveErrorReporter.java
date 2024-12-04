@@ -1,15 +1,16 @@
 package eu.ill.visa.business.notification.logging.filters;
 
 import eu.ill.visa.business.ErrorReportEmailConfiguration;
+import eu.ill.visa.business.services.TimerService;
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.MailerName;
 import io.quarkus.runtime.Shutdown;
-import io.quarkus.runtime.Startup;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.inject.Singleton;
 import org.jboss.logmanager.ExtLogRecord;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.LogRecord;
 import java.util.stream.Collectors;
 
@@ -32,8 +34,8 @@ import static java.lang.String.format;
 @Singleton
 public class ActiveErrorReporter implements ErrorReporter {
 
-    private final int MAX_ERRORS_WORKER_TIME_MS = 5000;
-    private final int CURRENT_ERROR_WORKER_TIME_MS = 60000;
+    private final static int MAX_ERRORS_WORKER_TIME_MS = 5000;
+    private final static int PENDING_ERRORS_WORKER_TIME_MS = 60000;
 
     public final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final Logger logger = LoggerFactory.getLogger(ActiveErrorReporter.class);
@@ -46,9 +48,9 @@ public class ActiveErrorReporter implements ErrorReporter {
     private final int maxErrorsPerReport;
 
     private final boolean enabled;
-    private final Thread reportedThread;
-    private boolean running = true;
-    private Date lastReportingTime = new Date();
+
+    private final Cancellable maxErrorsIntervalSubscription;
+    private final Cancellable pendingErrorsIntervalSubscription;
 
     private List<ErrorEvent> events = new ArrayList<>();
 
@@ -74,59 +76,34 @@ public class ActiveErrorReporter implements ErrorReporter {
         this.enabled =  (toAddress != null && fromAddress != null && subject != null);
         if (enabled) {
             logger.info("Error reporting is enabled");
+
+            this.maxErrorsIntervalSubscription = TimerService.setInterval(this::handleMaxErrors, MAX_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
+            this.pendingErrorsIntervalSubscription = TimerService.setInterval(this::handlePendingErrors, PENDING_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
+
         } else {
             logger.info("Error reporting is disabled (configuration is not valid)");
+            maxErrorsIntervalSubscription = null;
+            pendingErrorsIntervalSubscription = null;
         }
-
-        this.reportedThread = new Thread(this::run);
-    }
-
-    @Startup
-    public void start() {
-        this.reportedThread.start();
     }
 
     @Shutdown
     public void stop() {
-        this.running = false;
-        try {
-            this.reportedThread.join();
-        } catch (InterruptedException ignored) {
-        }
-    }
-
-    public void run() {
-        while (running) {
-            try {
-                Thread.sleep(MAX_ERRORS_WORKER_TIME_MS);
-                this.work();
-
-            } catch (InterruptedException ignored) {
-            }
-        }
-    }
-
-    private void work() {
-        this.handleMaxErrors();
-
-        Date currentTime = new Date();
-        long elapsedTime = currentTime.getTime() - this.lastReportingTime.getTime();
-        if (elapsedTime > CURRENT_ERROR_WORKER_TIME_MS) {
-            this.handleCurrentErrors();
+        if (enabled) {
+            this.maxErrorsIntervalSubscription.cancel();
+            this.pendingErrorsIntervalSubscription.cancel();
         }
     }
 
     public synchronized void handleMaxErrors() {
         if (this.events.size() >= this.maxErrorsPerReport) {
             this.generateReportInVirtualThread(events);
-            this.lastReportingTime = new Date();
         }
     }
 
-    public synchronized void handleCurrentErrors() {
+    public synchronized void handlePendingErrors() {
         if (!this.events.isEmpty()) {
             this.generateReportInVirtualThread(events);
-            this.lastReportingTime = new Date();
         }
     }
 

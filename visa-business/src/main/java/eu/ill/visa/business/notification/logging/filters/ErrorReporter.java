@@ -4,6 +4,6 @@ import java.util.logging.LogRecord;
 
 public interface ErrorReporter {
     void handleMaxErrors();
-    void handleCurrentErrors();
+    void handlePendingErrors();
     void onRecord(LogRecord record);
 }
