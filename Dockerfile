@@ -20,6 +20,6 @@ WORKDIR /app
 COPY --from=builder /usr/src/app/visa-app/target/visa-app-runner.jar /app/visa-app.jar
 COPY --from=builder /usr/src/app/db /app/db
 
-CMD java -jar /app/visa-app.jar
+CMD java -Djava.util.logging.manager=org.jboss.logmanager.LogManager -jar /app/visa-app.jar
 
 EXPOSE 8086 8087
