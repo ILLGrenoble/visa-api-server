@@ -7,6 +7,8 @@ import java.util.List;
 @ConfigMapping(prefix = "cloud", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface CloudConfiguration {
 
+    Boolean defaultProviderEnabled();
+
     String providerType();
 
     String providerName();

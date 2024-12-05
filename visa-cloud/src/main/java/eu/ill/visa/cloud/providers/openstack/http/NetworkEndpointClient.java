@@ -6,6 +6,7 @@ import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
 import eu.ill.visa.cloud.providers.openstack.http.responses.SecurityGroupsResponse;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
+import io.quarkus.rest.client.reactive.ClientQueryParam;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -18,6 +19,7 @@ public interface NetworkEndpointClient {
     @Path("/v2.0/security-groups")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @ClientQueryParam(name = "fields", value = "name")
     SecurityGroupsResponse securityGroups(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
 
     @ClientExceptionMapper

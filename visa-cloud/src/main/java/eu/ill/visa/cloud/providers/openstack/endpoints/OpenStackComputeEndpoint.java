@@ -149,7 +149,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         try {
             this.computeEndpointClient.deleteServer(this.identityProvider.authenticate(), id);
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             throw new CloudException(format("Could not delete server with id %s and response %s: ", id, e.getMessage()));
         }
     }
@@ -158,7 +158,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         try {
             return this.computeEndpointClient.createServer(this.identityProvider.authenticate(), new ServerRequest(input)).server().id();
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             throw new CloudException(format("Could not create server with name %s and response %s ", input.name, e.getMessage()));
         }
     }
@@ -169,7 +169,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
                 .map(SecurityGroupsResponse.SecurityGroup::name)
                 .toList();
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.error("Failed to get security groups for server with id {} from OpenStack: {}", id, e.getMessage());
             return new ArrayList<>();
         }
@@ -179,7 +179,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         try {
             return this.computeEndpointClient.limits(this.identityProvider.authenticate()).limits().absolute();
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.warn("Failed to get cloud limits from OpenStack: {}", e.getMessage());
             return null;
         }
@@ -189,7 +189,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         try {
             this.computeEndpointClient.runServerAction(this.identityProvider.authenticate(), id, action);
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             throw new CloudException(format("%s for server with id %s: %s: ", errorMessage, id, e.getMessage()));
         }
     }

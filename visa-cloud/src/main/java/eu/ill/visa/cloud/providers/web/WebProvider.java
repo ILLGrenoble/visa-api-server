@@ -47,7 +47,7 @@ public class WebProvider implements CloudProvider {
         try {
             return this.webProviderClient.instanceIdentifiers(this.configuration.getAuthToken());
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.warn("Failed to get cloud instance identifiers from Web Provider: {}", e.getMessage());
             return new ArrayList<>();
         }
@@ -58,7 +58,7 @@ public class WebProvider implements CloudProvider {
         try {
             return this.webProviderClient.instances(this.configuration.getAuthToken());
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.warn("Failed to get cloud instances from Web Provider: {}", e.getMessage());
             return null;
         }
@@ -72,7 +72,7 @@ public class WebProvider implements CloudProvider {
         } catch (CloudNotFoundException e) {
             return null;
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.warn("Failed to get cloud instance with id {} from Web Provider: {}", id, e.getMessage());
             return null;
         }
@@ -133,7 +133,7 @@ public class WebProvider implements CloudProvider {
             final String id = this.webProviderClient.createInstance(this.configuration.getAuthToken(), cloudInstance).id();
             return this.instance(id);
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             throw new CloudException(format("Could not create server with name %s and response %s ", name, e.getMessage()));
         }
     }
@@ -154,7 +154,7 @@ public class WebProvider implements CloudProvider {
         try {
             return this.webProviderClient.image(this.configuration.getAuthToken(), id);
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.warn("Failed to get cloud image with id {} from Web Provider: {}", id, e.getMessage());
             return null;
         }
@@ -165,7 +165,7 @@ public class WebProvider implements CloudProvider {
         try {
             return this.webProviderClient.flavours(this.configuration.getAuthToken());
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.error("Failed to get cloud images from Web Provider: {}", e.getMessage());
             return new ArrayList<>();
         }
@@ -176,7 +176,7 @@ public class WebProvider implements CloudProvider {
         try {
             return this.webProviderClient.flavour(this.configuration.getAuthToken(), id);
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.warn("Failed to get cloud image with id {} from Web Provider: {}", id, e.getMessage());
             return null;
         }

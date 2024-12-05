@@ -4,12 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.openstack.domain.AuthenticationToken;
+import eu.ill.visa.cloud.providers.openstack.http.IdentityEndpointClient;
 import eu.ill.visa.cloud.providers.openstack.http.requests.AuthenticationRequest;
 import eu.ill.visa.cloud.providers.openstack.http.responses.AuthenticationResponse;
-import eu.ill.visa.cloud.providers.openstack.http.IdentityEndpointClient;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public class OpenStackIdentityEndpoint {
 
                 this.token = new AuthenticationToken(token, expiresAt);
 
-            } catch (CloudClientException e) {
+            } catch (Exception e) {
                 throw new CloudException(e.getMessage());
             }
         }

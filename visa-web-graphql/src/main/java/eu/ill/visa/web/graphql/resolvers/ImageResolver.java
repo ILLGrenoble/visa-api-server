@@ -7,9 +7,10 @@ import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.CloudImageType;
 import eu.ill.visa.web.graphql.types.ImageType;
-import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
+
+import java.util.List;
 
 @GraphQLApi
 public class ImageResolver {
@@ -21,12 +22,16 @@ public class ImageResolver {
     }
 
 
-    public @NotNull CloudClientType cloudClient(@Source ImageType image) {
-        CloudClient cloudClient = this.cloudClientService.getCloudClient(image.getCloudId());
-        if (cloudClient != null) {
-            return new CloudClientType(cloudClient);
-        }
-        return null;
+    public List<CloudClientType> cloudClient(@Source List<ImageType> images) {
+        List<CloudClient> cloudClients = this.cloudClientService.getCloudClients(images.stream().map(ImageType::getCloudId).distinct().toList());
+        return images.stream().map(image -> {
+            return cloudClients.stream().filter(cloudClient -> {
+                if (cloudClient == null) {
+                    return false;
+                }
+                return cloudClient.getId() == -1 ? image.getCloudId() == null : cloudClient.getId().equals(image.getCloudId());
+            }).findFirst().orElse(null);
+        }).map(cloudClient -> cloudClient == null ? null : new CloudClientType(cloudClient)).toList();
     }
 
     public CloudImageType cloudImage(@Source ImageType image) {

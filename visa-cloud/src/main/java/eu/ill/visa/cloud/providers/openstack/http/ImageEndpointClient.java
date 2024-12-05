@@ -1,15 +1,12 @@
 package eu.ill.visa.cloud.providers.openstack.http;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
-import eu.ill.visa.cloud.providers.openstack.converters.CloudImageMixin;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ImagesResponse;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
-import io.quarkus.rest.client.reactive.jackson.ClientObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -29,12 +26,6 @@ public interface ImageEndpointClient {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     CloudImage image(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("imageId") String imageId);
-
-    @ClientObjectMapper
-    static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {
-        return defaultObjectMapper.copy()
-            .addMixIn(CloudImage.class, CloudImageMixin.class);
-    }
 
     @ClientExceptionMapper
     static RuntimeException toException(Response response) {

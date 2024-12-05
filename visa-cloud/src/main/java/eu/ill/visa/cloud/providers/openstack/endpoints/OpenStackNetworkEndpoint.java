@@ -1,7 +1,6 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
-import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.openstack.http.NetworkEndpointClient;
@@ -62,7 +61,7 @@ public class OpenStackNetworkEndpoint implements NetworkEndpoint {
                 .sorted(String::compareToIgnoreCase)
                 .toList();
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.error("Failed to get security groups from OpenStack: {}", e.getMessage());
             return new ArrayList<>();
         }

@@ -9,7 +9,6 @@ public class CloudImage {
     private String id;
     private String name;
     private Long   size;
-    private String createdAt;
 
     public String getId() {
         return id;
@@ -33,14 +32,6 @@ public class CloudImage {
 
     public void setSize(Long size) {
         this.size = size;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
     }
 
     @Override

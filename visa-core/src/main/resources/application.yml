@@ -69,6 +69,7 @@ quarkus:
 #        level: DEBUG
 
 cloud:
+  defaultProviderEnabled: ${VISA_CLOUD_DEFAULT_PROVIDER_ENABLED:true}
   serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
   providerType: ${VISA_DEFAULT_CLOUD_PROVIDER_TYPE:openstack}
   providerName: ${VISA_DEFAULT_CLOUD_PROVIDER_NAME:Default}

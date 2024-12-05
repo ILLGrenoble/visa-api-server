@@ -18,28 +18,28 @@ public class CloudClientGateway {
     private static final Logger logger = LoggerFactory.getLogger(CloudClientGateway.class);
     private final CloudClientFactory factory = new CloudClientFactory();
 
-    private CloudClient defaultCloudClient;
+    private CloudClient defaultCloudClient = null;
     private final Map<Long, CloudClient> secondaryCloudClients = new HashMap<>();
 
     @Inject
     public CloudClientGateway(final CloudConfiguration configuration) {
         try {
-            this.defaultCloudClient = factory.getClient(configuration);
-            this.secondaryCloudClients.put(this.defaultCloudClient.getId(), this.defaultCloudClient);
+            if (configuration.defaultProviderEnabled()) {
+                this.defaultCloudClient = factory.getClient(configuration);
+                this.secondaryCloudClients.put(this.defaultCloudClient.getId(), this.defaultCloudClient);
+            }
 
         } catch (CloudException e) {
             logger.error("Failed to create default Cloud Provider: {}", e.getMessage());
         }
-
-    }
-
-    private CloudClient getDefaultCloudClient() {
-        return defaultCloudClient;
     }
 
     public CloudClient getCloudClient(Long id) {
         if (id == null) {
-            return this.getDefaultCloudClient();
+            if (this.defaultCloudClient == null) {
+                logger.error("No default Cloud Provider is configured");
+            }
+            return this.defaultCloudClient;
         }
 
         CloudClient cloudClient = this.secondaryCloudClients.get(id);
@@ -62,7 +62,7 @@ public class CloudClientGateway {
 
             return cloudClient;
         } catch (CloudException e) {
-            logger.error("Failed to create default Cloud Provider: {}", e.getMessage());
+            logger.error("Failed to add Cloud Provider {}: {}", name, e.getMessage());
         }
 
         return null;

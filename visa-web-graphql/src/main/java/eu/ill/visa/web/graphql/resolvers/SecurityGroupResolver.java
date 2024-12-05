@@ -5,9 +5,10 @@ import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.SecurityGroupType;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
+
+import java.util.List;
 
 
 @GraphQLApi
@@ -20,11 +21,15 @@ public class SecurityGroupResolver {
         this.cloudClientService = cloudClientService;
     }
 
-    public @NotNull CloudClientType cloudClient(@Source SecurityGroupType securityGroup) {
-        CloudClient cloudClient = this.cloudClientService.getCloudClient(securityGroup.getCloudId());
-        if (cloudClient != null) {
-            return new CloudClientType(cloudClient);
-        }
-        return null;
+    public List<CloudClientType> cloudClient(@Source List<SecurityGroupType> securityGroups) {
+        List<CloudClient> cloudClients = this.cloudClientService.getCloudClients(securityGroups.stream().map(SecurityGroupType::getCloudId).distinct().toList());
+        return securityGroups.stream().map(securityGroupType -> {
+            return cloudClients.stream().filter(cloudClient -> {
+                if (cloudClient == null) {
+                    return false;
+                }
+                return cloudClient.getId() == -1 ? securityGroupType.getCloudId() == null : cloudClient.getId().equals(securityGroupType.getCloudId());
+            }).findFirst().orElse(null);
+        }).map(cloudClient -> cloudClient == null ? null : new CloudClientType(cloudClient)).toList();
     }
 }

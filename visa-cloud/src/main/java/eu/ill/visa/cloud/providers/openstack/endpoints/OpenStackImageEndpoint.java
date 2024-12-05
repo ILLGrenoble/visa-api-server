@@ -2,7 +2,6 @@ package eu.ill.visa.cloud.providers.openstack.endpoints;
 
 import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
-import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.openstack.http.ImageEndpointClient;
@@ -60,7 +59,7 @@ public class OpenStackImageEndpoint implements ImageEndpoint {
         try {
             return this.imageEndpointClient.images(this.identityProvider.authenticate()).images();
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.error("Failed to get cloud images from OpenStack: {}", e.getMessage());
             return new ArrayList<>();
         }
@@ -70,7 +69,7 @@ public class OpenStackImageEndpoint implements ImageEndpoint {
         try {
             return this.imageEndpointClient.image(this.identityProvider.authenticate(), id);
 
-        } catch (CloudClientException e) {
+        } catch (Exception e) {
             logger.warn("Failed to get cloud image with id {} from OpenStack: {}", id, e.getMessage());
             return null;
         }
