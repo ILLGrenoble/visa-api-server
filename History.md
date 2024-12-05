@@ -1,3 +1,10 @@
+3.0.5 05/12/2024
+================
+ * Improve logging from docker image: Specify log manager explicitly 
+ * Handle all exceptions in openstack api calls
+ * Handle cases where cloud provider has been removed but images, flavours and security groups are still configured
+ * Allow for default cloud provider to be disabled (use only configured providers from the database)
+
 3.0.4 04/12/2024
 ================
  * Automatically disconnect guacamole sessions if no ping event has been received in 30 seconds
