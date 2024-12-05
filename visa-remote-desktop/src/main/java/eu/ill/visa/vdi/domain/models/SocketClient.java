@@ -57,7 +57,7 @@ public class SocketClient {
                     if (dataString.length() > 20) {
                         dataString = dataString.substring(0, 20) + "...";
                     }
-                    logger.error("Unable to send message {} of type {} to client {}: {}", dataString, data.getClass().getName(), this.clientId, result.getException().getMessage());
+                    logger.warn("Unable to send message {} of type {} to client {}: {}", dataString, data.getClass().getName(), this.clientId, result.getException().getMessage());
                 }
             });
         }
@@ -68,7 +68,7 @@ public class SocketClient {
             this.disconnected = true;
             this.session.close();
         } catch (IOException e) {
-            logger.error("Failed to disconnect from WebSocket client {}: {}", this.clientId, e.getMessage());
+            logger.warn("Failed to disconnect from WebSocket client {}: {}", this.clientId, e.getMessage());
         }
     }
 
