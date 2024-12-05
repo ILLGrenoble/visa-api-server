@@ -22,12 +22,9 @@ public class SecurityGroupResolver {
     }
 
     public List<CloudClientType> cloudClient(@Source List<SecurityGroupType> securityGroups) {
-        List<CloudClient> cloudClients = this.cloudClientService.getCloudClients(securityGroups.stream().map(SecurityGroupType::getCloudId).distinct().toList());
+        List<CloudClient> cloudClients = this.cloudClientService.getAll();
         return securityGroups.stream().map(securityGroupType -> {
             return cloudClients.stream().filter(cloudClient -> {
-                if (cloudClient == null) {
-                    return false;
-                }
                 return cloudClient.getId() == -1 ? securityGroupType.getCloudId() == null : cloudClient.getId().equals(securityGroupType.getCloudId());
             }).findFirst().orElse(null);
         }).map(cloudClient -> cloudClient == null ? null : new CloudClientType(cloudClient)).toList();

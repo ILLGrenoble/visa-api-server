@@ -22,12 +22,9 @@ public class FlavourResolver {
     }
 
     public List<CloudClientType> cloudClient(@Source List<FlavourType> flavours) {
-        List<CloudClient> cloudClients = this.cloudClientService.getCloudClients(flavours.stream().map(FlavourType::getCloudId).distinct().toList());
+        List<CloudClient> cloudClients = this.cloudClientService.getAll();
         return flavours.stream().map(flavour -> {
             return cloudClients.stream().filter(cloudClient -> {
-                if (cloudClient == null) {
-                    return false;
-                }
                 return cloudClient.getId() == -1 ? flavour.getCloudId() == null : cloudClient.getId().equals(flavour.getCloudId());
             }).findFirst().orElse(null);
         }).map(cloudClient -> cloudClient == null ? null : new CloudClientType(cloudClient)).toList();
@@ -35,7 +32,10 @@ public class FlavourResolver {
 
     public CloudFlavourType cloudFlavour(@Source FlavourType flavour) {
         try {
-            CloudClient cloudClient = this.cloudClientService.getCloudClient(flavour.getCloudId());
+            CloudClient cloudClient = this.cloudClientService.getAll().stream().filter(aCloudClient -> {
+                return aCloudClient.getId() == -1 ? flavour.getCloudId() == null : aCloudClient.getId().equals(flavour.getCloudId());
+            }).findFirst().orElse(null);
+
             if (cloudClient != null) {
                 CloudFlavour cloudFlavour = cloudClient.flavour(flavour.getComputeId());
                 if (cloudFlavour != null) {

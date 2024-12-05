@@ -103,7 +103,10 @@ public class InstanceResolver {
      */
     public CloudInstanceType cloudInstance(@Source InstanceType instance) throws DataFetchingException {
         try {
-            CloudClient cloudClient = this.cloudClientService.getCloudClient(instance.getCloudId());
+            CloudClient cloudClient = this.cloudClientService.getAll().stream().filter(aCloudClient -> {
+                return aCloudClient.getId() == -1 ? instance.getCloudId() == null : aCloudClient.getId().equals(instance.getCloudId());
+            }).findFirst().orElse(null);
+
             if (cloudClient == null) {
                 throw new DataFetchingException("Cloud Client with ID " + instance.getCloudId() + " does not exist");
 
@@ -140,7 +143,7 @@ public class InstanceResolver {
     }
 
     public @NotNull List<CloudClientType> cloudClient(@Source final List<InstanceType> instances) {
-        List<CloudClient> cloudClients = this.cloudClientService.getCloudClients(instances.stream().map(InstanceType::getCloudId).distinct().toList());
+        List<CloudClient> cloudClients = this.cloudClientService.getAll();
         return instances.stream().map(instanceType -> {
             return cloudClients.stream().filter(cloudClient -> {
                 return cloudClient.getId() == -1 ? instanceType.getCloudId() == null : cloudClient.getId().equals(instanceType.getCloudId());

@@ -23,12 +23,9 @@ public class ImageResolver {
 
 
     public List<CloudClientType> cloudClient(@Source List<ImageType> images) {
-        List<CloudClient> cloudClients = this.cloudClientService.getCloudClients(images.stream().map(ImageType::getCloudId).distinct().toList());
+        List<CloudClient> cloudClients = this.cloudClientService.getAll();
         return images.stream().map(image -> {
             return cloudClients.stream().filter(cloudClient -> {
-                if (cloudClient == null) {
-                    return false;
-                }
                 return cloudClient.getId() == -1 ? image.getCloudId() == null : cloudClient.getId().equals(image.getCloudId());
             }).findFirst().orElse(null);
         }).map(cloudClient -> cloudClient == null ? null : new CloudClientType(cloudClient)).toList();
@@ -36,7 +33,9 @@ public class ImageResolver {
 
     public CloudImageType cloudImage(@Source ImageType image) {
         try {
-            CloudClient cloudClient = this.cloudClientService.getCloudClient(image.getCloudId());
+            CloudClient cloudClient = this.cloudClientService.getAll().stream().filter(aCloudClient -> {
+                return aCloudClient.getId() == -1 ? image.getCloudId() == null : aCloudClient.getId().equals(image.getCloudId());
+            }).findFirst().orElse(null);
             if (cloudClient != null) {
                 CloudImage cloudImage = cloudClient.image(image.getComputeId());
                 if (cloudImage != null) {
