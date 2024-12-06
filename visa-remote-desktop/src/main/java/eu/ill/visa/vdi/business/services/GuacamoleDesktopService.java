@@ -134,7 +134,7 @@ public class GuacamoleDesktopService extends DesktopService {
                 return buildSocket(instance, session);
 
             } catch (GuacamoleException exception) {
-                logger.error("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
+                logger.warn("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
                 // If it fails then invalidate current session
                 session.setCurrent(false);
                 this.instanceSessionService.updatePartial(session);

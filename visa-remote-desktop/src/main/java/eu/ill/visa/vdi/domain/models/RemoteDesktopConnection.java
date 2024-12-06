@@ -11,6 +11,7 @@ public class RemoteDesktopConnection {
     private final ConnectionThread connectionThread;
 
     private Date lastInstanceUpdateTime;
+    private Date lastInteractionAt = new Date();
     private InstanceActivityType instanceActivityType;
 
     public RemoteDesktopConnection(SocketClient client, ConnectionThread connectionThread) {
@@ -34,6 +35,14 @@ public class RemoteDesktopConnection {
         this.lastInstanceUpdateTime = lastInstanceUpdateTime;
     }
 
+    public Date getLastInteractionAt() {
+        return lastInteractionAt;
+    }
+
+    public void setLastInteractionAt(Date lastInteractionAt) {
+        this.lastInteractionAt = lastInteractionAt;
+    }
+
     public InstanceActivityType getInstanceActivity() {
         return instanceActivityType;
     }
@@ -52,6 +61,8 @@ public class RemoteDesktopConnection {
         } else if (instanceActivityType.equals(InstanceActivityType.KEYBOARD) && this.instanceActivityType.equals(InstanceActivityType.MOUSE)) {
             this.instanceActivityType = InstanceActivityType.MOUSE_AND_KEYBOARD;
         }
+
+        this.setLastInteractionAt(new Date());
     }
 
     public void disconnect() {

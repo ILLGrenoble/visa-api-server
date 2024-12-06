@@ -122,7 +122,7 @@ public class WebXDesktopService extends DesktopService {
                 return buildTunnel(instance, session);
 
             } catch (WebXConnectionException exception) {
-                logger.error("Failed to connect {} to given WebX session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
+                logger.warn("Failed to connect {} to given WebX session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
                 // If it fails then invalidate current session
                 session.setCurrent(false);
                 this.instanceSessionService.updatePartial(session);

@@ -38,44 +38,48 @@ public abstract class RemoteDesktopEventSubscriber<T> {
             final DesktopSession desktopSession = desktopSessionMember.session();
 
             final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
-            InstanceActivityType controlActivityType = this.getControlActivityType(data);
-            if (controlActivityType != null) {
-                remoteDesktopConnection.setInstanceActivity(controlActivityType);
-            }
 
             InstanceMemberRole role = desktopSessionMember.connectedUser().getRole();
-            if (controlActivityType == null || role.equals(InstanceMemberRole.OWNER) || role.equals(InstanceMemberRole.SUPPORT) || (role.equals(InstanceMemberRole.USER) && !desktopSession.isLocked())) {
+            if (role.equals(InstanceMemberRole.OWNER) || role.equals(InstanceMemberRole.SUPPORT) || (role.equals(InstanceMemberRole.USER) && !desktopSession.isLocked())) {
                 this.writeData(remoteDesktopConnection.getConnectionThread(), data);
+
+                // Update the instance activity if mouse/keyboard event has been sent to the server
+                InstanceActivityType controlActivityType = this.getControlActivityType(data);
+                if (controlActivityType != null) {
+                    remoteDesktopConnection.setInstanceActivity(controlActivityType);
+                }
             }
 
-            // Update last seen time of instance if more than one minute
+            // Two things to do:
+            //  1: update instance last seen at (so that it isn't deleted): happens for any remote desktop event (ie desktop open)
+            //  2: update instance last interaction at (to determine when sessions are active): happens only when the remote desktop has user keyboard or mouse interaction
             final Date lastInstanceUpdateTime = remoteDesktopConnection.getLastInstanceUpdateTime();
-            final Date instanceInteractionTime = new Date();
-            if (lastInstanceUpdateTime == null || (instanceInteractionTime.getTime() - lastInstanceUpdateTime.getTime() > 15 * 1000)) {
-                remoteDesktopConnection.setLastInstanceUpdateTime(instanceInteractionTime);
+            final Date currentDate = new Date();
+            if (lastInstanceUpdateTime == null || (currentDate.getTime() - lastInstanceUpdateTime.getTime() > 15 * 1000)) {
+                remoteDesktopConnection.setLastInstanceUpdateTime(currentDate);
 
                 // Use virtual thread to update interaction times so that the websocket can return ASAP
                 Uni.createFrom()
                     .voidItem()
                     .emitOn(Infrastructure.getDefaultWorkerPool())
                     .subscribe()
-                    .with((voidItem) -> this.updateInstanceActivity(desktopSession.getInstanceId(), instanceInteractionTime, socketClient.clientId()));
+                    .with((voidItem) -> this.updateInstanceActivity(desktopSession.getInstanceId(), currentDate, remoteDesktopConnection.getLastInteractionAt(), socketClient.clientId()));
             }
        });
     }
 
-    private void updateInstanceActivity(final Long instanceId, final Date instanceInteractionTime, final String clientId) {
+    private void updateInstanceActivity(final Long instanceId, final Date lastSeenAt, final Date lastInteractionAt, final String clientId) {
         final InstancePartial instance = this.instanceService.getPartialById(instanceId);
         if (instance == null) {
             return;
         }
 
         // Update instance
-        instance.setLastSeenAt(instanceInteractionTime);
-        instance.setLastInteractionAt(instanceInteractionTime);
+        instance.setLastSeenAt(lastSeenAt);
+        instance.setLastInteractionAt(lastInteractionAt);
         instanceService.updatePartial(instance);
 
-        this.desktopSessionService.updateSessionMemberActivity(clientId, instanceInteractionTime);
+        this.desktopSessionService.updateSessionMemberActivity(clientId, lastInteractionAt);
     }
 
     protected abstract InstanceActivityType getControlActivityType(T data);

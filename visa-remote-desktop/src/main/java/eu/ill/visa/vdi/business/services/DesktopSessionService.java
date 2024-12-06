@@ -233,7 +233,7 @@ public class DesktopSessionService {
             .findAny();
     }
 
-    public void updateSessionMemberActivity(final String clientId, final Date instanceInteractionTime) {
+    public void updateSessionMemberActivity(final String clientId, final Date lastInteractionAt) {
         this.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
 
             final DesktopSession desktopSession = desktopSessionMember.session();
@@ -246,7 +246,7 @@ public class DesktopSessionService {
                     logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
 
                 } else {
-                    instanceSessionMember.setLastInteractionAt(instanceInteractionTime);
+                    instanceSessionMember.setLastInteractionAt(lastInteractionAt);
                     instanceSessionMemberService.updatePartial(instanceSessionMember);
 
                     InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
