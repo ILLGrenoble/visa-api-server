@@ -1,3 +1,8 @@
+3.0.6 06/12/2024
+================
+ * Fix lastSeenAt and lastInteractionAt being given the same value: ensure instance activity is only updated when instance has interaction
+ * Add an idle handler to the GatewayClient to ensure that the events gateway is properly closed even if we don't receive a disconnection event from the websocket
+
 3.0.5 05/12/2024
 ================
  * Improve logging from docker image: Specify log manager explicitly 
