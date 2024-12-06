@@ -1,7 +1,7 @@
 package eu.ill.visa.business.notification.logging.filters;
 
 import eu.ill.visa.business.ErrorReportEmailConfiguration;
-import eu.ill.visa.business.services.TimerService;
+import eu.ill.visa.core.domain.Timer;
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
@@ -77,8 +77,8 @@ public class ActiveErrorReporter implements ErrorReporter {
         if (enabled) {
             logger.info("Error reporting is enabled");
 
-            this.maxErrorsIntervalSubscription = TimerService.setInterval(this::handleMaxErrors, MAX_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
-            this.pendingErrorsIntervalSubscription = TimerService.setInterval(this::handlePendingErrors, PENDING_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
+            this.maxErrorsIntervalSubscription = Timer.setInterval(this::handleMaxErrors, MAX_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
+            this.pendingErrorsIntervalSubscription = Timer.setInterval(this::handlePendingErrors, PENDING_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
 
         } else {
             logger.info("Error reporting is disabled (configuration is not valid)");

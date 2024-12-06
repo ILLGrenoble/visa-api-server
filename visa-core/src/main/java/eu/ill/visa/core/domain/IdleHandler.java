@@ -1,24 +1,28 @@
-package eu.ill.visa.vdi.domain.models;
+package eu.ill.visa.core.domain;
 
 
-import eu.ill.visa.business.services.TimerService;
 import io.smallrye.mutiny.subscription.Cancellable;
 
 import java.util.concurrent.TimeUnit;
 
-public class IdleSessionHandler {
+public class IdleHandler {
 
-    private static final int IDLE_TIMEOUT_SECONDS = 30;
-
+    private final int timeoutSeconds;
     private final boolean enabled;
     private Runnable onIdleCallback;
     private Cancellable timer;
 
-    public IdleSessionHandler(boolean enabled) {
-        this.enabled = enabled;
+    public IdleHandler(int timeoutSeconds) {
+        this.enabled = true;
+        this.timeoutSeconds = timeoutSeconds;
     }
 
-    public void start(Runnable onIdleCallback) {
+    public IdleHandler(boolean enabled, int timeoutSeconds) {
+        this.enabled = enabled;
+        this.timeoutSeconds = timeoutSeconds;
+    }
+
+    public synchronized void start(Runnable onIdleCallback) {
         if (enabled) {
             if (this.timer != null) {
                 this.timer.cancel();
@@ -28,22 +32,23 @@ public class IdleSessionHandler {
         }
     }
 
-    public void reset() {
+    public synchronized void reset() {
         if (this.timer != null) {
             this.timer.cancel();
             this.createTimer();
         }
     }
 
-    public void stop() {
+    public synchronized void stop() {
         if (this.timer != null) {
             this.timer.cancel();
+            this.timer = null;
         }
     }
 
     private void createTimer() {
-        this.timer = TimerService.setTimeout(() -> {
+        this.timer = Timer.setTimeout(() -> {
             this.onIdleCallback.run();
-        }, IDLE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }, timeoutSeconds, TimeUnit.SECONDS);
     }
 }

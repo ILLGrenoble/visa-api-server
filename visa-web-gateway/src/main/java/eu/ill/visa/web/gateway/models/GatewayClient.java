@@ -1,14 +1,21 @@
 package eu.ill.visa.web.gateway.models;
 
+import eu.ill.visa.core.domain.IdleHandler;
 import jakarta.websocket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
-public record GatewayClient(Session session, String token, String clientId) {
+public record GatewayClient(Session session, String token, String clientId, IdleHandler idleHandler) {
+
+    private static final int IDLE_TIMEOUT_SECONDS = 60;
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayClient.class);
+
+    public GatewayClient(Session session, String token, String clientId) {
+        this(session, token, clientId, new IdleHandler(IDLE_TIMEOUT_SECONDS));
+    }
 
     public void sendEvent(Object data) {
         if (session.isOpen()) {
@@ -18,15 +25,9 @@ public record GatewayClient(Session session, String token, String clientId) {
                     if (dataString.length() > 20) {
                         dataString = dataString.substring(0, 20) + "...";
                     }
-                    logger.error("Unable to send message {} of type {} to gateway client {}: {}", dataString, data.getClass().getName(), this.token, result.getException().getMessage());
+                    logger.warn("Unable to send message {} of type {} to gateway client {}: {}", dataString, data.getClass().getName(), this.token, result.getException().getMessage());
                 }
             });
-        } else {
-            String dataString = data.toString();
-            if (dataString.length() > 20) {
-                dataString = dataString.substring(0, 20) + "...";
-            }
-            logger.warn("Unable to send message {} of type {} to gateway client {} because the session is already closed", dataString, data.getClass().getName(), this.clientId);
         }
     }
 

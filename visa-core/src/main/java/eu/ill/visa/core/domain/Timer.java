@@ -1,4 +1,4 @@
-package eu.ill.visa.business.services;
+package eu.ill.visa.core.domain;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -7,7 +7,7 @@ import io.smallrye.mutiny.subscription.Cancellable;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public class TimerService {
+public class Timer {
 
     public static Cancellable setTimeout(Runnable task, long delay, TimeUnit unit) {
         return Uni.createFrom().voidItem()
