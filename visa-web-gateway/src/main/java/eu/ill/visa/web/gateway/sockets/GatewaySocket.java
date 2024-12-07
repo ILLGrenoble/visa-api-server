@@ -2,11 +2,9 @@ package eu.ill.visa.web.gateway.sockets;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.domain.models.ClientEventCarrier;
-import eu.ill.visa.broker.domain.models.EventChannelSubscription;
 import eu.ill.visa.business.InvalidTokenException;
 import eu.ill.visa.business.services.ClientAuthenticationTokenService;
 import eu.ill.visa.core.entity.ClientAuthenticationToken;
-import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.gateway.models.GatewayClient;
 import eu.ill.visa.web.gateway.models.GatewayTunnel;
@@ -92,11 +90,7 @@ public class GatewaySocket {
             logger.info("Gateway websocket connected for user {} (id = {}) with client Id {}", user.getFullName(), user.getId(), clientId);
 
             final GatewayClient gatewayClient = new GatewayClient(session, token, clientId);
-            final EventChannelSubscription subscription = this.eventDispatcher.subscribe(clientId, user.getId(), user.getRoles().stream().map(Role::getName).toList(), gatewayClient::sendEvent);
-            final GatewayTunnel gatewayTunnel = this.createGatewayTunnel(clientId, gatewayClient, subscription);
-
-            // Activate the idle handler
-            gatewayTunnel.idleHandler().start(() -> this.handleIdle(clientId));
+            final GatewayTunnel gatewayTunnel = this.createGatewayTunnel(user, gatewayClient, () -> this.handleIdle(clientId));
 
         } catch (InvalidTokenException e) {
             logger.error("GatewaySocket failed to connect: {}", e.getMessage());
@@ -104,28 +98,13 @@ public class GatewaySocket {
     }
 
     private void handleClose(String clientId) {
-        this.deleteGatewayTunnel(clientId).ifPresent(gatewayTunnel -> {
-            // Stop the idle handler and remove the gateway client
-            gatewayTunnel.idleHandler().stop();
-
-            // Remove event subscription
-            this.eventDispatcher.unsubscribe(gatewayTunnel.subscription());
-
-            logger.info("Gateway websocket closed for user with Id {} with client Id {}", gatewayTunnel.subscription().userId(), clientId);
-        });
+        this.deleteGatewayTunnel(clientId).ifPresent(GatewayTunnel::onClose);
     }
 
     private void handleMessage(String clientId, ClientEventCarrier clientEventCarrier) {
         // Reset the idle handler
         this.getGatewayTunnel(clientId).ifPresent(gatewayTunnel -> {
-            gatewayTunnel.idleHandler().reset();
-            if (clientEventCarrier.type().equals("ping")) {
-                // Handle simple ping-pong keep-alive messages
-                gatewayTunnel.sendEventToClient("pong");
-
-            } else {
-                this.eventDispatcher.forwardEventFromClient(clientId, clientEventCarrier);
-            }
+            gatewayTunnel.onEvent(clientEventCarrier);
         });
     }
 
@@ -143,8 +122,8 @@ public class GatewaySocket {
         this.handleClose(clientId);
     }
 
-    private synchronized GatewayTunnel createGatewayTunnel(String clientId, GatewayClient gatewayClient, EventChannelSubscription subscription) {
-        final GatewayTunnel gatewayTunnel = new GatewayTunnel(clientId, gatewayClient, subscription);
+    private synchronized GatewayTunnel createGatewayTunnel(final User user, GatewayClient gatewayClient, Runnable idleHandlerCallback) {
+        final GatewayTunnel gatewayTunnel = new GatewayTunnel(user, gatewayClient, this.eventDispatcher, idleHandlerCallback);
         this.gatewayTunnels.add(gatewayTunnel);
         return gatewayTunnel;
     }
