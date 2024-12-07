@@ -9,6 +9,7 @@ import eu.ill.visa.core.entity.ClientAuthenticationToken;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.gateway.models.GatewayClient;
+import eu.ill.visa.web.gateway.models.GatewayTunnel;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.inject.Inject;
@@ -34,8 +35,7 @@ public class GatewaySocket {
     private final EventDispatcher eventDispatcher;
     private final ClientAuthenticationTokenService authenticator;
 
-    private final List<EventChannelSubscription> subscriptions = new ArrayList<>();
-    private final List<GatewayClient> gatewayClients = new ArrayList<>();
+    private final List<GatewayTunnel> gatewayTunnels = new ArrayList<>();
 
     @Inject
     public GatewaySocket(final EventDispatcher eventDispatcher,
@@ -91,13 +91,12 @@ public class GatewaySocket {
 
             logger.info("Gateway websocket connected for user {} (id = {}) with client Id {}", user.getFullName(), user.getId(), clientId);
 
-            final GatewayClient gatewayClient = this.createGatewayClient(session, token, clientId);
+            final GatewayClient gatewayClient = new GatewayClient(session, token, clientId);
+            final EventChannelSubscription subscription = this.eventDispatcher.subscribe(clientId, user.getId(), user.getRoles().stream().map(Role::getName).toList(), gatewayClient::sendEvent);
+            final GatewayTunnel gatewayTunnel = this.createGatewayTunnel(clientId, gatewayClient, subscription);
 
             // Activate the idle handler
-            gatewayClient.idleHandler().start(() -> this.handleIdle(clientId));
-
-            final EventChannelSubscription subscription = this.eventDispatcher.subscribe(clientId, user.getId(), user.getRoles().stream().map(Role::getName).toList(), gatewayClient::sendEvent);
-            this.subscriptions.add(subscription);
+            gatewayTunnel.idleHandler().start(() -> this.handleIdle(clientId));
 
         } catch (InvalidTokenException e) {
             logger.error("GatewaySocket failed to connect: {}", e.getMessage());
@@ -105,37 +104,38 @@ public class GatewaySocket {
     }
 
     private void handleClose(String clientId) {
-        // Stop the idle handler and remove the gateway client
-        this.getGatewayClient(clientId).ifPresent(gatewayClient -> gatewayClient.idleHandler().stop());
-        this.deleteGatewayClient(clientId);
+        this.deleteGatewayTunnel(clientId).ifPresent(gatewayTunnel -> {
+            // Stop the idle handler and remove the gateway client
+            gatewayTunnel.idleHandler().stop();
 
-        final EventChannelSubscription subscription = this.subscriptions.stream()
-            .filter(aSubscription -> aSubscription.clientId().equals(clientId))
-            .findAny()
-            .orElse(null);
+            // Remove event subscription
+            this.eventDispatcher.unsubscribe(gatewayTunnel.subscription());
 
-        if (subscription != null) {
-            this.subscriptions.remove(subscription);
-            this.eventDispatcher.unsubscribe(subscription);
-
-            logger.info("Gateway websocket closed for user with Id {} with client Id {}", subscription.userId(), subscription.clientId());
-        }
+            logger.info("Gateway websocket closed for user with Id {} with client Id {}", gatewayTunnel.subscription().userId(), clientId);
+        });
     }
 
     private void handleMessage(String clientId, ClientEventCarrier clientEventCarrier) {
         // Reset the idle handler
-        this.getGatewayClient(clientId).ifPresent(gatewayClient -> gatewayClient.idleHandler().reset());
+        this.getGatewayTunnel(clientId).ifPresent(gatewayTunnel -> {
+            gatewayTunnel.idleHandler().reset();
+            if (clientEventCarrier.type().equals("ping")) {
+                // Handle simple ping-pong keep-alive messages
+                gatewayTunnel.sendEventToClient("pong");
 
-        this.eventDispatcher.forwardEventFromClient(clientId, clientEventCarrier);
+            } else {
+                this.eventDispatcher.forwardEventFromClient(clientId, clientEventCarrier);
+            }
+        });
     }
 
     private void handleIdle(String clientId) {
         logger.warn("Idle timeout for gateway websocket {}: disconnecting", clientId);
 
-        // Ensure websocket is fully closed
-        this.getGatewayClient(clientId).ifPresent(gatewayClient -> {
+        this.getGatewayTunnel(clientId).ifPresent(gatewayTunnel -> {
             try {
-                gatewayClient.session().close();
+                // Ensure websocket is fully closed (sends event to client so that it'll attempt to reconnect
+                gatewayTunnel.gatewayClient().session().close();
             } catch (Exception ignored) {
             }
         });
@@ -143,18 +143,25 @@ public class GatewaySocket {
         this.handleClose(clientId);
     }
 
-    private synchronized GatewayClient createGatewayClient(Session session, String token, String clientId) {
-        final GatewayClient gatewayClient = new GatewayClient(session, token, clientId);
-        this.gatewayClients.add(gatewayClient);
-        return gatewayClient;
+    private synchronized GatewayTunnel createGatewayTunnel(String clientId, GatewayClient gatewayClient, EventChannelSubscription subscription) {
+        final GatewayTunnel gatewayTunnel = new GatewayTunnel(clientId, gatewayClient, subscription);
+        this.gatewayTunnels.add(gatewayTunnel);
+        return gatewayTunnel;
     }
 
-    private synchronized Optional<GatewayClient> getGatewayClient(String clientId) {
-        return this.gatewayClients.stream().filter(gatewayClient -> gatewayClient.clientId().equals(clientId)).findAny();
+    private synchronized Optional<GatewayTunnel> getGatewayTunnel(String clientId) {
+        return this.gatewayTunnels.stream().filter(gatewayTunnel -> gatewayTunnel.clientId().equals(clientId)).findAny();
     }
 
-    private synchronized void deleteGatewayClient(String clientId) {
-        this.gatewayClients.removeIf(item -> item.clientId().equals(clientId));
+    private synchronized Optional<GatewayTunnel> deleteGatewayTunnel(String clientId) {
+        final GatewayTunnel gatewayTunnel = this.getGatewayTunnel(clientId).orElse(null);
+        if (gatewayTunnel != null) {
+            this.gatewayTunnels.remove(gatewayTunnel);
+            return Optional.of(gatewayTunnel);
+
+        } else {
+            return Optional.empty();
+        }
     }
 
 }
