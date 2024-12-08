@@ -1,3 +1,10 @@
+3.0.7 08/12/2024
+================
+ * Increase instance server port check timeout default to 5s (from 2s)
+ * Send ping messages from server to client to ensure that hidden tabs in chrome remain active (timers in js unreliable)
+ * Delegate event channel socket functionality to GatewayTunnel
+ * Use GatewayTunnel to encapsulate event channel subscription and gateway client. Improve async handling of socket events and timeout handler
+
 3.0.6 06/12/2024
 ================
  * Fix lastSeenAt and lastInteractionAt being given the same value: ensure instance activity is only updated when instance has interaction
