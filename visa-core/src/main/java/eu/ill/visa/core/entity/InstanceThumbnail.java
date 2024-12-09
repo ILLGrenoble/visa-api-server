@@ -31,8 +31,8 @@ public class InstanceThumbnail extends Timestampable {
     @Column(name = "data", nullable = false, columnDefinition = "TEXT")
     private byte[] data;
 
-    @Column(name = "instance_id")
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id", foreignKeyDefinition = "FOREIGN KEY (instance_id) REFERENCES instance(id)"), nullable = false)
+    @Column(name = "instance_id", nullable = false)
+    @JoinColumn(name = "instance_id")
     private Long instanceId;
 
     public InstanceThumbnail() {
@@ -64,5 +64,21 @@ public class InstanceThumbnail extends Timestampable {
 
     public void setInstanceId(Long instanceId) {
         this.instanceId = instanceId;
+    }
+
+    /**
+     * Entity mapping used to force foreign key constraints onto instance_id. This entity is not used elsewhere.
+     */
+    @Entity
+    @Table(name = "instance_thumbnail")
+    private static class InstanceThumbnailInner {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "id", nullable = false)
+        private Long id;
+
+        @ManyToOne
+        @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
+        private Instance instance;
     }
 }

@@ -18,12 +18,12 @@ public class InstanceActivity extends Timestampable {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "user_id")
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id", foreignKeyDefinition = "FOREIGN KEY (user_id) REFERENCES users(id)"), nullable = true)
+    @Column(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private String userId;
 
-    @Column(name = "instance_id")
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id", foreignKeyDefinition = "FOREIGN KEY (instance_id) REFERENCES instance(id)"), nullable = false)
+    @Column(name = "instance_id", nullable = false)
+    @JoinColumn(name = "instance_id")
     private Long instanceId;
 
     @Enumerated(EnumType.STRING)
@@ -31,11 +31,6 @@ public class InstanceActivity extends Timestampable {
     private InstanceActivityType instanceActivityType;
 
     public InstanceActivity() {
-
-    }
-
-    public InstanceActivity(InstanceActivityType type) {
-        this.instanceActivityType = type;
     }
 
     public InstanceActivity(String userId, Long instanceId, InstanceActivityType type) {
@@ -74,5 +69,25 @@ public class InstanceActivity extends Timestampable {
 
     public void setInstanceActivityType(InstanceActivityType instanceActivityType) {
         this.instanceActivityType = instanceActivityType;
+    }
+
+    /**
+     * Entity mapping used to force foreign key constraints onto instance_id and user_id. This entity is not used elsewhere.
+     */
+    @Entity
+    @Table(name = "instance_activity")
+    private static class InstanceActivityInner {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "id", nullable = false)
+        private Long id;
+
+        @ManyToOne
+        @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = true)
+        private User user;
+
+        @ManyToOne
+        @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
+        private Instance instance;
     }
 }

@@ -61,8 +61,7 @@ public class InstanceSession extends Timestampable {
     @Column(name = "protocol", length = 150, nullable = true)
     private String protocol;
 
-    @Column(name = "instance_id")
-    @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id", foreignKeyDefinition = "FOREIGN KEY (instance_id) REFERENCES instance(id)"), nullable = false)
+    @Column(name = "instance_id", nullable = false)
     private Long instanceId;
 
     @Column(name = "current", nullable = false)
@@ -145,5 +144,21 @@ public class InstanceSession extends Timestampable {
             .append("connectionId", connectionId)
             .append("current", current)
             .toString();
+    }
+
+    /**
+     * Entity mapping used to force foreign key constraints onto instance_id. This entity is not used elsewhere.
+     */
+    @Entity
+    @Table(name = "instance_session")
+    private static class InstanceSessionInner {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "id", nullable = false)
+        private Long id;
+
+        @ManyToOne
+        @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
+        private Instance instance;
     }
 }
