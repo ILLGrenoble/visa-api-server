@@ -8,104 +8,110 @@ import java.util.Date;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "instanceSessionMember.getAll", query = """
-            SELECT i FROM InstanceSessionMember i
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT i FROM InstanceSessionMember i
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE i.active = true
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.countAll", query = """
-            SELECT count(i) FROM InstanceSessionMember i
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT count(i) FROM InstanceSessionMember i
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE i.active = true
+        AND instance.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceSessionMember.countAllActive", query = """
-            SELECT count(i) FROM InstanceSessionMember i
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE i.active = true
-            AND i.lastInteractionAt > :timeAgo
-            AND instance.deletedAt IS NULL
+        SELECT count(i) FROM InstanceSessionMember i
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE i.active = true
+        AND i.lastInteractionAt > :timeAgo
+        AND instance.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceSessionMember.getAllForInstanceId", query = """
-            SELECT i FROM InstanceSessionMember i
-            LEFT JOIN FETCH i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE instance.id = :instanceId
-            AND i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT i FROM InstanceSessionMember i
+        LEFT JOIN FETCH i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instance.id = :instanceId
+        AND i.active = true
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllForInstanceIds", query = """
-            SELECT i FROM InstanceSessionMember i
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE instance.id IN :instanceIds
-            AND i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT i FROM InstanceSessionMember i
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instance.id IN :instanceIds
+        AND i.active = true
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllByConnectionId", query = """
-            SELECT i FROM InstanceSessionMember i
-            LEFT JOIN FETCH i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE instanceSession.connectionId = :connectionId
-            AND i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT i FROM InstanceSessionMember i
+        LEFT JOIN FETCH i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instanceSession.connectionId = :connectionId
+        AND i.active = true
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllHistoryForInstanceId", query = """
-            SELECT i FROM InstanceSessionMember i
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE instance.id = :instanceId
-            AND instance.deletedAt IS NULL
-            ORDER BY i.id DESC
+        SELECT i FROM InstanceSessionMember i
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instance.id = :instanceId
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
 
     @NamedQuery(name = "instanceSessionMember.getAllPartials", query = """
-            SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
-            FROM InstanceSessionMember i
-            LEFT JOIN i.user u
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        FROM InstanceSessionMember i
+        LEFT JOIN i.user u
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE i.active = true
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllPartialsForInstanceId", query = """
-            SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
-            FROM InstanceSessionMember i
-            LEFT JOIN i.user u
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE instance.id = :instanceId
-            AND i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        FROM InstanceSessionMember i
+        LEFT JOIN i.user u
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instance.id = :instanceId
+        AND i.active = true
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getPartialByInstanceSessionIdAndClientId", query = """
-            SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
-            FROM InstanceSessionMember i
-            LEFT JOIN i.user u
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE instanceSession.id = :instanceSessionId
-            AND i.clientId = :clientId
-            AND i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        FROM InstanceSessionMember i
+        LEFT JOIN i.user u
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instanceSession.id = :instanceSessionId
+        AND i.clientId = :clientId
+        AND i.active = true
+        AND instance.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceSessionMember.getAllPartialByInstanceSessionId", query = """
-            SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
-            FROM InstanceSessionMember i
-            LEFT JOIN i.user u
-            LEFT JOIN i.instanceSession instanceSession
-            LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
-            WHERE instanceSession.id = :instanceSessionId
-            AND i.active = true
-            AND instance.deletedAt IS NULL
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        FROM InstanceSessionMember i
+        LEFT JOIN i.user u
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instanceSession.id = :instanceSessionId
+        AND i.active = true
+        AND instance.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceSessionMember.updatePartialById", query = """
-            UPDATE InstanceSessionMember i
-            SET i.active = :active, i.lastInteractionAt = :lastInteractionAt
-            WHERE i.id = :id
+        UPDATE InstanceSessionMember i
+        SET i.active = :active, i.lastInteractionAt = :lastInteractionAt
+        WHERE i.id = :id
     """),
 })
 @Table(name = "instance_session_member")
