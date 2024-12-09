@@ -11,7 +11,7 @@ import java.util.Objects;
 public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleHandler idleSessionHandler) {
 
     private static final Logger logger = LoggerFactory.getLogger(DesktopSessionMember.class);
-    private static final int IDLE_TIMEOUT_SECONDS = 30;
+    private static final int IDLE_TIMEOUT_SECONDS = 14;
 
     public DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session) {
         this(clientId, connectedUser, remoteDesktopConnection, session, new IdleHandler(remoteDesktopConnection.getClient().protocol().equals(DesktopService.GUACAMOLE_PROTOCOL), IDLE_TIMEOUT_SECONDS));
