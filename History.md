@@ -1,3 +1,9 @@
+3.0.8 10/12/2024
+================
+ * FIX #20: Ordering of admin instance sessions by most recent
+ * FIX #19: Reduce the remote desktop idle timer to 14s preventing the guacamole timeout error from being reported
+ * FIX #18: Use full entity inner classes for simplified models to ensure that foreign key constraints are created
+
 3.0.7 08/12/2024
 ================
  * Increase instance server port check timeout default to 5s (from 2s)
