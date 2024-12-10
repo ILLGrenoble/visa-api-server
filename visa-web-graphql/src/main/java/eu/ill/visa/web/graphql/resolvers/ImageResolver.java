@@ -7,11 +7,13 @@ import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.CloudImageType;
 import eu.ill.visa.web.graphql.types.ImageType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
 import java.util.List;
 
+@RegisterForReflection
 @GraphQLApi
 public class ImageResolver {
 

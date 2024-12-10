@@ -2,10 +2,12 @@ package eu.ill.visa.business.gateway.events;
 
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Date;
 import java.util.List;
 
+@RegisterForReflection
 public record InstanceStateChangedEvent(Long instanceId,
                                         String instanceUid,
                                         String name,

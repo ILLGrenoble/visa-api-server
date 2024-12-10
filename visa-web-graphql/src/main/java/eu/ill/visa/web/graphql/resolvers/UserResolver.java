@@ -8,12 +8,14 @@ import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.graphql.types.ExperimentType;
 import eu.ill.visa.web.graphql.types.InstanceType;
 import eu.ill.visa.web.graphql.types.UserType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
 import java.util.List;
 
+@RegisterForReflection
 @GraphQLApi
 public class UserResolver {
 

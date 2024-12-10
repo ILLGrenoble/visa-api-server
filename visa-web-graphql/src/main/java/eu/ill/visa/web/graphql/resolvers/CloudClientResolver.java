@@ -8,9 +8,11 @@ import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.OpenStackProviderConfigurationType;
 import eu.ill.visa.web.graphql.types.WebProviderConfigurationType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
+@RegisterForReflection
 @GraphQLApi
 public class CloudClientResolver {
 

@@ -7,10 +7,12 @@ import eu.ill.visa.core.entity.Flavour;
 import eu.ill.visa.core.entity.Instrument;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.types.SecurityGroupFilterType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
+@RegisterForReflection
 @GraphQLApi
 public class SecurityGroupFilterResolver {
 

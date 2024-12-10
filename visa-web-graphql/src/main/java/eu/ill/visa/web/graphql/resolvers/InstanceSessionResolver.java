@@ -5,6 +5,7 @@ import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.web.graphql.types.InstanceSessionType;
 import eu.ill.visa.web.graphql.types.InstanceType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
@@ -12,6 +13,7 @@ import org.eclipse.microprofile.graphql.Source;
 import java.util.List;
 
 
+@RegisterForReflection
 @GraphQLApi
 public class InstanceSessionResolver {
 
