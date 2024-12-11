@@ -122,7 +122,7 @@ public class UserRepository extends AbstractRepository<User> {
         final CriteriaQuery<User> cbQuery = cb.createQuery(User.class);
         final Root<User> root = cbQuery.from(User.class);
 
-        Fetch<User, Employer> employerFetch = root.fetch("affiliation", JoinType.LEFT);
+        root.fetch("affiliation", JoinType.LEFT);
 
         UserRequestContext context = new UserRequestContext(root);
         final List<Predicate> predicates = this.convertFilterToPredicates(filter, cb, context);
