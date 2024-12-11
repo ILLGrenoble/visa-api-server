@@ -110,7 +110,7 @@ public class WebXDesktopService extends DesktopService {
     }
 
     private WebXTunnel getOrCreateTunnel(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
-        InstanceSession session = instanceSessionService.getByInstanceAndProtocol(instance, WEBX_PROTOCOL);
+        InstanceSession session = instanceSessionService.getLatestByInstanceAndProtocol(instance, WEBX_PROTOCOL);
 
         if (session == null) {
             return this.createTunnelAndSession(instance, user);
