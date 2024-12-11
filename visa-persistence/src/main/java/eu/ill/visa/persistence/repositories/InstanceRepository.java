@@ -136,8 +136,7 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         final Root<Instance> root = cbQuery.from(Instance.class);
 
         Fetch<Instance, Plan> planFetch = root.fetch("plan", JoinType.INNER);
-        Fetch<Plan, Image> imageFetch = planFetch.fetch("image", JoinType.INNER);
-        imageFetch.fetch("protocols", JoinType.LEFT);
+        planFetch.fetch("image", JoinType.INNER);
         planFetch.fetch("flavour", JoinType.INNER);
 
         InstanceRequestContext context = new InstanceRequestContext(root);
