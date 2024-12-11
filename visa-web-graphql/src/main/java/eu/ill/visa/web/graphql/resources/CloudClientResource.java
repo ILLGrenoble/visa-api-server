@@ -5,7 +5,7 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
-import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
+import eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
