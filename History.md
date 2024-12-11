@@ -1,4 +1,4 @@
-3.0.9 10/12/2024
+3.0.9 11/12/2024
 ================
  * Enabled graalvm native image build
  * Fix pagination being performed in memory for instances select (remove image protocols fetch)
