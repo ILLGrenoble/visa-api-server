@@ -21,7 +21,6 @@ import java.util.Base64;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-//@RegisterForReflection(targets = { org.bouncycastle.jce.provider.BouncyCastleProvider.class })
 @Singleton
 public class SignatureService {
 
