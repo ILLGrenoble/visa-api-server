@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk as builder
+FROM openjdk:21-jdk AS builder
 
 ARG MAVEN_OPTS
 

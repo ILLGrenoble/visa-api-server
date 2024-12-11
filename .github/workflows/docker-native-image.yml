@@ -1,0 +1,55 @@
+name: Build and push docker image
+
+on:
+  push:
+    branches: [ "dev" ]
+    tags: [ "*.*.*" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+          flavor: |
+            suffix=-native
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context    : .
+          file       : ./Dockerfile.native
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+
+      - name: Trigger external deploy pipeline
+        if: success()
+        run: |
+          if [ -z "${{ secrets.DEPLOY_PIPELINE_URL }}" ]; then
+            echo "Error: DEPLOY_PIPELINE_URL is not set"
+          else
+            curl -X POST "${{ secrets.DEPLOY_PIPELINE_URL }}"
+          fi
