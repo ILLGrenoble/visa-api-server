@@ -1,3 +1,11 @@
+3.0.9 10/12/2024
+================
+ * Enabled graalvm native image build
+ * Fix pagination being performed in memory for instances select (remove image protocols fetch)
+ * FIX #21: read-only sessions were closed automatically by guacamole because sync events weren't being sent to the server
+ * Handle case where 2 requests arrive at exactly the same time to create a remote desktop: keep only the latest instance session and remove any others
+ * Verify that instances exist when creating tokens or thumbnails. Send 404 if not
+
 3.0.8 10/12/2024
 ================
  * FIX #20: Ordering of admin instance sessions by most recent

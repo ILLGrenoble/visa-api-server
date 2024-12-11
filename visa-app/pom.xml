@@ -5,7 +5,7 @@
     <parent>
         <artifactId>api</artifactId>
         <groupId>eu.ill.visa</groupId>
-        <version>3.0.8</version>
+        <version>3.0.9</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -32,27 +32,27 @@
         <dependency>
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-web-rest</artifactId>
-            <version>3.0.8</version>
+            <version>3.0.9</version>
         </dependency>
         <dependency>
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-web-graphql</artifactId>
-            <version>3.0.8</version>
+            <version>3.0.9</version>
         </dependency>
         <dependency>
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-web-gateway</artifactId>
-            <version>3.0.8</version>
+            <version>3.0.9</version>
         </dependency>
         <dependency>
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-remote-desktop</artifactId>
-            <version>3.0.8</version>
+            <version>3.0.9</version>
         </dependency>
         <dependency>
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-scheduler</artifactId>
-            <version>3.0.8</version>
+            <version>3.0.9</version>
         </dependency>
     </dependencies>
 
