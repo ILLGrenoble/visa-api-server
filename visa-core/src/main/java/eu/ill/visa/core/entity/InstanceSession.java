@@ -31,7 +31,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
         AND i.deletedAt IS NULL
         ORDER BY isess.id DESC
     """),
-    @NamedQuery(name = "instanceSession.getByInstanceIdAndProtocol", query = """
+    @NamedQuery(name = "instanceSession.getAllByInstanceIdAndProtocol", query = """
         SELECT isess
         FROM InstanceSession isess
         LEFT JOIN Instance i on isess.instanceId = i.id

@@ -122,7 +122,7 @@ public class GuacamoleDesktopService extends DesktopService {
     }
 
     private ConfiguredGuacamoleSocket getOrCreateSocket(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException {
-        InstanceSession session = instanceSessionService.getByInstanceAndProtocol(instance, GUACAMOLE_PROTOCOL);
+        InstanceSession session = instanceSessionService.getLatestByInstanceAndProtocol(instance, GUACAMOLE_PROTOCOL);
 
         if (session == null) {
             return this.createSocketAndSession(instance, user);

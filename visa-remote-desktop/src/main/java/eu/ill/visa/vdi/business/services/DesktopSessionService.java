@@ -115,7 +115,7 @@ public class DesktopSessionService {
         }
 
         // Get or create a new DesktopSession: use the ID of the InstanceSession
-        final InstanceSession instanceSession = this.instanceSessionService.getByInstanceAndProtocol(instance, client.protocol());
+        final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, client.protocol());
         DesktopSession desktopSession = this.getOrCreateDesktopSession(instanceSession.getId(), instance.getId(), client.protocol());
 
         // Create session member

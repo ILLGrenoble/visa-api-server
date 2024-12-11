@@ -64,12 +64,28 @@ public class InstanceSessionService {
         return this.repository.getAllByInstance(instance);
     }
 
-    public InstanceSession getByInstanceAndProtocol(@NotNull Instance instance, String protocol) {
-        return this.getByInstanceIdAndProtocol(instance.getId(), protocol);
+    public InstanceSession getLatestByInstanceAndProtocol(@NotNull Instance instance, String protocol) {
+        return this.getLatestByInstanceIdAndProtocol(instance.getId(), protocol);
     }
 
-    public InstanceSession getByInstanceIdAndProtocol(Long instanceId, String protocol) {
-        return this.repository.getByInstanceIdAndProtocol(instanceId, protocol);
+    public InstanceSession getLatestByInstanceIdAndProtocol(Long instanceId, String protocol) {
+        // Fixes bug when 2 requests are made at the same time to create a session (on load-balanced servers)
+        List<InstanceSession>  instanceSessions = this.repository.getAllLatestByInstanceIdAndProtocol(instanceId, protocol);
+        if (instanceSessions.isEmpty()) {
+            return null;
+        }
+
+        // Get the latest session
+        InstanceSession latestInstanceSession = instanceSessions.removeFirst();
+
+        // Remove any remaining sessions
+        for (InstanceSession instanceSession : instanceSessions) {
+            logger.warn("Multiple instance sessions were available for the instance {} and protocol {}: deleting instance session {}", instanceId, protocol, instanceSession.getId());
+            instanceSession.setCurrent(false);
+            this.save(instanceSession);
+        }
+
+        return latestInstanceSession;
     }
 
     public void deleteSessionMember(@NotNull InstanceSession instanceSession, String clientId) {
@@ -79,12 +95,11 @@ public class InstanceSessionService {
             this.instanceSessionMemberService.updatePartial(sessionMember);
 
             List<InstanceSessionMemberPartial> members = this.instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
-
             if (members.isEmpty()) {
                 logger.info("Session for Instance with Id: {} is no longer current as it has no connected members", instanceSession.getInstanceId());
                 instanceSession.setCurrent(false);
+                this.updatePartial(instanceSession);
             }
-            this.updatePartial(instanceSession);
 
         } else {
             logger.warn("Got a null session member (clientId {}) for instance {}", clientId, instanceSession.getInstanceId());
