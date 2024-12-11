@@ -436,11 +436,11 @@ public class InstanceRepository extends AbstractRepository<Instance> {
     /**
      * Get an instance for an owner
      */
-    public Instance getByIdForOwner(User user, String instanceUid) {
+    public Instance getByIdForOwner(User user, Long instanceId) {
         try {
-            final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getByUidForOwner", Instance.class);
+            final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getByIdForOwner", Instance.class);
             query.setParameter("user", user);
-            query.setParameter("instanceUid", instanceUid);
+            query.setParameter("instanceId", instanceId);
 
             return query.getSingleResult();
 
@@ -579,10 +579,10 @@ public class InstanceRepository extends AbstractRepository<Instance> {
     /**
      * Get thumbnail for the given instance
      */
-    public InstanceThumbnail getThumbnailForInstanceUid(String instanceUid) {
+    public InstanceThumbnail getThumbnailForInstanceId(Long instanceId) {
         try {
-            final TypedQuery<InstanceThumbnail> query = getEntityManager().createNamedQuery("instanceThumbnail.getForInstanceUid", InstanceThumbnail.class);
-            query.setParameter("instanceUid", instanceUid);
+            final TypedQuery<InstanceThumbnail> query = getEntityManager().createNamedQuery("instanceThumbnail.getForInstanceId", InstanceThumbnail.class);
+            query.setParameter("instanceId", instanceId);
             return query.getSingleResult();
 
         } catch (NoResultException exception) {

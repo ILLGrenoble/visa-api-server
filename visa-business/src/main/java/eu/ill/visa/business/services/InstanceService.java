@@ -239,8 +239,8 @@ public class InstanceService {
         return this.repository.getAllForITSupport(filter, orderBy, pagination);
     }
 
-    public Instance getByUidForOwner(User user, String instanceUid) {
-        return this.repository.getByIdForOwner(user, instanceUid);
+    public Instance getByIdForOwner(User user, Long instanceId) {
+        return this.repository.getByIdForOwner(user, instanceId);
     }
 
     public Instance getByIdForInstrumentScientist(User user, Long instanceId) {
@@ -277,11 +277,11 @@ public class InstanceService {
         return instance.isOwner(user) || user.hasRole(Role.ADMIN_ROLE);
     }
 
-    public boolean isOwnerOrAdmin(User user, String instanceUid) {
+    public boolean isOwnerOrAdmin(User user, Long instanceId) {
         if (user.hasRole(Role.ADMIN_ROLE)) {
             return true;
         }
-        return this.getByUidForOwner(user, instanceUid) != null;
+        return this.getByIdForOwner(user, instanceId) != null;
     }
 
     public boolean isAuthorisedForInstance(User user, Instance instance) {
@@ -359,10 +359,8 @@ public class InstanceService {
         return repository.countAllForUserAndRole(user, role);
     }
 
-    public void createOrUpdateThumbnailByInstanceUid(String instanceUid, byte[] data) {
-        Long instanceId = this.getIdByUid(instanceUid);
-
-        final InstanceThumbnail thumbnail = requireNonNullElse(repository.getThumbnailForInstanceUid(instanceUid), new InstanceThumbnail(instanceId));
+    public void createOrUpdateThumbnailByInstanceId(Long instanceId, String instanceUid, byte[] data) {
+        final InstanceThumbnail thumbnail = requireNonNullElse(this.getThumbnailForInstanceId(instanceId), new InstanceThumbnail(instanceId));
         thumbnail.setData(data);
         this.repository.saveThumbnail(thumbnail);
 
@@ -370,11 +368,11 @@ public class InstanceService {
     }
 
     public InstanceThumbnail getThumbnailForInstance(Instance instance) {
-        return this.getThumbnailForInstanceUid(instance.getUid());
+        return this.getThumbnailForInstanceId(instance.getId());
     }
 
-    public InstanceThumbnail getThumbnailForInstanceUid(String instanceUid) {
-        return repository.getThumbnailForInstanceUid(instanceUid);
+    public InstanceThumbnail getThumbnailForInstanceId(Long instanceId) {
+        return repository.getThumbnailForInstanceId(instanceId);
     }
 
     public String getUID() {
