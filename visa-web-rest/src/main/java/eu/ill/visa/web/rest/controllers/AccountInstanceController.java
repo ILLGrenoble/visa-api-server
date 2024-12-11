@@ -382,6 +382,11 @@ public class AccountInstanceController extends AbstractController {
     public RestResponse<MetaResponse<InstanceAuthenticationTokenDto>> createInstanceAuthenticationTicket(@Context final SecurityContext securityContext, @PathParam("instanceUid") String instanceUid) {
         final User user = this.getUserPrincipal(securityContext);
         final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members));
+
+        if (instance == null) {
+            throw new NotFoundException("Instance not found");
+        }
+
         final InstanceMember member = instance.getMember(user);
 
         if (!this.instanceService.isAuthorisedForInstance(user, instance)) {
@@ -551,11 +556,17 @@ public class AccountInstanceController extends AbstractController {
                                 @NotNull @RestForm("file") final InputStream is) {
         try {
             final User user = this.getUserPrincipal(securityContext);
-            if (this.instanceService.isOwnerOrAdmin(user, instanceUid)) {
+
+            Long instanceId = this.instanceService.getIdByUid(instanceUid);
+            if (instanceId == null) {
+                throw new NotFoundException("Instance not found");
+            }
+
+            if (this.instanceService.isOwnerOrAdmin(user, instanceId)) {
                 final byte[] data = is.readAllBytes();
                 final ImageFormat mimeType = Imaging.guessFormat(data);
                 if (mimeType == ImageFormats.JPEG) {
-                    instanceService.createOrUpdateThumbnailByInstanceUid(instanceUid, data);
+                    instanceService.createOrUpdateThumbnailByInstanceId(instanceId, instanceUid, data);
                 }
             }
 
@@ -572,8 +583,14 @@ public class AccountInstanceController extends AbstractController {
     public Response getThumbnail(@Context final SecurityContext securityContext,
                                  @PathParam("instanceUid") final String instanceUid) {
         final User user = this.getUserPrincipal(securityContext);
-        if (this.instanceService.isOwnerOrAdmin(user, instanceUid)) {
-            final InstanceThumbnail thumbnail = instanceService.getThumbnailForInstanceUid(instanceUid);
+
+        Long instanceId = this.instanceService.getIdByUid(instanceUid);
+        if (instanceId == null) {
+            throw new NotFoundException("Instance not found");
+        }
+
+        if (this.instanceService.isOwnerOrAdmin(user, instanceId)) {
+            final InstanceThumbnail thumbnail = instanceService.getThumbnailForInstanceId(instanceId);
             if (thumbnail != null) {
                 final ResponseBuilder response = Response.ok(thumbnail.getData());
                 return response.build();

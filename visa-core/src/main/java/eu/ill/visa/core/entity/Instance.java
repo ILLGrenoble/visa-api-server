@@ -31,7 +31,7 @@ import java.util.List;
             WHERE i.id = :id
             AND i.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instance.getByUidForOwner", query = """
+    @NamedQuery(name = "instance.getByIdForOwner", query = """
             SELECT i FROM Instance i
             JOIN i.members m
             JOIN FETCH i.plan p
@@ -39,7 +39,7 @@ import java.util.List;
             JOIN FETCH p.flavour f
             WHERE m.user = :user
             AND m.role = 'OWNER'
-            AND i.uid = :instanceUid
+            AND i.id = :instanceId
             AND i.deletedAt IS NULL
     """),
     @NamedQuery(name = "instance.getByUID", query = """
