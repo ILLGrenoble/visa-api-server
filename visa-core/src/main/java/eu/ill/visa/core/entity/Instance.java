@@ -1,8 +1,5 @@
 package eu.ill.visa.core.entity;
 
-import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
-import eu.ill.visa.core.domain.NumberInstancesByFlavour;
-import eu.ill.visa.core.domain.NumberInstancesByImage;
 import eu.ill.visa.core.entity.converter.CommaSeparatedListConverter;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
@@ -176,59 +173,87 @@ import java.util.List;
             SET i.lastSeenAt = :lastSeenAt, i.lastInteractionAt = :lastInteractionAt
             WHERE i.id = :id
     """),
-})
-@NamedNativeQueries({
-    @NamedNativeQuery(name = "instance.countByFlavour", resultSetMapping = "countByFlavourMapping", query = """
-            SELECT f.id as id, f.name as name, COUNT(i.id) as total
-            FROM instance i
-            JOIN plan p on i.plan_id = p.id
-            JOIN flavour f on p.flavour_id = f.id AND i.deleted_at IS NULL
+    @NamedQuery(name = "instance.countByFlavour", query = """
+            SELECT new eu.ill.visa.core.entity.partial.NumberInstancesByFlavour(f.id, f.name, COUNT(i.id))
+            FROM Instance i
+            JOIN i.plan p
+            JOIN p.flavour f
+            WHERE i.deletedAt IS NULL
             GROUP BY f.id, f.name
             ORDER BY f.name
     """),
-    @NamedNativeQuery(name = "instance.countByImage", resultSetMapping = "countByImageMapping", query = """
-            SELECT im.id as id, im.name as name, im.version as version, COUNT(i.id) as total
-            FROM instance i
-            JOIN plan p on i.plan_id = p.id
-            JOIN image im on p.image_id = im.id AND i.deleted_at IS NULL
+    @NamedQuery(name = "instance.countByImage", query = """
+            SELECT new eu.ill.visa.core.entity.partial.NumberInstancesByImage(im.id, im.name, im.version, COUNT(i.id))
+            FROM Instance i
+            JOIN i.plan p
+            JOIN p.image im
+            WHERE i.deletedAt IS NULL
             GROUP BY im.id, im.name, im.version
-            ORDER BY im.name, im.version desc
+            ORDER BY im.name, im.version DESC
     """),
-    @NamedNativeQuery(name = "instance.countByCloudClient", resultSetMapping = "countByCloudClientMapping", query = """
-            SELECT cpc.id as id, cpc.name as name, COUNT(i.id) as total
-            FROM instance i
-            JOIN plan p on i.plan_id = p.id
-            JOIN image im on p.image_id = im.id
-            LEFT JOIN cloud_provider_configuration cpc on im.cloud_provider_configuration_id = cpc.id
-            WHERE i.deleted_at IS NULL
+    @NamedQuery(name = "instance.countByCloudClient", query = """
+            SELECT new eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient(cpc.id, cpc.name, COUNT(i.id))
+            FROM Instance i
+            JOIN i.plan p
+            JOIN p.image im
+            LEFT JOIN im.cloudProviderConfiguration cpc
+            WHERE i.deletedAt IS NULL
             GROUP BY cpc.id, cpc.name
             ORDER BY cpc.name
     """),
 })
-@SqlResultSetMappings({
-    @SqlResultSetMapping(name = "countByFlavourMapping", classes = {
-        @ConstructorResult(targetClass = NumberInstancesByFlavour.class, columns = {
-            @ColumnResult(name = "id", type = Long.class),
-            @ColumnResult(name = "name", type = String.class),
-            @ColumnResult(name = "total", type = Long.class),
-        })
-    }),
-    @SqlResultSetMapping(name = "countByImageMapping", classes = {
-        @ConstructorResult(targetClass = NumberInstancesByImage.class, columns = {
-            @ColumnResult(name = "id", type = Long.class),
-            @ColumnResult(name = "name", type = String.class),
-            @ColumnResult(name = "version", type = String.class),
-            @ColumnResult(name = "total", type = Long.class),
-        })
-    }),
-    @SqlResultSetMapping(name = "countByCloudClientMapping", classes = {
-        @ConstructorResult(targetClass = NumberInstancesByCloudClient.class, columns = {
-            @ColumnResult(name = "id", type = Long.class),
-            @ColumnResult(name = "name", type = String.class),
-            @ColumnResult(name = "total", type = Long.class),
-        })
-    }),
-})
+//@NamedNativeQueries({
+//    @NamedNativeQuery(name = "instance.countByFlavour", resultSetMapping = "countByFlavourMapping", query = """
+//            SELECT new eu.ill.visa.core.domain.NumberInstancesByFlavour(f.id as id, f.name as name, COUNT(i.id))
+//            FROM instance i
+//            JOIN plan p on i.plan_id = p.id
+//            JOIN flavour f on p.flavour_id = f.id AND i.deleted_at IS NULL
+//            GROUP BY f.id, f.name
+//            ORDER BY f.name
+//    """),
+//    @NamedNativeQuery(name = "instance.countByImage", resultSetMapping = "countByImageMapping", query = """
+//            SELECT im.id as id, im.name as name, im.version as version, COUNT(i.id) as total
+//            FROM instance i
+//            JOIN plan p on i.plan_id = p.id
+//            JOIN image im on p.image_id = im.id AND i.deleted_at IS NULL
+//            GROUP BY im.id, im.name, im.version
+//            ORDER BY im.name, im.version desc
+//    """),
+//    @NamedNativeQuery(name = "instance.countByCloudClient", resultSetMapping = "countByCloudClientMapping", query = """
+//            SELECT cpc.id as id, cpc.name as name, COUNT(i.id) as total
+//            FROM instance i
+//            JOIN plan p on i.plan_id = p.id
+//            JOIN image im on p.image_id = im.id
+//            LEFT JOIN cloud_provider_configuration cpc on im.cloud_provider_configuration_id = cpc.id
+//            WHERE i.deleted_at IS NULL
+//            GROUP BY cpc.id, cpc.name
+//            ORDER BY cpc.name
+//    """),
+//})
+//@SqlResultSetMappings({
+//    @SqlResultSetMapping(name = "countByFlavourMapping", classes = {
+//        @ConstructorResult(targetClass = NumberInstancesByFlavour.class, columns = {
+//            @ColumnResult(name = "id", type = Long.class),
+//            @ColumnResult(name = "name", type = String.class),
+//            @ColumnResult(name = "total", type = Long.class),
+//        })
+//    }),
+//    @SqlResultSetMapping(name = "countByImageMapping", classes = {
+//        @ConstructorResult(targetClass = NumberInstancesByImage.class, columns = {
+//            @ColumnResult(name = "id", type = Long.class),
+//            @ColumnResult(name = "name", type = String.class),
+//            @ColumnResult(name = "version", type = String.class),
+//            @ColumnResult(name = "total", type = Long.class),
+//        })
+//    }),
+//    @SqlResultSetMapping(name = "countByCloudClientMapping", classes = {
+//        @ConstructorResult(targetClass = NumberInstancesByCloudClient.class, columns = {
+//            @ColumnResult(name = "id", type = Long.class),
+//            @ColumnResult(name = "name", type = String.class),
+//            @ColumnResult(name = "total", type = Long.class),
+//        })
+//    }),
+//})
 @Table(name = "instance")
 public class Instance extends Timestampable {
 
