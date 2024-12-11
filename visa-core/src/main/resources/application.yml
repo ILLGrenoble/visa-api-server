@@ -42,6 +42,7 @@ quarkus:
       includes: images/thumbnail.jpg,fixtures/**.sql,words/**.txt,emails/templates/**.twig
     additional-build-args:
      - --initialize-at-run-time=eu.ill.visa.business.services.InstanceNameGeneratorService,zmq.util.Utils
+     - --march=compatibility
   security:
     security-providers: BC
   log:

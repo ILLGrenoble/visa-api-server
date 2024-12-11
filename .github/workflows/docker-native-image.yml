@@ -1,4 +1,4 @@
-name: Build and push docker image
+name: Build and push docker native image
 
 on:
   push:
@@ -46,10 +46,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Trigger external deploy pipeline
-        if: success()
+        if: success() && github.ref == 'refs/heads/dev'
         run: |
-          if [ -z "${{ secrets.DEPLOY_PIPELINE_URL }}" ]; then
+          if [ -z "${{ secrets.DEPLOY_PIPELINE_NATIVE_URL }}" ]; then
             echo "Error: DEPLOY_PIPELINE_URL is not set"
           else
-            curl -X POST "${{ secrets.DEPLOY_PIPELINE_URL }}"
+            curl -X POST "${{ secrets.DEPLOY_PIPELINE_NATIVE_URL }}"
           fi
