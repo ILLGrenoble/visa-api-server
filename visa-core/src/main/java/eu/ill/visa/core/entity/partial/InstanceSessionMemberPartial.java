@@ -2,9 +2,11 @@ package eu.ill.visa.core.entity.partial;
 
 
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Date;
 
+@RegisterForReflection
 public class InstanceSessionMemberPartial {
     private final Long id;
     private final InstanceMemberRole role;

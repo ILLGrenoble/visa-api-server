@@ -5,7 +5,7 @@ import eu.ill.visa.business.services.InstanceActionScheduler;
 import eu.ill.visa.business.services.InstanceExtensionRequestService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.domain.NumberInstancesByCloudClient;
+import eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.Instance;

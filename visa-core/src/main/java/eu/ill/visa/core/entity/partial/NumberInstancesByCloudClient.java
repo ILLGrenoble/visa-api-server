@@ -1,12 +1,12 @@
-package eu.ill.visa.core.domain;
+package eu.ill.visa.core.entity.partial;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class NumberInstancesByCloudClient {
     private Long id;
     private String name;
     private Long total ;
-
-    public NumberInstancesByCloudClient() {
-    }
 
     public NumberInstancesByCloudClient(final Long id, final String name, final Long total) {
         this.id = id;

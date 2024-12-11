@@ -1,7 +1,9 @@
 package eu.ill.visa.broker.brokers.redis;
 
 import eu.ill.visa.broker.domain.exceptions.MessageMarshallingException;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class RedisMessageCarrier {
     private String className;
     private Object payload;

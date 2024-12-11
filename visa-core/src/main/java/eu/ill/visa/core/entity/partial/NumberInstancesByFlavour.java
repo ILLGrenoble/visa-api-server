@@ -1,18 +1,16 @@
-package eu.ill.visa.core.domain;
+package eu.ill.visa.core.entity.partial;
 
-public class NumberInstancesByImage {
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
+public class NumberInstancesByFlavour {
     private Long id;
     private String name;
-    private String version;
     private Long total ;
 
-    public NumberInstancesByImage() {
-    }
-
-    public NumberInstancesByImage(final Long id, final String name, final String version, final Long total) {
+    public NumberInstancesByFlavour(final Long id, final String name, final Long total) {
         this.id = id;
         this.name = name;
-        this.version = version;
         this.total = total;
     }
 
@@ -30,14 +28,6 @@ public class NumberInstancesByImage {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public Long getTotal() {

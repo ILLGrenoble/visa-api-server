@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.ill.visa.cloud.domain.CloudInstanceFault;
 import eu.ill.visa.cloud.domain.CloudInstanceMetadata;
 import eu.ill.visa.cloud.domain.CloudInstanceState;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Date;
 import java.util.List;
 
+@RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CloudInstanceMixin {
 

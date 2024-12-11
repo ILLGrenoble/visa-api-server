@@ -1,7 +1,9 @@
 package eu.ill.visa.cloud.providers.openstack.converters;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class CloudFlavourMixin {
 
     public String id;

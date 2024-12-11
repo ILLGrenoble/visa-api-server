@@ -65,9 +65,15 @@ public class SignatureService {
      */
     public String sign(final String payload) {
         try {
-            final byte[] bytes = payload.getBytes(UTF_8);
-            final byte[] signature = createSignature(bytes);
-            return encodeBase64(signature);
+            final PrivateKey privateKey = createPrivateKey();
+            final Signature signatureInstance = Signature.getInstance(SIGNATURE_ALGORITHM);
+            signatureInstance.initSign(privateKey);
+            signatureInstance.update(payload.getBytes(UTF_8));
+
+            byte[] signatureBytes = signatureInstance.sign();
+
+            return encodeBase64(signatureBytes);
+
         } catch (InvalidKeySpecException | NoSuchAlgorithmException |
             InvalidKeyException | IOException | SignatureException exception) {
             logger.error("Could not create signature: {}", exception.getMessage());
@@ -75,29 +81,9 @@ public class SignatureService {
         }
     }
 
-    private byte[] createSignature(final byte[] payload) throws InvalidKeySpecException,
-        NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException {
-
-        final PrivateKey key = createPrivateKey();
-        final Signature signatureInstance = createSignatureInstance();
-
-        signatureInstance.initSign(key);
-        signatureInstance.update(payload);
-
-        return signatureInstance.sign();
-    }
-
     private String encodeBase64(final byte[] payload) {
         Base64.Encoder encoder = Base64.getEncoder();
         return encoder.encodeToString(payload);
-    }
-
-    private KeyFactory createKeyFactoryInstance() throws NoSuchAlgorithmException {
-        return KeyFactory.getInstance(KEY_ALGORITHM);
-    }
-
-    private Signature createSignatureInstance() throws NoSuchAlgorithmException {
-        return Signature.getInstance(SIGNATURE_ALGORITHM);
     }
 
     private byte[] readKey(final String inputFilePath) throws IOException {
@@ -108,17 +94,16 @@ public class SignatureService {
     }
 
     private PrivateKey createPrivateKey() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-        final byte[] bytes = readKey(privateKeyPath);
-        final PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(bytes);
-        final KeyFactory keyFactory = createKeyFactoryInstance();
+        final byte[] privateKeyBytes = this.readKey(this.privateKeyPath);
+        final PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        final KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         return keyFactory.generatePrivate(encodedKeySpec);
     }
 
     public String readPublicKey()  {
         if (!publicKeyPath.isEmpty()) {
             try {
-                String publicKey = Files.readString(Paths.get(publicKeyPath));
-                return publicKey;
+                return Files.readString(Paths.get(publicKeyPath));
 
             } catch (IOException e) {
                 logger.error("Could not read public key from {}: {}", publicKeyPath, e.getMessage());

@@ -1,10 +1,12 @@
 package eu.ill.visa.vdi.domain.models;
 
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.List;
 import java.util.Objects;
 
+@RegisterForReflection
 public class ConnectedUser {
 
     private String id;

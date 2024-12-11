@@ -1,8 +1,11 @@
 package eu.ill.visa.core.entity.partial;
 
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.Date;
 
+@RegisterForReflection
 public class InstancePartial {
     private Long id;
     private Date lastSeenAt;

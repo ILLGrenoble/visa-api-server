@@ -3,9 +3,12 @@ package eu.ill.visa.cloud.providers.openstack.http.responses;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Date;
 
+
+@RegisterForReflection
 @JsonRootName(value = "token")
 public class AuthenticationResponse {
 

@@ -1,6 +1,6 @@
 package eu.ill.visa.web.graphql.types;
 
-import eu.ill.visa.core.domain.NumberInstancesByImage;
+import eu.ill.visa.core.entity.partial.NumberInstancesByImage;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;

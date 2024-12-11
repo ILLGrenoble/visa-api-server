@@ -4,6 +4,7 @@ import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.web.graphql.types.CloudClientType;
 import eu.ill.visa.web.graphql.types.SecurityGroupType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
@@ -11,6 +12,7 @@ import org.eclipse.microprofile.graphql.Source;
 import java.util.List;
 
 
+@RegisterForReflection
 @GraphQLApi
 public class SecurityGroupResolver {
 
