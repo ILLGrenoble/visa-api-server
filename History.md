@@ -1,3 +1,7 @@
+3.1.1 17/12/2024
+================
+ * Minor bug fix to ensure that an instance expiration date is shown in the users' homepage. 
+
 3.1.0 12/12/2024
 ================
  * Release version of VISA 3.X: tag alignment of visa-api-server, visa-web, visa-accounts and visa-jupyter-proxy
