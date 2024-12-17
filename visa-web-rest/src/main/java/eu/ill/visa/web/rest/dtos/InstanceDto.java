@@ -49,7 +49,7 @@ public class InstanceDto {
         this.lastSeenAt = instance.getLastSeenAt();
         this.lastInteractionAt = instance.getLastInteractionAt();
         this.terminationDate = instance.getTerminationDate();
-        this.expirationDate = instance.getExpirationDate();
+        this.expirationDate = instance.getExpirationDate() == null ? instance.getTerminationDate() : instance.getExpirationDate();
         this.deleteRequested = instance.getDeleteRequested();
         this.keyboardLayout = instance.getKeyboardLayout();
         this.activeProtocols = instance.getActiveProtocols();
