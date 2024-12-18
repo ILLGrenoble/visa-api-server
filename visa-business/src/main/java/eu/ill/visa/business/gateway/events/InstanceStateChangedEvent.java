@@ -29,7 +29,7 @@ public record InstanceStateChangedEvent(Long instanceId,
             instance.getState(),
             instance.getIpAddress(),
             instance.getTerminationDate(),
-            instance.getExpirationDate(),
+            instance.getExpirationDate() != null ? instance.getExpirationDate() : instance.getTerminationDate(),
             instance.getDeleteRequested(),
             instance.canAccessWhenOwnerAway(),
             instance.getActiveProtocols()
