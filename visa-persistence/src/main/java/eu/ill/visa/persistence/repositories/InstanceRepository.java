@@ -222,6 +222,10 @@ public class InstanceRepository extends AbstractRepository<Instance> {
             predicates.add(cb.equal(memberJoin.get("role"), InstanceMemberRole.OWNER));
         }
 
+        if (filter.getState() != null) {
+            predicates.add(cb.equal(root.get("state"), filter.getState()));
+        }
+
         if (filter.getInstrumentId() != null) {
             Join<Instance, Experiment> experimentJoin = context.getExperimentJoin();
             predicates.add(cb.equal(experimentJoin.get("instrument").get("id"), filter.getInstrumentId()));
