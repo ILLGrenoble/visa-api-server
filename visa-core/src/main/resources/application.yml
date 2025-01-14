@@ -145,6 +145,7 @@ vdi:
   guacd:
     ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
     port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
+    color-depth: ${VISA_VDI_GUACD_PARAMETER_COLOR_DEPTH:16}
 
 client:
   login:
