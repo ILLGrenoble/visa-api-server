@@ -1,3 +1,10 @@
+3.1.2 14/01/2025
+================
+ * Add color depth option to guacamole: default to 16 to maintain previous display quality, env var VISA_VDI_GUACD_PARAMETER_COLOR_DEPTH to set it to 8, 16, 24 or 32
+ * Fix bug of emails being sent to owner rather than member added to instance
+ * Fix instance filtering by instance state
+ * Modify InstanceStateChangedEvent to send the termination date as the expiration date if the expiration date is null
+
 3.1.1 17/12/2024
 ================
  * Minor bug fix to ensure that an instance expiration date is shown in the users' homepage. 
