@@ -154,7 +154,7 @@ public class ActiveEmailHandler implements EmailHandler {
                 if (owner != null) {
                     final String subject = "[VISA] You have been added as a member to an instance";
                     final NotificationRenderer renderer = new InstanceMemberAddedRenderer(instance, emailTemplatesDirectory, owner, member, rootURL, adminEmailAddress);
-                    final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
+                    final Mail email = buildEmail(member.getUser().getEmail(), subject, renderer.render());
                     this.mailer.send(email);
                 } else {
                     logger.error("Unable to find owner for instance: {}", instance.getId());
