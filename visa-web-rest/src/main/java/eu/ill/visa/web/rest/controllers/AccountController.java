@@ -72,9 +72,11 @@ public class AccountController extends AbstractController {
     @Path("/clients/{clientId}/auth/token")
     public RestResponse<MetaResponse<ClientAuthenticationTokenDto>> createClientAuthenticationTicket(@Context final SecurityContext securityContext, @PathParam("clientId") String clientId) {
         final User user = this.getUserPrincipal(securityContext);
+        if ("0".equals(user.getId())) {
+            throw new NotAuthorizedException("Invalid user");
+        }
 
         final ClientAuthenticationToken token = clientAuthenticationTokenService.create(user, clientId);
-
         return createResponse(new ClientAuthenticationTokenDto(token), CREATED);
     }
 
