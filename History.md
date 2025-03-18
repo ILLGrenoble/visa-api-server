@@ -1,3 +1,7 @@
+3.1.3 18/03/2025
+================
+ * Fix creating client auth tokens for invalid users
+
 3.1.2 14/01/2025
 ================
  * Add color depth option to guacamole: default to 16 to maintain previous display quality, env var VISA_VDI_GUACD_PARAMETER_COLOR_DEPTH to set it to 8, 16, 24 or 32

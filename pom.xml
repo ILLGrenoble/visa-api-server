@@ -5,7 +5,7 @@
 
     <groupId>eu.ill.visa</groupId>
     <artifactId>api</artifactId>
-    <version>3.1.2</version>
+    <version>3.1.3</version>
 
     <modules>
         <module>visa-core</module>
