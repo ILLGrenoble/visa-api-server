@@ -110,7 +110,7 @@ import java.util.Date;
     """),
     @NamedQuery(name = "instanceSessionMember.updatePartialById", query = """
         UPDATE InstanceSessionMember i
-        SET i.active = :active, i.lastInteractionAt = :lastInteractionAt
+        SET i.active = :active, i.lastInteractionAt = :lastInteractionAt, i.updatedAt = CURRENT TIMESTAMP
         WHERE i.id = :id
     """),
 })
