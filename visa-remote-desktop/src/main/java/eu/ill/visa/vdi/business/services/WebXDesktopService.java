@@ -50,20 +50,23 @@ public class WebXDesktopService extends DesktopService {
 
     private WebXClientConfiguration createClientConfiguration(final InstanceSession session, final Instance instance) {
         if (session == null) {
-            // use session Id to connect to remote desktop
-        }
-        final Integer screenHeight = instance.getScreenHeight();
-        final Integer screenWidth = instance.getScreenWidth();
-        String username = instance.getUsername();
-        logger.info("Creating new WebX session on instance {} with username {}", instance.getId(), username);
-        String autologin = instance.getPlan().getImage().getAutologin();
-        String password = null;
-        if (autologin != null && autologin.equals("VISA_PAM")) {
-            password =  signatureService.createSignature(username);
-        }
-        String keyboardLayout = instance.getKeyboardLayout();
+            final Integer screenHeight = instance.getScreenHeight();
+            final Integer screenWidth = instance.getScreenWidth();
+            String username = instance.getUsername();
+            logger.info("Creating new WebX session on instance {} with username {}", instance.getId(), username);
+            String autologin = instance.getPlan().getImage().getAutologin();
+            String password = null;
+            if (autologin != null && autologin.equals("VISA_PAM")) {
+                password =  signatureService.createSignature(username);
+            }
+            String keyboardLayout = instance.getKeyboardLayout();
 
-        return WebXClientConfiguration.ForLogin(username, password, screenWidth, screenHeight, keyboardLayout);
+            return WebXClientConfiguration.ForLogin(username, password, screenWidth, screenHeight, keyboardLayout);
+        } else {
+            // use session Id to connect to remote desktop
+            logger.info("Connecting to existing WebX session on instance {} with session Id {}", instance.getId(), session.getConnectionId());
+            return WebXClientConfiguration.ForExistingSession(session.getConnectionId());
+        }
     }
 
     private WebXHostConfiguration createHostConfiguration(final Instance instance) {
@@ -99,7 +102,7 @@ public class WebXDesktopService extends DesktopService {
         if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final WebXTunnel tunnel = buildTunnel(instance);
             InstanceSession session = instanceSessionService.create(instance.getId(), WEBX_PROTOCOL, tunnel.getConnectionId());
-            logger.info("User {} created WebX session {}", getInstanceAndUser(instance, user), session.getConnectionId());
+            logger.info("User {} created WebX session with Id {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
             return tunnel;
 
