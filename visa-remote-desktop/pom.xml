@@ -13,7 +13,7 @@
 
     <properties>
         <guacamole.version>1.5.5</guacamole.version>
-        <webx-relay.version>0.1.0</webx-relay.version>
+        <webx-relay.version>1.0.0</webx-relay.version>
     </properties>
 
     <dependencies>
@@ -32,12 +32,6 @@
             <groupId>eu.ill</groupId>
             <artifactId>webx-relay</artifactId>
             <version>${webx-relay.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 

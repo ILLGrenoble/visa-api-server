@@ -14,8 +14,8 @@ import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import eu.ill.webx.WebXClientInformation;
-import eu.ill.webx.WebXConfiguration;
+import eu.ill.webx.WebXClientConfiguration;
+import eu.ill.webx.WebXHostConfiguration;
 import eu.ill.webx.WebXTunnel;
 import eu.ill.webx.exceptions.WebXClientException;
 import eu.ill.webx.exceptions.WebXConnectionException;
@@ -48,7 +48,7 @@ public class WebXDesktopService extends DesktopService {
         this.executorService = executorService;
     }
 
-    private WebXClientInformation createClientInformation(final InstanceSession session, final Instance instance) {
+    private WebXClientConfiguration createClientConfiguration(final InstanceSession session, final Instance instance) {
         if (session == null) {
             // use session Id to connect to remote desktop
         }
@@ -63,10 +63,10 @@ public class WebXDesktopService extends DesktopService {
         }
         String keyboardLayout = instance.getKeyboardLayout();
 
-        return new WebXClientInformation(username, password, screenWidth, screenHeight, keyboardLayout);
+        return WebXClientConfiguration.ForLogin(username, password, screenWidth, screenHeight, keyboardLayout);
     }
 
-    private WebXConfiguration createConfiguration(final Instance instance) {
+    private WebXHostConfiguration createHostConfiguration(final Instance instance) {
         final ImageProtocol protocol = requireNonNullElse(
             imageProtocolService.getByName("WEBX"),
             new ImageProtocol("WEBX", 5555)
@@ -74,7 +74,7 @@ public class WebXDesktopService extends DesktopService {
 
         String hostname = instance.getIpAddress();
 
-        return new WebXConfiguration(hostname, protocol.getPort());
+        return new WebXHostConfiguration(hostname, protocol.getPort());
     }
 
     private WebXTunnel buildTunnel(final Instance instance) throws WebXConnectionException {
@@ -84,12 +84,12 @@ public class WebXDesktopService extends DesktopService {
     private WebXTunnel buildTunnel(final Instance instance,
                                    final InstanceSession session) throws WebXConnectionException {
 
-        final WebXConfiguration configuration = createConfiguration(instance);
+        final WebXHostConfiguration hostConfiguration = createHostConfiguration(instance);
 
-        WebXClientInformation clientInformation = createClientInformation(session, instance);
+        WebXClientConfiguration clientConfiguration = createClientConfiguration(session, instance);
 
         WebXTunnel tunnel = new WebXTunnel();
-        tunnel.connect(configuration, clientInformation);
+        tunnel.connect(hostConfiguration, clientConfiguration);
 
         return tunnel;
     }
