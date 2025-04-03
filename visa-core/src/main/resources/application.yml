@@ -69,6 +69,8 @@ quarkus:
     category:
       "eu.ill.visa":
         level: ${VISA_LOGGING_LEVEL:INFO}
+      "eu.ill.webx":
+        level: DEBUG
       "org.apache.guacamole":
         level: INFO
 #      "org.jboss.resteasy.reactive.client.logging":
