@@ -2,7 +2,6 @@ package eu.ill.visa.vdi.domain.models;
 
 import eu.ill.visa.core.domain.IdleHandler;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
-import eu.ill.visa.vdi.business.services.DesktopService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +10,10 @@ import java.util.Objects;
 public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleHandler idleSessionHandler) {
 
     private static final Logger logger = LoggerFactory.getLogger(DesktopSessionMember.class);
-    private static final int IDLE_TIMEOUT_SECONDS = 14;
+    private static final int IDLE_TIMEOUT_SECONDS = 10;
 
     public DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session) {
-        this(clientId, connectedUser, remoteDesktopConnection, session, new IdleHandler(remoteDesktopConnection.getClient().protocol().equals(DesktopService.GUACAMOLE_PROTOCOL), IDLE_TIMEOUT_SECONDS));
+        this(clientId, connectedUser, remoteDesktopConnection, session, new IdleHandler(IDLE_TIMEOUT_SECONDS));
     }
 
     public void disconnect() {
