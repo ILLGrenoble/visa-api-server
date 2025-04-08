@@ -1,19 +1,25 @@
 package eu.ill.visa.vdi.domain.models;
 
 import eu.ill.visa.core.domain.IdleHandler;
+import eu.ill.visa.core.domain.Timer;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import io.smallrye.mutiny.subscription.Cancellable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
-public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleHandler idleSessionHandler) {
+public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleHandler idleSessionHandler, Cancellable nopTimer) {
 
     private static final Logger logger = LoggerFactory.getLogger(DesktopSessionMember.class);
     private static final int IDLE_TIMEOUT_SECONDS = 10;
+    private static final int NOP_INTERVAL_TIME_SECONDS = 5;
 
-    public DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session) {
-        this(clientId, connectedUser, remoteDesktopConnection, session, new IdleHandler(IDLE_TIMEOUT_SECONDS));
+    public DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, NopSender nopSender) {
+        this(clientId, connectedUser, remoteDesktopConnection, session, new IdleHandler(IDLE_TIMEOUT_SECONDS), Timer.setInterval(() -> {
+            nopSender.sendNop(remoteDesktopConnection.getClient());
+        }, NOP_INTERVAL_TIME_SECONDS, TimeUnit.SECONDS));
     }
 
     public void disconnect() {

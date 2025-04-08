@@ -96,7 +96,7 @@ public class DesktopSessionService {
         this.messageBroker.shutdown();
     }
 
-    public synchronized DesktopSessionMember createDesktopSessionMember(final SocketClient client, final ConnectedUser user, final Instance instance) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
+    public synchronized DesktopSessionMember createDesktopSessionMember(final SocketClient client, final ConnectedUser user, final Instance instance, final NopSender nopSender) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
 
         final InstanceMemberRole role = user.getRole();
         if (role == InstanceMemberRole.NONE) {
@@ -118,8 +118,8 @@ public class DesktopSessionService {
         final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, client.protocol());
         DesktopSession desktopSession = this.getOrCreateDesktopSession(instanceSession.getId(), instance.getId(), client.protocol());
 
-        // Create session member
-        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession);
+        // Create session member: Add a NOP timer to keep the connection alive
+        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession, nopSender);
         desktopSession.addMember(desktopSessionMember);
 
         // Activate idle session timer
@@ -149,6 +149,7 @@ public class DesktopSessionService {
     public synchronized void onDesktopMemberDisconnect(final DesktopSessionMember desktopSessionMember) {
         // Stop the idle handler
         desktopSessionMember.idleSessionHandler().stop();
+        desktopSessionMember.nopTimer().cancel();
 
         desktopSessionMember.remoteDesktopConnection().getConnectionThread().closeTunnel();
 

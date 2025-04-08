@@ -179,7 +179,7 @@ public class DesktopAccessService {
                 InstanceMemberRole role = this.convertAccessReplyRole(replyRole, instance, user);
                 user.setRole(role);
                 try {
-                    this.desktopSessionService.createDesktopSessionMember(client, user, instance);
+                    this.desktopSessionService.createDesktopSessionMember(client, user, instance, candidate.nopSender());
 
                     this.eventDispatcher.sendEventToClient(client.clientId(), SessionEvent.ACCESS_GRANTED_EVENT, role);
 

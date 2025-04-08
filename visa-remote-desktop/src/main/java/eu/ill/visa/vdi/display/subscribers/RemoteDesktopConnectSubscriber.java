@@ -73,7 +73,7 @@ public class RemoteDesktopConnectSubscriber {
                 if (connectedUser.getRole().equals(InstanceMemberRole.SUPPORT)) {
                     // See if user can connect even if owner is away
                     if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
-                        this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance);
+                        this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
 
                     } else {
                         final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, socketClient.protocol());
@@ -87,7 +87,7 @@ public class RemoteDesktopConnectSubscriber {
                     }
 
                 } else {
-                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance);
+                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
                 }
             }
 
