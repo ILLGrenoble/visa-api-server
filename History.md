@@ -1,3 +1,11 @@
+3.2.0 11/04/2025
+================
+ * Use the NopSender to regularly send messages to the guacamole client (ensures that sync messages are resent by the client keeping the connection alive)
+ * Idle handler added to WebX client sessions
+ * Full integration of WebX: web-relay v 1.1.0; connection via sessionId; thumbnail generation; screenshot; clipboard
+ * Set the updatedAt to current timestamp when setting the instance session member data.
+ * Improve access log (user agent details)
+
 3.1.3 18/03/2025
 ================
  * Fix creating client auth tokens for invalid users
