@@ -13,7 +13,7 @@
 
     <properties>
         <guacamole.version>1.5.5</guacamole.version>
-        <webx-relay.version>1.0.0</webx-relay.version>
+        <webx-relay.version>1.1.0</webx-relay.version>
     </properties>
 
     <dependencies>
