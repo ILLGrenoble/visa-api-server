@@ -97,6 +97,7 @@ import java.util.Date;
         AND i.clientId = :clientId
         AND i.active = true
         AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllPartialByInstanceSessionId", query = """
         SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
@@ -112,6 +113,13 @@ import java.util.Date;
         UPDATE InstanceSessionMember i
         SET i.active = :active, i.lastInteractionAt = :lastInteractionAt, i.updatedAt = CURRENT TIMESTAMP
         WHERE i.id = :id
+    """),
+    @NamedQuery(name = "instanceSessionMember.deactivateAllByInstanceSessionIdAndClientId", query = """
+        UPDATE InstanceSessionMember i
+        SET i.active = false, i.updatedAt = CURRENT TIMESTAMP
+        WHERE i.instanceSession.id = :instanceSessionId
+        AND i.clientId = :clientId
+        AND i.active = true
     """),
 })
 @Table(name = "instance_session_member")

@@ -44,11 +44,9 @@ public class InstanceSessionMemberService {
 
     public void create(@NotNull InstanceSession instanceSession, String clientId, User user, InstanceMemberRole role) {
         // Ensure we do not have any previous InstanceSessionMembers that have not been deactivated correctly
-        InstanceSessionMemberPartial instanceSessionMemberPartial = this.getPartialByInstanceSessionIdAndClientId(instanceSession.getId(), clientId);
-        if (instanceSessionMemberPartial != null) {
-            instanceSessionMemberPartial.setActive(false);
-            this.updatePartial(instanceSessionMemberPartial);
-            logger.warn("Deleting a InstanceSessionMember for instance {} with client Id {} that was not previously deleted", instanceSession.getInstanceId(), clientId);
+        int previouslyActiveSessions = this.repository.deactivateAllByInstanceSessionIdAndClientID(instanceSession.getId(), clientId);
+        if (previouslyActiveSessions > 0) {
+            logger.warn("Deleted {} InstanceSessionMember for instance {} with client Id {} that were previously not deleted", previouslyActiveSessions, instanceSession.getInstanceId(), clientId);
         }
 
         InstanceSessionMember sessionMember = new InstanceSessionMember(instanceSession, clientId, user, role);
@@ -90,7 +88,6 @@ public class InstanceSessionMemberService {
 
     public InstanceSessionMemberPartial getPartialByInstanceSessionIdAndClientId(Long instanceSessionId, final String clientId) {
         return this.repository.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
-
     }
 
     public void updatePartial(final InstanceSessionMemberPartial instanceSessionMember) {

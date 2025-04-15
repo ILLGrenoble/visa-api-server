@@ -80,6 +80,8 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
             final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getPartialByInstanceSessionIdAndClientId", InstanceSessionMemberPartial.class);
             query.setParameter("instanceSessionId", instanceSessionId);
             query.setParameter("clientId", clientId);
+            query.setMaxResults(1); // Limit to the latest result
+            query.setFirstResult(0);
             return query.getSingleResult();
         } catch (NoResultException exception) {
             return null;
@@ -108,6 +110,13 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
             .setParameter("id", instanceSessionMember.getId())
             .setParameter("active", instanceSessionMember.getActive())
             .setParameter("lastInteractionAt", instanceSessionMember.getLastInteractionAt())
+            .executeUpdate();
+    }
+
+    public int deactivateAllByInstanceSessionIdAndClientID(final Long instanceSessionId, final String clientId) {
+        return getEntityManager().createNamedQuery("instanceSessionMember.deactivateAllByInstanceSessionIdAndClientId")
+            .setParameter("instanceSessionId", instanceSessionId)
+            .setParameter("clientId", clientId)
             .executeUpdate();
     }
 }
