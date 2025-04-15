@@ -5,36 +5,46 @@ import jakarta.persistence.*;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "instanceJupyterSession.getAll", query = """
-        SELECT i
-        FROM InstanceJupyterSession i
-        WHERE i.active = true
-        ORDER BY i.id DESC
+        SELECT s
+        FROM InstanceJupyterSession s
+        LEFT JOIN Instance i ON s.instance.id = i.id
+        WHERE s.active = true
+        AND i.deletedAt IS NULL
+        ORDER BY s.id DESC
     """),
     @NamedQuery(name = "instanceJupyterSession.countAll", query = """
-        SELECT count(i)
-        FROM InstanceJupyterSession i
-        WHERE i.active = true
+        SELECT count(s)
+        FROM InstanceJupyterSession s
+        LEFT JOIN Instance i ON s.instance.id = i.id
+        WHERE s.active = true
+        AND i.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceJupyterSession.countAllInstances", query = """
-            SELECT count(distinct i.instance)
-            FROM InstanceJupyterSession i
-            WHERE i.active = true
+        SELECT count(distinct s.instance)
+        FROM InstanceJupyterSession s
+        LEFT JOIN Instance i ON s.instance.id = i.id
+        WHERE s.active = true
+        AND i.deletedAt IS NULL
     """),
     @NamedQuery(name = "instanceJupyterSession.getAllByInstance", query = """
-            SELECT i
-            FROM InstanceJupyterSession i
-            WHERE i.instance = :instance
-            AND i.active = true
-            ORDER BY i.id DESC
+        SELECT s
+        FROM InstanceJupyterSession s
+        LEFT JOIN Instance i ON s.instance.id = i.id
+        WHERE s.instance = :instance
+        AND s.active = true
+        AND i.deletedAt IS NULL
+        ORDER BY s.id DESC
     """),
     @NamedQuery(name = "instanceJupyterSession.getByInstanceKernelSession", query = """
-            SELECT i
-            FROM InstanceJupyterSession i
-            WHERE i.instance = :instance
-            AND i.kernelId = :kernelId
-            AND i.sessionId = :sessionId
-            AND i.active = true
-            ORDER BY i.id DESC
+        SELECT s
+        FROM InstanceJupyterSession s
+        LEFT JOIN Instance i ON s.instance.id = i.id
+        WHERE s.instance = :instance
+        AND s.kernelId = :kernelId
+        AND s.sessionId = :sessionId
+        AND s.active = true
+        AND i.deletedAt IS NULL
+        ORDER BY s.id DESC
     """),
 })
 @Table(name = "instance_jupyter_session")
