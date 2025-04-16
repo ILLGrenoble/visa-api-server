@@ -2,23 +2,22 @@ package eu.ill.visa.vdi;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.gateway.ClientEventsGateway;
-import eu.ill.visa.business.services.InstanceActivityService;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.vdi.domain.models.SessionEvent;
-import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
-import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
 import eu.ill.visa.vdi.display.sockets.GuacamoleRemoteDesktopSocket;
 import eu.ill.visa.vdi.display.sockets.WebXRemoteDesktopSocket;
 import eu.ill.visa.vdi.display.subscribers.GuacamoleRemoteDesktopEventSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.WebXRemoteDesktopEventSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.EventChannelAccessRequestResponseSubscriber;
+import eu.ill.visa.vdi.domain.models.SessionEvent;
+import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
+import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
 import eu.ill.visa.vdi.gateway.subscribers.AccessRevokedSubscriber;
+import eu.ill.visa.vdi.gateway.subscribers.EventChannelAccessRequestResponseSubscriber;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -34,7 +33,6 @@ public class RemoteDesktopServer {
     private final InstanceService instanceService;
     private final InstanceAuthenticationTokenService authenticator;
     private final InstanceSessionService instanceSessionService;
-    private final InstanceActivityService instanceActivityService;
     private final DesktopAccessService desktopAccessService;
     private final VirtualDesktopConfiguration configuration;
     private final ClientEventsGateway clientEventsGateway;
@@ -49,7 +47,6 @@ public class RemoteDesktopServer {
                                final InstanceAuthenticationTokenService authenticator,
                                final DesktopAccessService desktopAccessService,
                                final VirtualDesktopConfiguration configuration,
-                               final InstanceActivityService instanceActivityService,
                                final ClientEventsGateway clientEventsGateway,
                                final EventDispatcher eventDispatcher,
                                final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket,
@@ -60,7 +57,6 @@ public class RemoteDesktopServer {
         this.authenticator = authenticator;
         this.desktopAccessService = desktopAccessService;
         this.configuration = configuration;
-        this.instanceActivityService = instanceActivityService;
         this.clientEventsGateway = clientEventsGateway;
         this.eventDispatcher = eventDispatcher;
         this.guacamoleRemoteDesktopSocket = guacamoleRemoteDesktopSocket;

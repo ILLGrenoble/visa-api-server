@@ -9,12 +9,13 @@ import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public abstract class RemoteDesktopEventSubscriber<T> {
 
@@ -23,10 +24,13 @@ public abstract class RemoteDesktopEventSubscriber<T> {
     private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
 
+    private final Executor instanceActivityUpdateExecutor;
+
     public RemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
                                         final InstanceService instanceService) {
         this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
+        this.instanceActivityUpdateExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("vdi-ia-vt-", 0).factory());
     }
 
     public void onEvent(final SocketClient socketClient, final T data) {
@@ -61,11 +65,14 @@ public abstract class RemoteDesktopEventSubscriber<T> {
                 remoteDesktopConnection.setLastInstanceUpdateTime(currentDate);
 
                 // Use virtual thread to update interaction times so that the websocket can return ASAP
-                Uni.createFrom()
-                    .voidItem()
-                    .emitOn(Infrastructure.getDefaultWorkerPool())
-                    .subscribe()
-                    .with((voidItem) -> this.updateInstanceActivity(desktopSession.getInstanceId(), currentDate, remoteDesktopConnection.getLastInteractionAt(), socketClient.clientId()));
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        this.updateInstanceActivity(desktopSession.getInstanceId(), currentDate, remoteDesktopConnection.getLastInteractionAt(), socketClient.clientId());
+
+                    } catch (Exception error) {
+                        logger.error("Failed to update instance {} activity: {}", desktopSession.getInstanceId(), error.getMessage());
+                    }
+                }, this.instanceActivityUpdateExecutor);
             }
        });
     }

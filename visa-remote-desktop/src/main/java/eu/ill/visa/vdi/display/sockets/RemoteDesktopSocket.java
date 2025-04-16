@@ -3,15 +3,16 @@ package eu.ill.visa.vdi.display.sockets;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.domain.models.SocketClient;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public abstract class RemoteDesktopSocket {
 
@@ -35,6 +36,11 @@ public abstract class RemoteDesktopSocket {
     private final ConcurrentHashMap<String, Object> sessionLocks = new ConcurrentHashMap<>();
     private final Map<String, LinkedList<WorkerEvent>> sessionEventQueues = new HashMap<>();
 
+    private final Executor desktopEventExecutor;
+
+    public RemoteDesktopSocket() {
+        this.desktopEventExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("vdi-vt-", 0).factory());
+    }
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {
         this.connectSubscriber = connectSubscriber;
@@ -80,21 +86,18 @@ public abstract class RemoteDesktopSocket {
     }
 
     private void runEvent(final WorkerEvent event) {
-        // Execute handler on worker thread to allow JTA transactions
-        Uni.createFrom()
-            .voidItem()
-            .emitOn(Infrastructure.getDefaultWorkerPool())
-            .subscribe()
-            .with(Void -> {
-                try {
-                    event.worker().doWork();
+        // Execute handler on virtual thread to allow JTA transactions
+        CompletableFuture.runAsync(() -> {
+            try {
+                event.worker().doWork();
 
-                } catch (Exception error) {
-                    logger.error("Remote Desktop Event ({}) failed with protocol {}: {}", event.type(), event.socketClient().protocol(), error.getMessage());
-                }
+            } catch (Exception error) {
+                logger.error("Remote Desktop Event ({}) failed with protocol {}: {}", event.type(), event.socketClient().protocol(), error.getMessage());
+            }
 
-                this.onWorkerEventTerminated(event);
-            });
+            this.onWorkerEventTerminated(event);
+
+        }, desktopEventExecutor);
     }
 
     protected void onOpen(final SocketClient socketClient) {
