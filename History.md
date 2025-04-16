@@ -1,3 +1,10 @@
+3.2.1 16/04/2025
+================
+ * Double check that the idle timer has been cancelled before calling the callback.
+ * Increase idle timer to 60s (determine if this reduces the number of Idle timeouts for remote desktops).
+ * Remove active jupyter sessions from view from instances that have been deleted.
+ * Fix sql single result errors from possible double instance session members existing with the same client Id and session Id.
+
 3.2.0 11/04/2025
 ================
  * Use the NopSender to regularly send messages to the guacamole client (ensures that sync messages are resent by the client keeping the connection alive)
