@@ -6,15 +6,40 @@ import io.smallrye.mutiny.subscription.Cancellable;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Timer {
 
+    public static class GuardedTimeout implements Cancellable {
+        private final AtomicBoolean cancelled;
+        private final Cancellable cancellable;
+
+        public GuardedTimeout(AtomicBoolean cancelled, Cancellable cancellable) {
+            this.cancelled = cancelled;
+            this.cancellable = cancellable;
+        }
+
+        @Override
+        public void cancel() {
+            cancelled.set(true);
+            cancellable.cancel();
+        }
+    }
+
     public static Cancellable setTimeout(Runnable task, long delay, TimeUnit unit) {
-        return Uni.createFrom().voidItem()
+        AtomicBoolean cancelled = new AtomicBoolean(false);
+
+        Cancellable cancellable = Uni.createFrom().voidItem()
             .onItem()
             .delayIt().by(Duration.ofMillis(unit.toMillis(delay)))
             .subscribe()
-            .with(ignored -> task.run());
+            .with(ignored -> {
+                if (!cancelled.get()) {
+                    task.run();
+                }
+            });
+
+        return new GuardedTimeout(cancelled, cancellable);
     }
 
     public static Cancellable setInterval(Runnable task, long interval, TimeUnit unit) {
