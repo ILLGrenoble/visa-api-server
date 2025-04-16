@@ -54,13 +54,13 @@ public class WebXConnectionThread extends ConnectionThread {
             }
 
         } catch (WebXClientException exception) {
-            logger.error("WebSocket connection terminated due to client error {}", exception.getMessage());
+            logger.warn("WebSocket connection terminated due to client error {}", exception.getMessage());
 
         } catch (WebXConnectionInterruptException exception) {
-            logger.error("WebSocket connection terminated due to interruption {}", exception.getMessage());
+            logger.warn("WebSocket connection terminated due to interruption {}", exception.getMessage());
 
         } catch (WebXDisconnectedException exception) {
-            logger.error("WebSocket connection terminated due to disconnection {}", exception.getMessage());
+            logger.warn("WebSocket connection terminated due to disconnection {}", exception.getMessage());
         }
 
         client.disconnect();

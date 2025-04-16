@@ -79,13 +79,13 @@ public class GuacamoleConnectionThread extends ConnectionThread {
             }
             client.disconnect();
         } catch (GuacamoleClientException exception) {
-            logger.error("WebSocket connection terminated for {} due to client error {}", this.getInstanceAndUser(), exception.getMessage());
+            logger.warn("WebSocket connection terminated for {} due to client error {}", this.getInstanceAndUser(), exception.getMessage());
             client.disconnect();
         } catch (GuacamoleConnectionClosedException exception) {
             logger.info("Connection to guacd closed for {} : {}", this.getInstanceAndUser(), exception.getMessage());
             client.disconnect();
         } catch (GuacamoleException exception) {
-            logger.error("Connection to guacd for {} terminated abnormally: {}", this.getInstanceAndUser(), exception.getMessage());
+            logger.warn("Connection to guacd for {} terminated abnormally: {}", this.getInstanceAndUser(), exception.getMessage());
             client.disconnect();
         }
     }

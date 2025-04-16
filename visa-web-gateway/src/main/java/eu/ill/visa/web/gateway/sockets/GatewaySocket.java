@@ -86,11 +86,13 @@ public class GatewaySocket {
         try {
             final ClientAuthenticationToken clientAuthenticationToken = authenticator.authenticate(token, clientId);
             final User user = clientAuthenticationToken.getUser();
+            final String userName = user.getFullName();
+            final String userId = user.getId();
 
             logger.info("Gateway websocket connected for user {} (id = {}) with client Id {}", user.getFullName(), user.getId(), clientId);
 
             final GatewayClient gatewayClient = new GatewayClient(session, token, clientId);
-            final GatewayTunnel gatewayTunnel = this.createGatewayTunnel(user, gatewayClient, () -> this.handleIdle(clientId));
+            final GatewayTunnel gatewayTunnel = this.createGatewayTunnel(user, gatewayClient, () -> this.handleIdle(clientId, userName, userId));
 
         } catch (InvalidTokenException e) {
             logger.error("GatewaySocket failed to connect: {}", e.getMessage());
@@ -108,8 +110,8 @@ public class GatewaySocket {
         });
     }
 
-    private void handleIdle(String clientId) {
-        logger.warn("Idle timeout for gateway websocket {}: disconnecting", clientId);
+    private void handleIdle(String clientId, final String userName, final String userId) {
+        logger.warn("Idle timeout for gateway websocket for user {} (id = {}) with client Id {}: disconnecting", userName, userId, clientId);
 
         this.getGatewayTunnel(clientId).ifPresent(gatewayTunnel -> {
             try {
