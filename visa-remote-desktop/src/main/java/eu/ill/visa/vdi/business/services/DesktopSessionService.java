@@ -143,6 +143,11 @@ public class DesktopSessionService {
             this.connectUser(desktopSession.getSessionId(), desktopSessionMember.clientId(), user);
         }
 
+        logger.info("After connection, currently have {} remote desktop clients (Guacamole = {}, WebX = {})",
+            this.countSessionMembers(null),
+            this.countSessionMembers(DesktopService.GUACAMOLE_PROTOCOL),
+            this.countSessionMembers(DesktopService.WEBX_PROTOCOL));
+
         return desktopSessionMember;
     }
 
@@ -181,6 +186,12 @@ public class DesktopSessionService {
             logger.info("There is no active instance session so all clients will be disconnected");
             this.closeSession(sessionId);
         }
+
+        logger.info("After disconnection, currently have {} remote desktop clients (Guacamole = {}, WebX = {})",
+            this.countSessionMembers(null),
+            this.countSessionMembers(DesktopService.GUACAMOLE_PROTOCOL),
+            this.countSessionMembers(DesktopService.WEBX_PROTOCOL));
+
     }
 
     private synchronized void onDesktopMemberIdle(final DesktopSessionMember desktopSessionMember) {
@@ -258,6 +269,20 @@ public class DesktopSessionService {
                 }
             }
         });
+    }
+
+    private synchronized int countSessionMembers(String protocol) {
+        if (protocol == null) {
+            return this.desktopSessions.stream()
+                .mapToInt(DesktopSession::memberCount)
+                .sum();
+
+        } else {
+            return this.desktopSessions.stream()
+                .filter(session -> session.getProtocol().equals(protocol))
+                .mapToInt(DesktopSession::memberCount)
+                .sum();
+        }
     }
 
     private void onUserConnected(final Long sessionId, final String clientId, final ConnectedUser user) {

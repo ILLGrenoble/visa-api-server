@@ -57,6 +57,10 @@ public class DesktopSession {
         isLocked = locked;
     }
 
+    public int memberCount() {
+        return members.size();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
