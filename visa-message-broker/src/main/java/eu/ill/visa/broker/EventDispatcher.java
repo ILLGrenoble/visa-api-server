@@ -41,13 +41,13 @@ public class EventDispatcher {
         this.messageBroker.subscribe(ClientEventCarrierMessage.class).next(this::onEventReceivedFromClient);
     }
 
-    public EventChannelSubscription subscribe(final String clientId, final String userId, final List<String> roles, final EventHandler eventHandler) {
+    public synchronized EventChannelSubscription subscribe(final String clientId, final String userId, final List<String> roles, final EventHandler eventHandler) {
         final EventChannelSubscription subscription = new EventChannelSubscription(clientId, userId, roles, eventHandler);
         this.subscriptions.add(subscription);
         return subscription;
     }
 
-    public void unsubscribe(final EventChannelSubscription subscription) {
+    public synchronized void unsubscribe(final EventChannelSubscription subscription) {
         this.subscriptions.remove(subscription);
     }
 
@@ -87,45 +87,45 @@ public class EventDispatcher {
         this.messageBroker.broadcast(new BroadcastEventMessage(new ClientEventCarrier(type, event)));
     }
 
-    private void onEventForUser(final EventForUserMessage message) {
+    private synchronized void onEventForUser(final EventForUserMessage message) {
         try {
             this.subscriptions.stream()
                 .filter(subscription -> subscription.userId().equals(message.userId()))
                 .forEach(subscriber -> subscriber.onEvent(this.deserializeClientEventCarrier(message.event())));
 
         } catch (MessageMarshallingException e) {
-            logger.error(e.getMessage());
+            logger.error("Failed to forward event to user {}: {}", message.userId(), e.getMessage());
         }
     }
 
-    private void onEventForRole(final EventForRoleMessage message) {
+    private synchronized void onEventForRole(final EventForRoleMessage message) {
         try {
             this.subscriptions.stream()
                 .filter(subscription -> subscription.roles().contains(message.role()))
                 .forEach(subscriber -> subscriber.onEvent(this.deserializeClientEventCarrier(message.event())));
 
         } catch (MessageMarshallingException e) {
-            logger.error(e.getMessage());
+            logger.error("Failed to forward event for role {}: {}", message.role(), e.getMessage());
         }
     }
 
-    private void onEventForClient(final EventForClientMessage message) {
+    private synchronized void onEventForClient(final EventForClientMessage message) {
         try {
             this.subscriptions.stream()
                 .filter(subscription -> subscription.clientId().equals(message.clientId()))
                 .forEach(subscriber -> subscriber.onEvent(this.deserializeClientEventCarrier(message.event())));
 
         } catch (MessageMarshallingException e) {
-            logger.error(e.getMessage());
+            logger.error("Failed to forward event for client {}: {}", message.clientId(), e.getMessage());
         }
     }
 
-    private void onBroadcastEvent(final BroadcastEventMessage message) {
+    private synchronized void onBroadcastEvent(final BroadcastEventMessage message) {
         try {
             this.subscriptions.forEach(subscription -> subscription.onEvent(this.deserializeClientEventCarrier(message.event())));
 
         } catch (MessageMarshallingException e) {
-            logger.error(e.getMessage());
+            logger.error("Failed to broadcast event: {}", e.getMessage());
         }
     }
 
