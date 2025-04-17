@@ -94,7 +94,7 @@ public class DesktopSessionService {
         this.messageBroker.shutdown();
     }
 
-    public synchronized DesktopSessionMember createDesktopSessionMember(final SocketClient client, final ConnectedUser user, final Instance instance, final NopSender nopSender) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
+    public DesktopSessionMember createDesktopSessionMember(final SocketClient client, final ConnectedUser user, final Instance instance, final NopSender nopSender) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
 
         final InstanceMemberRole role = user.getRole();
         if (role == InstanceMemberRole.NONE) {
@@ -149,7 +149,7 @@ public class DesktopSessionService {
         return desktopSessionMember;
     }
 
-    public synchronized void onDesktopMemberDisconnect(final DesktopSessionMember desktopSessionMember) {
+    public void onDesktopMemberDisconnect(final DesktopSessionMember desktopSessionMember) {
         // Stop the idle handler
         desktopSessionMember.idleSessionHandler().stop();
         desktopSessionMember.nopTimer().cancel();
@@ -192,7 +192,7 @@ public class DesktopSessionService {
 
     }
 
-    private synchronized void onDesktopMemberIdle(final DesktopSessionMember desktopSessionMember) {
+    private void onDesktopMemberIdle(final DesktopSessionMember desktopSessionMember) {
         logger.warn("Idle timeout for desktop session member {}: disconnecting", desktopSessionMember);
         this.onDesktopMemberDisconnect(desktopSessionMember);
     }
@@ -230,14 +230,18 @@ public class DesktopSessionService {
         this.messageBroker.broadcast(new SessionUnlockedMessage(sessionId));
     }
 
-    public synchronized Optional<DesktopSession> findDesktopSession(final Long sessionId) {
-        return this.desktopSessions.stream()
-            .filter(desktopSession -> desktopSession.getSessionId().equals(sessionId))
-            .findAny();
+    public Optional<DesktopSession> findDesktopSession(final Long sessionId) {
+        synchronized (this.desktopSessions) {
+            return this.desktopSessions.stream()
+                .filter(desktopSession -> desktopSession.getSessionId().equals(sessionId))
+                .findAny();
+        }
     }
 
-    public synchronized Optional<DesktopSessionMember> getDesktopSessionMember(final String clientId) {
-        return Optional.ofNullable(this.desktopSessionMembers.get(clientId));
+    public Optional<DesktopSessionMember> getDesktopSessionMember(final String clientId) {
+        synchronized (this.desktopSessionMembers) {
+            return Optional.ofNullable(this.desktopSessionMembers.get(clientId));
+        }
     }
 
     public void updateSessionMemberActivity(final String clientId, final Date lastInteractionAt) {
@@ -266,17 +270,19 @@ public class DesktopSessionService {
         });
     }
 
-    private synchronized int countSessionMembers(String protocol) {
-        if (protocol == null) {
-            return this.desktopSessions.stream()
-                .mapToInt(DesktopSession::memberCount)
-                .sum();
+    private int countSessionMembers(String protocol) {
+        synchronized (this.desktopSessions) {
+            if (protocol == null) {
+                return this.desktopSessions.stream()
+                    .mapToInt(DesktopSession::memberCount)
+                    .sum();
 
-        } else {
-            return this.desktopSessions.stream()
-                .filter(session -> session.getProtocol().equals(protocol))
-                .mapToInt(DesktopSession::memberCount)
-                .sum();
+            } else {
+                return this.desktopSessions.stream()
+                    .filter(session -> session.getProtocol().equals(protocol))
+                    .mapToInt(DesktopSession::memberCount)
+                    .sum();
+            }
         }
     }
 
@@ -384,36 +390,46 @@ public class DesktopSessionService {
         }
     }
 
-    private synchronized void removeDesktopSession(final DesktopSession desktopSession) {
-        this.desktopSessions.removeIf(item -> item.equals(desktopSession));
-    }
-
-    private synchronized void addDesktopSessionMember(final DesktopSession desktopSession, final DesktopSessionMember desktopSessionMember) {
-        desktopSession.addMember(desktopSessionMember);
-        this.desktopSessionMembers.put(desktopSessionMember.clientId(), desktopSessionMember);
-    }
-
-    private synchronized void removeDesktopSessionMember(final DesktopSession desktopSession, final DesktopSessionMember desktopSessionMember) {
-        this.desktopSessionMembers.remove(desktopSessionMember.clientId());
-        desktopSession.removeMember(desktopSessionMember);
-        if (desktopSession.getMembers().isEmpty()) {
-            this.removeDesktopSession(desktopSession);
+    private void removeDesktopSession(final DesktopSession desktopSession) {
+        synchronized (this.desktopSessionMembers) {
+            this.desktopSessions.removeIf(item -> item.equals(desktopSession));
         }
     }
 
-    private synchronized Optional<DesktopSession> getDesktopSession(final Long sessionId) {
-        return this.desktopSessions.stream().filter(desktopSession -> desktopSession.getSessionId().equals(sessionId)).findAny();
+    private void addDesktopSessionMember(final DesktopSession desktopSession, final DesktopSessionMember desktopSessionMember) {
+        synchronized (this.desktopSessionMembers) {
+            desktopSession.addMember(desktopSessionMember);
+            this.desktopSessionMembers.put(desktopSessionMember.clientId(), desktopSessionMember);
+        }
     }
 
-    private synchronized DesktopSession getOrCreateDesktopSession(final Long sessionId, final Long instanceId, final String protocol) {
-        return this.desktopSessions.stream()
-            .filter(desktopSession -> desktopSession.getSessionId().equals(sessionId))
-            .findFirst()
-            .orElseGet(() -> {
-                DesktopSession desktopSession = new DesktopSession(sessionId, instanceId, protocol);
-                this.desktopSessions.add(desktopSession);
-                return desktopSession;
-            });
+    private void removeDesktopSessionMember(final DesktopSession desktopSession, final DesktopSessionMember desktopSessionMember) {
+        synchronized (this.desktopSessionMembers) {
+            this.desktopSessionMembers.remove(desktopSessionMember.clientId());
+            desktopSession.removeMember(desktopSessionMember);
+            if (desktopSession.getMembers().isEmpty()) {
+                this.removeDesktopSession(desktopSession);
+            }
+        }
+    }
+
+    private Optional<DesktopSession> getDesktopSession(final Long sessionId) {
+        synchronized (this.desktopSessions) {
+            return this.desktopSessions.stream().filter(desktopSession -> desktopSession.getSessionId().equals(sessionId)).findAny();
+        }
+    }
+
+    private DesktopSession getOrCreateDesktopSession(final Long sessionId, final Long instanceId, final String protocol) {
+        synchronized (this.desktopSessions) {
+            return this.desktopSessions.stream()
+                .filter(desktopSession -> desktopSession.getSessionId().equals(sessionId))
+                .findFirst()
+                .orElseGet(() -> {
+                    DesktopSession desktopSession = new DesktopSession(sessionId, instanceId, protocol);
+                    this.desktopSessions.add(desktopSession);
+                    return desktopSession;
+                });
+        }
     }
 
     private List<ConnectedUser> getConnectedUsers(final DesktopSession desktopSession) {

@@ -3,7 +3,6 @@ package eu.ill.visa.vdi.display.subscribers;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.InvalidTokenException;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
-import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
@@ -32,20 +31,17 @@ public class RemoteDesktopConnectSubscriber {
 
     private final DesktopSessionService desktopSessionService;
     private final DesktopAccessService desktopAccessService;
-    private final InstanceService instanceService;
     private final InstanceSessionService instanceSessionService;
     private final InstanceAuthenticationTokenService authenticator;
     private final EventDispatcher eventDispatcher;
 
     public RemoteDesktopConnectSubscriber(final DesktopSessionService desktopSessionService,
                                           final DesktopAccessService desktopAccessService,
-                                          final InstanceService instanceService,
                                           final InstanceSessionService instanceSessionService,
                                           final InstanceAuthenticationTokenService authenticator,
                                           final EventDispatcher eventDispatcher) {
         this.desktopSessionService = desktopSessionService;
         this.desktopAccessService = desktopAccessService;
-        this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.authenticator = authenticator;
         this.eventDispatcher = eventDispatcher;
