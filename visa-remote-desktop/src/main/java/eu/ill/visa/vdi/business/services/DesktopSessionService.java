@@ -25,10 +25,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static eu.ill.visa.vdi.domain.models.SessionEvent.*;
 
@@ -52,6 +49,7 @@ public class DesktopSessionService {
     private final MessageBroker messageBroker;
 
     private final List<DesktopSession> desktopSessions = new ArrayList<>();
+    private final Map<String, DesktopSessionMember> desktopSessionMembers = new HashMap<>();
 
     @Inject
     public DesktopSessionService(final InstanceService instanceService,
@@ -120,7 +118,7 @@ public class DesktopSessionService {
 
         // Create session member: Add a NOP timer to keep the connection alive
         DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession, nopSender);
-        desktopSession.addMember(desktopSessionMember);
+        this.addDesktopSessionMember(desktopSession, desktopSessionMember);
 
         // Activate idle session timer
         desktopSessionMember.idleSessionHandler().start(() -> this.onDesktopMemberIdle(desktopSessionMember));
@@ -204,11 +202,11 @@ public class DesktopSessionService {
         return instanceSessionMembers.stream().anyMatch(instanceSessionMember -> instanceSessionMember.getRole().equals(InstanceMemberRole.OWNER));
     }
 
-    public void connectUser(final Long sessionId, final String clientId, final ConnectedUser user) {
+    private void connectUser(final Long sessionId, final String clientId, final ConnectedUser user) {
         this.messageBroker.broadcast(new UserConnectedMessage(sessionId, clientId, user));
     }
 
-    public void disconnectUser(final Long sessionId, final String clientId, final ConnectedUser user) {
+    private void disconnectUser(final Long sessionId, final String clientId, final ConnectedUser user) {
         this.messageBroker.broadcast(new UserDisconnectedMessage(sessionId, clientId, user));
     }
 
@@ -220,15 +218,15 @@ public class DesktopSessionService {
         }
     }
 
-    public void closeSession(final Long sessionId) {
+    private void closeSession(final Long sessionId) {
         this.messageBroker.broadcast(new SessionClosedMessage(sessionId));
     }
 
-    public void lockSession(final Long sessionId, final ConnectedUser user) {
+    private void lockSession(final Long sessionId, final ConnectedUser user) {
         this.messageBroker.broadcast(new SessionLockedMessage(sessionId, user));
     }
 
-    public void unlockSession(final Long sessionId) {
+    private void unlockSession(final Long sessionId) {
         this.messageBroker.broadcast(new SessionUnlockedMessage(sessionId));
     }
 
@@ -238,15 +236,12 @@ public class DesktopSessionService {
             .findAny();
     }
 
-    public synchronized Optional<DesktopSessionMember> findDesktopSessionMemberByClientId(final String clientId) {
-        return this.desktopSessions.stream()
-            .flatMap(desktopSession -> desktopSession.getMembers().stream())
-            .filter(desktopSessionMember -> desktopSessionMember.clientId().equals(clientId))
-            .findAny();
+    public synchronized Optional<DesktopSessionMember> getDesktopSessionMember(final String clientId) {
+        return Optional.ofNullable(this.desktopSessionMembers.get(clientId));
     }
 
     public void updateSessionMemberActivity(final String clientId, final Date lastInteractionAt) {
-        this.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
+        this.getDesktopSessionMember(clientId).ifPresent(desktopSessionMember -> {
 
             final DesktopSession desktopSession = desktopSessionMember.session();
             final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
@@ -393,7 +388,13 @@ public class DesktopSessionService {
         this.desktopSessions.removeIf(item -> item.equals(desktopSession));
     }
 
+    private synchronized void addDesktopSessionMember(final DesktopSession desktopSession, final DesktopSessionMember desktopSessionMember) {
+        desktopSession.addMember(desktopSessionMember);
+        this.desktopSessionMembers.put(desktopSessionMember.clientId(), desktopSessionMember);
+    }
+
     private synchronized void removeDesktopSessionMember(final DesktopSession desktopSession, final DesktopSessionMember desktopSessionMember) {
+        this.desktopSessionMembers.remove(desktopSessionMember.clientId());
         desktopSession.removeMember(desktopSessionMember);
         if (desktopSession.getMembers().isEmpty()) {
             this.removeDesktopSession(desktopSession);

@@ -34,7 +34,7 @@ public abstract class RemoteDesktopEventSubscriber<T> {
     }
 
     public void onEvent(final SocketClient socketClient, final T data) {
-        this.desktopSessionService.findDesktopSessionMemberByClientId(socketClient.clientId()).ifPresent(desktopSessionMember -> {
+        this.desktopSessionService.getDesktopSessionMember(socketClient.clientId()).ifPresent(desktopSessionMember -> {
 
             // Reset the idle handler
             desktopSessionMember.idleSessionHandler().reset();

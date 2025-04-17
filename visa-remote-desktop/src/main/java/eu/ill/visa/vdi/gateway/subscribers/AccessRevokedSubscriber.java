@@ -14,7 +14,7 @@ public class AccessRevokedSubscriber implements ClientEventSubscriber<AccessRevo
 
     @Override
     public void onEvent(final String clientId, final AccessRevokedEvent command) {
-        this.desktopSessionService.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
+        this.desktopSessionService.getDesktopSessionMember(clientId).ifPresent(desktopSessionMember -> {
             this.desktopSessionService.revokeUserAccess(desktopSessionMember, command.userId());
         });
     }

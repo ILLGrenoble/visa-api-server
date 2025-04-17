@@ -18,7 +18,7 @@ public class EventChannelAccessRequestResponseSubscriber implements ClientEventS
 
     @Override
     public void onEvent(final String clientId, final AccessRequestResponseEvent data) {
-        this.desktopSessionService.findDesktopSessionMemberByClientId(clientId).ifPresent(desktopSessionMember -> {
+        this.desktopSessionService.getDesktopSessionMember(clientId).ifPresent(desktopSessionMember -> {
             this.desktopAccessService.respondToAccessRequest(desktopSessionMember, data.sessionId(), data.requesterConnectionId(), data.getRole());
         });
 
