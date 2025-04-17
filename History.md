@@ -1,3 +1,12 @@
+3.2.2 17/04/2025
+================
+ * Ensure the event dispatcher subscriptions list access is synchronised
+ * Limit use of synchronised to modify and access the lists of session and session members (fixed bug that blocked and dropped all sessions when connection to new session was slow).
+ * More optimised retrieval of DesktopSessionMember directly from a hashmap (requires parallel management to list of desktop sessions).
+ * Bug fix: corrected position in buffer array to obtain instruction type.
+ * Redo locks and message queues: only lock/queue if waiting for completion of connection event.
+ * Alternative to using mutiny workers: using virtual threads to run websocket events.
+
 3.2.1 16/04/2025
 ================
  * Double check that the idle timer has been cancelled before calling the callback.
