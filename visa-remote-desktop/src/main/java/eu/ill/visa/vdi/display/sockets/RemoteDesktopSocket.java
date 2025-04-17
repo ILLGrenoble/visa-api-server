@@ -36,6 +36,7 @@ public abstract class RemoteDesktopSocket {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopSocket.class);
+    private static final int VIRTUAL_THREAD_POOL_SIZE = 128;
 
     private RemoteDesktopConnectSubscriber connectSubscriber;
     private RemoteDesktopDisconnectSubscriber disconnectSubscriber;
@@ -45,7 +46,7 @@ public abstract class RemoteDesktopSocket {
     private final Executor desktopEventExecutor;
 
     public RemoteDesktopSocket() {
-        this.desktopEventExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("vdi-vt-", 0).factory());
+        this.desktopEventExecutor = Executors.newFixedThreadPool(VIRTUAL_THREAD_POOL_SIZE, Thread.ofVirtual().name("vdi-vt-", 0).factory());
     }
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {

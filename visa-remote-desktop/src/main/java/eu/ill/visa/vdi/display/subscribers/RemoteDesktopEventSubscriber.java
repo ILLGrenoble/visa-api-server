@@ -13,9 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public abstract class RemoteDesktopEventSubscriber<T> {
 
@@ -24,13 +21,10 @@ public abstract class RemoteDesktopEventSubscriber<T> {
     private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
 
-    private final Executor instanceActivityUpdateExecutor;
-
     public RemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
                                         final InstanceService instanceService) {
         this.desktopSessionService = desktopSessionService;
         this.instanceService = instanceService;
-        this.instanceActivityUpdateExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("vdi-ia-vt-", 0).factory());
     }
 
     public void onEvent(final SocketClient socketClient, final T data) {
@@ -65,14 +59,15 @@ public abstract class RemoteDesktopEventSubscriber<T> {
                 remoteDesktopConnection.setLastInstanceUpdateTime(currentDate);
 
                 // Use virtual thread to update interaction times so that the websocket can return ASAP
-                CompletableFuture.runAsync(() -> {
+                Thread.startVirtualThread(() -> {
                     try {
+                        Thread.sleep(2000);
                         this.updateInstanceActivity(desktopSession.getInstanceId(), currentDate, remoteDesktopConnection.getLastInteractionAt(), socketClient.clientId());
 
                     } catch (Exception error) {
                         logger.error("Failed to update instance {} activity: {}", desktopSession.getInstanceId(), error.getMessage());
                     }
-                }, this.instanceActivityUpdateExecutor);
+                });
             }
        });
     }
