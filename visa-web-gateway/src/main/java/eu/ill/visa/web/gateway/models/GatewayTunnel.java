@@ -22,7 +22,7 @@ public record GatewayTunnel(GatewayClient gatewayClient, EventDispatcher eventDi
     public GatewayTunnel(User user, GatewayClient gatewayClient, EventDispatcher eventDispatcher, Runnable idleHandlerCallback) {
         this(gatewayClient,
              eventDispatcher,
-             eventDispatcher.subscribe(gatewayClient.clientId(), user.getId(), user.getRoles().stream().map(Role::getName).toList(), gatewayClient::sendEvent),
+             eventDispatcher.subscribe(gatewayClient.clientId(), user.getId(), user.getFullName(), user.getRoles().stream().map(Role::getName).toList(), gatewayClient::sendEvent),
              new IdleHandler(IDLE_TIMEOUT_SECONDS),
              new ReusableTimer(() -> gatewayClient.sendEvent(new ClientEventCarrier("ping", null)), 5, TimeUnit.SECONDS));
 
@@ -43,7 +43,7 @@ public record GatewayTunnel(GatewayClient gatewayClient, EventDispatcher eventDi
         // Remove event subscription
         this.eventDispatcher.unsubscribe(this.subscription);
 
-        logger.info("Gateway websocket closed for user with Id {} with client Id {}", this.subscription.userId(), this.clientId());
+        logger.info("Gateway websocket closed for user {} (id = {}) with client Id {}", this.subscription.userFullName(), this.subscription.userId(), this.clientId());
     }
 
     public void onEvent(ClientEventCarrier clientEventCarrier) {

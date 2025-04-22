@@ -41,8 +41,8 @@ public class EventDispatcher {
         this.messageBroker.subscribe(ClientEventCarrierMessage.class).next(this::onEventReceivedFromClient);
     }
 
-    public synchronized EventChannelSubscription subscribe(final String clientId, final String userId, final List<String> roles, final EventHandler eventHandler) {
-        final EventChannelSubscription subscription = new EventChannelSubscription(clientId, userId, roles, eventHandler);
+    public synchronized EventChannelSubscription subscribe(final String clientId, final String userId, final String userFullName, final List<String> roles, final EventHandler eventHandler) {
+        final EventChannelSubscription subscription = new EventChannelSubscription(clientId, userId, userFullName, roles, eventHandler);
         this.subscriptions.add(subscription);
         return subscription;
     }
