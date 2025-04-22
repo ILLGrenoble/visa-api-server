@@ -1,3 +1,7 @@
+3.2.4 22/04/2025
+================
+ * Use virtual threads rather than mutiny work pool threads. Use threadPerTask to ensure virtual thread use.
+
 3.2.3 22/04/2025
 ================
  * Use un-synchronised "get" access to session members. Remove thread sleep bug.
