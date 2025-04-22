@@ -239,35 +239,32 @@ public class DesktopSessionService {
     }
 
     public Optional<DesktopSessionMember> getDesktopSessionMember(final String clientId) {
-        synchronized (this.desktopSessionMembers) {
-            return Optional.ofNullable(this.desktopSessionMembers.get(clientId));
-        }
+        // Un-synchronized access to the map is ok since we are only reading from it and we want to go fast
+        return Optional.ofNullable(this.desktopSessionMembers.get(clientId));
     }
 
-    public void updateSessionMemberActivity(final String clientId, final Date lastInteractionAt) {
-        this.getDesktopSessionMember(clientId).ifPresent(desktopSessionMember -> {
+    public void updateSessionMemberActivity(final DesktopSessionMember desktopSessionMember, final Date lastInteractionAt) {
+        final DesktopSession desktopSession = desktopSessionMember.session();
+        final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
+        final Long instanceSessionId = desktopSession.getSessionId();
+        final String clientId = desktopSessionMember.clientId();
 
-            final DesktopSession desktopSession = desktopSessionMember.session();
-            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
-            final Long instanceSessionId = desktopSession.getSessionId();
+        synchronized (this) {
+            final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
+            if (instanceSessionMember == null) {
+                logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
 
-            synchronized (this) {
-                final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
-                if (instanceSessionMember == null) {
-                    logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
+            } else {
+                instanceSessionMember.setLastInteractionAt(lastInteractionAt);
+                instanceSessionMemberService.updatePartial(instanceSessionMember);
 
-                } else {
-                    instanceSessionMember.setLastInteractionAt(lastInteractionAt);
-                    instanceSessionMemberService.updatePartial(instanceSessionMember);
-
-                    InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
-                    if (instanceActivityType != null) {
-                        this.instanceActivityService.create(instanceSessionMember.getUserId(), instanceSessionMember.getInstanceId(), instanceActivityType);
-                        remoteDesktopConnection.resetInstanceActivity();
-                    }
+                InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
+                if (instanceActivityType != null) {
+                    this.instanceActivityService.create(instanceSessionMember.getUserId(), instanceSessionMember.getInstanceId(), instanceActivityType);
+                    remoteDesktopConnection.resetInstanceActivity();
                 }
             }
-        });
+        }
     }
 
     private int countSessionMembers(String protocol) {

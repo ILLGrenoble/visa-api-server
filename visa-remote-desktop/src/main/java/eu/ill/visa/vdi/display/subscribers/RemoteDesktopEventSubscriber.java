@@ -7,6 +7,7 @@ import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
+import eu.ill.visa.vdi.domain.models.DesktopSessionMember;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
@@ -61,8 +62,7 @@ public abstract class RemoteDesktopEventSubscriber<T> {
                 // Use virtual thread to update interaction times so that the websocket can return ASAP
                 Thread.startVirtualThread(() -> {
                     try {
-                        Thread.sleep(2000);
-                        this.updateInstanceActivity(desktopSession.getInstanceId(), currentDate, remoteDesktopConnection.getLastInteractionAt(), socketClient.clientId());
+                        this.updateInstanceActivity(desktopSessionMember, currentDate, remoteDesktopConnection.getLastInteractionAt());
 
                     } catch (Exception error) {
                         logger.error("Failed to update instance {} activity: {}", desktopSession.getInstanceId(), error.getMessage());
@@ -72,8 +72,8 @@ public abstract class RemoteDesktopEventSubscriber<T> {
        });
     }
 
-    private void updateInstanceActivity(final Long instanceId, final Date lastSeenAt, final Date lastInteractionAt, final String clientId) {
-        final InstancePartial instance = this.instanceService.getPartialById(instanceId);
+    private void updateInstanceActivity(final DesktopSessionMember desktopSessionMember, final Date lastSeenAt, final Date lastInteractionAt) {
+        final InstancePartial instance = this.instanceService.getPartialById(desktopSessionMember.session().getInstanceId());
         if (instance == null) {
             return;
         }
@@ -83,7 +83,7 @@ public abstract class RemoteDesktopEventSubscriber<T> {
         instance.setLastInteractionAt(lastInteractionAt);
         instanceService.updatePartial(instance);
 
-        this.desktopSessionService.updateSessionMemberActivity(clientId, lastInteractionAt);
+        this.desktopSessionService.updateSessionMemberActivity(desktopSessionMember, lastInteractionAt);
     }
 
     protected abstract InstanceActivityType getControlActivityType(T data);
