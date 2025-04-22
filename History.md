@@ -1,3 +1,7 @@
+3.2.3 22/04/2025
+================
+ * Use un-synchronised "get" access to session members. Remove thread sleep bug.
+
 3.2.2 17/04/2025
 ================
  * Ensure the event dispatcher subscriptions list access is synchronised
