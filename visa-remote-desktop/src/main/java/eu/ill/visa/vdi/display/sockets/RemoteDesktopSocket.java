@@ -36,17 +36,15 @@ public abstract class RemoteDesktopSocket {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopSocket.class);
-    private static final int VIRTUAL_THREAD_POOL_SIZE = 128;
 
     private RemoteDesktopConnectSubscriber connectSubscriber;
     private RemoteDesktopDisconnectSubscriber disconnectSubscriber;
 
     private final ConcurrentHashMap<String, LinkedList<WorkerEvent>> sessionQueues = new ConcurrentHashMap<>();
 
-    private final Executor desktopEventExecutor;
+    private final Executor desktopEventExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("vdi-vt-", 0).factory());;
 
     public RemoteDesktopSocket() {
-        this.desktopEventExecutor = Executors.newFixedThreadPool(VIRTUAL_THREAD_POOL_SIZE, Thread.ofVirtual().name("vdi-vt-", 0).factory());
     }
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {

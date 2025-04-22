@@ -8,8 +8,6 @@ import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.MailerName;
 import io.quarkus.runtime.Shutdown;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.inject.Singleton;
 import org.jboss.logmanager.ExtLogRecord;
@@ -23,6 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.LogRecord;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ public class ActiveErrorReporter implements ErrorReporter {
 
     private List<ErrorEvent> events = new ArrayList<>();
 
+    private final Executor errorReportExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("error-reporter-vt-", 0).factory());;
 
     public ActiveErrorReporter(final @MailerName("logging") Mailer mailer,
                                final ErrorReportEmailConfiguration configuration) {
@@ -113,14 +115,16 @@ public class ActiveErrorReporter implements ErrorReporter {
         }
     }
 
-    private void generateReportInVirtualThread(final List<ErrorEvent> events) {
+    private void generateReportInVirtualThread(final List<ErrorEvent> eventsList) {
         this.events = new ArrayList<>();
 
-        Uni.createFrom()
-            .item(events)
-            .emitOn(Infrastructure.getDefaultWorkerPool())
-            .subscribe()
-            .with(this::generateReport, Throwable::printStackTrace);
+        CompletableFuture.runAsync(() -> {
+            try {
+                this.generateReport(eventsList);
+            } catch (Exception e) {
+                logger.error("Error while generating error report: {}", e.getMessage());
+            }
+        }, errorReportExecutor);
     }
 
     private void generateReport(final List<ErrorEvent> events) {

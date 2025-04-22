@@ -8,8 +8,6 @@ import eu.ill.visa.core.entity.ClientAuthenticationToken;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.web.gateway.models.GatewayClient;
 import eu.ill.visa.web.gateway.models.GatewayTunnel;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.websocket.*;
@@ -18,9 +16,12 @@ import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @ServerEndpoint(value="/ws/{token}/{clientId}/gateway",
     encoders = {ClientEventCarrierEncoderDecoder.class},
@@ -28,12 +29,31 @@ import java.util.Optional;
 @Singleton
 public class GatewaySocket {
 
+    private enum GatewayEventType {
+        CONNECT,
+        DISCONNECT,
+        MESSAGE,
+    }
+
+    private record GatewayEvent(Runnable runnable, GatewayEventType type) {
+        public void execute() {
+            try {
+                runnable.run();
+
+            } catch (Exception error) {
+                logger.error("Gateway Event ({}) failed: {}", type, error.getMessage());
+            }
+        }
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(GatewaySocket.class);
 
     private final EventDispatcher eventDispatcher;
     private final ClientAuthenticationTokenService authenticator;
 
-    private final List<GatewayTunnel> gatewayTunnels = new ArrayList<>();
+    private final Map<String, GatewayTunnel> gatewayTunnels = new HashMap<>();
+
+    private final Executor gatewayEventExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("gateway-vt-", 0).factory());
 
     @Inject
     public GatewaySocket(final EventDispatcher eventDispatcher,
@@ -44,17 +64,8 @@ public class GatewaySocket {
 
     @OnOpen
     private void onOpen(Session session, @PathParam("token") String token, @PathParam("clientId") String clientId) {
-        try {
-            // Execute handler on worker thread to allow JTA transactions
-            Uni.createFrom()
-                .voidItem()
-                .emitOn(Infrastructure.getDefaultWorkerPool())
-                .subscribe()
-                .with((voidItem) -> this.handleOpen(session, token, clientId));
-
-        } catch (Exception e) {
-            logger.error("Failed to connect to GatewaySocket: {}", e.getMessage());
-        }
+        // Execute handler on virtual thread to allow JTA transactions
+        this.asyncRunEvent(new GatewayEvent(() -> this.handleOpen(session, token, clientId), GatewayEventType.CONNECT));
     }
 
     @OnClose
@@ -64,22 +75,16 @@ public class GatewaySocket {
 
     @OnMessage
     private void onMessage(Session session, @PathParam("token") String token, @PathParam("clientId") String clientId, ClientEventCarrier clientEventCarrier) {
-        try {
-            // Execute handler on worker thread to allow JTA transactions
-            Uni.createFrom()
-                .voidItem()
-                .emitOn(Infrastructure.getDefaultWorkerPool())
-                .subscribe()
-                .with((voidItem) -> this.handleMessage(clientId, clientEventCarrier));
-
-        } catch (Exception e) {
-            logger.error("Failed to handle message on GatewaySocket: {}", e.getMessage());
-        }
+        this.asyncRunEvent(new GatewayEvent(() -> this.handleMessage(clientId, clientEventCarrier), GatewayEventType.MESSAGE));
     }
 
     @OnError
     private void onError(Session session, @PathParam("token") String token, @PathParam("clientId") String clientId, Throwable throwable) {
         logger.error("Got GatewaySocket error for session {}: {}", session.getId(), throwable.getMessage());
+    }
+
+    private void asyncRunEvent(final GatewayEvent gatewayEvent) {
+        CompletableFuture.runAsync(gatewayEvent::execute, gatewayEventExecutor);
     }
 
     private void handleOpen(Session session, String token, String clientId) {
@@ -126,23 +131,16 @@ public class GatewaySocket {
 
     private synchronized GatewayTunnel createGatewayTunnel(final User user, GatewayClient gatewayClient, Runnable idleHandlerCallback) {
         final GatewayTunnel gatewayTunnel = new GatewayTunnel(user, gatewayClient, this.eventDispatcher, idleHandlerCallback);
-        this.gatewayTunnels.add(gatewayTunnel);
+        this.gatewayTunnels.put(gatewayClient.clientId(), gatewayTunnel);
         return gatewayTunnel;
     }
 
     private synchronized Optional<GatewayTunnel> getGatewayTunnel(String clientId) {
-        return this.gatewayTunnels.stream().filter(gatewayTunnel -> gatewayTunnel.clientId().equals(clientId)).findAny();
+        return Optional.ofNullable(this.gatewayTunnels.get(clientId));
     }
 
     private synchronized Optional<GatewayTunnel> deleteGatewayTunnel(String clientId) {
-        final GatewayTunnel gatewayTunnel = this.getGatewayTunnel(clientId).orElse(null);
-        if (gatewayTunnel != null) {
-            this.gatewayTunnels.remove(gatewayTunnel);
-            return Optional.of(gatewayTunnel);
-
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(this.gatewayTunnels.remove(clientId));
     }
 
 }
