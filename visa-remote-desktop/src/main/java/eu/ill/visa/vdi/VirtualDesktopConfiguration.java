@@ -21,4 +21,7 @@ public interface VirtualDesktopConfiguration {
 
     @WithName("guacd")
     Map<String, String> guacdConfiguration();
+
+    @WithName("webx")
+    Map<String, String> webxConfiguration();
 }

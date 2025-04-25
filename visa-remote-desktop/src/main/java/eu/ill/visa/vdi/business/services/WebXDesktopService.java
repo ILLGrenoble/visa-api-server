@@ -7,6 +7,7 @@ import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
@@ -15,6 +16,7 @@ import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.webx.WebXClientConfiguration;
+import eu.ill.webx.WebXEngineConfiguration;
 import eu.ill.webx.WebXHostConfiguration;
 import eu.ill.webx.WebXTunnel;
 import eu.ill.webx.exceptions.WebXClientException;
@@ -24,6 +26,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -36,16 +40,19 @@ public class WebXDesktopService extends DesktopService {
     private final SignatureService signatureService;
     private final ImageProtocolService imageProtocolService;
     private final ConnectionThreadExecutor executorService;
+    private final VirtualDesktopConfiguration configuration;
 
     @Inject
     public WebXDesktopService(final InstanceSessionService instanceSessionService,
                               final SignatureService signatureService,
                               final ImageProtocolService imageProtocolService,
-                              final ConnectionThreadExecutor executorService) {
+                              final ConnectionThreadExecutor executorService,
+                              final VirtualDesktopConfiguration configuration) {
         this.instanceSessionService = instanceSessionService;
         this.signatureService = signatureService;
         this.imageProtocolService = imageProtocolService;
         this.executorService = executorService;
+        this.configuration = configuration;
     }
 
     private WebXClientConfiguration createClientConfiguration(final InstanceSession session, final Instance instance) {
@@ -69,6 +76,13 @@ public class WebXDesktopService extends DesktopService {
         }
     }
 
+    private WebXEngineConfiguration createEngineConfiguration() {
+        final WebXEngineConfiguration config = new WebXEngineConfiguration();
+        final Map<String, String> webxConfiguration = configuration.webxConfiguration();
+        webxConfiguration.forEach(config::setParameter);
+        return config;
+    }
+
     private WebXHostConfiguration createHostConfiguration(final Instance instance) {
         final ImageProtocol protocol = requireNonNullElse(
             imageProtocolService.getByName("WEBX"),
@@ -88,11 +102,11 @@ public class WebXDesktopService extends DesktopService {
                                    final InstanceSession session) throws WebXConnectionException {
 
         final WebXHostConfiguration hostConfiguration = createHostConfiguration(instance);
-
-        WebXClientConfiguration clientConfiguration = createClientConfiguration(session, instance);
+        final WebXClientConfiguration clientConfiguration = createClientConfiguration(session, instance);
+        final WebXEngineConfiguration engineConfiguration = createEngineConfiguration();
 
         WebXTunnel tunnel = new WebXTunnel();
-        tunnel.connect(hostConfiguration, clientConfiguration);
+        tunnel.connect(hostConfiguration, clientConfiguration, engineConfiguration);
 
         return tunnel;
     }

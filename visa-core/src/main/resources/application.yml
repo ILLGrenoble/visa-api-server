@@ -149,7 +149,9 @@ vdi:
     ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
     port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
     color-depth: ${VISA_VDI_GUACD_PARAMETER_COLOR_DEPTH:16}
-
+  webx:
+    runtimeMaxQualityIndex: ${VISA_VDI_WEBX_ENGINE_RUNTIME_MAX_QUALITY_INDEX:10}
+    logLevel: ${VISA_VDI_WEBX_ENGINE_LOG_LEVEL:debug}
 client:
   login:
     issuer: ${VISA_CLIENT_CONFIG_LOGIN_ISSUER}
