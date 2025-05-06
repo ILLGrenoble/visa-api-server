@@ -1,31 +1,30 @@
 package eu.ill.visa.vdi.display.subscribers;
 
-import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
-import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
-import eu.ill.visa.vdi.domain.models.DesktopSessionMember;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public abstract class RemoteDesktopEventSubscriber<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopEventSubscriber.class);
+    private static final int INSTANCE_SESSION_UPDATE_TIME_MS = 15000;
 
     private final DesktopSessionService desktopSessionService;
-    private final InstanceService instanceService;
+    private final int maxInactivityTimeMinutes;
 
     public RemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
-                                        final InstanceService instanceService) {
+                                        final int maxInactivityTimeMinutes) {
         this.desktopSessionService = desktopSessionService;
-        this.instanceService = instanceService;
+        this.maxInactivityTimeMinutes = maxInactivityTimeMinutes;
     }
 
     public void onEvent(final SocketClient socketClient, final T data) {
@@ -56,13 +55,24 @@ public abstract class RemoteDesktopEventSubscriber<T> {
             //  2: update instance last interaction at (to determine when sessions are active): happens only when the remote desktop has user keyboard or mouse interaction
             final Date lastInstanceUpdateTime = remoteDesktopConnection.getLastInstanceUpdateTime();
             final Date currentDate = new Date();
-            if (lastInstanceUpdateTime == null || (currentDate.getTime() - lastInstanceUpdateTime.getTime() > 15 * 1000)) {
+
+            if (lastInstanceUpdateTime == null || (currentDate.getTime() - lastInstanceUpdateTime.getTime() >= INSTANCE_SESSION_UPDATE_TIME_MS)) {
                 remoteDesktopConnection.setLastInstanceUpdateTime(currentDate);
 
                 // Use virtual thread to update interaction times so that the websocket can return ASAP
                 Thread.startVirtualThread(() -> {
                     try {
-                        this.updateInstanceActivity(desktopSessionMember, currentDate, remoteDesktopConnection.getLastInteractionAt());
+                        // Determine if the instance is still being actively used by the user
+                        long timeSinceLastInteractionMs = currentDate.getTime() - remoteDesktopConnection.getLastInteractionAt().getTime();
+                        long timeSinceLastInteractionMinutes = TimeUnit.MINUTES.convert(timeSinceLastInteractionMs, TimeUnit.MILLISECONDS);
+                        if (timeSinceLastInteractionMinutes >= maxInactivityTimeMinutes) {
+                            logger.info("{} has been inactive for {} minutes: disconnecting the user", desktopSessionMember, timeSinceLastInteractionMinutes);
+                            desktopSessionMember.remoteDesktopConnection().getClient().disconnect();
+
+                        } else {
+                            // Update database values
+                            this.desktopSessionService.updateSessionMemberActivity(desktopSessionMember);
+                        }
 
                     } catch (Exception error) {
                         logger.error("Failed to update instance {} activity: {}", desktopSession.getInstanceId(), error.getMessage());
@@ -70,20 +80,6 @@ public abstract class RemoteDesktopEventSubscriber<T> {
                 });
             }
        });
-    }
-
-    private void updateInstanceActivity(final DesktopSessionMember desktopSessionMember, final Date lastSeenAt, final Date lastInteractionAt) {
-        final InstancePartial instance = this.instanceService.getPartialById(desktopSessionMember.session().getInstanceId());
-        if (instance == null) {
-            return;
-        }
-
-        // Update instance
-        instance.setLastSeenAt(lastSeenAt);
-        instance.setLastInteractionAt(lastInteractionAt);
-        instanceService.updatePartial(instance);
-
-        this.desktopSessionService.updateSessionMemberActivity(desktopSessionMember, lastInteractionAt);
     }
 
     protected abstract InstanceActivityType getControlActivityType(T data);

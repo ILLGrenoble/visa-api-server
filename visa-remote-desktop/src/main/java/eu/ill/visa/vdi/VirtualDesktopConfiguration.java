@@ -19,6 +19,8 @@ public interface VirtualDesktopConfiguration {
 
     String protocol();
 
+    int maxSessionInactivityTimeMinutes();
+
     @WithName("guacd")
     Map<String, String> guacdConfiguration();
 

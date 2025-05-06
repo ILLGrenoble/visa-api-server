@@ -116,7 +116,7 @@ public class WebXDesktopService extends DesktopService {
         if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
             final WebXTunnel tunnel = buildTunnel(instance);
             InstanceSession session = instanceSessionService.create(instance.getId(), WEBX_PROTOCOL, tunnel.getConnectionId());
-            logger.info("User {} created WebX session with Id {}", getInstanceAndUser(instance, user), session.getConnectionId());
+            logger.info("{} created WebX session with Id {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
             return tunnel;
 

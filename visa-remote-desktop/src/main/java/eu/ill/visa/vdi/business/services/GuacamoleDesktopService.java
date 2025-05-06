@@ -130,7 +130,7 @@ public class GuacamoleDesktopService extends DesktopService {
         } else {
             try {
                 // try to connect to existing sessionId
-                logger.info("User {} connecting to existing guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
+                logger.info("{} connecting to existing guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
                 return buildSocket(instance, session);
 
             } catch (GuacamoleException exception) {

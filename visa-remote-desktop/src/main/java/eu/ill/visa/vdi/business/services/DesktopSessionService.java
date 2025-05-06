@@ -8,6 +8,7 @@ import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.broker.*;
@@ -250,19 +251,25 @@ public class DesktopSessionService {
         return Optional.ofNullable(this.desktopSessionMembers.get(clientId));
     }
 
-    public void updateSessionMemberActivity(final DesktopSessionMember desktopSessionMember, final Date lastInteractionAt) {
+    public void updateSessionMemberActivity(final DesktopSessionMember desktopSessionMember) {
         final DesktopSession desktopSession = desktopSessionMember.session();
         final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
         final Long instanceSessionId = desktopSession.getSessionId();
         final String clientId = desktopSessionMember.clientId();
 
-        synchronized (this) {
+        final InstancePartial instance = this.instanceService.getPartialById(desktopSessionMember.session().getInstanceId());
+        if (instance != null) {
+            // Update instance
+            instance.setLastSeenAt(remoteDesktopConnection.getLastInstanceUpdateTime());
+            instance.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
+            instanceService.updatePartial(instance);
+
             final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
             if (instanceSessionMember == null) {
                 logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
 
             } else {
-                instanceSessionMember.setLastInteractionAt(lastInteractionAt);
+                instanceSessionMember.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
                 instanceSessionMemberService.updateInteractionAt(instanceSessionMember);
 
                 InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();

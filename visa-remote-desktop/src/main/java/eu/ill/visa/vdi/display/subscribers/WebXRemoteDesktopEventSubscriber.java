@@ -1,6 +1,5 @@
 package eu.ill.visa.vdi.display.subscribers;
 
-import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
@@ -17,8 +16,8 @@ public class WebXRemoteDesktopEventSubscriber extends RemoteDesktopEventSubscrib
     private static final int INSTRUCTION_TYPE_OFFSET = 20;
 
     public WebXRemoteDesktopEventSubscriber(final DesktopSessionService desktopSessionService,
-                                            final InstanceService instanceService) {
-        super(desktopSessionService, instanceService);
+                                            final int maxInactivityTimeMinutes) {
+        super(desktopSessionService, maxInactivityTimeMinutes);
     }
 
     @Override

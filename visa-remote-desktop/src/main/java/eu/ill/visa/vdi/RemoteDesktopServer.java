@@ -3,7 +3,6 @@ package eu.ill.visa.vdi;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.gateway.ClientEventsGateway;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
-import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
@@ -30,7 +29,6 @@ public class RemoteDesktopServer {
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopServer.class);
 
     private final DesktopSessionService desktopConnectionService;
-    private final InstanceService instanceService;
     private final InstanceAuthenticationTokenService authenticator;
     private final InstanceSessionService instanceSessionService;
     private final DesktopAccessService desktopAccessService;
@@ -43,7 +41,6 @@ public class RemoteDesktopServer {
     @Inject
     public RemoteDesktopServer(final InstanceSessionService instanceSessionService,
                                final DesktopSessionService desktopConnectionService,
-                               final InstanceService instanceService,
                                final InstanceAuthenticationTokenService authenticator,
                                final DesktopAccessService desktopAccessService,
                                final VirtualDesktopConfiguration configuration,
@@ -53,7 +50,6 @@ public class RemoteDesktopServer {
                                final WebXRemoteDesktopSocket webXRemoteDesktopSocket) {
         this.instanceSessionService = instanceSessionService;
         this.desktopConnectionService = desktopConnectionService;
-        this.instanceService = instanceService;
         this.authenticator = authenticator;
         this.desktopAccessService = desktopAccessService;
         this.configuration = configuration;
@@ -88,12 +84,12 @@ public class RemoteDesktopServer {
         // Set up guacamole display listeners
         this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.authenticator, this.eventDispatcher));
         this.guacamoleRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
-        this.guacamoleRemoteDesktopSocket.setEventSubscriber(new GuacamoleRemoteDesktopEventSubscriber(this.desktopConnectionService, this.instanceService));
+        this.guacamoleRemoteDesktopSocket.setEventSubscriber(new GuacamoleRemoteDesktopEventSubscriber(this.desktopConnectionService, this.configuration.maxSessionInactivityTimeMinutes()));
 
         // Set up webx display listeners
         this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.authenticator, this.eventDispatcher));
         this.webXRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
-        this.webXRemoteDesktopSocket.setEventSubscriber(new WebXRemoteDesktopEventSubscriber(this.desktopConnectionService, this.instanceService));
+        this.webXRemoteDesktopSocket.setEventSubscriber(new WebXRemoteDesktopEventSubscriber(this.desktopConnectionService, this.configuration.maxSessionInactivityTimeMinutes()));
     }
 
     private void cleanupSessions() {

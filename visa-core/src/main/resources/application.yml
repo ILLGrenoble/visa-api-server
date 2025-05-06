@@ -145,6 +145,7 @@ vdi:
   ownerDisconnectionPolicy: ${VISA_VDI_OWNER_DISCONNECTION_POLICY:DISCONNECT_ALL}
   cleanupSessionsOnStartup: ${VISA_VDI_CLEANUP_SESSIONS_ON_STARTUP:false}
   protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}
+  maxSessionInactivityTimeMinutes: ${VISA_VDI_MAX_SESSION_INACTIVITY_TIME_MINUTES:360}
   guacd:
     ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
     port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
