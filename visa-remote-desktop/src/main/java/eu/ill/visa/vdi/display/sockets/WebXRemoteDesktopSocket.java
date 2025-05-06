@@ -1,8 +1,9 @@
 package eu.ill.visa.vdi.display.sockets;
 
 import eu.ill.visa.vdi.business.services.DesktopService;
-import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.visa.vdi.display.subscribers.WebXRemoteDesktopEventSubscriber;
+import eu.ill.visa.vdi.domain.models.SocketClient;
+import eu.ill.webx.WebXTunnel;
 import jakarta.inject.Singleton;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -33,6 +34,7 @@ public class WebXRemoteDesktopSocket extends RemoteDesktopSocket {
     }
 
     protected void sendNop(final SocketClient socketClient) {
+        socketClient.sendEvent(WebXTunnel.WEBX_NOP_MESSAGE_DATA);
     }
 
     @OnError
