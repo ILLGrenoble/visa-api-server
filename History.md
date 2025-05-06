@@ -1,3 +1,17 @@
+3.3.0 06/05/2025
+================
+ * Set a maximum inactivity time for each session: upon reaching this time the session is automatically disconnected.
+ * Move instance session database updates to the DesktopSessionService.
+ * Add jdbc pool size configuration options.
+ * Handle disconnect by owner during access request from support user.
+ * Start the connection thread after the DesktopSessionMember has been fully created: avoid client sending connection instructions prematurely.
+ * Send Nop messages to WebXClient to keep the connection alive when support user is waiting for access to be granted to another desktop session.
+ * Use mutiny timer rather than system thread to send NOP messages to clients that are waiting for desktop access.
+ * Fix bug on InstanceSessionMember.active not being set to false when concurrent updates of ISMs occur (one to update the interactionAt and another to deactivate).
+ * Add webx configuration parameters to the visa config. The parameters are sent to the WebX Router, and converted into environment variables when spawning a WebX Engine.
+ * Update to relay 1.2.0 (waits for webx connection message).
+ * Improve logging of event channel disconnection
+
 3.2.4 22/04/2025
 ================
  * Use virtual threads rather than mutiny work pool threads. Use threadPerTask to ensure virtual thread use.
