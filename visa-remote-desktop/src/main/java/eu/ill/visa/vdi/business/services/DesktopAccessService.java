@@ -4,6 +4,7 @@ import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.business.services.InstanceSessionService;
+import eu.ill.visa.core.domain.Timer;
 import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
@@ -20,6 +21,7 @@ import eu.ill.visa.vdi.gateway.events.AccessRequestEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import io.quarkus.runtime.Shutdown;
 import io.quarkus.runtime.Startup;
+import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -28,11 +30,13 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Startup
 @ApplicationScoped
 public class DesktopAccessService {
     private static final Logger logger = LoggerFactory.getLogger(DesktopAccessService.class);
+    private static final int NOP_INTERVAL_TIME_SECONDS = 5;
 
     private final DesktopSessionService desktopSessionService;
     private final InstanceService instanceService;
@@ -42,7 +46,7 @@ public class DesktopAccessService {
 
     private final List<DesktopCandidate> desktopCandidates = new ArrayList<>();
 
-    private boolean keepingAlive = true;
+    private final Cancellable keepAliveInterval;
 
     @Inject
     public DesktopAccessService(final DesktopSessionService desktopSessionService,
@@ -63,21 +67,15 @@ public class DesktopAccessService {
         this.messageBroker.subscribe(AccessRequestResponseMessage.class)
             .next((message) -> this.onAccessRequestResponse(message.sessionId(), message.requesterClientId(), message.role()));
 
-        Thread keepAliveThread = new Thread(() -> {
-            while (this.keepingAlive) {
-                try {
-                    Thread.sleep(1000);
-                    this.desktopCandidates.forEach(DesktopCandidate::keepAlive);
-                } catch (InterruptedException ignored) {
-                }
-            }
-        });
-        keepAliveThread.start();
+        this.keepAliveInterval = Timer.setInterval(() -> {
+            this.desktopCandidates.forEach(DesktopCandidate::keepAlive);
+        }, NOP_INTERVAL_TIME_SECONDS, TimeUnit.SECONDS);
+
     }
 
     @Shutdown
     public void shutdown() {
-        this.keepingAlive = false;
+        this.keepAliveInterval.cancel();
     }
 
     public void requestAccess(final SocketClient client, final Long sessionId, final ConnectedUser connectedUser, Long instanceId, final NopSender nopSender) {
