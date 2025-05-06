@@ -91,8 +91,7 @@ public class InstanceSessionService {
     public void deleteSessionMember(@NotNull InstanceSession instanceSession, String clientId) {
         InstanceSessionMemberPartial sessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSession.getId(), clientId);
         if (sessionMember != null) {
-            sessionMember.setActive(false);
-            this.instanceSessionMemberService.updatePartial(sessionMember);
+            this.instanceSessionMemberService.deactivateSessionMember(sessionMember);
 
             List<InstanceSessionMemberPartial> members = this.instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
             if (members.isEmpty()) {
@@ -123,8 +122,7 @@ public class InstanceSessionService {
 
         List<InstanceSessionMemberPartial> activeSessionMembers = this.instanceSessionMemberService.getAllPartials();
         for (InstanceSessionMemberPartial instanceSessionMember : activeSessionMembers) {
-            instanceSessionMember.setActive(false);
-            this.instanceSessionMemberService.updatePartial(instanceSessionMember);
+            this.instanceSessionMemberService.deactivateSessionMember(instanceSessionMember);
         }
 
         // Do the cleanup here... not ideal but at least it is centralised

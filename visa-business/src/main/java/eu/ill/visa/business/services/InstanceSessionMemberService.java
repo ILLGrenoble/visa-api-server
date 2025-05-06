@@ -90,8 +90,12 @@ public class InstanceSessionMemberService {
         return this.repository.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
     }
 
-    public void updatePartial(final InstanceSessionMemberPartial instanceSessionMember) {
-        this.repository.updatePartial(instanceSessionMember);
+    public void deactivateSessionMember(final InstanceSessionMemberPartial instanceSessionMember) {
+        this.repository.deactivateSessionMember(instanceSessionMember);
+    }
+
+    public void updateInteractionAt(final InstanceSessionMemberPartial instanceSessionMember) {
+        this.repository.updateInteractionAt(instanceSessionMember);
     }
 
 }

@@ -105,10 +105,15 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         return query.getResultList();
     }
 
-    public void updatePartial(final InstanceSessionMemberPartial instanceSessionMember) {
-        getEntityManager().createNamedQuery("instanceSessionMember.updatePartialById")
+    public void deactivateSessionMember(final InstanceSessionMemberPartial instanceSessionMember) {
+        getEntityManager().createNamedQuery("instanceSessionMember.deactivateById")
             .setParameter("id", instanceSessionMember.getId())
-            .setParameter("active", instanceSessionMember.getActive())
+            .executeUpdate();
+    }
+
+    public void updateInteractionAt(final InstanceSessionMemberPartial instanceSessionMember) {
+        getEntityManager().createNamedQuery("instanceSessionMember.updateInteractionAtById")
+            .setParameter("id", instanceSessionMember.getId())
             .setParameter("lastInteractionAt", instanceSessionMember.getLastInteractionAt())
             .executeUpdate();
     }

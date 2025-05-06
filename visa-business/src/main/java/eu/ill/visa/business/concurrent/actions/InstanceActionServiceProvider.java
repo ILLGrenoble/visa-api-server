@@ -68,8 +68,7 @@ public class InstanceActionServiceProvider {
 
         final List<InstanceSessionMemberPartial> sessionMembers = this.instanceSessionMemberService.getAllPartialsByInstanceId(instance.getId());
         for (InstanceSessionMemberPartial member : sessionMembers) {
-            member.setActive(false);
-            this.instanceSessionMemberService.updatePartial(member);
+            this.instanceSessionMemberService.deactivateSessionMember(member);
         }
     }
 

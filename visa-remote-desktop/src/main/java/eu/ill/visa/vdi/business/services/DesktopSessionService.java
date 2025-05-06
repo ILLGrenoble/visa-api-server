@@ -256,7 +256,7 @@ public class DesktopSessionService {
 
             } else {
                 instanceSessionMember.setLastInteractionAt(lastInteractionAt);
-                instanceSessionMemberService.updatePartial(instanceSessionMember);
+                instanceSessionMemberService.updateInteractionAt(instanceSessionMember);
 
                 InstanceActivityType instanceActivityType = remoteDesktopConnection.getInstanceActivity();
                 if (instanceActivityType != null) {

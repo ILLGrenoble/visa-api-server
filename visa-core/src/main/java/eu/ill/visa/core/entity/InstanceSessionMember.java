@@ -109,14 +109,20 @@ import java.util.Date;
         AND i.active = true
         AND instance.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instanceSessionMember.updatePartialById", query = """
+    @NamedQuery(name = "instanceSessionMember.deactivateById", query = """
         UPDATE InstanceSessionMember i
-        SET i.active = :active, i.lastInteractionAt = :lastInteractionAt, i.updatedAt = CURRENT TIMESTAMP
+        SET i.active = false, i.updatedAt = CURRENT_TIMESTAMP
         WHERE i.id = :id
+    """),
+    @NamedQuery(name = "instanceSessionMember.updateInteractionAtById", query = """
+        UPDATE InstanceSessionMember i
+        SET i.lastInteractionAt = :lastInteractionAt, i.updatedAt = CURRENT_TIMESTAMP
+        WHERE i.id = :id
+        AND i.active = true
     """),
     @NamedQuery(name = "instanceSessionMember.deactivateAllByInstanceSessionIdAndClientId", query = """
         UPDATE InstanceSessionMember i
-        SET i.active = false, i.updatedAt = CURRENT TIMESTAMP
+        SET i.active = false, i.updatedAt = CURRENT_TIMESTAMP
         WHERE i.instanceSession.id = :instanceSessionId
         AND i.clientId = :clientId
         AND i.active = true
