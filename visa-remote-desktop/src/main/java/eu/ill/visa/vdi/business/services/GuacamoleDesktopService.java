@@ -165,7 +165,7 @@ public class GuacamoleDesktopService extends DesktopService {
         final GuacamoleSocket guacamoleSocket = this.createGuacamoleSocket(instance, user);
 
         final GuacamoleTunnel guacamoleTunnel = new SimpleGuacamoleTunnel(guacamoleSocket);
-        final ConnectionThread connectionThread = executorService.startGuacamoleConnectionThread(client, guacamoleTunnel, instance, user);
+        final ConnectionThread connectionThread = executorService.createGuacamoleConnectionThread(client, guacamoleTunnel, instance, user);
         return new RemoteDesktopConnection(client, connectionThread);
     }
 }

@@ -16,19 +16,15 @@ public class ConnectionThreadExecutor {
 
     private final ExecutorService executorService = newCachedThreadPool(new ConnectionThreadFactory());
 
-    public ConnectionThread startGuacamoleConnectionThread(SocketClient client, GuacamoleTunnel tunnel, Instance instance, ConnectedUser user) {
-        final ConnectionThread thread = new GuacamoleConnectionThread(client, tunnel, instance, user);
-
-        executorService.submit(thread);
-
-        return thread;
+    public ConnectionThread createGuacamoleConnectionThread(SocketClient client, GuacamoleTunnel tunnel, Instance instance, ConnectedUser user) {
+        return new GuacamoleConnectionThread(client, tunnel, instance, user);
     }
 
-    public ConnectionThread startWebXConnectionThread(SocketClient client, WebXTunnel tunnel, Instance instance, ConnectedUser user) {
-        final ConnectionThread thread = new WebXConnectionThread(client, tunnel, instance, user);
+    public ConnectionThread createWebXConnectionThread(SocketClient client, WebXTunnel tunnel, Instance instance, ConnectedUser user) {
+        return new WebXConnectionThread(client, tunnel, instance, user);
+    }
 
+    public void startConnectionThread(final ConnectionThread thread) {
         executorService.submit(thread);
-
-        return thread;
     }
 }

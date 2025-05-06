@@ -11,6 +11,7 @@ import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.broker.*;
+import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
@@ -45,6 +46,7 @@ public class DesktopSessionService {
     private final InstanceExpirationService instanceExpirationService;
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
     private final EventDispatcher eventDispatcher;
+    private final ConnectionThreadExecutor connectionThreadExecutor;
 
     private final MessageBroker messageBroker;
 
@@ -62,7 +64,8 @@ public class DesktopSessionService {
                                  final InstanceExpirationService instanceExpirationService,
                                  final VirtualDesktopConfiguration virtualDesktopConfiguration,
                                  final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
-                                 final EventDispatcher eventDispatcher) {
+                                 final EventDispatcher eventDispatcher,
+                                 final ConnectionThreadExecutor connectionThreadExecutor) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceSessionMemberService = instanceSessionMemberService;
@@ -74,6 +77,7 @@ public class DesktopSessionService {
         this.virtualDesktopConfiguration = virtualDesktopConfiguration;
         this.messageBroker = messageBrokerInstance.get();
         this.eventDispatcher = eventDispatcher;
+        this.connectionThreadExecutor = connectionThreadExecutor;
 
         this.messageBroker.subscribe(UserConnectedMessage.class)
             .next((message) -> this.onUserConnected(message.sessionId(), message.clientId(), message.user()));
@@ -122,6 +126,9 @@ public class DesktopSessionService {
 
         // Activate idle session timer
         desktopSessionMember.idleSessionHandler().start(() -> this.onDesktopMemberIdle(desktopSessionMember));
+
+        // Start the connection thread
+        this.connectionThreadExecutor.startConnectionThread(remoteDesktopConnection.getConnectionThread());
 
         boolean unlockSession = virtualDesktopConfiguration.ownerDisconnectionPolicy().equals(VirtualDesktopConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
             && role.equals(InstanceMemberRole.OWNER)

@@ -162,7 +162,7 @@ public class WebXDesktopService extends DesktopService {
     @Override
     public RemoteDesktopConnection connect(SocketClient client, Instance instance, ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
         final WebXTunnel webXTunnel = this.createWebXTunnel(instance, user);
-        final ConnectionThread connectionThread = executorService.startWebXConnectionThread(client, webXTunnel, instance, user);
+        final ConnectionThread connectionThread = executorService.createWebXConnectionThread(client, webXTunnel, instance, user);
         return new RemoteDesktopConnection(client, connectionThread);
 
     }
