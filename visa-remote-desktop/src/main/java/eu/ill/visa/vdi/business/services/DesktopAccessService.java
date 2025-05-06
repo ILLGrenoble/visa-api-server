@@ -9,9 +9,7 @@ import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
-import eu.ill.visa.vdi.broker.AccessRequestCancellationMessage;
-import eu.ill.visa.vdi.broker.AccessRequestMessage;
-import eu.ill.visa.vdi.broker.AccessRequestResponseMessage;
+import eu.ill.visa.vdi.broker.*;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
@@ -66,6 +64,10 @@ public class DesktopAccessService {
             .next((message) -> this.onAccessRequestCancelled(message.sessionId(), message.user(), message.requesterClientId()));
         this.messageBroker.subscribe(AccessRequestResponseMessage.class)
             .next((message) -> this.onAccessRequestResponse(message.sessionId(), message.requesterClientId(), message.role()));
+        this.messageBroker.subscribe(SessionClosedMessage.class)
+            .next((message) -> this.onOwnerDisconnected(message.sessionId()));
+        this.messageBroker.subscribe(SessionLockedMessage.class)
+            .next((message) -> this.onOwnerDisconnected(message.sessionId()));
 
         this.keepAliveInterval = Timer.setInterval(() -> {
             this.desktopCandidates.forEach(DesktopCandidate::keepAlive);
@@ -132,7 +134,7 @@ public class DesktopAccessService {
         });
     }
 
-    public void onAccessRequestResponse(final Long sessionId, final String requesterClientId, final InstanceMemberRole role) {
+    private void onAccessRequestResponse(final Long sessionId, final String requesterClientId, final InstanceMemberRole role) {
         this.removeCandidate(requesterClientId).ifPresent(desktopCandidate -> {
             logger.info("Handling response ({}) of access request for instance {} from user {} with client id {}", role, desktopCandidate.instanceId(), desktopCandidate.connectedUser().getFullName(), requesterClientId);
             this.connectFromAccessReply(desktopCandidate, role);
@@ -146,6 +148,15 @@ public class DesktopAccessService {
         });
     }
 
+    private void onOwnerDisconnected(final Long sessionId) {
+        this.getCandidatesBySessionId(sessionId).forEach(desktopCandidate -> {
+            final SocketClient client = desktopCandidate.client();
+
+            this.eventDispatcher.sendEventToClient(client.clientId(), SessionEvent.OWNER_AWAY_EVENT);
+            client.disconnect();
+        });
+    }
+
     private synchronized DesktopCandidate addCandidate(final SocketClient client, final Long sessionId, final ConnectedUser connectedUser, final Long instanceId, final NopSender nopSender) {
         DesktopCandidate desktopCandidate = new DesktopCandidate(client, sessionId, connectedUser, instanceId, nopSender);
         this.desktopCandidates.add(desktopCandidate);
@@ -153,16 +164,22 @@ public class DesktopAccessService {
         return desktopCandidate;
     }
 
-    private synchronized Optional<DesktopCandidate> getCandidateByClientId(String clientId) {
+    private synchronized Optional<DesktopCandidate> getCandidateByClientId(final String clientId) {
         return this.desktopCandidates.stream()
             .filter(candidate -> candidate.client().clientId().equals(clientId))
             .findAny();
     }
 
-    private synchronized Optional<DesktopCandidate> removeCandidate(String clientId) {
+    private synchronized Optional<DesktopCandidate> removeCandidate(final String clientId) {
         return this.getCandidateByClientId(clientId).stream()
             .peek(this.desktopCandidates::remove)
             .findAny();
+    }
+
+    private synchronized List<DesktopCandidate> getCandidatesBySessionId(final Long sessionId) {
+        return this.desktopCandidates.stream()
+            .filter(candidate -> candidate.sessionId().equals(sessionId))
+            .toList();
     }
 
     private void connectFromAccessReply(final DesktopCandidate candidate, final InstanceMemberRole replyRole) {
