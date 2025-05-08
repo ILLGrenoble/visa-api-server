@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SocketClient {
 
@@ -47,6 +49,14 @@ public class SocketClient {
 
     public String getPathParameter(String parameterName) {
         return this.session.getPathParameters().get(parameterName);
+    }
+
+    public Optional<String> getStringRequestParameter(String parameterName) {
+        List<String> paramValues = this.session.getRequestParameterMap().get(parameterName);
+        if (paramValues != null && !paramValues.isEmpty()) {
+            return Optional.of(paramValues.getFirst());
+        }
+        return Optional.empty();
     }
 
     public void sendEvent(Object data) {

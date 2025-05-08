@@ -35,6 +35,7 @@ import static java.util.Objects.requireNonNullElse;
 public class WebXDesktopService extends DesktopService {
 
     private static final Logger logger = LoggerFactory.getLogger(WebXDesktopService.class);
+    private static final String WEBX_CLIENT_VERSION = "client-version";
 
     private final InstanceSessionService instanceSessionService;
     private final SignatureService signatureService;
@@ -55,7 +56,9 @@ public class WebXDesktopService extends DesktopService {
         this.configuration = configuration;
     }
 
-    private WebXClientConfiguration createClientConfiguration(final InstanceSession session, final Instance instance) {
+    private WebXClientConfiguration createClientConfiguration(final SocketClient client, final Instance instance, final InstanceSession session) {
+        String clientVersion = client.getStringRequestParameter(WEBX_CLIENT_VERSION).orElse("0.0.0");
+
         if (session == null) {
             final Integer screenHeight = instance.getScreenHeight();
             final Integer screenWidth = instance.getScreenWidth();
@@ -68,11 +71,12 @@ public class WebXDesktopService extends DesktopService {
             }
             String keyboardLayout = instance.getKeyboardLayout();
 
-            return WebXClientConfiguration.ForLogin(username, password, screenWidth, screenHeight, keyboardLayout);
+            return WebXClientConfiguration.ForLogin(username, password, screenWidth, screenHeight, keyboardLayout, clientVersion);
+
         } else {
             // use session Id to connect to remote desktop
             logger.info("Connecting to existing WebX session on instance {} with session Id {}", instance.getId(), session.getConnectionId());
-            return WebXClientConfiguration.ForExistingSession(session.getConnectionId());
+            return WebXClientConfiguration.ForExistingSession(session.getConnectionId(), clientVersion);
         }
     }
 
@@ -94,15 +98,17 @@ public class WebXDesktopService extends DesktopService {
         return new WebXHostConfiguration(hostname, protocol.getPort());
     }
 
-    private WebXTunnel buildTunnel(final Instance instance) throws WebXConnectionException {
-        return this.buildTunnel(instance, null);
+    private WebXTunnel buildTunnel(final SocketClient client,
+                                   final Instance instance) throws WebXConnectionException {
+        return this.buildTunnel(client, instance, null);
     }
 
-    private WebXTunnel buildTunnel(final Instance instance,
+    private WebXTunnel buildTunnel(final SocketClient client,
+                                   final Instance instance,
                                    final InstanceSession session) throws WebXConnectionException {
 
         final WebXHostConfiguration hostConfiguration = createHostConfiguration(instance);
-        final WebXClientConfiguration clientConfiguration = createClientConfiguration(session, instance);
+        final WebXClientConfiguration clientConfiguration = createClientConfiguration(client, instance, session);
         final WebXEngineConfiguration engineConfiguration = createEngineConfiguration();
 
         WebXTunnel tunnel = new WebXTunnel();
@@ -111,10 +117,12 @@ public class WebXDesktopService extends DesktopService {
         return tunnel;
     }
 
-    private WebXTunnel createTunnelAndSession(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
+    private WebXTunnel createTunnelAndSession(final SocketClient client,
+                                              final Instance instance,
+                                              final ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
         // Create new session if user is owner
         if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
-            final WebXTunnel tunnel = buildTunnel(instance);
+            final WebXTunnel tunnel = this.buildTunnel(client, instance);
             InstanceSession session = instanceSessionService.create(instance.getId(), WEBX_PROTOCOL, tunnel.getConnectionId());
             logger.info("{} created WebX session with Id {}", getInstanceAndUser(instance, user), session.getConnectionId());
 
@@ -126,17 +134,19 @@ public class WebXDesktopService extends DesktopService {
         }
     }
 
-    private WebXTunnel getOrCreateTunnel(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
+    private WebXTunnel getOrCreateTunnel(final SocketClient client,
+                                         final Instance instance,
+                                         final ConnectedUser user) throws OwnerNotConnectedException, WebXConnectionException, WebXClientException {
         InstanceSession session = instanceSessionService.getLatestByInstanceAndProtocol(instance, WEBX_PROTOCOL);
 
         if (session == null) {
-            return this.createTunnelAndSession(instance, user);
+            return this.createTunnelAndSession(client, instance, user);
 
         } else {
             try {
                 // try to connect to existing sessionId
                 logger.info("User {} connecting to existing WebX session {}", getInstanceAndUser(instance, user), session.getConnectionId());
-                return buildTunnel(instance, session);
+                return buildTunnel(client, instance, session);
 
             } catch (WebXConnectionException exception) {
                 logger.warn("Failed to connect {} to given WebX session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
@@ -145,14 +155,15 @@ public class WebXDesktopService extends DesktopService {
                 this.instanceSessionService.updatePartial(session);
 
                 // Create a new session
-                return this.createTunnelAndSession(instance, user);
+                return this.createTunnelAndSession(client, instance, user);
             }
         }
     }
-    private WebXTunnel createWebXTunnel(final Instance instance,
+    private WebXTunnel createWebXTunnel(final SocketClient client,
+                                        final Instance instance,
                                         final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
         try {
-            return getOrCreateTunnel(instance, user);
+            return getOrCreateTunnel(client, instance, user);
 
         } catch (WebXException exception) {
             throw new ConnectionException("Error connecting to tunnel for " + this.getInstanceAndUser(instance, user) + " : " + exception.getMessage());
@@ -161,7 +172,7 @@ public class WebXDesktopService extends DesktopService {
 
     @Override
     public RemoteDesktopConnection connect(SocketClient client, Instance instance, ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
-        final WebXTunnel webXTunnel = this.createWebXTunnel(instance, user);
+        final WebXTunnel webXTunnel = this.createWebXTunnel(client, instance, user);
         final ConnectionThread connectionThread = executorService.createWebXConnectionThread(client, webXTunnel, instance, user);
         return new RemoteDesktopConnection(client, connectionThread);
 
