@@ -6,17 +6,11 @@ import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.LinkedList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public abstract class RemoteDesktopSocket {
-
-    protected interface WorkerHandler {
-        void doWork();
-    }
 
     private enum WorkerEventType {
         CONNECT,
@@ -24,10 +18,24 @@ public abstract class RemoteDesktopSocket {
         MESSAGE,
     }
 
-    private record WorkerEvent(SocketClient socketClient, WorkerHandler worker, WorkerEventType type) {
+    private record WorkerEvent(SocketClient socketClient, Runnable worker, WorkerEventType type, Date createdAt) {
+
+        WorkerEvent(SocketClient socketClient, Runnable worker, WorkerEventType type) {
+            this(socketClient, worker, type, new Date());
+        }
+
         public void execute() {
             try {
-                worker.doWork();
+                long timeToExecuteEventSeconds = new Date().getTime() - this.createdAt.getTime();
+
+                if (this.type == WorkerEventType.CONNECT) {
+                    logger.info("Remote Desktop Event (CONNECT) for client {} started in : {}ms", socketClient.clientId(), timeToExecuteEventSeconds);
+                }
+                if (timeToExecuteEventSeconds > 2000) {
+                    logger.warn("Remote Desktop Event ({}) for client {} slow to execute: {}ms", type, socketClient.clientId(), timeToExecuteEventSeconds);
+                }
+
+                worker.run();
 
             } catch (Exception error) {
                 logger.error("Remote Desktop Event ({}) failed with protocol {}: {}", type, socketClient.protocol(), error.getMessage());
@@ -124,7 +132,7 @@ public abstract class RemoteDesktopSocket {
         this.handleEvent(new WorkerEvent(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT));
     }
 
-    protected void onMessage(final SocketClient socketClient, WorkerHandler handler) {
+    protected void onMessage(final SocketClient socketClient, Runnable handler) {
         this.handleEvent(new WorkerEvent(socketClient, handler, WorkerEventType.MESSAGE));
     }
 
