@@ -26,16 +26,28 @@ public abstract class RemoteDesktopSocket {
 
         public void execute() {
             try {
-                long timeToExecuteEventSeconds = new Date().getTime() - this.createdAt.getTime();
+                long eventStartTime = new Date().getTime();
+                long timeToStartEventMs = eventStartTime - this.createdAt.getTime();
 
                 if (this.type == WorkerEventType.CONNECT) {
-                    logger.info("Remote Desktop Event (CONNECT) for client {} started in : {}ms", socketClient.clientId(), timeToExecuteEventSeconds);
+                    logger.info("Remote Desktop Event (CONNECT) for client {} started in : {}ms", socketClient.clientId(), timeToStartEventMs);
                 }
-                if (timeToExecuteEventSeconds > 2000) {
-                    logger.warn("Remote Desktop Event ({}) for client {} slow to execute: {}ms", type, socketClient.clientId(), timeToExecuteEventSeconds);
+                if (timeToStartEventMs > 1000) {
+                    logger.warn("Remote Desktop Event ({}) for client {} slow to start: {}ms", type, socketClient.clientId(), timeToStartEventMs);
                 }
 
                 worker.run();
+
+                long eventEndTime = new Date().getTime();
+                long eventDurationMs = eventEndTime - eventStartTime;
+
+                if (this.type == WorkerEventType.CONNECT) {
+                    logger.info("Remote Desktop Event (CONNECT) for client {} completed in : {}ms", socketClient.clientId(), eventDurationMs);
+
+                } else if (this.type == WorkerEventType.MESSAGE && eventDurationMs > 1000) {
+                    logger.warn("Remote Desktop Event (MESSAGE) for client {} slow to execute: {}ms", socketClient.clientId(), timeToStartEventMs);
+                }
+
 
             } catch (Exception error) {
                 logger.error("Remote Desktop Event ({}) failed with protocol {}: {}", type, socketClient.protocol(), error.getMessage());
