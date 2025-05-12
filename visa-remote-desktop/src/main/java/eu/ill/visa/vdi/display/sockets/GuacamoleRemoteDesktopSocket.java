@@ -1,8 +1,10 @@
 package eu.ill.visa.vdi.display.sockets;
 
 import eu.ill.visa.vdi.business.services.DesktopService;
-import eu.ill.visa.vdi.domain.models.SocketClient;
+import eu.ill.visa.vdi.business.services.RemoteDesktopMetrics;
 import eu.ill.visa.vdi.display.subscribers.GuacamoleRemoteDesktopEventSubscriber;
+import eu.ill.visa.vdi.domain.models.SocketClient;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -18,6 +20,10 @@ public class GuacamoleRemoteDesktopSocket extends RemoteDesktopSocket {
 
     private GuacamoleRemoteDesktopEventSubscriber guacamoleRemoteDesktopEventSubscriber;
 
+    @Inject
+    public GuacamoleRemoteDesktopSocket(final RemoteDesktopMetrics metrics) {
+        super(metrics);
+    }
     public void setEventSubscriber(GuacamoleRemoteDesktopEventSubscriber guacamoleRemoteDesktopEventSubscriber) {
         this.guacamoleRemoteDesktopEventSubscriber = guacamoleRemoteDesktopEventSubscriber;
     }

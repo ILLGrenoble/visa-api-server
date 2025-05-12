@@ -1,9 +1,11 @@
 package eu.ill.visa.vdi.display.sockets;
 
 import eu.ill.visa.vdi.business.services.DesktopService;
+import eu.ill.visa.vdi.business.services.RemoteDesktopMetrics;
 import eu.ill.visa.vdi.display.subscribers.WebXRemoteDesktopEventSubscriber;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.webx.WebXTunnel;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -18,6 +20,11 @@ public class WebXRemoteDesktopSocket extends RemoteDesktopSocket {
     private static final Logger logger = LoggerFactory.getLogger(WebXRemoteDesktopSocket.class);
 
     private WebXRemoteDesktopEventSubscriber webXRemoteDesktopEventSubscriber;
+
+    @Inject
+    public WebXRemoteDesktopSocket(final RemoteDesktopMetrics metrics) {
+        super(metrics);
+    }
 
     public void setEventSubscriber(WebXRemoteDesktopEventSubscriber webXRemoteDesktopEventSubscriber) {
         this.webXRemoteDesktopEventSubscriber = webXRemoteDesktopEventSubscriber;

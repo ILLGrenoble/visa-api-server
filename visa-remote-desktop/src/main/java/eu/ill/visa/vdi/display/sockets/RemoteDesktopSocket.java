@@ -1,14 +1,20 @@
 package eu.ill.visa.vdi.display.sockets;
 
+import eu.ill.visa.vdi.business.services.RemoteDesktopMetrics;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.domain.models.SocketClient;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public abstract class RemoteDesktopSocket {
 
@@ -18,16 +24,20 @@ public abstract class RemoteDesktopSocket {
         MESSAGE,
     }
 
-    private record WorkerEvent(SocketClient socketClient, Runnable worker, WorkerEventType type, Date createdAt) {
+    private final RemoteDesktopMetrics metrics;
 
-        WorkerEvent(SocketClient socketClient, Runnable worker, WorkerEventType type) {
-            this(socketClient, worker, type, new Date());
+    private record WorkerEvent(RemoteDesktopMetrics metrics, SocketClient socketClient, Runnable worker, WorkerEventType type, Date createdAt) {
+
+        WorkerEvent(RemoteDesktopMetrics metrics, SocketClient socketClient, Runnable worker, WorkerEventType type) {
+            this(metrics, socketClient, worker, type, new Date());
         }
 
         public void execute() {
             try {
                 long eventStartTime = new Date().getTime();
                 long timeToStartEventMs = eventStartTime - this.createdAt.getTime();
+
+                metrics.getEventStartDelayHistogram().record(timeToStartEventMs, Attributes.of(AttributeKey.stringKey("event_type"), this.type.name()));
 
                 if (this.type == WorkerEventType.CONNECT) {
                     logger.info("Remote Desktop Event (CONNECT) for client {} started in : {}ms", socketClient.clientId(), timeToStartEventMs);
@@ -40,6 +50,8 @@ public abstract class RemoteDesktopSocket {
 
                 long eventEndTime = new Date().getTime();
                 long eventDurationMs = eventEndTime - eventStartTime;
+
+                metrics.getEventDurationHistogram().record(eventDurationMs, Attributes.of(AttributeKey.stringKey("event_type"), this.type.name()));
 
                 if (this.type == WorkerEventType.CONNECT) {
                     logger.info("Remote Desktop Event (CONNECT) for client {} completed in : {}ms", socketClient.clientId(), eventDurationMs);
@@ -64,7 +76,8 @@ public abstract class RemoteDesktopSocket {
 
     private final Executor desktopEventExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("vdi-vt-", 0).factory());;
 
-    public RemoteDesktopSocket() {
+    public RemoteDesktopSocket(final RemoteDesktopMetrics metrics) {
+        this.metrics = metrics;
     }
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {
@@ -137,15 +150,15 @@ public abstract class RemoteDesktopSocket {
 
     protected void onOpen(final SocketClient socketClient) {
         sessionQueues.put(socketClient.clientId(), new LinkedList<>());
-        this.handleEvent(new WorkerEvent(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT));
+        this.handleEvent(new WorkerEvent(this.metrics, socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT));
     }
 
     protected void onClose(final SocketClient socketClient) {
-        this.handleEvent(new WorkerEvent(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT));
+        this.handleEvent(new WorkerEvent(this.metrics, socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT));
     }
 
     protected void onMessage(final SocketClient socketClient, Runnable handler) {
-        this.handleEvent(new WorkerEvent(socketClient, handler, WorkerEventType.MESSAGE));
+        this.handleEvent(new WorkerEvent(this.metrics, socketClient, handler, WorkerEventType.MESSAGE));
     }
 
     protected abstract void sendNop(final SocketClient socketClient);
