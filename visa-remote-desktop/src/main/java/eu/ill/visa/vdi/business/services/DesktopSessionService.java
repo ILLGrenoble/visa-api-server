@@ -48,6 +48,7 @@ public class DesktopSessionService {
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
     private final EventDispatcher eventDispatcher;
     private final ConnectionThreadExecutor connectionThreadExecutor;
+    private final RemoteDesktopMetricsCalculator metricsCalculator;
 
     private final MessageBroker messageBroker;
 
@@ -66,7 +67,8 @@ public class DesktopSessionService {
                                  final VirtualDesktopConfiguration virtualDesktopConfiguration,
                                  final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
                                  final EventDispatcher eventDispatcher,
-                                 final ConnectionThreadExecutor connectionThreadExecutor) {
+                                 final ConnectionThreadExecutor connectionThreadExecutor,
+                                 final RemoteDesktopMetricsCalculator metricsCalculator) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceSessionMemberService = instanceSessionMemberService;
@@ -79,6 +81,7 @@ public class DesktopSessionService {
         this.messageBroker = messageBrokerInstance.get();
         this.eventDispatcher = eventDispatcher;
         this.connectionThreadExecutor = connectionThreadExecutor;
+        this.metricsCalculator = metricsCalculator;
 
         this.messageBroker.subscribe(UserConnectedMessage.class)
             .next((message) -> this.onUserConnected(message.sessionId(), message.clientId(), message.user()));
@@ -411,12 +414,25 @@ public class DesktopSessionService {
         synchronized (this.desktopSessionMembers) {
             desktopSession.addMember(desktopSessionMember);
             this.desktopSessionMembers.put(desktopSessionMember.clientId(), desktopSessionMember);
+
+            if (DesktopService.GUACAMOLE_PROTOCOL.equals(desktopSession.getProtocol())) {
+                metricsCalculator.getGuacamoleSessionMembers().incrementAndGet();
+            } else if (DesktopService.WEBX_PROTOCOL.equals(desktopSession.getProtocol())) {
+                metricsCalculator.getWebXSessionMembers().incrementAndGet();
+            }
         }
     }
 
     private void removeDesktopSessionMember(final DesktopSession desktopSession, final DesktopSessionMember desktopSessionMember) {
         synchronized (this.desktopSessionMembers) {
             this.desktopSessionMembers.remove(desktopSessionMember.clientId());
+
+            if (DesktopService.GUACAMOLE_PROTOCOL.equals(desktopSession.getProtocol())) {
+                metricsCalculator.getGuacamoleSessionMembers().decrementAndGet();
+            } else if (DesktopService.WEBX_PROTOCOL.equals(desktopSession.getProtocol())) {
+                metricsCalculator.getWebXSessionMembers().decrementAndGet();
+            }
+
             desktopSession.removeMember(desktopSessionMember);
             if (desktopSession.getMembers().isEmpty()) {
                 this.removeDesktopSession(desktopSession);
