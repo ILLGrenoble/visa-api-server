@@ -133,6 +133,10 @@ business:
     enabled: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_ENABLED:false}
     url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
     authToken: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_AUTH_TOKEN}
+  metrics:
+    enabled: ${VISA_METRICS_ENABLED:false}
+    hostname: ${VISA_METRICS_HOSTNAME:visa}
+    exportIntervalSeconds: ${VISA_METRICS_EXPORT_INTERVAL_SECONDS:60}
 
 broker:
   redisEnabled: ${VISA_VDI_REDIS_ENABLED:false}

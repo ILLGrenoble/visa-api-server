@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.display.sockets;
 
 import eu.ill.visa.vdi.business.services.DesktopService;
-import eu.ill.visa.vdi.business.services.RemoteDesktopMetricsCalculator;
+import eu.ill.visa.vdi.business.services.RemoteDesktopMetrics;
 import eu.ill.visa.vdi.display.subscribers.WebXRemoteDesktopEventSubscriber;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.webx.WebXTunnel;
@@ -22,7 +22,7 @@ public class WebXRemoteDesktopSocket extends RemoteDesktopSocket {
     private WebXRemoteDesktopEventSubscriber webXRemoteDesktopEventSubscriber;
 
     @Inject
-    public WebXRemoteDesktopSocket(RemoteDesktopMetricsCalculator metricsCalculator) {
+    public WebXRemoteDesktopSocket(RemoteDesktopMetrics metricsCalculator) {
         super(metricsCalculator);
     }
 

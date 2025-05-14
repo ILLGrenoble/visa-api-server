@@ -139,7 +139,7 @@ public class Metric {
             return this;
         }
 
-        public Builder hsot(String host) {
+        public Builder host(String host) {
             this.host = host;
             return this;
         }

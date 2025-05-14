@@ -43,6 +43,11 @@ public class ConfigurationProducer {
     }
 
     @Produces
+    public MetricsConfiguration metrics() {
+        return this.businessConfiguration.metrics();
+    }
+
+    @Produces
     @Unremovable
     public ErrorReportEmailConfiguration errorReportEmail() {
         return this.businessConfiguration.errorReportEmail();

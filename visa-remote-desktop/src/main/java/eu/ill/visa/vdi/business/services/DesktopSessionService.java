@@ -48,7 +48,7 @@ public class DesktopSessionService {
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
     private final EventDispatcher eventDispatcher;
     private final ConnectionThreadExecutor connectionThreadExecutor;
-    private final RemoteDesktopMetricsCalculator metricsCalculator;
+    private final RemoteDesktopMetrics metrics;
 
     private final MessageBroker messageBroker;
 
@@ -68,7 +68,7 @@ public class DesktopSessionService {
                                  final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
                                  final EventDispatcher eventDispatcher,
                                  final ConnectionThreadExecutor connectionThreadExecutor,
-                                 final RemoteDesktopMetricsCalculator metricsCalculator) {
+                                 final RemoteDesktopMetrics metrics) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceSessionMemberService = instanceSessionMemberService;
@@ -81,7 +81,7 @@ public class DesktopSessionService {
         this.messageBroker = messageBrokerInstance.get();
         this.eventDispatcher = eventDispatcher;
         this.connectionThreadExecutor = connectionThreadExecutor;
-        this.metricsCalculator = metricsCalculator;
+        this.metrics = metrics;
 
         this.messageBroker.subscribe(UserConnectedMessage.class)
             .next((message) -> this.onUserConnected(message.sessionId(), message.clientId(), message.user()));
@@ -415,10 +415,11 @@ public class DesktopSessionService {
             desktopSession.addMember(desktopSessionMember);
             this.desktopSessionMembers.put(desktopSessionMember.clientId(), desktopSessionMember);
 
+            metrics.getTotalDesktopSessionMembers().increaseBy(1L);
             if (DesktopService.GUACAMOLE_PROTOCOL.equals(desktopSession.getProtocol())) {
-                metricsCalculator.getGuacamoleSessionMembers().incrementAndGet();
+                metrics.getGuacamoleDesktopSessionMembers().increaseBy(1L);
             } else if (DesktopService.WEBX_PROTOCOL.equals(desktopSession.getProtocol())) {
-                metricsCalculator.getWebXSessionMembers().incrementAndGet();
+                metrics.getWebXDesktopSessionMembers().increaseBy(1L);
             }
         }
     }
@@ -427,10 +428,11 @@ public class DesktopSessionService {
         synchronized (this.desktopSessionMembers) {
             this.desktopSessionMembers.remove(desktopSessionMember.clientId());
 
+            metrics.getTotalDesktopSessionMembers().decreaseBy(1L);
             if (DesktopService.GUACAMOLE_PROTOCOL.equals(desktopSession.getProtocol())) {
-                metricsCalculator.getGuacamoleSessionMembers().decrementAndGet();
+                metrics.getGuacamoleDesktopSessionMembers().decreaseBy(1L);
             } else if (DesktopService.WEBX_PROTOCOL.equals(desktopSession.getProtocol())) {
-                metricsCalculator.getWebXSessionMembers().decrementAndGet();
+                metrics.getWebXDesktopSessionMembers().decreaseBy(1L);
             }
 
             desktopSession.removeMember(desktopSessionMember);

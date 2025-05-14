@@ -1,6 +1,6 @@
 package eu.ill.visa.vdi.display.sockets;
 
-import eu.ill.visa.vdi.business.services.RemoteDesktopMetricsCalculator;
+import eu.ill.visa.vdi.business.services.RemoteDesktopMetrics;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.domain.models.SocketClient;
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,18 +23,18 @@ public abstract class RemoteDesktopSocket {
         MESSAGE,
     }
 
-    private record WorkerEvent(RemoteDesktopMetricsCalculator metricsCalculator, SocketClient socketClient, Runnable worker, WorkerEventType type, Date createdAt) {
+    private record WorkerEvent(RemoteDesktopMetrics metrics, SocketClient socketClient, Runnable worker, WorkerEventType type, Instant createdAt) {
 
-        WorkerEvent(RemoteDesktopMetricsCalculator metricsCalculator, SocketClient socketClient, Runnable worker, WorkerEventType type) {
-            this(metricsCalculator, socketClient, worker, type, new Date());
+        WorkerEvent(RemoteDesktopMetrics metrics, SocketClient socketClient, Runnable worker, WorkerEventType type) {
+            this(metrics, socketClient, worker, type, Instant.now());
         }
 
         public void execute() {
             try {
                 Instant eventStartTime = Instant.now().truncatedTo(ChronoUnit.MICROS);
-                long timeToStartEventMicros = ChronoUnit.MICROS.between(eventStartTime, this.createdAt.toInstant());
+                long timeToStartEventMicros = ChronoUnit.MICROS.between(this.createdAt, eventStartTime);
 
-                this.metricsCalculator.addEventStartDelayMetric(this.type.name(), timeToStartEventMicros);
+                this.metrics.getEventStartDelayHistogram().record(timeToStartEventMicros, this.type.name());
 
                 if (this.type == WorkerEventType.CONNECT) {
                     logger.info("Remote Desktop Event (CONNECT) for client {} started in : {}ms", socketClient.clientId(), timeToStartEventMicros / 1000.0);
@@ -47,9 +46,9 @@ public abstract class RemoteDesktopSocket {
                 worker.run();
 
                 Instant eventEndTime = Instant.now().truncatedTo(ChronoUnit.MICROS);
-                long eventDurationMicros = ChronoUnit.MICROS.between(eventEndTime, eventStartTime);
+                long eventDurationMicros = ChronoUnit.MICROS.between(eventStartTime, eventEndTime);
 
-                this.metricsCalculator.addEventDurationMetric(this.type.name(), eventDurationMicros);
+                this.metrics.getEventDurationHistogram().record(eventDurationMicros, this.type.name());
 
                 if (this.type == WorkerEventType.CONNECT) {
                     logger.info("Remote Desktop Event (CONNECT) for client {} completed in : {}ms", socketClient.clientId(), eventDurationMicros / 1000.0);
@@ -66,7 +65,7 @@ public abstract class RemoteDesktopSocket {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopSocket.class);
-    private final RemoteDesktopMetricsCalculator metricsCalculator;
+    private final RemoteDesktopMetrics metrics;
 
     private RemoteDesktopConnectSubscriber connectSubscriber;
     private RemoteDesktopDisconnectSubscriber disconnectSubscriber;
@@ -75,8 +74,8 @@ public abstract class RemoteDesktopSocket {
 
     private final Executor desktopEventExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("vdi-vt-", 0).factory());;
 
-    public RemoteDesktopSocket(final RemoteDesktopMetricsCalculator metricsCalculator) {
-        this.metricsCalculator = metricsCalculator;
+    public RemoteDesktopSocket(final RemoteDesktopMetrics metrics) {
+        this.metrics = metrics;
     }
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {
@@ -149,15 +148,15 @@ public abstract class RemoteDesktopSocket {
 
     protected void onOpen(final SocketClient socketClient) {
         sessionQueues.put(socketClient.clientId(), new LinkedList<>());
-        this.handleEvent(new WorkerEvent(this.metricsCalculator, socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT));
+        this.handleEvent(new WorkerEvent(this.metrics, socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT));
     }
 
     protected void onClose(final SocketClient socketClient) {
-        this.handleEvent(new WorkerEvent(this.metricsCalculator, socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT));
+        this.handleEvent(new WorkerEvent(this.metrics, socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT));
     }
 
     protected void onMessage(final SocketClient socketClient, Runnable handler) {
-        this.handleEvent(new WorkerEvent(this.metricsCalculator, socketClient, handler, WorkerEventType.MESSAGE));
+        this.handleEvent(new WorkerEvent(this.metrics, socketClient, handler, WorkerEventType.MESSAGE));
     }
 
     protected abstract void sendNop(final SocketClient socketClient);

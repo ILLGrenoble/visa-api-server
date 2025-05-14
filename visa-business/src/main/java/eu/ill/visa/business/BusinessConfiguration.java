@@ -16,4 +16,6 @@ public interface BusinessConfiguration {
     SecurityGroupServiceClientConfiguration securityGroupServiceClient();
 
     ErrorReportEmailConfiguration errorReportEmail();
+
+    MetricsConfiguration metrics();
 }

@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record LongHistogram(String name, ArrayList<HistogramRecord<Long>> values) implements MetricProvider {
+public record LongHistogram(String name, String hostname, ArrayList<HistogramRecord<Long>> values) implements MetricProvider {
 
-    LongHistogram(String name) {
-        this(name, new ArrayList<>());
+    public LongHistogram(String name, String hostname) {
+        this(name, hostname, new ArrayList<>());
     }
 
     public void record(Long value) {
@@ -51,42 +51,46 @@ public record LongHistogram(String name, ArrayList<HistogramRecord<Long>> values
 
             metrics.add(Metric.builder()
                 .name(name)
+                .host(hostname)
                 .attribute(attribute)
                 .statistic((double) sum)
                 .type(MetricType.SUM)
                 .recordCount((long) values.size())
                 .periodStart(minTimestamp)
-                .periodEnd(maxTimestamp) // Set appropriate unit
+                .periodEnd(maxTimestamp)
                 .build());
 
             metrics.add(Metric.builder()
                 .name(name)
+                .host(hostname)
                 .attribute(attribute)
                 .statistic(average)
                 .type(MetricType.MEAN)
                 .recordCount((long) values.size())
                 .periodStart(minTimestamp)
-                .periodEnd(maxTimestamp) // Set appropriate unit
+                .periodEnd(maxTimestamp)
                 .build());
 
             metrics.add(Metric.builder()
                 .name(name)
+                .host(hostname)
                 .attribute(attribute)
                 .statistic((double) min)
                 .type(MetricType.MIN)
                 .recordCount((long) values.size())
                 .periodStart(minTimestamp)
-                .periodEnd(maxTimestamp) // Set appropriate unit
+                .periodEnd(maxTimestamp)
                 .build());
 
             metrics.add(Metric.builder()
                 .name(name)
+                .host(hostname)
                 .attribute(attribute)
                 .statistic((double) max)
                 .type(MetricType.MAX)
                 .recordCount((long) values.size())
                 .periodStart(minTimestamp)
-                .periodEnd(maxTimestamp) // Set appropriate unit
+                .periodEnd(maxTimestamp)
                 .build());
         });
 

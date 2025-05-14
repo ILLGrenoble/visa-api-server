@@ -1,6 +1,7 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.SignatureConfiguration;
+import io.quarkus.runtime.Startup;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -21,6 +22,7 @@ import java.util.Base64;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@Startup
 @Singleton
 public class SignatureService {
 
