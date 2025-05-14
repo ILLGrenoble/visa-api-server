@@ -6,9 +6,13 @@ import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public abstract class RemoteDesktopSocket {
 
@@ -18,16 +22,16 @@ public abstract class RemoteDesktopSocket {
         MESSAGE,
     }
 
-    private record WorkerEvent(SocketClient socketClient, Runnable worker, WorkerEventType type, Date createdAt) {
+    private record WorkerEvent(SocketClient socketClient, Runnable worker, WorkerEventType type, Instant createdAt) {
 
         WorkerEvent(SocketClient socketClient, Runnable worker, WorkerEventType type) {
-            this(socketClient, worker, type, new Date());
+            this(socketClient, worker, type, Instant.now());
         }
 
         public void execute() {
             try {
-                long eventStartTime = new Date().getTime();
-                long timeToStartEventMs = eventStartTime - this.createdAt.getTime();
+                Instant eventStartTime = Instant.now().truncatedTo(ChronoUnit.MICROS);
+                double timeToStartEventMs = 0.001 * ChronoUnit.MICROS.between(this.createdAt, eventStartTime);
 
                 if (this.type == WorkerEventType.CONNECT) {
                     logger.info("Remote Desktop Event (CONNECT) for client {} started in : {}ms", socketClient.clientId(), timeToStartEventMs);
@@ -38,8 +42,8 @@ public abstract class RemoteDesktopSocket {
 
                 worker.run();
 
-                long eventEndTime = new Date().getTime();
-                long eventDurationMs = eventEndTime - eventStartTime;
+                Instant eventEndTime = Instant.now().truncatedTo(ChronoUnit.MICROS);
+                double eventDurationMs = 0.001 * ChronoUnit.MICROS.between(eventStartTime, eventEndTime);
 
                 if (this.type == WorkerEventType.CONNECT) {
                     logger.info("Remote Desktop Event (CONNECT) for client {} completed in : {}ms", socketClient.clientId(), eventDurationMs);
