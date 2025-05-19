@@ -1,3 +1,10 @@
+3.3.1 19/05/2025
+================
+ * Update webx-relay and send the webx-client version in the ClientConfiguration
+ * more logging on remote desktop events (warning on slow event handling, info on connection times)
+ * add logging on remote desktop connection event
+ * Use Instant rather than Date for remote desktop event timing.
+
 3.3.0 06/05/2025
 ================
  * Set a maximum inactivity time for each session: upon reaching this time the session is automatically disconnected.
