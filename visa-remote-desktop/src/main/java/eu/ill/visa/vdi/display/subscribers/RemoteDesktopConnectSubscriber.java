@@ -20,8 +20,7 @@ import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static eu.ill.visa.vdi.domain.models.SessionEvent.ACCESS_DENIED;
-import static eu.ill.visa.vdi.domain.models.SessionEvent.OWNER_AWAY_EVENT;
+import static eu.ill.visa.vdi.domain.models.SessionEvent.*;
 
 public class RemoteDesktopConnectSubscriber {
 
@@ -104,7 +103,7 @@ public class RemoteDesktopConnectSubscriber {
 
         } catch (ConnectionException exception) {
             logger.error(exception.getMessage());
-            this.eventDispatcher.sendEventToClient(socketClient.clientId(), ACCESS_DENIED);
+            this.eventDispatcher.sendEventToClient(socketClient.clientId(), USER_DISCONNECTED_EVENT);
             socketClient.disconnect();
         }
     }
