@@ -30,12 +30,33 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNullElse;
+import static java.util.Map.entry;
 
 @ApplicationScoped
 public class WebXDesktopService extends DesktopService {
 
     private static final Logger logger = LoggerFactory.getLogger(WebXDesktopService.class);
     private static final String WEBX_CLIENT_VERSION = "client-version";
+
+    private final static Map<String, String> KeyboardLayoutConversion = Map.ofEntries(
+        entry("en-gb-qwerty", "gb"),
+        entry("en-us-qwerty", "us"),
+        entry("fr-fr-azerty", "fr"),
+        entry("de-de-qwertz", "de"),
+        entry("fr-be-azerty", "be"),
+        entry("fr-ch-qwertz", "ch(fr)"),
+        entry("hu-hu-qwertz", "hu"),
+        entry("it-it-qwerty", "it"),
+        entry("ja-jp-qwerty", "jp"),
+        entry("pt-br-qwerty", "br"),
+        entry("es-es-qwerty", "es"),
+        entry("es-latam-qwerty", "latam"),
+        entry("sv-se-qwerty", "se"),
+        entry("tr-tr-qwerty", "tr"),
+        entry("da-dk-qwerty", "dk"),
+        entry("de-ch-qwertz", "ch(de)"),
+        entry("no-no-qwerty", "no")
+    );
 
     private final InstanceSessionService instanceSessionService;
     private final SignatureService signatureService;
@@ -69,7 +90,7 @@ public class WebXDesktopService extends DesktopService {
             if (autologin != null && autologin.equals("VISA_PAM")) {
                 password =  signatureService.createSignature(username);
             }
-            String keyboardLayout = instance.getKeyboardLayout();
+            String keyboardLayout = KeyboardLayoutConversion.getOrDefault(instance.getKeyboardLayout(), instance.getKeyboardLayout());
 
             return WebXClientConfiguration.ForLogin(username, password, screenWidth, screenHeight, keyboardLayout, clientVersion);
 
