@@ -2,6 +2,7 @@ package eu.ill.visa.broker.brokers.redis;
 
 import eu.ill.visa.broker.MessageSubscriptionList;
 import eu.ill.visa.broker.domain.exceptions.MessageMarshallingException;
+import eu.ill.visa.core.domain.Timer;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
@@ -30,9 +32,12 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
     private static final Logger logger = LoggerFactory.getLogger(RedisMessageBrokerPubSub.class);
 
     private final static String CHANNEL = "VISA_MESSAGE_BROKER";
+    private static final int CONNECTION_RETRY_SECONDS = 5;
 
-    private final PubSubCommands.RedisSubscriber subscriber;
+    private PubSubCommands.RedisSubscriber subscriber;
     private final PubSubCommands<RedisMessageCarrier> publisher;
+    private final RedisPubSubHealthMonitor healthMonitor;
+    private boolean isRunning = false;
 
     private final List<MessageSubscriptionList<?>> subscriptionLists = new ArrayList<>();
 
@@ -40,11 +45,23 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
 
     public RedisMessageBrokerPubSub(final RedisDataSource redisDataSource) {
         this.publisher = redisDataSource.pubsub(RedisMessageCarrier.class);
-        this.subscriber = this.publisher.subscribe(CHANNEL, this);
+        logger.info("Starting Redis pub/sub message broker...");
+
+        this.subscribeToRedis();
+        this.healthMonitor = new RedisPubSubHealthMonitor(this.publisher, () -> {
+            logger.warn("Redis pub/sub message broker connection lost: handling reconnection...");
+            this.subscribeToRedis();
+        });
+        this.isRunning = true;
     }
 
     public void shutdown() {
-        this.subscriber.unsubscribe();
+        if (!this.isRunning) {
+            return;
+        }
+        this.isRunning = false;
+        this.healthMonitor.stop();
+        this.unsubscribe();
     }
 
     @Override
@@ -65,6 +82,32 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
     public <T> void broadcast(T message) {
         RedisMessageCarrier remoteDesktopMessage = new RedisMessageCarrier(message);
         this.publisher.publish(CHANNEL, remoteDesktopMessage);
+    }
+
+    private void subscribeToRedis() {
+        try {
+            this.unsubscribe();
+            this.subscriber = this.publisher.subscribe(CHANNEL, this);
+
+            logger.info("... subscribed to Redis pub/sub message broker");
+
+        } catch (Exception e) {
+            if (this.isRunning) {
+                logger.error("Error while subscribing Redis pub/sub message broker. Retrying in {} seconds...", CONNECTION_RETRY_SECONDS);
+                Timer.setTimeout(this::subscribeToRedis, CONNECTION_RETRY_SECONDS, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+    private void unsubscribe() {
+        if (this.subscriber != null) {
+            try {
+                this.subscriber.unsubscribe(CHANNEL);
+            } catch (Exception e) {
+                // Ignore
+            }
+            this.subscriber = null;
+        }
     }
 
     private void runAsync(final RedisEventHandler eventHandler) {
