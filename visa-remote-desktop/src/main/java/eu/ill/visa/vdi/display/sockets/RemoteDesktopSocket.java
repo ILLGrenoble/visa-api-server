@@ -47,7 +47,7 @@ public abstract class RemoteDesktopSocket {
                     logger.info("Remote Desktop Event (CONNECT) for client {} completed in : {}ms", socketClient.clientId(), eventDurationMs);
 
                 } else if (this.type == WorkerEventType.MESSAGE && eventDurationMs > 1000) {
-                    logger.warn("Remote Desktop Event (MESSAGE) for client {} slow to execute: {}ms", socketClient.clientId(), timeToStartEventMs);
+                    logger.warn("Remote Desktop Event (MESSAGE) for client {} slow to execute: {}ms", socketClient.clientId(), eventDurationMs);
                 }
 
             } catch (Exception error) {
