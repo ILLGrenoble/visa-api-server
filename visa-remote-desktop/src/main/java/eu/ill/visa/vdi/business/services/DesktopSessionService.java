@@ -265,10 +265,7 @@ public class DesktopSessionService {
             instanceService.updatePartial(instance);
 
             final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
-            if (instanceSessionMember == null) {
-                logger.warn("Instance session member not found for instance {}", desktopSession.getInstanceId());
-
-            } else {
+            if (instanceSessionMember != null) {
                 instanceSessionMember.setLastInteractionAt(remoteDesktopConnection.getLastInteractionAt());
                 instanceSessionMemberService.updateInteractionAt(instanceSessionMember);
 
