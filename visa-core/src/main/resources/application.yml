@@ -46,6 +46,8 @@ quarkus:
      - -march=compatibility
   security:
     security-providers: BC
+  vertx:
+    warning-exception-time: ${VISA_VERTX_WARNING_EXCEPTION_TIME:10S}
   log:
     console:
       filter: error-email-filter
