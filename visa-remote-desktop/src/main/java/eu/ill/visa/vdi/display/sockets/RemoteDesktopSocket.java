@@ -51,7 +51,7 @@ public abstract class RemoteDesktopSocket {
                 }
 
             } catch (Exception error) {
-                logger.error("Remote Desktop Event ({}) failed with protocol {}: {}", type, socketClient.protocol(), error.getMessage());
+                logger.error("Remote Desktop Event ({}) for socket client {} failed with protocol {}", type, socketClient.clientId(), socketClient.protocol(), error);
             }
         }
     }

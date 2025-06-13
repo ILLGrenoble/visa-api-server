@@ -24,7 +24,7 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
                 runnable.run();
 
             } catch (Exception error) {
-                logger.error("Handling of Redis message failed: {}", error.getMessage());
+                logger.error("Handling of Redis message failed", error);
             }
         }
     }
@@ -43,15 +43,15 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
 
     private final Executor messageHandlerExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("redis-vt-", 0).factory());;
 
-    public RedisMessageBrokerPubSub(final RedisDataSource redisDataSource) {
+    public RedisMessageBrokerPubSub(final RedisDataSource redisDataSource, boolean healthMonitorEnabled) {
         this.publisher = redisDataSource.pubsub(RedisMessageCarrier.class);
         logger.info("Starting Redis pub/sub message broker...");
 
         this.subscribeToRedis();
-        this.healthMonitor = new RedisPubSubHealthMonitor(this.publisher, () -> {
+        this.healthMonitor = healthMonitorEnabled ? new RedisPubSubHealthMonitor(this.publisher, () -> {
             logger.warn("Redis pub/sub message broker connection lost: handling reconnection...");
             this.subscribeToRedis();
-        });
+        }) : null;
         this.isRunning = true;
     }
 
@@ -60,7 +60,9 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
             return;
         }
         this.isRunning = false;
-        this.healthMonitor.stop();
+        if (this.healthMonitor != null) {
+            this.healthMonitor.stop();
+        }
         this.unsubscribe();
     }
 
@@ -81,7 +83,12 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
 
     public <T> void broadcast(T message) {
         RedisMessageCarrier remoteDesktopMessage = new RedisMessageCarrier(message);
-        this.publisher.publish(CHANNEL, remoteDesktopMessage);
+
+        // Publish the message on a virtual thread to avoid blocking the main thread
+        // Observations show that his can sometimes end in a timeout
+        Thread.startVirtualThread(() ->
+            this.publisher.publish(CHANNEL, remoteDesktopMessage)
+        );
     }
 
     private void subscribeToRedis() {

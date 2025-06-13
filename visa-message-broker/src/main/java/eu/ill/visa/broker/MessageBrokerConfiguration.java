@@ -14,4 +14,6 @@ public interface MessageBrokerConfiguration {
     Optional<String> redisPassword();
 
     Integer redisDatabase();
+
+    boolean redisHealthMonitorEnabled();
 }

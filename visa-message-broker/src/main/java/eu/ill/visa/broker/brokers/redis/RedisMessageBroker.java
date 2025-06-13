@@ -19,7 +19,7 @@ public class RedisMessageBroker implements MessageBroker {
     public RedisMessageBroker(final RedisDataSource redisDataSource,
                               final MessageBrokerConfiguration configuration) {
         logger.info("Enabling redis message broker at {}, using db {}", configuration.redisURL().get(), configuration.redisDatabase());
-        this.redisPubSub = new RedisMessageBrokerPubSub(redisDataSource);
+        this.redisPubSub = new RedisMessageBrokerPubSub(redisDataSource, configuration.redisHealthMonitorEnabled());
     }
 
     @Override

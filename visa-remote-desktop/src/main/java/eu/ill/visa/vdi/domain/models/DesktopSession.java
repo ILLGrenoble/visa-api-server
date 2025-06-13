@@ -34,7 +34,7 @@ public class DesktopSession {
     }
 
     public List<DesktopSessionMember> getMembers() {
-        return members;
+        return new ArrayList<>(members);
     }
 
     public Stream<DesktopSessionMember> filterMembers(final Predicate<DesktopSessionMember> predicate) {
