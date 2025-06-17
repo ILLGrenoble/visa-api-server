@@ -192,7 +192,7 @@ public class ActiveEmailHandler implements EmailHandler {
                 logger.error("Error sending email: {}", exception.getMessage());
             }
         } else {
-            logger.warn("Unable to send instance created email, $VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS is not configured");
+            logger.warn("Unable to send instance created email, $VISA_NOTIFICATION_EMAIL_ADAPTER_DEV_EMAIL_ADDRESS is not configured");
         }
     }
 
