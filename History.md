@@ -1,3 +1,15 @@
+3.3.2 17/06/2025
+================
+ * Increase vertx warning exception time to 10s
+ * Remove warning log when instance session member not found (can happen if the master api with the scheduler running is restarted but the session is on another server). 
+ * update webx-relay to 1.6.0
+ * Map guacamole long-name keyboard layouts to webx shortened ones.
+ * Fix logging error on slow execution of VDI messages
+ * Add a redis health monitor (optional... beta testing). Check pub-sub connection to redis every 10s. If subscriber fails then re-create the subscription.
+ * Use virtual thread to publish redis messages: potential timeouts (from thread locks?).
+ * Remove all explicit threading from the desktop message handling: run on the same websocket thread (blocking).
+ * Add DesktopExecutorService to create a thread pool (system threads) for the creation/deletion of VDI sessions. Use a completable future to block to websocket request until the actions have completed. 
+
 3.3.1 19/05/2025
 ================
  * Update webx-relay and send the webx-client version in the ClientConfiguration
