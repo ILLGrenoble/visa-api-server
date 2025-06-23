@@ -60,6 +60,10 @@ public class InstanceSessionService {
         return this.repository.getByInstance(instance);
     }
 
+    public InstanceSession getLastByInstance(@NotNull Instance instance) {
+        return this.repository.getLastByInstance(instance);
+    }
+
     public List<InstanceSession> getAllByInstance(@NotNull Instance instance) {
         return this.repository.getAllByInstance(instance);
     }

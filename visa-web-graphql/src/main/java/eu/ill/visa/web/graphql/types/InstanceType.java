@@ -29,6 +29,7 @@ public class InstanceType {
     private final @NotNull String keyboardLayout;
     private final Long cloudId;
     private final String computeId;
+    private final String vdiProtocol;
 
     public InstanceType(final Instance instance) {
         this.id = instance.getId();
@@ -46,6 +47,7 @@ public class InstanceType {
         this.keyboardLayout = instance.getKeyboardLayout();
         this.cloudId = instance.getCloudId();
         this.computeId = instance.getComputeId();
+        this.vdiProtocol = instance.getVdiProtocol() != null ? instance.getVdiProtocol().getName() : null;
     }
 
     public Long getId() {
@@ -108,5 +110,9 @@ public class InstanceType {
     @JsonIgnore
     public String getComputeId() {
         return computeId;
+    }
+
+    public String getVdiProtocol() {
+        return vdiProtocol;
     }
 }

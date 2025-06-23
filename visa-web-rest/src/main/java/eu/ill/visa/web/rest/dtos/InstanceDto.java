@@ -31,6 +31,7 @@ public class InstanceDto {
     private final String keyboardLayout;
     private boolean unrestrictedAccess;
     private final List<String> activeProtocols;
+    private final String vdiProtocol;
 
     public InstanceDto(Instance instance) {
         this.id = instance.getId();
@@ -53,6 +54,7 @@ public class InstanceDto {
         this.deleteRequested = instance.getDeleteRequested();
         this.keyboardLayout = instance.getKeyboardLayout();
         this.activeProtocols = instance.getActiveProtocols();
+        this.vdiProtocol = instance.getVdiProtocol().getName();
     }
 
     public Long getId() {
@@ -157,5 +159,9 @@ public class InstanceDto {
 
     public List<String> getActiveProtocols() {
         return activeProtocols;
+    }
+
+    public String getVdiProtocol() {
+        return vdiProtocol;
     }
 }

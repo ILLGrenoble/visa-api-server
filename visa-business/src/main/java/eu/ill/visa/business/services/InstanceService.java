@@ -430,4 +430,7 @@ public class InstanceService {
         this.repository.updatePartialById(instance);
     }
 
+    public void updateVdiProtocolById(Instance instance) {
+        this.repository.updateVdiProtocolById(instance);
+    }
 }

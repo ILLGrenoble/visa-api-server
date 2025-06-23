@@ -623,6 +623,13 @@ public class InstanceRepository extends AbstractRepository<Instance> {
             .executeUpdate();
     }
 
+    public void updateVdiProtocolById(Instance instance) {
+        getEntityManager().createNamedQuery("instance.updateVdiProtocolById")
+            .setParameter("id", instance.getId())
+            .setParameter("vdiProtocol", instance.getVdiProtocol())
+            .executeUpdate();
+    }
+
 
     protected static final class InstanceRequestContext {
         private final Root<Instance> root;

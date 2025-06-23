@@ -25,6 +25,9 @@ public class InstanceUpdatorDto {
     @NotNull
     private Boolean unrestrictedAccess;
 
+    @NotNull
+    private String vdiProtocol;
+
     public String getName() {
         return name;
     }
@@ -71,5 +74,13 @@ public class InstanceUpdatorDto {
 
     public void setUnrestrictedAccess(Boolean unrestrictedAccess) {
         this.unrestrictedAccess = unrestrictedAccess;
+    }
+
+    public String getVdiProtocol() {
+        return vdiProtocol;
+    }
+
+    public void setVdiProtocol(String vdiProtocol) {
+        this.vdiProtocol = vdiProtocol;
     }
 }

@@ -173,6 +173,11 @@ import java.util.List;
             SET i.lastSeenAt = :lastSeenAt, i.lastInteractionAt = :lastInteractionAt
             WHERE i.id = :id
     """),
+    @NamedQuery(name = "instance.updateVdiProtocolById", query = """
+            UPDATE Instance i
+            SET i.vdiProtocol = :vdiProtocol
+            WHERE i.id = :id
+    """),
     @NamedQuery(name = "instance.countByFlavour", query = """
             SELECT new eu.ill.visa.core.entity.partial.NumberInstancesByFlavour(f.id, f.name, COUNT(i.id))
             FROM Instance i
@@ -293,6 +298,9 @@ public class Instance extends Timestampable {
     @Column(name = "state_hash", nullable = true)
     private Integer stateHash;
 
+    @ManyToOne
+    @JoinColumn(name = "vdi_protocol", foreignKey = @ForeignKey(name = "fk_vdi_protocol_id"), nullable = true)
+    private ImageProtocol vdiProtocol;
 
     public Instance() {
     }
@@ -313,6 +321,7 @@ public class Instance extends Timestampable {
         this.members.addAll(builder.members);
         this.experiments.addAll(builder.experiments);
         this.attributes.addAll(builder.attributes);
+        this.vdiProtocol = builder.vdiProtocol;
     }
 
     public static Builder builder() {
@@ -657,7 +666,16 @@ public class Instance extends Timestampable {
             .append(deleteRequested)
             .append(unrestrictedMemberAccess)
             .append(activeProtocols)
+            .append(vdiProtocol)
             .toHashCode();
+    }
+
+    public ImageProtocol getVdiProtocol() {
+        return vdiProtocol;
+    }
+
+    public void setVdiProtocol(ImageProtocol vdiProtocol) {
+        this.vdiProtocol = vdiProtocol;
     }
 
     @Transient
@@ -732,8 +750,9 @@ public class Instance extends Timestampable {
         private List<InstanceMember> members = new ArrayList<>();
         private List<Experiment> experiments = new ArrayList<>();
         private Date lastSeenAt;
-        private String                  keyboardLayout;
+        private String keyboardLayout;
         private List<InstanceAttribute> attributes = new ArrayList<>();
+        private ImageProtocol vdiProtocol;
 
         private Builder() {
         }
@@ -815,6 +834,11 @@ public class Instance extends Timestampable {
 
         public Builder attributes(List<InstanceAttribute> attributes) {
             this.attributes = attributes;
+            return this;
+        }
+
+        public Builder vdiProtocol(ImageProtocol vdiProtocol) {
+            this.vdiProtocol = vdiProtocol;
             return this;
         }
 
