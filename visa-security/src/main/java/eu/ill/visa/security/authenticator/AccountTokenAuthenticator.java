@@ -90,7 +90,8 @@ public class AccountTokenAuthenticator {
             // Make REST API call to Accounts Service
             return this.accountsServiceClient.getAccountToken(jwt);
         } catch (UnauthorizedRuntimeException unauthorizedRuntimeException) {
-            logger.warn(unauthorizedRuntimeException.getMessage());
+            // Remove logging: doesn't add any information and occurs from gateway auto-reconnection
+//            logger.warn(unauthorizedRuntimeException.getMessage());
 
         } catch (RuntimeException runtimeException) {
             logger.error(runtimeException.getMessage());

@@ -15,12 +15,14 @@ public class InstanceSessionType {
     private final @NotNull boolean current;
     @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long instanceId;
+    private final @NotNull String protocol;
 
     public InstanceSessionType(final InstanceSession session) {
         this.id = session.getId();
         this.connectionId = session.getConnectionId();
         this.current = session.getCurrent();
         this.instanceId = session.getInstanceId();
+        this.protocol = session.getProtocol();
     }
 
     public Long getId() {
@@ -37,5 +39,9 @@ public class InstanceSessionType {
 
     public @NotNull Long getInstanceId() {
         return instanceId;
+    }
+
+    public @NotNull String getProtocol() {
+        return protocol;
     }
 }

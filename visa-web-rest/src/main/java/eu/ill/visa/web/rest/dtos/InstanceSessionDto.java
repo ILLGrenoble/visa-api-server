@@ -8,12 +8,14 @@ public class InstanceSessionDto {
     private final String connectionId;
     private final Long instanceId;
     private final boolean current;
+    private final String protocol;
 
     public InstanceSessionDto(final InstanceSession instanceSession) {
         this.id = instanceSession.getId();
         this.connectionId = instanceSession.getConnectionId();
         this.instanceId = instanceSession.getInstanceId();
         this.current = instanceSession.getCurrent();
+        this.protocol = instanceSession.getProtocol();
     }
 
     public Long getId() {
@@ -30,5 +32,9 @@ public class InstanceSessionDto {
 
     public boolean isCurrent() {
         return current;
+    }
+
+    public String getProtocol() {
+        return protocol;
     }
 }
