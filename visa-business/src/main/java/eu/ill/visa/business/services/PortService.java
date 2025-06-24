@@ -19,17 +19,8 @@ public class PortService {
         this.portCheckTimeoutMs =configuration.instance().portCheckTimeoutMs();
     }
 
-    public boolean areMandatoryPortsOpen(String hostname, List<ImageProtocol> protocols) {
-        if (!protocols.isEmpty()) {
-            for (ImageProtocol protocol : protocols) {
-                if (!protocol.isOptional() && !isPortOpen(hostname, protocol.getPort())) {
-                    return false;
-                }
-            }
-        } else {
-            return false;
-        }
-        return true;
+    public boolean isVdiPortOpen(String hostname, ImageProtocol vdiProtocol) {
+        return isPortOpen(hostname, vdiProtocol.getPort());
     }
 
     public List<ImageProtocol> getActiveProtocols(String hostname, List<ImageProtocol> protocols) {

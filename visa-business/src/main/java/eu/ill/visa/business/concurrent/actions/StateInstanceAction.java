@@ -65,7 +65,8 @@ public class StateInstanceAction extends InstanceAction {
                         final Plan plan = instance.getPlan();
                         final Image image = plan.getImage();
                         final List<ImageProtocol> protocols = image.getProtocols();
-                        boolean instanceIsUpAndRunning = this.getPortService().areMandatoryPortsOpen(cloudInstance.getAddress(), protocols);
+                        final ImageProtocol vdiProtocol = instance.getVdiProtocol() != null ? instance.getVdiProtocol() : getImageService().getDefaultVdiProtocolForImage(image);
+                        boolean instanceIsUpAndRunning = this.getPortService().isVdiPortOpen(cloudInstance.getAddress(), vdiProtocol);
                         if (!instanceIsUpAndRunning) {
                             instanceState = InstanceState.STARTING;
 

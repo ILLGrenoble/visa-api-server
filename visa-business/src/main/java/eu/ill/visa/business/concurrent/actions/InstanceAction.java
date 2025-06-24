@@ -58,6 +58,10 @@ public abstract class InstanceAction {
         return this.serviceProvider.getPortService();
     }
 
+    public ImageService getImageService() {
+        return this.serviceProvider.getImageService();
+    }
+
     public EventDispatcher getEventDispatcher() {
         return this.serviceProvider.getEventDispatcher();
     }

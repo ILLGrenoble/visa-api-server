@@ -26,6 +26,7 @@ public class InstanceActionServiceProvider {
     private final SignatureService signatureService;
     private final CloudClientService cloudClientService;
     private final PortService portService;
+    private final ImageService imageService;
     private final EventDispatcher eventDispatcher;
 
 
@@ -40,6 +41,7 @@ public class InstanceActionServiceProvider {
                                          final EmailManager emailManager,
                                          final SignatureService signatureService,
                                          final PortService portService,
+                                         final ImageService imageService,
                                          final EventDispatcher eventDispatcher) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
@@ -51,6 +53,7 @@ public class InstanceActionServiceProvider {
         this.emailManager = emailManager;
         this.signatureService = signatureService;
         this.portService = portService;
+        this.imageService = imageService;
         this.eventDispatcher = eventDispatcher;
     }
 
@@ -102,6 +105,10 @@ public class InstanceActionServiceProvider {
 
     public PortService getPortService() {
         return portService;
+    }
+
+    public ImageService getImageService() {
+        return imageService;
     }
 
     public EventDispatcher getEventDispatcher() {
