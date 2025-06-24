@@ -305,9 +305,14 @@ public class AccountInstanceController extends AbstractController {
                 throw new BadRequestException("Invalid keyboard layout provided");
             }
 
-            final ImageProtocol dtoVdiProtocol = instanceUpdatorDto.getVdiProtocol() == null ? null : imageProtocolService.getByName(instanceUpdatorDto.getVdiProtocol());
-            logger.warn("Update of instance VDI protocol cannot be done because protocol {} is not known", instanceUpdatorDto.getVdiProtocol());
-            final ImageProtocol vdiProtocol = dtoVdiProtocol == null ? instance.getVdiProtocol() : dtoVdiProtocol;
+            ImageProtocol vdiProtocol = null;
+            if (instanceUpdatorDto.getVdiProtocolId() != null) {
+                vdiProtocol = this.imageProtocolService.getById(instanceUpdatorDto.getVdiProtocolId());
+                if (vdiProtocol == null) {
+                    vdiProtocol = instance.getVdiProtocol();
+                    logger.warn("Unable to find ImageProtocol with Id {}. Not updating the instance protocol", instanceUpdatorDto.getVdiProtocolId());
+                }
+            }
 
             instance.setName(instanceUpdatorDto.getName());
             instance.setComments(instanceUpdatorDto.getComments());

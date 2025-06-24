@@ -1,5 +1,6 @@
 package eu.ill.visa.business.gateway.events;
 
+import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -18,7 +19,8 @@ public record InstanceStateChangedEvent(Long instanceId,
                                         Date expirationDate,
                                         Boolean deleteRequested,
                                         Boolean unrestrictedMemberAccess,
-                                        List<String> activeProtocols) {
+                                        List<String> activeProtocols,
+                                        ImageProtocol vdiProtocol) {
 
 
     public InstanceStateChangedEvent(final Instance instance) {
@@ -32,7 +34,8 @@ public record InstanceStateChangedEvent(Long instanceId,
             instance.getExpirationDate() != null ? instance.getExpirationDate() : instance.getTerminationDate(),
             instance.getDeleteRequested(),
             instance.canAccessWhenOwnerAway(),
-            instance.getActiveProtocols()
+            instance.getActiveProtocols(),
+            instance.getVdiProtocol()
         );
     }
 }
