@@ -223,6 +223,15 @@ public class AccountInstanceController extends AbstractController {
         final Plan plan = planService.getById(dto.getPlanId());
         checkNotNull(plan, "Invalid plan");
 
+        final ImageProtocol defaultVdiProtocol = this.imageService.getDefaultVdiProtocolForImage(plan.getImage());
+        ImageProtocol vdiProtocol= defaultVdiProtocol;
+        if (dto.getVdiProtocolId() != null) {
+            vdiProtocol = this.imageProtocolService.getById(dto.getVdiProtocolId());
+            if (vdiProtocol == null) {
+                vdiProtocol = defaultVdiProtocol;
+                logger.warn("Unable to find ImageProtocol with Id {}. Using default image protocol: {}", dto.getVdiProtocolId(), vdiProtocol.getName());
+            }
+        }
 
         // Verify user has access to experiments
         List<Experiment> experiments = new ArrayList<>();
@@ -273,7 +282,7 @@ public class AccountInstanceController extends AbstractController {
             .member(user, OWNER)
             .experiments(experiments)
             .attributes(instanceAttributes)
-            .vdiProtocol(this.imageService.getDefaultVdiProtocolForImage(plan.getImage()));
+            .vdiProtocol(vdiProtocol);
 
         Instance instance = instanceService.create(instanceBuilder);
 

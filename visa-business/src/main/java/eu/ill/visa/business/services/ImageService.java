@@ -17,11 +17,13 @@ public class ImageService {
 
     private final ImageRepository repository;
     private final String defaultVdiProtocol;
+    private final ImageProtocolService imageProtocolService;
 
     @Inject
-    public ImageService(ImageRepository repository, InstanceConfiguration instanceConfiguration) {
+    public ImageService(ImageRepository repository, InstanceConfiguration instanceConfiguration, ImageProtocolService imageProtocolService) {
         this.repository = repository;
         this.defaultVdiProtocol = instanceConfiguration.defaultVdiProtocol();
+        this.imageProtocolService = imageProtocolService;
     }
 
     public List<Image> getAll() {
@@ -55,12 +57,13 @@ public class ImageService {
 
         final ImageProtocol guacamoleProtocol = image.getProtocols().stream().filter(imageProtocol -> imageProtocol.getName().equals("GUACD")).findFirst().orElse(null);
         final ImageProtocol webXProtocol = image.getProtocols().stream().filter(imageProtocol -> imageProtocol.getName().equals("WEBX")).findFirst().orElse(null);
+        final ImageProtocol defaultProtocol = imageProtocolService.getByName(this.defaultVdiProtocol);
 
         if (this.defaultVdiProtocol.equals("GUACD")) {
-            return (guacamoleProtocol != null) ? guacamoleProtocol : webXProtocol;
+            return guacamoleProtocol != null ? guacamoleProtocol : webXProtocol != null ? webXProtocol : defaultProtocol;
 
         } else {
-            return (webXProtocol != null) ? webXProtocol : guacamoleProtocol;
+            return webXProtocol != null ? webXProtocol : guacamoleProtocol != null ? guacamoleProtocol : defaultProtocol;
         }
     }
 }

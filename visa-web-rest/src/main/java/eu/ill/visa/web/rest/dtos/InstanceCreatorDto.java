@@ -32,6 +32,8 @@ public class InstanceCreatorDto {
     @NotNull
     private String keyboardLayout;
 
+    private Long vdiProtocolId;
+
     public InstanceCreatorDto() {
     }
 
@@ -97,5 +99,13 @@ public class InstanceCreatorDto {
 
     public void setKeyboardLayout(String keyboardLayout) {
         this.keyboardLayout = keyboardLayout;
+    }
+
+    public Long getVdiProtocolId() {
+        return vdiProtocolId;
+    }
+
+    public void setVdiProtocolId(Long vdiProtocolId) {
+        this.vdiProtocolId = vdiProtocolId;
     }
 }

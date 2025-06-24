@@ -1,5 +1,6 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 
@@ -31,7 +32,7 @@ public class InstanceDto {
     private final String keyboardLayout;
     private boolean unrestrictedAccess;
     private final List<String> activeProtocols;
-    private final String vdiProtocol;
+    private final ImageProtocol vdiProtocol;
 
     public InstanceDto(Instance instance) {
         this.id = instance.getId();
@@ -54,7 +55,7 @@ public class InstanceDto {
         this.deleteRequested = instance.getDeleteRequested();
         this.keyboardLayout = instance.getKeyboardLayout();
         this.activeProtocols = instance.getActiveProtocols();
-        this.vdiProtocol = instance.getVdiProtocol().getName();
+        this.vdiProtocol = instance.getVdiProtocol();
     }
 
     public Long getId() {
@@ -161,7 +162,7 @@ public class InstanceDto {
         return activeProtocols;
     }
 
-    public String getVdiProtocol() {
+    public ImageProtocol getVdiProtocol() {
         return vdiProtocol;
     }
 }
