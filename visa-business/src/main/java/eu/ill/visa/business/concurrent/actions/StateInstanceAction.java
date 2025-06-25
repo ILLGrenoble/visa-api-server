@@ -10,6 +10,8 @@ import eu.ill.visa.core.entity.enumerations.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class StateInstanceAction extends InstanceAction {
@@ -65,8 +67,23 @@ public class StateInstanceAction extends InstanceAction {
                         final Plan plan = instance.getPlan();
                         final Image image = plan.getImage();
                         final List<ImageProtocol> protocols = image.getProtocols();
+
+                        // Get the VDI protocols
                         final ImageProtocol vdiProtocol = instance.getVdiProtocol() != null ? instance.getVdiProtocol() : getImageService().getDefaultVdiProtocolForImage(image);
-                        boolean instanceIsUpAndRunning = this.getPortService().isVdiPortOpen(cloudInstance.getAddress(), vdiProtocol);
+                        final List<ImageProtocol> vdiProtocols = new ArrayList<>(Collections.singletonList(vdiProtocol));
+                        // If using Guacamole then ensure that the main remote desktop protocol is also running
+                        if (vdiProtocol.getName().equals("GUACD")) {
+                            ImageProtocol secondaryVdiProtocol = instance.getPlan().getImage().getSecondaryVdiProtocol();
+                            if (secondaryVdiProtocol == null) {
+                                // Legacy get RDP protocol
+                                secondaryVdiProtocol = this.getImageProtocolService().getByName("RDP");
+                            }
+                            if (secondaryVdiProtocol != null) {
+                                vdiProtocols.add(secondaryVdiProtocol);
+                            }
+                        }
+
+                        boolean instanceIsUpAndRunning = this.getPortService().areVdiPortsOpen(cloudInstance.getAddress(), vdiProtocols);
                         if (!instanceIsUpAndRunning) {
                             instanceState = InstanceState.STARTING;
 

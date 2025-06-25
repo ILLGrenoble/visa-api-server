@@ -26,6 +26,7 @@ public class ImageInput {
     private String bootCommand;
     private String autologin;
     private @NotNull @AdaptToScalar(Scalar.Int.class) Long defaultVdiProtocolId;
+    private @AdaptToScalar(Scalar.Int.class) Long secondaryVdiProtocolId;
 
     public String getName() {
         return name;
@@ -113,5 +114,13 @@ public class ImageInput {
 
     public void setDefaultVdiProtocolId(Long defaultVdiProtocolId) {
         this.defaultVdiProtocolId = defaultVdiProtocolId;
+    }
+
+    public Long getSecondaryVdiProtocolId() {
+        return secondaryVdiProtocolId;
+    }
+
+    public void setSecondaryVdiProtocolId(Long secondaryVdiProtocolId) {
+        this.secondaryVdiProtocolId = secondaryVdiProtocolId;
     }
 }

@@ -91,6 +91,10 @@ public class Image extends Timestampable {
     private ImageProtocol defaultVdiProtocol;
 
     @ManyToOne
+    @JoinColumn(name = "secondary_vdi_protocol", foreignKey = @ForeignKey(name = "fk_secondary_vdi_protocol_id"), nullable = true)
+    private ImageProtocol secondaryVdiProtocol;
+
+    @ManyToOne
     @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = true)
     private CloudProviderConfiguration cloudProviderConfiguration;
 
@@ -190,6 +194,14 @@ public class Image extends Timestampable {
 
     public void setDefaultVdiProtocol(ImageProtocol defaultVdiProtocol) {
         this.defaultVdiProtocol = defaultVdiProtocol;
+    }
+
+    public ImageProtocol getSecondaryVdiProtocol() {
+        return secondaryVdiProtocol;
+    }
+
+    public void setSecondaryVdiProtocol(ImageProtocol secondaryVdiProtocol) {
+        this.secondaryVdiProtocol = secondaryVdiProtocol;
     }
 
     @Override
