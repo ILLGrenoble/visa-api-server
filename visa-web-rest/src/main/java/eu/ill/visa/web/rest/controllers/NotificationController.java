@@ -1,18 +1,18 @@
 package eu.ill.visa.web.rest.controllers;
 
+import eu.ill.visa.business.services.AcknowledgedSystemNotificationService;
 import eu.ill.visa.business.services.ClientNotificationService;
 import eu.ill.visa.core.domain.ClientNotification;
 import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.SystemNotification;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.security.tokens.AccountToken;
 import eu.ill.visa.web.rest.dtos.NotificationPayloadDto;
 import eu.ill.visa.web.rest.dtos.SystemNotificationDto;
 import eu.ill.visa.web.rest.module.MetaResponse;
+import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -27,10 +27,13 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 public class NotificationController extends AbstractController {
 
     private final ClientNotificationService clientNotificationService;
+    private final AcknowledgedSystemNotificationService acknowledgedSystemNotificationService;
 
     @Inject
-    NotificationController(final ClientNotificationService clientNotificationService) {
+    NotificationController(final ClientNotificationService clientNotificationService,
+                           final AcknowledgedSystemNotificationService acknowledgedSystemNotificationService) {
         this.clientNotificationService = clientNotificationService;
+        this.acknowledgedSystemNotificationService = acknowledgedSystemNotificationService;
     }
 
     @GET
@@ -54,6 +57,32 @@ public class NotificationController extends AbstractController {
         }
 
         return createResponse(notificationPayload);
+    }
+
+    @GET
+    @Path("/acknowledged")
+    @Authenticated
+    public MetaResponse<List<Long>> getAcknowledgedNotifications(@Context final SecurityContext securityContext) {
+        final User user = this.getUserPrincipal(securityContext);
+        return createResponse(this.acknowledgedSystemNotificationService.getAllByUserId(user.getId()).stream()
+            .map(acknowledgedSystemNotification -> acknowledgedSystemNotification.getSystemNotification().getId())
+            .toList());
+    }
+
+    @POST
+    @Path("/acknowledged")
+    @Authenticated
+    public MetaResponse<Long> acknowledgedNotification(@Context final SecurityContext securityContext, Long systemNotificationId) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        final SystemNotification notification = this.clientNotificationService.getSystemNotificationById(systemNotificationId);
+        if (notification == null) {
+            throw new NotFoundException("System notification not found for the given id");
+        }
+
+        this.acknowledgedSystemNotificationService.acknowledgeSystemNotification(notification, user);
+
+        return createResponse(systemNotificationId);
     }
 
 }

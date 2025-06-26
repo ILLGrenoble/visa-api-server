@@ -22,6 +22,11 @@ import java.util.zip.Checksum;
 @Table(name = "system_notification")
 public class SystemNotification extends Timestampable {
 
+    public enum SystemNotificationType {
+        BANNER,
+        MODAL,
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -33,6 +38,10 @@ public class SystemNotification extends Timestampable {
     @Enumerated(EnumType.STRING)
     @Column(name = "level", length = 50, nullable = false)
     private SystemNotificationLevel level;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", length = 50, nullable = true)
+    private SystemNotificationType type;
 
     @Column(name = "activated_at", nullable = true)
     private Date activatedAt;
@@ -72,6 +81,14 @@ public class SystemNotification extends Timestampable {
 
     public void setLevel(SystemNotificationLevel level) {
         this.level = level;
+    }
+
+    public SystemNotificationType getType() {
+        return type;
+    }
+
+    public void setType(SystemNotificationType type) {
+        this.type = type;
     }
 
     public Date getActivatedAt() {

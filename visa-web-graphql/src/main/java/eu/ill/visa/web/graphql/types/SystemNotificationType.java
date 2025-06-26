@@ -16,12 +16,14 @@ public class SystemNotificationType {
     private final @NotNull Long id;
     private final @NotNull String message;
     private final @NotNull SystemNotificationLevel level;
+    private final @NotNull SystemNotification.SystemNotificationType type;
     private final Date activatedAt;
 
     public SystemNotificationType(final SystemNotification systemNotification) {
         this.id = systemNotification.getId();
         this.message = systemNotification.getMessage();
         this.level = systemNotification.getLevel();
+        this.type = systemNotification.getType() == null ? SystemNotification.SystemNotificationType.BANNER : systemNotification.getType();
         this.activatedAt = systemNotification.getActivatedAt();
     }
 
@@ -35,6 +37,10 @@ public class SystemNotificationType {
 
     public SystemNotificationLevel getLevel() {
         return level;
+    }
+
+    public SystemNotification.SystemNotificationType getType() {
+        return type;
     }
 
     public Date getActivatedAt() {
