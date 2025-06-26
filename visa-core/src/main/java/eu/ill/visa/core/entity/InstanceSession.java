@@ -58,6 +58,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Table(name = "instance_session")
 public class InstanceSession extends Timestampable {
 
+    public static final String GUACAMOLE_PROTOCOL = "guacamole";
+    public static final String WEBX_PROTOCOL = "webx";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

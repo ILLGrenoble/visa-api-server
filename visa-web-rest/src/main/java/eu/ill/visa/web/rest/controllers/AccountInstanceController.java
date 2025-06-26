@@ -189,12 +189,18 @@ public class AccountInstanceController extends AbstractController {
     @POST
     @Path("/{instance}/actions/reboot")
     public MetaResponse<InstanceDto> rebootAction(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+        // Cleanup any existing sessions for the instance
+        this.instanceSessionService.cleanupForInstance(instance);
+
         return this.performAction(instance, this.getUserPrincipal(securityContext), InstanceCommandType.REBOOT);
     }
 
     @POST
     @Path("/{instance}/actions/shutdown")
     public MetaResponse<InstanceDto> shutdownAction(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+        // Cleanup any existing sessions for the instance
+        this.instanceSessionService.cleanupForInstance(instance);
+
         return this.performAction(instance, this.getUserPrincipal(securityContext), InstanceCommandType.SHUTDOWN);
     }
 
@@ -340,6 +346,8 @@ public class AccountInstanceController extends AbstractController {
             return this.performAction(instance, user, InstanceCommandType.DELETE);
 
         } else {
+            this.instanceSessionService.cleanupForInstance(instance);
+
             instance.setDeleteRequested(true);
             this.instanceService.save(instance);
             if (instance.getState().equals(InstanceState.STOPPING)) {
@@ -557,9 +565,9 @@ public class AccountInstanceController extends AbstractController {
             final InstanceSession lastInstanceSession = this.instanceSessionService.getLastByInstance(instance);
             final ImageProtocol guacamoleImageProtocol = instance.getPlan().getImage().getProtocolByName("GUACD");
             final ImageProtocol webXImageProtocol = instance.getPlan().getImage().getProtocolByName("WEBX");
-            if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals("webx") && webXImageProtocol != null) {
+            if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.WEBX_PROTOCOL) && webXImageProtocol != null) {
                 instance.setVdiProtocol(webXImageProtocol);
-            } else if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals("guacamole") && guacamoleImageProtocol != null) {
+            } else if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.GUACAMOLE_PROTOCOL) && guacamoleImageProtocol != null) {
                 instance.setVdiProtocol(guacamoleImageProtocol);
             } else {
                 instance.setVdiProtocol(this.imageService.getDefaultVdiProtocolForImage(instance.getPlan().getImage()));

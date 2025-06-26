@@ -76,7 +76,7 @@ public class InstanceSessionServiceTest {
     @DisplayName("Create a new instance session")
     void create() {
         Instance instance = instanceService.getById(1000L);
-        InstanceSession session = new InstanceSession(instance.getId(), "guacamole", "a-connection-id");
+        InstanceSession session = new InstanceSession(instance.getId(), InstanceSession.GUACAMOLE_PROTOCOL, "a-connection-id");
         instanceSessionService.save(session);
         InstanceSession persistedInstanceSession = instanceSessionService.getById(session.getId());
         assertNotNull(persistedInstanceSession);
@@ -113,7 +113,7 @@ public class InstanceSessionServiceTest {
         String clientId = UUID.randomUUID().toString();
 
         Instance instance = instanceService.getById(1000L);
-        InstanceSession session = instanceSessionService.create(instance.getId(), "guacamole", "a-connection-id");
+        InstanceSession session = instanceSessionService.create(instance.getId(), InstanceSession.GUACAMOLE_PROTOCOL, "a-connection-id");
 
         InstanceSession persistedInstanceSession = instanceSessionService.getById(session.getId());
         assertNotNull(persistedInstanceSession);
