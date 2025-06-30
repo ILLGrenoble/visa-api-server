@@ -55,6 +55,9 @@ public class CreateInstanceAction extends InstanceAction {
             metadata.put("id", instance.getId());
             metadata.put("uid", instance.getUid());
             metadata.put("owner", instance.getUsername());
+            metadata.put("screenWidth", instance.getScreenWidth());
+            metadata.put("screenHeight", instance.getScreenHeight());
+            metadata.put("keyboardLayout", instance.getKeyboardLayout());
             metadata.put("instruments", String.join(",", instrumentNames));
             metadata.put("proposals", String.join(",", proposals));
 
