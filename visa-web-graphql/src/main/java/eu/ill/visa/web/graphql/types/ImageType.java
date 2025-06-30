@@ -21,6 +21,8 @@ public class ImageType {
     private final @NotNull String computeId;
     private final @NotNull Boolean visible;
     private final List<ImageProtocolType> protocols;
+    private final ImageProtocolType defaultVdiProtocol;
+    private final ImageProtocolType secondaryVdiProtocol;
     private final String bootCommand;
     private final String autologin;
     private final Long cloudId;
@@ -33,6 +35,8 @@ public class ImageType {
         this.icon = image.getIcon();
         this.computeId = image.getComputeId();
         this.protocols = image.getProtocols().stream().map(ImageProtocolType::new).toList();
+        this.defaultVdiProtocol = image.getDefaultVdiProtocol() != null ? new ImageProtocolType(image.getDefaultVdiProtocol()) : null;
+        this.secondaryVdiProtocol = image.getSecondaryVdiProtocol() != null ? new ImageProtocolType(image.getSecondaryVdiProtocol()) : null;
         this.visible = image.isVisible();
         this.bootCommand = image.getBootCommand();
         this.autologin = image.getAutologin();
@@ -69,6 +73,14 @@ public class ImageType {
 
     public List<ImageProtocolType> getProtocols() {
         return protocols;
+    }
+
+    public ImageProtocolType getDefaultVdiProtocol() {
+        return defaultVdiProtocol;
+    }
+
+    public ImageProtocolType getSecondaryVdiProtocol() {
+        return secondaryVdiProtocol;
     }
 
     public String getBootCommand() {

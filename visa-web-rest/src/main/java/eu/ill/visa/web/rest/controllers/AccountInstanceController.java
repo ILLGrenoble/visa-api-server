@@ -59,11 +59,13 @@ public class AccountInstanceController extends AbstractController {
     private final InstanceExtensionRequestService instanceExtensionRequestService;
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
     private final PlanService planService;
+    private final ImageService imageService;
     private final UserService userService;
     private final ExperimentService experimentService;
     private final EmailManager emailManager;
     private final DesktopConfigurationImpl desktopConfiguration;
     private final ClientConfiguration clientConfiguration;
+    private final ImageProtocolService imageProtocolService;
 
     @Inject
     public AccountInstanceController(final UserService userService,
@@ -75,10 +77,11 @@ public class AccountInstanceController extends AbstractController {
                                      final InstanceExtensionRequestService instanceExtensionRequestService,
                                      final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
                                      final PlanService planService,
+                                     final ImageService imageService,
                                      final ExperimentService experimentService,
                                      final EmailManager emailManager,
                                      final DesktopConfigurationImpl desktopConfiguration,
-                                     final ClientConfiguration clientConfiguration) {
+                                     final ClientConfiguration clientConfiguration, ImageProtocolService imageProtocolService) {
         this.userService = userService;
         this.instanceService = instanceService;
         this.instanceMemberService = instanceMemberService;
@@ -88,10 +91,12 @@ public class AccountInstanceController extends AbstractController {
         this.instanceExtensionRequestService = instanceExtensionRequestService;
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
         this.planService = planService;
+        this.imageService = imageService;
         this.experimentService = experimentService;
         this.emailManager = emailManager;
         this.desktopConfiguration = desktopConfiguration;
         this.clientConfiguration = clientConfiguration;
+        this.imageProtocolService = imageProtocolService;
     }
 
     @GET
@@ -184,12 +189,18 @@ public class AccountInstanceController extends AbstractController {
     @POST
     @Path("/{instance}/actions/reboot")
     public MetaResponse<InstanceDto> rebootAction(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+        // Cleanup any existing sessions for the instance
+        this.instanceSessionService.cleanupForInstance(instance);
+
         return this.performAction(instance, this.getUserPrincipal(securityContext), InstanceCommandType.REBOOT);
     }
 
     @POST
     @Path("/{instance}/actions/shutdown")
     public MetaResponse<InstanceDto> shutdownAction(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+        // Cleanup any existing sessions for the instance
+        this.instanceSessionService.cleanupForInstance(instance);
+
         return this.performAction(instance, this.getUserPrincipal(securityContext), InstanceCommandType.SHUTDOWN);
     }
 
@@ -218,6 +229,15 @@ public class AccountInstanceController extends AbstractController {
         final Plan plan = planService.getById(dto.getPlanId());
         checkNotNull(plan, "Invalid plan");
 
+        final ImageProtocol defaultVdiProtocol = this.imageService.getDefaultVdiProtocolForImage(plan.getImage());
+        ImageProtocol vdiProtocol= defaultVdiProtocol;
+        if (dto.getVdiProtocolId() != null) {
+            vdiProtocol = this.imageProtocolService.getById(dto.getVdiProtocolId());
+            if (vdiProtocol == null) {
+                vdiProtocol = defaultVdiProtocol;
+                logger.warn("Unable to find ImageProtocol with Id {}. Using default image protocol: {}", dto.getVdiProtocolId(), vdiProtocol.getName());
+            }
+        }
 
         // Verify user has access to experiments
         List<Experiment> experiments = new ArrayList<>();
@@ -267,7 +287,8 @@ public class AccountInstanceController extends AbstractController {
             .username(connectedUsername)
             .member(user, OWNER)
             .experiments(experiments)
-            .attributes(instanceAttributes);
+            .attributes(instanceAttributes)
+            .vdiProtocol(vdiProtocol);
 
         Instance instance = instanceService.create(instanceBuilder);
 
@@ -290,11 +311,21 @@ public class AccountInstanceController extends AbstractController {
                 throw new BadRequestException("Invalid keyboard layout provided");
             }
 
+            ImageProtocol vdiProtocol = null;
+            if (instanceUpdatorDto.getVdiProtocolId() != null) {
+                vdiProtocol = this.imageProtocolService.getById(instanceUpdatorDto.getVdiProtocolId());
+                if (vdiProtocol == null) {
+                    vdiProtocol = instance.getVdiProtocol();
+                    logger.warn("Unable to find ImageProtocol with Id {}. Not updating the instance protocol", instanceUpdatorDto.getVdiProtocolId());
+                }
+            }
+
             instance.setName(instanceUpdatorDto.getName());
             instance.setComments(instanceUpdatorDto.getComments());
             instance.setScreenWidth(instanceUpdatorDto.getScreenWidth());
             instance.setScreenHeight(instanceUpdatorDto.getScreenHeight());
             instance.setKeyboardLayout(instanceUpdatorDto.getKeyboardLayout());
+            instance.setVdiProtocol(vdiProtocol);
             if (instanceUpdatorDto.getUnrestrictedAccess() && !instance.canAccessWhenOwnerAway()) {
                 instance.setUnrestrictedMemberAccess(new Date());
             } else if (!instanceUpdatorDto.getUnrestrictedAccess()) {
@@ -315,6 +346,8 @@ public class AccountInstanceController extends AbstractController {
             return this.performAction(instance, user, InstanceCommandType.DELETE);
 
         } else {
+            this.instanceSessionService.cleanupForInstance(instance);
+
             instance.setDeleteRequested(true);
             this.instanceService.save(instance);
             if (instance.getState().equals(InstanceState.STOPPING)) {
@@ -527,6 +560,22 @@ public class AccountInstanceController extends AbstractController {
     }
 
     private InstanceDto mapInstance(Instance instance, User user) {
+        // Check if instance vdi protocol has been set or not
+        if (instance.getVdiProtocol() == null) {
+            final InstanceSession lastInstanceSession = this.instanceSessionService.getLastByInstance(instance);
+            final ImageProtocol guacamoleImageProtocol = instance.getPlan().getImage().getProtocolByName("GUACD");
+            final ImageProtocol webXImageProtocol = instance.getPlan().getImage().getProtocolByName("WEBX");
+            if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.WEBX_PROTOCOL) && webXImageProtocol != null) {
+                instance.setVdiProtocol(webXImageProtocol);
+            } else if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.GUACAMOLE_PROTOCOL) && guacamoleImageProtocol != null) {
+                instance.setVdiProtocol(guacamoleImageProtocol);
+            } else {
+                instance.setVdiProtocol(this.imageService.getDefaultVdiProtocolForImage(instance.getPlan().getImage()));
+            }
+
+            instanceService.updateVdiProtocolById(instance);
+        }
+
         InstanceDto instanceDto = new InstanceDto(instance);
         InstanceMember instanceMember = instance.getMember(user);
         if (instanceMember != null) {

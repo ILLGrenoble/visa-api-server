@@ -35,6 +35,18 @@ public class InstanceSessionRepository extends AbstractRepository<InstanceSessio
         return null;
     }
 
+    public InstanceSession getLastByInstance(final Instance instance) {
+        final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getLastByInstance", InstanceSession.class);
+        query.setParameter("instance", instance);
+        query.setMaxResults(1);
+
+        List<InstanceSession> sessions = query.getResultList();
+        if (!sessions.isEmpty()) {
+            return sessions.getFirst();
+        }
+        return null;
+    }
+
     public List<InstanceSession> getAllByInstance(final Instance instance) {
         final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getAllByInstance", InstanceSession.class);
         query.setParameter("instance", instance);

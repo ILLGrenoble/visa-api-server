@@ -94,6 +94,7 @@ public class SystemNotificationResource {
     private void mapToSystemNotification(SystemNotificationInput input, SystemNotification systemNotification) throws InvalidInputException {
         systemNotification.setMessage(input.getMessage());
         systemNotification.setLevel(input.getLevel());
+        systemNotification.setType(input.getType());
         try {
             systemNotification.setActivatedAt(input.getActivatedAt() == null ? null : DATE_FORMAT.parse(input.getActivatedAt()));
         } catch (ParseException e) {

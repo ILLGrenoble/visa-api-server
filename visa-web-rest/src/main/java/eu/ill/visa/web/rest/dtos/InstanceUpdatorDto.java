@@ -25,6 +25,9 @@ public class InstanceUpdatorDto {
     @NotNull
     private Boolean unrestrictedAccess;
 
+    @NotNull
+    private Long vdiProtocolId;
+
     public String getName() {
         return name;
     }
@@ -71,5 +74,13 @@ public class InstanceUpdatorDto {
 
     public void setUnrestrictedAccess(Boolean unrestrictedAccess) {
         this.unrestrictedAccess = unrestrictedAccess;
+    }
+
+    public Long getVdiProtocolId() {
+        return vdiProtocolId;
+    }
+
+    public void setVdiProtocolId(Long vdiProtocolId) {
+        this.vdiProtocolId = vdiProtocolId;
     }
 }

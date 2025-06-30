@@ -60,6 +60,10 @@ public class InstanceSessionService {
         return this.repository.getByInstance(instance);
     }
 
+    public InstanceSession getLastByInstance(@NotNull Instance instance) {
+        return this.repository.getLastByInstance(instance);
+    }
+
     public List<InstanceSession> getAllByInstance(@NotNull Instance instance) {
         return this.repository.getAllByInstance(instance);
     }
@@ -94,7 +98,7 @@ public class InstanceSessionService {
             this.instanceSessionMemberService.deactivateSessionMember(sessionMember);
 
             List<InstanceSessionMemberPartial> members = this.instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
-            if (members.isEmpty()) {
+            if (members.isEmpty() && instanceSession.getProtocol().equals(InstanceSession.GUACAMOLE_PROTOCOL)) {
                 logger.info("Session for Instance with Id: {} is no longer current as it has no connected members", instanceSession.getInstanceId());
                 instanceSession.setCurrent(false);
                 this.updatePartial(instanceSession);
@@ -111,6 +115,19 @@ public class InstanceSessionService {
 
     public void updatePartial(@NotNull InstanceSession instanceSession) {
         this.repository.updatePartial(instanceSession);
+    }
+
+    public void cleanupForInstance(@NotNull Instance instance) {
+        requireNonNull(instance, "instance cannot be null");
+
+        this.instanceSessionMemberService.getAllByInstance(instance).forEach(member -> {;
+            // Remove all active session members
+            this.deleteSessionMember(member.getInstanceSession(), member.getClientId());
+        });
+        this.getAllByInstance(instance).forEach(session -> {
+            session.setCurrent(false);
+            this.updatePartial(session);
+        });
     }
 
     public void cleanupSession() {

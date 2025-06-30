@@ -139,6 +139,11 @@ public class ImageResource {
                 throw new InvalidInputException("Invalid Cloud Image Id");
             }
 
+            ImageProtocol imageProtocol = imageProtocolService.getById(imageInput.getDefaultVdiProtocolId());
+            if (imageProtocol == null) {
+                throw new InvalidInputException("Invalid Default VDI Protocol Id");
+            }
+
         } catch (CloudException exception) {
             throw new InvalidInputException("Error accessing Cloud");
         }
@@ -164,6 +169,8 @@ public class ImageResource {
             protocols.add(protocol);
         }
         image.setProtocols(protocols);
+        image.setDefaultVdiProtocol(imageProtocolService.getById(input.getDefaultVdiProtocolId()));
+        image.setSecondaryVdiProtocol(input.getSecondaryVdiProtocolId() != null ? imageProtocolService.getById(input.getSecondaryVdiProtocolId()) : null);
     }
 
     private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {

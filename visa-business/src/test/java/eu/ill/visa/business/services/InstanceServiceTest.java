@@ -32,6 +32,9 @@ public class InstanceServiceTest {
     @Inject
     private ExperimentService experimentService;
 
+    @Inject
+    private ImageProtocolService imageProtocolService;
+
     @Test
     @DisplayName("Get all instances")
     void testGetAll() {
@@ -106,7 +109,8 @@ public class InstanceServiceTest {
             .screenWidth(1280)
             .screenHeight(1024)
             .keyboardLayout("fr-fr-azerty")
-            .attributes(singletonList(new InstanceAttribute("home.directory", "/home/acme")));
+            .attributes(singletonList(new InstanceAttribute("home.directory", "/home/acme")))
+            .vdiProtocol(imageProtocolService.getByName("GUACD"));
         Instance instance = instanceService.create(instanceBuilder);
         Long instanceId = instance.getId();
 
@@ -127,7 +131,8 @@ public class InstanceServiceTest {
             .comments("This is an instance")
             .screenWidth(1280)
             .screenHeight(1024)
-            .keyboardLayout("en-gb-qwerty");
+            .keyboardLayout("en-gb-qwerty")
+            .vdiProtocol(imageProtocolService.getByName("GUACD"));
         Instance instance = instanceService.create(instanceBuilder);
         Long instanceId = instance.getId();
 
@@ -159,7 +164,8 @@ public class InstanceServiceTest {
             .comments("This is an instance")
             .screenWidth(1280)
             .screenHeight(1024)
-            .keyboardLayout("en-gb-qwerty");
+            .keyboardLayout("en-gb-qwerty")
+            .vdiProtocol(imageProtocolService.getByName("GUACD"));
         Instance instance = instanceService.create(instanceBuilder);
         Long instanceId = instance.getId();
 
@@ -340,7 +346,8 @@ public class InstanceServiceTest {
             .comments("This is an instance")
             .screenWidth(1280)
             .screenHeight(1024)
-            .keyboardLayout("en-gb-qwerty");
+            .keyboardLayout("en-gb-qwerty")
+            .vdiProtocol(imageProtocolService.getByName("GUACD"));
 
         Instance instance = instanceService.create(instanceBuilder);
         Long instanceId = instance.getId();

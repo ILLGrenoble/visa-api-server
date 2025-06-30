@@ -11,6 +11,7 @@ public class SystemNotificationDto {
     private final Long uid;
     private final String message;
     private final SystemNotificationLevel level;
+    private final SystemNotification.SystemNotificationType type;
     private final Date createdAt;
     private final Date activatedAt;
 
@@ -19,6 +20,7 @@ public class SystemNotificationDto {
         this.uid = systemNotification.getUid();
         this.message = systemNotification.getMessage();
         this.level = systemNotification.getLevel();
+        this.type = systemNotification.getType() == null ? SystemNotification.SystemNotificationType.BANNER : systemNotification.getType();
         this.createdAt = systemNotification.getCreatedAt();
         this.activatedAt = systemNotification.getActivatedAt();
     }
@@ -37,6 +39,10 @@ public class SystemNotificationDto {
 
     public SystemNotificationLevel getLevel() {
         return level;
+    }
+
+    public SystemNotification.SystemNotificationType getType() {
+        return type;
     }
 
     public Date getCreatedAt() {

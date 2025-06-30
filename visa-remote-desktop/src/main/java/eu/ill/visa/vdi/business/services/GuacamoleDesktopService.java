@@ -28,6 +28,7 @@ import org.apache.guacamole.protocol.GuacamoleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNullElse;
@@ -69,10 +70,20 @@ public class GuacamoleDesktopService extends DesktopService {
     private GuacamoleConfiguration createConfiguration(InstanceSession session, Instance instance, String ip) {
         final GuacamoleConfiguration config = new GuacamoleConfiguration();
         config.setParameter("hostname", ip);
-        config.setProtocol(configuration.protocol());
+
         if (session == null) {
+            // Get the protocol from the instance image or use the default configuration
+            final ImageProtocol protocol = instance.getPlan().getImage().getSecondaryVdiProtocol();
+            if (protocol != null && Arrays.asList("RDP", "VNC").contains(protocol.getName())) {
+                config.setProtocol(protocol.getName().toLowerCase());
+
+            } else {
+                // Fallback to the default protocol defined in the configuration
+                config.setProtocol(configuration.protocol());
+            }
+
             String username = instance.getUsername();
-            logger.info("Creating new guacamole session on instance {} with username {}", instance.getId(), username);
+            logger.info("Creating new guacamole session ({}) on instance {} with username {}", config.getProtocol(), instance.getId(), username);
             String autologin = instance.getPlan().getImage().getAutologin();
             config.setParameter("username", username);
             if (autologin != null && autologin.equals("VISA_PAM")) {

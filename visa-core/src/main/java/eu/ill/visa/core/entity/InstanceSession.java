@@ -31,6 +31,14 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
         AND i.deletedAt IS NULL
         ORDER BY isess.id DESC
     """),
+    @NamedQuery(name = "instanceSession.getLastByInstance", query = """
+        SELECT isess
+        FROM InstanceSession isess
+        LEFT JOIN Instance i on isess.instanceId = i.id
+        WHERE i = :instance
+        AND i.deletedAt IS NULL
+        ORDER BY isess.id DESC
+    """),
     @NamedQuery(name = "instanceSession.getAllByInstanceIdAndProtocol", query = """
         SELECT isess
         FROM InstanceSession isess
@@ -49,6 +57,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 })
 @Table(name = "instance_session")
 public class InstanceSession extends Timestampable {
+
+    public static final String GUACAMOLE_PROTOCOL = "guacamole";
+    public static final String WEBX_PROTOCOL = "webx";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

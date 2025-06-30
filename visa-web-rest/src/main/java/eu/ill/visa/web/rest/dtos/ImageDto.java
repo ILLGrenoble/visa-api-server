@@ -13,6 +13,8 @@ public class ImageDto {
     private final String description;
     private final String icon;
     private final List<ImageProtocol> protocols;
+    private final ImageProtocol defaultVdiProtocol;
+    private final ImageProtocol secondaryVdiProtocol;
 
     public ImageDto(final Image image) {
         this.id = image.getId();
@@ -21,6 +23,8 @@ public class ImageDto {
         this.description = image.getDescription();
         this.icon = image.getIcon();
         this.protocols = image.getProtocols();
+        this.defaultVdiProtocol = image.getDefaultVdiProtocol();
+        this.secondaryVdiProtocol = image.getDefaultVdiProtocol();
     }
 
     public Long getId() {
@@ -45,5 +49,13 @@ public class ImageDto {
 
     public List<ImageProtocol> getProtocols() {
         return protocols;
+    }
+
+    public ImageProtocol getDefaultVdiProtocol() {
+        return defaultVdiProtocol;
+    }
+
+    public ImageProtocol getSecondaryVdiProtocol() {
+        return secondaryVdiProtocol;
     }
 }

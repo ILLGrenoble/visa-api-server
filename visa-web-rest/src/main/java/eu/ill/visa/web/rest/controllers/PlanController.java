@@ -1,6 +1,7 @@
 package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.business.services.ExperimentService;
+import eu.ill.visa.business.services.ImageService;
 import eu.ill.visa.business.services.PlanService;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.web.rest.dtos.PlanDto;
@@ -30,11 +31,15 @@ public class PlanController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(PlanController.class);
 
     private final PlanService planService;
+    private final ImageService imageService;
     final ExperimentService experimentService;
 
     @Inject
-    PlanController(final PlanService planService, final ExperimentService experimentService) {
+    PlanController(final PlanService planService,
+                   final ImageService imageService,
+                   final ExperimentService experimentService) {
         this.planService = planService;
+        this.imageService = imageService;
         this.experimentService = experimentService;
     }
 
@@ -77,7 +82,7 @@ public class PlanController extends AbstractController {
                     return 1;
                 } else return f1.getMemory().compareTo(f2.getMemory());
             })
-            .map(PlanDto::new)
+            .map(this::toDto)
             .toList();
         return createResponse(planDtos);
     }
@@ -85,6 +90,12 @@ public class PlanController extends AbstractController {
     @Path("/{plan}")
     @GET
     public MetaResponse<PlanDto> get(@PathParam("plan") final Plan plan) {
-        return createResponse(new PlanDto(plan));
+        return createResponse(this.toDto(plan));
+    }
+
+    private PlanDto toDto(final Plan plan) {
+        final Image image = plan.getImage();
+        image.setDefaultVdiProtocol(imageService.getDefaultVdiProtocolForImage(image));
+        return new PlanDto(plan);
     }
 }

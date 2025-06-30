@@ -9,5 +9,6 @@ public interface InstanceConfiguration {
     Integer defaultUserInstanceQuota();
     Integer activityRetentionPeriodDays();
     Integer portCheckTimeoutMs();
+    String defaultVdiProtocol();
 
 }

@@ -2,9 +2,7 @@ package eu.ill.visa.business.concurrent;
 
 import eu.ill.visa.business.concurrent.actions.InstanceActionServiceProvider;
 import eu.ill.visa.business.profiles.ConcurrencyTestProfile;
-import eu.ill.visa.business.services.InstanceCommandService;
-import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.business.services.PlanService;
+import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceCommand;
 import eu.ill.visa.core.entity.Plan;
@@ -41,6 +39,9 @@ public class InstanceActionManagerTest {
     private PlanService planService;
 
     @Inject
+    private ImageProtocolService imageProtocolService;
+
+    @Inject
     private InstanceService instanceService;
 
     @Inject
@@ -56,7 +57,8 @@ public class InstanceActionManagerTest {
             .comments("This is an instance")
             .keyboardLayout("fr-fr-azerty")
             .screenWidth(1280)
-            .screenHeight(1024);
+            .screenHeight(1024)
+            .vdiProtocol(imageProtocolService.getByName("GUACD"));
         Instance instance = instanceService.create(instanceBuilder);
         Long instanceId = instance.getId();
         assertNotNull(instanceId);
