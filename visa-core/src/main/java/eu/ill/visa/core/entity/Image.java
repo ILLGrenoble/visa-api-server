@@ -46,6 +46,12 @@ import java.util.List;
 @Table(name = "image")
 public class Image extends Timestampable {
 
+    public enum AutoAcceptExtensionRequest {
+        ALL,
+        STAFF,
+        NONE,
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -97,6 +103,10 @@ public class Image extends Timestampable {
     @ManyToOne
     @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = true)
     private CloudProviderConfiguration cloudProviderConfiguration;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auto_accept_extension_request", length = 50, nullable = true)
+    private AutoAcceptExtensionRequest autoAcceptExtensionRequest;
 
     public Image() {
     }
@@ -256,6 +266,14 @@ public class Image extends Timestampable {
         return this.protocols.stream().filter(protocol -> protocol.getName().equals(protocolName)).findFirst().orElse(null);
     }
 
+    public AutoAcceptExtensionRequest getAutoAcceptExtensionRequest() {
+        return autoAcceptExtensionRequest;
+    }
+
+    public void setAutoAcceptExtensionRequest(AutoAcceptExtensionRequest autoAcceptExtensionRequest) {
+        this.autoAcceptExtensionRequest = autoAcceptExtensionRequest;
+    }
+
     public static final class Builder {
         private Long id;
         private String name;
@@ -266,6 +284,7 @@ public class Image extends Timestampable {
         private boolean visible = false;
         private String bootCommand;
         private String autologin;
+        private AutoAcceptExtensionRequest autoAcceptExtensionRequest = AutoAcceptExtensionRequest.NONE;
 
         public Builder() {
         }
@@ -319,6 +338,11 @@ public class Image extends Timestampable {
             return this;
         }
 
+        public Builder autoAcceptExtensionRequest(AutoAcceptExtensionRequest autoAcceptExtensionRequest) {
+            this.autoAcceptExtensionRequest = autoAcceptExtensionRequest;
+            return this;
+        }
+
         public Image build() {
             Image image = new Image();
             image.setId(id);
@@ -329,6 +353,7 @@ public class Image extends Timestampable {
             image.setVersion(version);
             image.setVisible(visible);
             image.setAutologin(autologin);
+            image.setAutoAcceptExtensionRequest(autoAcceptExtensionRequest);
             return image;
         }
     }

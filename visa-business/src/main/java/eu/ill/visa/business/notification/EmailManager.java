@@ -39,8 +39,8 @@ public class EmailManager {
         this.emailHandler.sendInstanceCreatedNotification(instance);
     }
 
-    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments) {
-        this.emailHandler.sendInstanceExtensionRequestNotification(instance, comments);
+    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments, boolean autoAccepted) {
+        this.emailHandler.sendInstanceExtensionRequestNotification(instance, comments, autoAccepted);
     }
 
     public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {

@@ -3,10 +3,8 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.business.notification.EmailManager;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceExpiration;
-import eu.ill.visa.core.entity.InstanceExtensionRequest;
-import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.InstanceExtensionRequestState;
 import eu.ill.visa.persistence.repositories.InstanceExtensionRequestRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -65,8 +63,35 @@ public class InstanceExtensionRequestService {
         InstanceExtensionRequest request = new InstanceExtensionRequest(instance, comments);
         this.save(request);
 
-        // Send email to admin
-        this.emailManager.sendInstanceExtensionRequestNotification(instance, comments);
+        final Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest = instance.getPlan().getImage().getAutoAcceptExtensionRequest();
+        final boolean autoAccept = autoAcceptExtensionRequest != null &&
+            (autoAcceptExtensionRequest.equals(Image.AutoAcceptExtensionRequest.ALL) ||
+                autoAcceptExtensionRequest.equals(Image.AutoAcceptExtensionRequest.STAFF) && instance.getOwner().getUser().hasRole(Role.STAFF_ROLE));
+
+        if (autoAccept) {
+            // Automatically grant the extension if the auto-accept policy is set to ALL
+            logger.info("Automatically granting extension for instance {} due to auto-accept policy", instance.getId());
+            final Date terminationDate = this.instanceService.calculateTerminationDate(instance.getTerminationDate(), instance.getOwner());
+
+            request.setState(InstanceExtensionRequestState.ACCEPTED);
+            request.setHandledOn(new Date());
+            request.setExtensionDate(terminationDate);
+            this.save(request);
+
+            this.grantExtension(instance, terminationDate, null, true);
+
+            // Send email to admin
+            comments = comments == null ? "" : comments + "\n\n--------------------\n\n";
+            comments += "Extension request has been automatically accepted!";
+            this.emailManager.sendInstanceExtensionRequestNotification(instance, comments, true);
+
+        } else {
+            logger.info("Instance extension request created for instance {} with comments: {}. Email sent to admins.", instance.getId(), comments);
+
+            // Send email to admin
+            this.emailManager.sendInstanceExtensionRequestNotification(instance, comments, false);
+
+        }
 
         return request;
     }

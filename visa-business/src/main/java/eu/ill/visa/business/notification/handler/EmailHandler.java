@@ -14,6 +14,6 @@ public interface EmailHandler {
     void sendInstanceLifetimeNotification(Instance instance);
     void sendInstanceMemberAddedNotification(Instance instance, InstanceMember member);
     void sendInstanceCreatedNotification(final Instance instance);
-    void sendInstanceExtensionRequestNotification(final Instance instance, final String comments);
+    void sendInstanceExtensionRequestNotification(final Instance instance, final String comments, boolean autoAccepted);
     void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments);
 }

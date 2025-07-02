@@ -121,15 +121,8 @@ public class InstanceService {
             .build();
 
         // Determine from owner whether to apply staff or user lifetime durations
-        InstanceMember owner = instance.getOwner();
-        if (owner != null && owner.getUser().hasRole(Role.STAFF_ROLE)) {
-            long terminationDate = (new Date().getTime()) + this.configuration.staffMaxLifetimeDurationHours() * 60L * 60L * 1000L;
-            instance.setTerminationDate(new Date(terminationDate));
-
-        } else {
-            long terminationDate = (new Date().getTime()) + this.configuration.userMaxLifetimeDurationHours() * 60L * 60L * 1000L;
-            instance.setTerminationDate(new Date(terminationDate));
-        }
+        Date terminationDate = this.calculateTerminationDate(null, instance.getOwner());
+        instance.setTerminationDate(terminationDate);
 
         this.save(instance);
 
@@ -274,6 +267,21 @@ public class InstanceService {
         }
 
         return 0L;
+    }
+
+    public Date calculateTerminationDate(Date startDate, InstanceMember owner) {
+        if (startDate == null) {
+            startDate = new Date();
+        }
+
+        if (owner != null && owner.getUser().hasRole(Role.STAFF_ROLE)) {
+            long terminationDate = (startDate.getTime()) + this.configuration.staffMaxLifetimeDurationHours() * 60L * 60L * 1000L;
+            return new Date(terminationDate);
+
+        } else {
+            long terminationDate = (startDate.getTime()) + this.configuration.userMaxLifetimeDurationHours() * 60L * 60L * 1000L;
+            return new Date(terminationDate);
+        }
     }
 
     public boolean isOwnerOrAdmin(User user, Instance instance) {

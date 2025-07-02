@@ -37,7 +37,7 @@ public class DummyEmailHandler implements EmailHandler {
     public void sendInstanceCreatedNotification(final Instance instance) {
     }
 
-    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments) {
+    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments, boolean autoAccepted) {
     }
 
     public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {

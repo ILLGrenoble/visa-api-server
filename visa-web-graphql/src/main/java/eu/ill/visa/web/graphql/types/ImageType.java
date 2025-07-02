@@ -26,6 +26,7 @@ public class ImageType {
     private final String bootCommand;
     private final String autologin;
     private final Long cloudId;
+    private final Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest;
 
     public ImageType(final Image image) {
         this.id = image.getId();
@@ -41,6 +42,7 @@ public class ImageType {
         this.bootCommand = image.getBootCommand();
         this.autologin = image.getAutologin();
         this.cloudId = image.getCloudId();
+        this.autoAcceptExtensionRequest = image.getAutoAcceptExtensionRequest();
     }
 
     public Long getId() {
@@ -89,6 +91,10 @@ public class ImageType {
 
     public String getAutologin() {
         return autologin;
+    }
+
+    public Image.AutoAcceptExtensionRequest getAutoAcceptExtensionRequest() {
+        return autoAcceptExtensionRequest;
     }
 
     @JsonIgnore

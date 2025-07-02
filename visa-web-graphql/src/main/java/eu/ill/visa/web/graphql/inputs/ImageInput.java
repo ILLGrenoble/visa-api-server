@@ -1,5 +1,6 @@
 package eu.ill.visa.web.graphql.inputs;
 
+import eu.ill.visa.core.entity.Image;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ public class ImageInput {
     private String autologin;
     private @NotNull @AdaptToScalar(Scalar.Int.class) Long defaultVdiProtocolId;
     private @AdaptToScalar(Scalar.Int.class) Long secondaryVdiProtocolId;
+    private Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest;
 
     public String getName() {
         return name;
@@ -122,5 +124,13 @@ public class ImageInput {
 
     public void setSecondaryVdiProtocolId(Long secondaryVdiProtocolId) {
         this.secondaryVdiProtocolId = secondaryVdiProtocolId;
+    }
+
+    public Image.AutoAcceptExtensionRequest getAutoAcceptExtensionRequest() {
+        return autoAcceptExtensionRequest;
+    }
+
+    public void setAutoAcceptExtensionRequest(Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest) {
+        this.autoAcceptExtensionRequest = autoAcceptExtensionRequest;
     }
 }

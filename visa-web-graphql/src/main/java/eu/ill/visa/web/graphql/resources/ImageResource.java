@@ -171,6 +171,7 @@ public class ImageResource {
         image.setProtocols(protocols);
         image.setDefaultVdiProtocol(imageProtocolService.getById(input.getDefaultVdiProtocolId()));
         image.setSecondaryVdiProtocol(input.getSecondaryVdiProtocolId() != null ? imageProtocolService.getById(input.getSecondaryVdiProtocolId()) : null);
+        image.setAutoAcceptExtensionRequest(input.getAutoAcceptExtensionRequest());
     }
 
     private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {

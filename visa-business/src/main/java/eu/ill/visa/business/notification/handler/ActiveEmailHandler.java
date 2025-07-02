@@ -196,12 +196,15 @@ public class ActiveEmailHandler implements EmailHandler {
         }
     }
 
-    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments) {
+    public void sendInstanceExtensionRequestNotification(final Instance instance, final String comments, boolean autoAccepted) {
         if (adminEmailAddress != null && !adminEmailAddress.isEmpty()) {
             try {
                 final User owner = this.instanceMemberService.getOwnerByInstanceId(instance.getId());
                 if (owner != null) {
-                    final String subject = "[VISA] An instance extension request has been made";
+                    String subject = "[VISA] An instance extension request has been made";
+                    if (autoAccepted) {
+                        subject += " (automatically accepted)";
+                    }
                     final NotificationRenderer renderer = new InstanceExtensionRequestRenderer(instance, emailTemplatesDirectory, owner, comments, rootURL);
                     final Mail email = buildEmail(adminEmailAddress, subject, renderer.render());
                     this.mailer.send(email);
