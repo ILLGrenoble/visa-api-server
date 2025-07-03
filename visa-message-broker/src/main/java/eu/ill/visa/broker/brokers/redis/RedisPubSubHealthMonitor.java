@@ -131,8 +131,7 @@ public class RedisPubSubHealthMonitor {
         if (this.subscriber != null) {
             try {
                 this.subscriber.unsubscribe(CHANNEL);
-            } catch (Exception e) {
-                // Ignore
+            } catch (Exception ignored) {
             }
             this.subscriber = null;
         }

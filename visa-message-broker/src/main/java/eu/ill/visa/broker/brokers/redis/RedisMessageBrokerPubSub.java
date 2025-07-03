@@ -86,9 +86,14 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
 
         // Publish the message on a virtual thread to avoid blocking the main thread
         // Observations show that his can sometimes end in a timeout
-        Thread.startVirtualThread(() ->
-            this.publisher.publish(CHANNEL, remoteDesktopMessage)
-        );
+        Thread.startVirtualThread(() -> {
+            try {
+                this.publisher.publish(CHANNEL, remoteDesktopMessage);
+
+            } catch (Exception error) {
+                logger.error("Failed to publish message to Redis: {}", error.getMessage());
+            }
+        });
     }
 
     private void subscribeToRedis() {
@@ -110,8 +115,7 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
         if (this.subscriber != null) {
             try {
                 this.subscriber.unsubscribe(CHANNEL);
-            } catch (Exception e) {
-                // Ignore
+            } catch (Exception ignored) {
             }
             this.subscriber = null;
         }
