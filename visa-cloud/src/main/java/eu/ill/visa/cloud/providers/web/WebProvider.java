@@ -1,5 +1,6 @@
 package eu.ill.visa.cloud.providers.web;
 
+import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -30,11 +32,14 @@ public class WebProvider implements CloudProvider {
     private final WebProviderConfiguration configuration;
     private final WebProviderClient webProviderClient;
 
-    public WebProvider(final WebProviderConfiguration configuration) {
+    public WebProvider(final CloudConfiguration cloudConfiguration,
+                       final WebProviderConfiguration configuration) {
         this.configuration = requireNonNull(configuration, "configuration cannot be null");
 
         this.webProviderClient = QuarkusRestClientBuilder.newBuilder()
             .baseUri(URI.create(configuration.getUrl()))
+            .readTimeout(cloudConfiguration.restClientReadTimeoutMs(), TimeUnit.MILLISECONDS)
+            .connectTimeout(cloudConfiguration.restClientConnectTimeoutMs(), TimeUnit.MILLISECONDS)
             .build(WebProviderClient.class);
     }
 

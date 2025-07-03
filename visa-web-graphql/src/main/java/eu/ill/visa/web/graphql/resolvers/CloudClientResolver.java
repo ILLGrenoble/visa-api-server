@@ -29,7 +29,7 @@ public class CloudClientResolver {
             try {
                 OpenStackProvider openStackProvider = (OpenStackProvider)cloudClient.getProvider();
                 if (openStackProvider != null) {
-                    return new OpenStackProviderConfigurationType(openStackProvider.getConfiguration());
+                    return new OpenStackProviderConfigurationType(openStackProvider.getOpenStackConfiguration());
                 }
             } catch (Exception ignored) {
             }

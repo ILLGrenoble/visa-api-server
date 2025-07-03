@@ -3,6 +3,7 @@ package eu.ill.visa.cloud.providers.openstack.endpoints;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.openstack.domain.AuthenticationToken;
@@ -18,6 +19,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class OpenStackIdentityEndpoint {
     private static final Logger logger = LoggerFactory.getLogger(OpenStackIdentityEndpoint.class);
@@ -30,11 +32,14 @@ public class OpenStackIdentityEndpoint {
 
     private AuthenticationToken token = new AuthenticationToken(null, new Date());
 
-    public OpenStackIdentityEndpoint(final OpenStackProviderConfiguration configuration) {
+    public OpenStackIdentityEndpoint(final CloudConfiguration cloudConfiguration,
+                                     final OpenStackProviderConfiguration openStackConfiguration) {
         this.identityEndpointClient = QuarkusRestClientBuilder.newBuilder()
-            .baseUri(URI.create(configuration.getIdentityEndpoint()))
+            .baseUri(URI.create(openStackConfiguration.getIdentityEndpoint()))
+            .readTimeout(cloudConfiguration.restClientReadTimeoutMs(), TimeUnit.MILLISECONDS)
+            .connectTimeout(cloudConfiguration.restClientConnectTimeoutMs(), TimeUnit.MILLISECONDS)
             .build(IdentityEndpointClient.class);
-        this.authenticationRequest = new AuthenticationRequest(configuration.getApplicationId(), configuration.getApplicationSecret());
+        this.authenticationRequest = new AuthenticationRequest(openStackConfiguration.getApplicationId(), openStackConfiguration.getApplicationSecret());
         this.mapper = new ObjectMapper()
             .enable(DeserializationFeature.UNWRAP_ROOT_VALUE)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);

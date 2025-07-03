@@ -1,5 +1,6 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
+import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
@@ -14,6 +15,7 @@ import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class OpenStackNetworkEndpoint implements NetworkEndpoint {
 
@@ -22,16 +24,20 @@ public class OpenStackNetworkEndpoint implements NetworkEndpoint {
     private final OpenStackIdentityEndpoint identityProvider;
     private final NetworkEndpointClient networkEndpointClient;
 
-    private OpenStackNetworkEndpoint(final OpenStackProviderConfiguration configuration,
-                                    final OpenStackIdentityEndpoint identityProvider) {
+    private OpenStackNetworkEndpoint(final CloudConfiguration cloudConfiguration,
+                                     final OpenStackProviderConfiguration openStackConfiguration,
+                                     final OpenStackIdentityEndpoint identityProvider) {
         this.identityProvider = identityProvider;
         this.networkEndpointClient = QuarkusRestClientBuilder.newBuilder()
-            .baseUri(URI.create(configuration.getNetworkEndpoint()))
+            .baseUri(URI.create(openStackConfiguration.getNetworkEndpoint()))
+            .readTimeout(cloudConfiguration.restClientReadTimeoutMs(), TimeUnit.MILLISECONDS)
+            .connectTimeout(cloudConfiguration.restClientConnectTimeoutMs(), TimeUnit.MILLISECONDS)
             .build(NetworkEndpointClient.class);
     }
-    public static NetworkEndpoint authenticationProxy(final OpenStackProviderConfiguration configuration,
-                                                    final OpenStackIdentityEndpoint identityEndpoint) {
-        final OpenStackNetworkEndpoint openStackNetworkEndpoint = new OpenStackNetworkEndpoint(configuration, identityEndpoint);
+    public static NetworkEndpoint authenticationProxy(final CloudConfiguration cloudConfiguration,
+                                                      final OpenStackProviderConfiguration openStackConfiguration,
+                                                      final OpenStackIdentityEndpoint identityEndpoint) {
+        final OpenStackNetworkEndpoint openStackNetworkEndpoint = new OpenStackNetworkEndpoint(cloudConfiguration, openStackConfiguration, identityEndpoint);
         return (NetworkEndpoint) Proxy.newProxyInstance(
             openStackNetworkEndpoint.getClass().getClassLoader(),
             new Class[] { NetworkEndpoint.class }, (target, method, methodArgs) -> {

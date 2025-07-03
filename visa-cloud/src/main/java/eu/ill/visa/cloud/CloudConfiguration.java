@@ -13,6 +13,10 @@ public interface CloudConfiguration {
 
     String providerName();
 
+    Long restClientReadTimeoutMs();
+
+    Long restClientConnectTimeoutMs();
+
     List<ProviderConfiguration> providers();
 
     String serverNamePrefix();

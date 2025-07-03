@@ -83,6 +83,8 @@ cloud:
   serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
   providerType: ${VISA_DEFAULT_CLOUD_PROVIDER_TYPE:openstack}
   providerName: ${VISA_DEFAULT_CLOUD_PROVIDER_NAME:Default}
+  restClientConnectTimeoutMs: ${VISA_CLOUD_REST_CLIENT_CONNECT_TIMEOUT_MS:15000}
+  restClientReadTimeoutMs: ${VISA_CLOUD_REST_CLIENT_READ_TIMEOUT_MS:30000}
   providers:
     - name: openstack
       parameters:

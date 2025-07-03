@@ -1,5 +1,6 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
+import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.domain.CloudImage;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -14,6 +15,7 @@ import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class OpenStackImageEndpoint implements ImageEndpoint {
 
@@ -22,17 +24,21 @@ public class OpenStackImageEndpoint implements ImageEndpoint {
     private final OpenStackIdentityEndpoint identityProvider;
     private final ImageEndpointClient imageEndpointClient;
 
-    private OpenStackImageEndpoint(final OpenStackProviderConfiguration configuration,
-                                  final OpenStackIdentityEndpoint identityProvider) {
+    private OpenStackImageEndpoint(final CloudConfiguration cloudConfiguration,
+                                   final OpenStackProviderConfiguration openStackConfiguration,
+                                   final OpenStackIdentityEndpoint identityProvider) {
         this.identityProvider = identityProvider;
         this.imageEndpointClient = QuarkusRestClientBuilder.newBuilder()
-            .baseUri(URI.create(configuration.getImageEndpoint()))
+            .baseUri(URI.create(openStackConfiguration.getImageEndpoint()))
+            .readTimeout(cloudConfiguration.restClientReadTimeoutMs(), TimeUnit.MILLISECONDS)
+            .connectTimeout(cloudConfiguration.restClientConnectTimeoutMs(), TimeUnit.MILLISECONDS)
             .build(ImageEndpointClient.class);
     }
 
-    public static ImageEndpoint authenticationProxy(final OpenStackProviderConfiguration configuration,
-                                                      final OpenStackIdentityEndpoint identityEndpoint) {
-        final OpenStackImageEndpoint openStackImageEndpoint = new OpenStackImageEndpoint(configuration, identityEndpoint);
+    public static ImageEndpoint authenticationProxy(final CloudConfiguration cloudConfiguration,
+                                                    final OpenStackProviderConfiguration openStackConfiguration,
+                                                    final OpenStackIdentityEndpoint identityEndpoint) {
+        final OpenStackImageEndpoint openStackImageEndpoint = new OpenStackImageEndpoint(cloudConfiguration, openStackConfiguration, identityEndpoint);
         return (ImageEndpoint) Proxy.newProxyInstance(
             openStackImageEndpoint.getClass().getClassLoader(),
             new Class[] { ImageEndpoint.class }, (target, method, methodArgs) -> {

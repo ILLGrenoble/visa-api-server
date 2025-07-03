@@ -1,5 +1,6 @@
 package eu.ill.visa.cloud.providers.openstack;
 
+import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.CloudProvider;
@@ -14,22 +15,23 @@ public class OpenStackProvider implements CloudProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenStackProvider.class);
 
-    private final OpenStackProviderConfiguration configuration;
+    private final OpenStackProviderConfiguration openStackConfiguration;
 
     private final ImageEndpoint imageEndpoint;
     private final ComputeEndpoint computeEndpoint;
     private final NetworkEndpoint networkEndpoint;
 
-    public OpenStackProvider(final OpenStackProviderConfiguration configuration) {
-        this.configuration = configuration;
-        OpenStackIdentityEndpoint identityEndpoint = new OpenStackIdentityEndpoint(this.configuration);
-        this.imageEndpoint = OpenStackImageEndpoint.authenticationProxy(this.configuration, identityEndpoint);
-        this.networkEndpoint = OpenStackNetworkEndpoint.authenticationProxy(this.configuration, identityEndpoint);
-        this.computeEndpoint = OpenStackComputeEndpoint.authenticationProxy(configuration, identityEndpoint);
+    public OpenStackProvider(final CloudConfiguration cloudConfiguration,
+                             final OpenStackProviderConfiguration openStackConfiguration) {
+        this.openStackConfiguration = openStackConfiguration;
+        OpenStackIdentityEndpoint identityEndpoint = new OpenStackIdentityEndpoint(cloudConfiguration, this.openStackConfiguration);
+        this.imageEndpoint = OpenStackImageEndpoint.authenticationProxy(cloudConfiguration, this.openStackConfiguration, identityEndpoint);
+        this.networkEndpoint = OpenStackNetworkEndpoint.authenticationProxy(cloudConfiguration, this.openStackConfiguration, identityEndpoint);
+        this.computeEndpoint = OpenStackComputeEndpoint.authenticationProxy(cloudConfiguration, openStackConfiguration, identityEndpoint);
     }
 
-    public OpenStackProviderConfiguration getConfiguration() {
-        return configuration;
+    public OpenStackProviderConfiguration getOpenStackConfiguration() {
+        return openStackConfiguration;
     }
 
     @Override
@@ -121,7 +123,7 @@ public class OpenStackProvider implements CloudProvider {
             .imageId(imageId)
             .flavorId(flavorId)
             .securityGroups(securityGroupNames)
-            .networks(List.of(configuration.getAddressProviderUUID()))
+            .networks(List.of(openStackConfiguration.getAddressProviderUUID()))
             .metadata(metadata)
             .userData(bootCommand)
             .build();

@@ -1,5 +1,6 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
+import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
@@ -22,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
@@ -33,19 +35,23 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
     private final ComputeEndpointClient computeEndpointClient;
     private final OpenStackProviderConfiguration configuration;
 
-    private OpenStackComputeEndpoint(final OpenStackProviderConfiguration configuration,
-                                    final OpenStackIdentityEndpoint identityProvider) {
+    private OpenStackComputeEndpoint(final CloudConfiguration cloudConfiguration,
+                                     final OpenStackProviderConfiguration openStackConfiguration,
+                                     final OpenStackIdentityEndpoint identityProvider) {
 
         this.identityProvider = identityProvider;
-        this.configuration = configuration;
+        this.configuration = openStackConfiguration;
         this.computeEndpointClient = QuarkusRestClientBuilder.newBuilder()
-            .baseUri(URI.create(configuration.getComputeEndpoint()))
+            .baseUri(URI.create(openStackConfiguration.getComputeEndpoint()))
+            .readTimeout(cloudConfiguration.restClientReadTimeoutMs(), TimeUnit.MILLISECONDS)
+            .connectTimeout(cloudConfiguration.restClientConnectTimeoutMs(), TimeUnit.MILLISECONDS)
             .build(ComputeEndpointClient.class);
     }
 
-    public static ComputeEndpoint authenticationProxy(final OpenStackProviderConfiguration configuration,
+    public static ComputeEndpoint authenticationProxy(final CloudConfiguration cloudConfiguration,
+                                                      final OpenStackProviderConfiguration openStackConfiguration,
                                                       final OpenStackIdentityEndpoint identityEndpoint) {
-        final OpenStackComputeEndpoint openStackComputeEndpoint = new OpenStackComputeEndpoint(configuration, identityEndpoint);
+        final OpenStackComputeEndpoint openStackComputeEndpoint = new OpenStackComputeEndpoint(cloudConfiguration, openStackConfiguration, identityEndpoint);
         return (ComputeEndpoint) Proxy.newProxyInstance(
             openStackComputeEndpoint.getClass().getClassLoader(),
             new Class[] { ComputeEndpoint.class }, (target, method, methodArgs) -> {

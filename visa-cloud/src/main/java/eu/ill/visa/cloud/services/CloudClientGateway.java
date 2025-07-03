@@ -17,15 +17,17 @@ import java.util.Map;
 public class CloudClientGateway {
     private static final Logger logger = LoggerFactory.getLogger(CloudClientGateway.class);
     private final CloudClientFactory factory = new CloudClientFactory();
+    private final CloudConfiguration cloudConfiguration;
 
     private CloudClient defaultCloudClient = null;
     private final Map<Long, CloudClient> secondaryCloudClients = new HashMap<>();
 
     @Inject
-    public CloudClientGateway(final CloudConfiguration configuration) {
+    public CloudClientGateway(final CloudConfiguration cloudConfiguration) {
+        this.cloudConfiguration = cloudConfiguration;
         try {
-            if (configuration.defaultProviderEnabled()) {
-                this.defaultCloudClient = factory.getClient(configuration);
+            if (cloudConfiguration.defaultProviderEnabled()) {
+                this.defaultCloudClient = factory.getClient(cloudConfiguration);
                 this.secondaryCloudClients.put(this.defaultCloudClient.getId(), this.defaultCloudClient);
             }
 
@@ -57,7 +59,7 @@ public class CloudClientGateway {
 
     public CloudClient addCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) {
         try {
-            CloudClient cloudClient = this.factory.getClient(providerId, name, providerConfiguration.name(), providerConfiguration, serverNamePrefix, visible);
+            CloudClient cloudClient = this.factory.getClient(cloudConfiguration, providerId, name, providerConfiguration.name(), providerConfiguration, serverNamePrefix, visible);
             this.secondaryCloudClients.put(providerId, cloudClient);
 
             return cloudClient;

@@ -29,23 +29,23 @@ public class CloudClientFactory {
      * @return a new cloud client
      * @throws CloudException if the provider is not found
      */
-    public CloudClient getClient(final CloudConfiguration configuration) throws CloudException {
-        final String provider = configuration.providerType();
-        final ProviderConfiguration providerConfiguration = provider.equals(CloudClientFactory.NULL) ? null :  this.getProviderConfiguration(configuration, provider);
-        final String serverNamePrefix = configuration.serverNamePrefix();
+    public CloudClient getClient(final CloudConfiguration cloudConfiguration) throws CloudException {
+        final String provider = cloudConfiguration.providerType();
+        final ProviderConfiguration providerConfiguration = provider.equals(CloudClientFactory.NULL) ? null :  this.getProviderConfiguration(cloudConfiguration, provider);
+        final String serverNamePrefix = cloudConfiguration.serverNamePrefix();
 
-        return this.getClient(-1L, configuration.providerName(), provider, providerConfiguration, serverNamePrefix, true);
+        return this.getClient(cloudConfiguration, -1L, cloudConfiguration.providerName(), provider, providerConfiguration, serverNamePrefix, true);
     }
 
-    public CloudClient getClient(Long id, String name, String provider, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) throws CloudException {
+    public CloudClient getClient(CloudConfiguration cloudConfiguration, Long id, String name, String provider, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) throws CloudException {
         if (NULL.equals(provider)) {
             return createNullProvider(id, name, "null", serverNamePrefix, visible);
 
         } else if (OPENSTACK.equals(provider)) {
-            return createOpenStackProvider(id, name, provider, providerConfiguration.parameters(), serverNamePrefix, visible);
+            return createOpenStackProvider(cloudConfiguration, id, name, provider, providerConfiguration.parameters(), serverNamePrefix, visible);
 
         } else if (WEB.equals(provider)) {
-            return createWebProvider(id, name, provider, providerConfiguration.parameters(), serverNamePrefix, visible);
+            return createWebProvider(cloudConfiguration, id, name, provider, providerConfiguration.parameters(), serverNamePrefix, visible);
         }
         throw new CloudException(format("Unsupported provider provided: %s", provider));
     }
@@ -59,7 +59,7 @@ public class CloudClientFactory {
      * This is the officially supported provider for VISA
      * Please use the web provider implementation if you wish to use a different cloud provider
      */
-    private CloudClient createOpenStackProvider(@NotNull Long id, @NotNull String name, @NotNull String provider, final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix, boolean visible) {
+    private CloudClient createOpenStackProvider(@NotNull CloudConfiguration cloudConfiguration, @NotNull Long id, @NotNull String name, @NotNull String provider, final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix, boolean visible) {
         requireNonNull(parameters.get("identityEndpoint"), "identityEndpoint endpoint must be set");
         requireNonNull(parameters.get("computeEndpoint"), "computeEndpoint endpoint must be set");
         requireNonNull(parameters.get("imageEndpoint"), "imageEndpoint endpoint must be set");
@@ -69,20 +69,20 @@ public class CloudClientFactory {
         requireNonNull(parameters.get("addressProvider"), "addressProvider must be set");
         requireNonNull(parameters.get("addressProviderUUID"), "addressProviderUUID must be set");
 
-        final OpenStackProviderConfiguration configuration = new OpenStackProviderConfiguration(parameters);
-        return new CloudClient(id, name, provider, new OpenStackProvider(configuration), serverNamePrefix, visible);
+        final OpenStackProviderConfiguration openStackProviderConfiguration = new OpenStackProviderConfiguration(parameters);
+        return new CloudClient(id, name, provider, new OpenStackProvider(cloudConfiguration, openStackProviderConfiguration), serverNamePrefix, visible);
     }
 
     /**
      * This provider enables using a custom cloud provider i.e. proxmox, vmware etc.
      * It forwards requests to an implementation that encapsulates the underlying cloud provider
      */
-    private CloudClient createWebProvider(@NotNull Long id, @NotNull String name, @NotNull String provider, final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix, boolean visible) {
-        final WebProviderConfiguration configuration = new WebProviderConfiguration(
+    private CloudClient createWebProvider(@NotNull CloudConfiguration cloudConfiguration, @NotNull Long id, @NotNull String name, @NotNull String provider, final Map<String, String> parameters, @NotNull @Valid String serverNamePrefix, boolean visible) {
+        final WebProviderConfiguration webProviderConfiguration = new WebProviderConfiguration(
             requireNonNull(parameters.get("url"), "url must be set"),
             requireNonNull(parameters.get("authToken"), "authToken must be set")
         );
-        return new CloudClient(id, name, provider, new WebProvider(configuration), serverNamePrefix, visible);
+        return new CloudClient(id, name, provider, new WebProvider(cloudConfiguration, webProviderConfiguration), serverNamePrefix, visible);
     }
 
 
