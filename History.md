@@ -1,3 +1,23 @@
+3.4.0 03/07/2025
+================
+ * Small changes to error handling in redis pubsub.
+ * Add connect and read timeout options for the cloud provider http clients.
+ * Handle automatically accepting instance extension requests. Can be for no one, staff or everyone. Applies to individual images (configurable through admin ui).
+ * Update WebX Relay to 1.7.0
+ * Send remote desktop parameters to the cloud-init metadata (can be used to initialise a remote desktop session for the instance owner on startup).
+ * Add "modal" type notifications (in parallel to legacy "banner" ones). Store user acknowledgements when a notification has been read.
+ * Keep session Id of webx sessions active even when no one is connected. delete all sessions when an instance is deleted, rebooted or shutdown.
+ * Test for secondary protocol being open when getting the instance state. Use the secondary protocol when creating the guacamole tunnel.
+ * Add a secondary VDI protocol to the image: used for guacamole to specify the underlying remote desktop protocol (ie RDP).
+ * Remove optional column from ImageProtocol. Check explicitly for the VDI protocol being available in the state instance action.
+ * Send vdi protocol in instance state changed event (event gateway)
+ * Modify instance update in account instance controller to handle vdi protocol.
+ * Modify creation of instances with choice of vdi protocol from the client. Send default VDI protocol with Image to client. Send full ImageProtocol with Instance data to clients.
+ * Modify creation and edition of images to handle default VDI protocol.
+ * Automatically determine the instance session protocol if not explicitly set (from image or last instance session). Return protocol in DTOs.
+ * Add "default VDI protocol" to Image and "VDI protocol" to instance. 
+ * Send instance session VDI protocol to web client (for display in admin sections)
+
 3.3.2 17/06/2025
 ================
  * Increase vertx warning exception time to 10s
