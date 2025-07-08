@@ -1,3 +1,7 @@
+3.4.1 08/07/2025
+================
+ * Update WebX Relay to handle asynchronous creation of webx sessions (avoiding timeouts if the creation process is slow). Asynchronous requires WebX Router 1.5.0 but legacy routers are still supported.
+
 3.4.0 03/07/2025
 ================
  * Small changes to error handling in redis pubsub.
