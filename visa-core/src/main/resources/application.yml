@@ -54,7 +54,7 @@ quarkus:
     file:
       enable: ${VISA_LOGGING_FILE_ENABLED:true}
       path: ${VISA_LOGGING_FILE_DIRECTORY:/tmp}/application.log
-      format: ${VISA_LOGGING_FILE_FORMAT}
+      format: ${VISA_LOGGING_FILE_FORMAT:%d{yyyy-MM-dd HH:mm:ss,SSS} %h %N[%i] %-5p [%c{3.}] (%t) %s%e%n}
       level: ${VISA_LOGGING_FILE_THRESHOLD:INFO}
       rotation:
         max-file-size: ${VISA_LOGGING_FILE_MAX_FILE_SIZE:100M}
@@ -63,8 +63,8 @@ quarkus:
       enable: ${VISA_LOGGING_SYSLOG_ENABLED:true}
       syslog-type: ${VISA_LOGGING_SYSLOG_TYPE:rfc3164}
       endpoint: ${VISA_LOGGING_SYSLOG_ENDPOINT:change.logs.com:514}
-      format: ${VISA_LOGGING_SYSLOG_FORMAT}
-      app-name: ${VISA_LOGGING_SYSLOG_APP_NAME}
+      format: ${VISA_LOGGING_SYSLOG_FORMAT:[%-5p] [%c{3.}] (%t) %s%e%n}
+      app-name: ${VISA_LOGGING_SYSLOG_APP_NAME:api}
       facility: ${VISA_LOGGING_SYSLOG_FACILITY:local-use-0}
       level: ${VISA_LOGGING_SYSLOG_THRESHOLD:INFO}
       truncate: false
@@ -80,7 +80,7 @@ quarkus:
 
 cloud:
   defaultProviderEnabled: ${VISA_CLOUD_DEFAULT_PROVIDER_ENABLED:true}
-  serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX}
+  serverNamePrefix: ${VISA_CLOUD_SERVER_NAME_PREFIX:VISA-INSTANCE}
   providerType: ${VISA_DEFAULT_CLOUD_PROVIDER_TYPE:openstack}
   providerName: ${VISA_DEFAULT_CLOUD_PROVIDER_NAME:Default}
   restClientConnectTimeoutMs: ${VISA_CLOUD_REST_CLIENT_CONNECT_TIMEOUT_MS:15000}
@@ -88,18 +88,18 @@ cloud:
   providers:
     - name: openstack
       parameters:
-        identityEndpoint: ${VISA_CLOUD_IDENTITY_ENDPOINT}
-        computeEndpoint: ${VISA_CLOUD_COMPUTE_ENDPOINT}
-        imageEndpoint: ${VISA_CLOUD_IMAGE_ENDPOINT}
-        networkEndpoint: ${VISA_CLOUD_NETWORK_ENDPOINT}
-        applicationId: ${VISA_CLOUD_APPLICATION_ID}
-        applicationSecret: ${VISA_CLOUD_APPLICATION_SECRET}
-        addressProvider: ${VISA_CLOUD_ADDRESS_PROVIDER}
-        addressProviderUUID: ${VISA_CLOUD_ADDRESS_PROVIDER_UUID}
+        identityEndpoint: ${VISA_CLOUD_IDENTITY_ENDPOINT:null}
+        computeEndpoint: ${VISA_CLOUD_COMPUTE_ENDPOINT:null}
+        imageEndpoint: ${VISA_CLOUD_IMAGE_ENDPOINT:null}
+        networkEndpoint: ${VISA_CLOUD_NETWORK_ENDPOINT:null}
+        applicationId: ${VISA_CLOUD_APPLICATION_ID:null}
+        applicationSecret: ${VISA_CLOUD_APPLICATION_SECRET:null}
+        addressProvider: ${VISA_CLOUD_ADDRESS_PROVIDER:null}
+        addressProviderUUID: ${VISA_CLOUD_ADDRESS_PROVIDER_UUID:null}
     - name: web
       parameters:
-        url: ${VISA_CLOUD_WEB_PROVIDER_URL:""}
-        authToken: ${VISA_CLOUD_WEB_PROVIDER_AUTH_TOKEN:""}
+        url: ${VISA_CLOUD_WEB_PROVIDER_URL:null}
+        authToken: ${VISA_CLOUD_WEB_PROVIDER_AUTH_TOKEN:null}
 
 business:
   numberInstanceActionThreads: 16
@@ -120,9 +120,9 @@ business:
     rootURL: ${VISA_ROOT_URL}
     enabled: ${VISA_NOTIFICATION_EMAIL_ADAPTER_ENABLED:false}
     fromEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_FROM_EMAIL_ADDRESS}
-    bccEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_BCC_EMAIL_ADDRESS:}
-    devEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_DEV_EMAIL_ADDRESS:}
-    adminEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS:}
+    bccEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_BCC_EMAIL_ADDRESS}
+    devEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_DEV_EMAIL_ADDRESS}
+    adminEmailAddress: ${VISA_NOTIFICATION_EMAIL_ADAPTER_ADMIN_EMAIL_ADDRESS}
     emailTemplatesDirectory: ${VISA_NOTIFICATION_EMAIL_ADAPTER_TEMPLATES_DIRECTORY:emails/templates/}
   errorReportEmail:
     enabled: ${VISA_LOGGING_EMAIL_APPENDER_ENABLED:false}
