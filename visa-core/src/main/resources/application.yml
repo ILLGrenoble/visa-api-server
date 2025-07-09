@@ -98,8 +98,8 @@ cloud:
         addressProviderUUID: ${VISA_CLOUD_ADDRESS_PROVIDER_UUID}
     - name: web
       parameters:
-        url: ${VISA_CLOUD_WEB_PROVIDER_URL}
-        authToken: ${VISA_CLOUD_WEB_PROVIDER_AUTH_TOKEN}
+        url: ${VISA_CLOUD_WEB_PROVIDER_URL:""}
+        authToken: ${VISA_CLOUD_WEB_PROVIDER_AUTH_TOKEN:""}
 
 business:
   numberInstanceActionThreads: 16

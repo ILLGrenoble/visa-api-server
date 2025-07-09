@@ -11,7 +11,7 @@
 
     <artifactId>visa-web-rest</artifactId>
     <properties>
-        <maven-model.version>3.9.6</maven-model.version>
+        <maven-model.version>3.9.10</maven-model.version>
     </properties>
 
     <dependencies>
