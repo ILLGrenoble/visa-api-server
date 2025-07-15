@@ -2,6 +2,7 @@ package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.security.tokens.AccountToken;
+import eu.ill.visa.security.tokens.InstanceToken;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.ws.rs.BadRequestException;
@@ -51,6 +52,15 @@ public abstract class AbstractController {
             return ((AccountToken) principal);
         }
         throw new UnauthorizedException("SecurityContext does not hold a valid AccountToken");
+    }
+
+
+    protected InstanceToken getInstanceToken(SecurityContext securityContext) {
+        Principal principal = securityContext.getUserPrincipal();
+        if (principal instanceof InstanceToken) {
+            return ((InstanceToken) principal);
+        }
+        throw new UnauthorizedException("SecurityContext does not hold a valid InstanceToken");
     }
 
 

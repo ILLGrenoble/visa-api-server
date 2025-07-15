@@ -49,7 +49,7 @@ public class ApplicationCredentialService {
             }
 
         } else {
-            logger.warn("Application credential with applicationId {} does not exist", applicationId);
+            logger.info("Application credential with applicationId {} does not exist", applicationId);
         }
 
         return null;
