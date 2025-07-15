@@ -1,3 +1,9 @@
+3.4.2 15/07/2025
+================
+ * Add basic auth for instance identity provider (allows an instance to obtain details of itself by passing a secret compute ID) - used as an alternative to cloud-init to get instance data.
+ * Redesign of the AuthenticationMechanism: fix basic auth method for application credentials. 
+ * update to quarkus 3.24.2 and update dependencies.
+
 3.4.1 08/07/2025
 ================
  * Update WebX Relay to handle asynchronous creation of webx sessions (avoiding timeouts if the creation process is slow). Asynchronous requires WebX Router 1.5.0 but legacy routers are still supported.
