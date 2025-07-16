@@ -54,7 +54,7 @@ quarkus:
     file:
       enable: ${VISA_LOGGING_FILE_ENABLED:true}
       path: ${VISA_LOGGING_FILE_DIRECTORY:/tmp}/application.log
-      format: ${VISA_LOGGING_FILE_FORMAT:%d{yyyy-MM-dd HH:mm:ss,SSS} %h %N[%i] %-5p [%c{3.}] (%t) %s%e%n}
+      format: ${VISA_LOGGING_FILE_FORMAT:%d %-5p [%c] (%t) %s%e%n}
       level: ${VISA_LOGGING_FILE_THRESHOLD:INFO}
       rotation:
         max-file-size: ${VISA_LOGGING_FILE_MAX_FILE_SIZE:100M}
