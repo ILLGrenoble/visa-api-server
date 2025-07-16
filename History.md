@@ -1,3 +1,7 @@
+3.4.3 16/07/2025
+================
+ * Fix file log format configuration
+
 3.4.2 15/07/2025
 ================
  * Add basic auth for instance identity provider (allows an instance to obtain details of itself by passing a secret compute ID) - used as an alternative to cloud-init to get instance data.
