@@ -67,9 +67,9 @@ public class GuacamoleDesktopService extends DesktopService {
         return info;
     }
 
-    private GuacamoleConfiguration createConfiguration(InstanceSession session, Instance instance, String ip) {
+    private GuacamoleConfiguration createConfiguration(InstanceSession session, Instance instance) {
         final GuacamoleConfiguration config = new GuacamoleConfiguration();
-        config.setParameter("hostname", ip);
+        config.setParameter("hostname", instance.getIpAddress());
 
         if (session == null) {
             // Get the protocol from the instance image or use the default configuration
@@ -85,11 +85,12 @@ public class GuacamoleDesktopService extends DesktopService {
             String username = instance.getUsername();
             logger.info("Creating new guacamole session ({}) on instance {} with username {}", config.getProtocol(), instance.getId(), username);
             String autologin = instance.getPlan().getImage().getAutologin();
-            config.setParameter("username", username);
+            config.setParameter("username", "vagrant");
             if (autologin != null && autologin.equals("VISA_PAM")) {
                 config.setParameter("password", signatureService.createSignature(username));
             }
             config.setParameter("server-layout", instance.getKeyboardLayout());
+            config.setParameter("security", "tls"); // can be RDP too: neither work for our XRDP servers
             // merge guacamole configuration parameters
             final Map<String, String> guacamoleParameters = configuration.guacdConfiguration();
             guacamoleParameters.forEach(config::setParameter);
@@ -110,10 +111,10 @@ public class GuacamoleDesktopService extends DesktopService {
             new ImageProtocol("GUACD", 4822)
         );
         final Integer port = protocol.getPort();
-        final String ip = instance.getIpAddress();
-        final GuacamoleConfiguration config = createConfiguration(session, instance, ip);
+//        final String ip = instance.getIpAddress();
+        final GuacamoleConfiguration config = createConfiguration(session, instance);
         final GuacamoleClientInformation information = createClientInformation(instance);
-        final InetGuacamoleSocket socket = new InetGuacamoleSocket(ip, port);
+        final InetGuacamoleSocket socket = new InetGuacamoleSocket("localhost", port);
         return new ConfiguredGuacamoleSocket(socket, config, information);
     }
 
