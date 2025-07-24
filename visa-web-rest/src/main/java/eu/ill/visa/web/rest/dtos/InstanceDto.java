@@ -2,6 +2,7 @@ package eu.ill.visa.web.rest.dtos;
 
 import eu.ill.visa.core.entity.ImageProtocol;
 import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 
 import java.util.Date;
@@ -33,6 +34,8 @@ public class InstanceDto {
     private boolean unrestrictedAccess;
     private final List<String> activeProtocols;
     private final ImageProtocol vdiProtocol;
+    private final String publicAccessToken;
+    private final InstanceMemberRole publicAccessRole;
 
     public InstanceDto(Instance instance) {
         this.id = instance.getId();
@@ -56,6 +59,8 @@ public class InstanceDto {
         this.keyboardLayout = instance.getKeyboardLayout();
         this.activeProtocols = instance.getActiveProtocols();
         this.vdiProtocol = instance.getVdiProtocol();
+        this.publicAccessToken = instance.getPublicAccessToken();
+        this.publicAccessRole = instance.getPublicAccessRole();
     }
 
     public Long getId() {
@@ -164,5 +169,13 @@ public class InstanceDto {
 
     public ImageProtocol getVdiProtocol() {
         return vdiProtocol;
+    }
+
+    public String getPublicAccessToken() {
+        return publicAccessToken;
+    }
+
+    public InstanceMemberRole getPublicAccessRole() {
+        return publicAccessRole;
     }
 }

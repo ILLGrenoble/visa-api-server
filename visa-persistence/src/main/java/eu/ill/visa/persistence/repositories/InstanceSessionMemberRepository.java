@@ -105,6 +105,13 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         return query.getResultList();
     }
 
+    public List<InstanceSessionMemberPartial> getAllPartialsByInstanceIdAndProtocol(final Long instanceId, final String protocol) {
+        final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllPartialsForInstanceIdAndProtocol", InstanceSessionMemberPartial.class);
+        query.setParameter("instanceId", instanceId);
+        query.setParameter("protocol", protocol);
+        return query.getResultList();
+    }
+
     public void deactivateSessionMember(final InstanceSessionMemberPartial instanceSessionMember) {
         getEntityManager().createNamedQuery("instanceSessionMember.deactivateById")
             .setParameter("id", instanceSessionMember.getId())

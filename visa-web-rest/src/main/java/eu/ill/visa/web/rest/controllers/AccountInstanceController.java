@@ -161,11 +161,16 @@ public class AccountInstanceController extends AbstractController {
 
     @GET
     @Path("/{instance}")
-    public MetaResponse<InstanceDto> get(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+    public MetaResponse<InstanceDto> get(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance, @QueryParam("access_token") String accessToken) {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
             InstanceDto instanceDto = this.mapInstance(instance, user);
+
+            return createResponse(instanceDto);
+
+        } else if (accessToken != null && accessToken.equals(instance.getPublicAccessToken()) && instance.getPublicAccessRole() != null) {
+            InstanceDto instanceDto = this.mapInstanceForPublicAccessToken(instance, user);
 
             return createResponse(instanceDto);
         }
@@ -412,7 +417,8 @@ public class AccountInstanceController extends AbstractController {
 
     @POST
     @Path("/{instanceUid}/auth/token")
-    public RestResponse<MetaResponse<InstanceAuthenticationTokenDto>> createInstanceAuthenticationTicket(@Context final SecurityContext securityContext, @PathParam("instanceUid") String instanceUid) {
+    public RestResponse<MetaResponse<InstanceAuthenticationTokenDto>> createInstanceAuthenticationTicket(@Context final SecurityContext securityContext,
+                                                                                                         @PathParam("instanceUid") String instanceUid) {
         final User user = this.getUserPrincipal(securityContext);
         final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members));
 
@@ -434,6 +440,83 @@ public class AccountInstanceController extends AbstractController {
         final InstanceAuthenticationToken token = instanceAuthenticationTokenService.create(user, instance);
 
         return createResponse(new InstanceAuthenticationTokenDto(token), CREATED);
+    }
+
+    @POST
+    @Path("/{instanceUid}/auth/token/{public_access_token}")
+    public RestResponse<MetaResponse<InstanceAuthenticationTokenDto>> createInstanceAuthenticationTicketFromPublicAccessToken(@Context final SecurityContext securityContext,
+                                                                                                                              @PathParam("instanceUid") String instanceUid,
+                                                                                                                              @PathParam("public_access_token") String publicAccessToken) {
+        final User user = this.getUserPrincipal(securityContext);
+        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members));
+
+        if (instance == null) {
+            throw new NotFoundException("Instance not found");
+        }
+
+        if (!publicAccessToken.equals(instance.getPublicAccessToken())) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        final InstanceAuthenticationToken token = instanceAuthenticationTokenService.create(user, instance, publicAccessToken);
+
+        return createResponse(new InstanceAuthenticationTokenDto(token), CREATED);
+    }
+
+    @POST
+    @Path("/{instanceUid}/public/access_token")
+    public MetaResponse<InstanceDto> createPublicInstanceAccessToken(@Context final SecurityContext securityContext,
+                                                                     @PathParam("instanceUid") String instanceUid,
+                                                                     @Valid @NotNull final PublicAccessTokenCreatorDto publicAccessTokenCreatorDto) {
+        final User user = this.getUserPrincipal(securityContext);
+        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
+
+        if (instance == null) {
+            throw new NotFoundException("Instance not found");
+        }
+
+        if (!instance.getOwner().getUser().equals(user)) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        return createResponse(mapInstance(this.instanceService.createPublicAccessToken(instance, publicAccessTokenCreatorDto.getRole()), user));
+    }
+
+    @PUT
+    @Path("/{instanceUid}/public/access_token")
+    public MetaResponse<InstanceDto> updatePublicInstanceAccessToken(@Context final SecurityContext securityContext,
+                                                                     @PathParam("instanceUid") String instanceUid,
+                                                                     @Valid @NotNull final PublicAccessTokenCreatorDto publicAccessTokenCreatorDto) {
+        final User user = this.getUserPrincipal(securityContext);
+        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
+
+        if (instance == null) {
+            throw new NotFoundException("Instance not found");
+        }
+
+        if (!instance.getOwner().getUser().equals(user)) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        return createResponse(mapInstance(this.instanceService.updatePublicAccessToken(instance, publicAccessTokenCreatorDto.getRole()), user));
+    }
+
+    @DELETE
+    @Path("/{instanceUid}/public/access_token")
+    public MetaResponse<InstanceDto> deletePublicInstanceAccessToken(@Context final SecurityContext securityContext,
+                                                                     @PathParam("instanceUid") String instanceUid) {
+        final User user = this.getUserPrincipal(securityContext);
+        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
+
+        if (instance == null) {
+            throw new NotFoundException("Instance not found");
+        }
+
+        if (!instance.getOwner().getUser().equals(user)) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        return createResponse(mapInstance(this.instanceService.deletePublicAccessToken(instance), user));
     }
 
     @POST
@@ -559,22 +642,19 @@ public class AccountInstanceController extends AbstractController {
         throw new NotFoundException();
     }
 
-    private InstanceDto mapInstance(Instance instance, User user) {
-        // Check if instance vdi protocol has been set or not
-        if (instance.getVdiProtocol() == null) {
-            final InstanceSession lastInstanceSession = this.instanceSessionService.getLastByInstance(instance);
-            final ImageProtocol guacamoleImageProtocol = instance.getPlan().getImage().getProtocolByName("GUACD");
-            final ImageProtocol webXImageProtocol = instance.getPlan().getImage().getProtocolByName("WEBX");
-            if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.WEBX_PROTOCOL) && webXImageProtocol != null) {
-                instance.setVdiProtocol(webXImageProtocol);
-            } else if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.GUACAMOLE_PROTOCOL) && guacamoleImageProtocol != null) {
-                instance.setVdiProtocol(guacamoleImageProtocol);
-            } else {
-                instance.setVdiProtocol(this.imageService.getDefaultVdiProtocolForImage(instance.getPlan().getImage()));
-            }
+    private InstanceDto mapInstanceForPublicAccessToken(Instance instance, User user) {
+        this.updateVdiProtocol(instance);
+        InstanceDto instanceDto = new InstanceDto(instance);
 
-            instanceService.updateVdiProtocolById(instance);
-        }
+        instanceDto.setMembership(new InstanceMemberDto(InstanceMember.newBuilder().user(user).role(instance.getPublicAccessRole()).build()));
+        instanceDto.setCanConnectWhileOwnerAway(false);
+        instanceDto.setUnrestrictedAccess(false);
+
+        return instanceDto;
+    }
+
+    private InstanceDto mapInstance(Instance instance, User user) {
+        this.updateVdiProtocol(instance);
 
         InstanceDto instanceDto = new InstanceDto(instance);
         InstanceMember instanceMember = instance.getMember(user);
@@ -591,6 +671,24 @@ public class AccountInstanceController extends AbstractController {
         instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
 
         return instanceDto;
+    }
+
+    private void updateVdiProtocol(Instance instance) {
+        // Check if instance vdi protocol has been set or not
+        if (instance.getVdiProtocol() == null) {
+            final InstanceSession lastInstanceSession = this.instanceSessionService.getLastByInstance(instance);
+            final ImageProtocol guacamoleImageProtocol = instance.getPlan().getImage().getProtocolByName("GUACD");
+            final ImageProtocol webXImageProtocol = instance.getPlan().getImage().getProtocolByName("WEBX");
+            if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.WEBX_PROTOCOL) && webXImageProtocol != null) {
+                instance.setVdiProtocol(webXImageProtocol);
+            } else if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.GUACAMOLE_PROTOCOL) && guacamoleImageProtocol != null) {
+                instance.setVdiProtocol(guacamoleImageProtocol);
+            } else {
+                instance.setVdiProtocol(this.imageService.getDefaultVdiProtocolForImage(instance.getPlan().getImage()));
+            }
+
+            instanceService.updateVdiProtocolById(instance);
+        }
     }
 
     private UserDto mapUser(User user) {

@@ -33,7 +33,7 @@ public class InstanceAuthenticationTokenServiceTest {
         InstanceAuthenticationToken instanceAuthenticationToken = this.instanceAuthenticationTokenService.getByToken(token);
         assertNotNull(instanceAuthenticationToken);
         assertEquals(1000L, instanceAuthenticationToken.getId());
-        assertEquals(true, instanceAuthenticationToken.isExpired(10));
+        assertEquals(true, instanceAuthenticationToken.isExpired(15));
     }
 
 }

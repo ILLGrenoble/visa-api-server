@@ -61,7 +61,7 @@ public class ClientAuthenticationTokenService {
             throw new InvalidTokenException("Client authentication token not found");
         }
 
-        if (authenticationToken.isExpired(10)) {
+        if (authenticationToken.isExpired(15)) {
             throw new InvalidTokenException("Client authentication token has expired");
         }
 

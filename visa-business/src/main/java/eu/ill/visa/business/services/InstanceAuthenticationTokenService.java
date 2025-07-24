@@ -50,6 +50,19 @@ public class InstanceAuthenticationTokenService {
         return instanceAuthenticationToken;
     }
 
+    public InstanceAuthenticationToken create(User user, Instance instance, String publicAccessToken) {
+
+        InstanceAuthenticationToken instanceAuthenticationToken = InstanceAuthenticationToken.newBuilder()
+            .token(UUID.randomUUID().toString())
+            .user(user)
+            .instance(instance)
+            .publicAccessToken(publicAccessToken)
+            .build();
+
+        this.save(instanceAuthenticationToken);
+        return instanceAuthenticationToken;
+    }
+
     public void save(InstanceAuthenticationToken instanceAuthenticationToken) {
         this.repository.save(instanceAuthenticationToken);
     }
@@ -69,7 +82,7 @@ public class InstanceAuthenticationTokenService {
             throw new InvalidTokenException("Authentication session ticket not found");
         }
 
-        if (authenticationToken.isExpired(10)) {
+        if (authenticationToken.isExpired(15)) {
             throw new InvalidTokenException("Authentication session ticket has expired");
         }
 

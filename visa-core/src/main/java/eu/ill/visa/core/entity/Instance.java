@@ -302,6 +302,13 @@ public class Instance extends Timestampable {
     @JoinColumn(name = "vdi_protocol", foreignKey = @ForeignKey(name = "fk_vdi_protocol_id"), nullable = true)
     private ImageProtocol vdiProtocol;
 
+    @Column(name = "public_access_token", length = 250, nullable = true)
+    private String publicAccessToken;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "public_access_role", length = 255, nullable = true)
+    private InstanceMemberRole publicAccessRole;
+
     public Instance() {
     }
 
@@ -676,6 +683,22 @@ public class Instance extends Timestampable {
 
     public void setVdiProtocol(ImageProtocol vdiProtocol) {
         this.vdiProtocol = vdiProtocol;
+    }
+
+    public String getPublicAccessToken() {
+        return publicAccessToken;
+    }
+
+    public void setPublicAccessToken(String publicAccessToken) {
+        this.publicAccessToken = publicAccessToken;
+    }
+
+    public InstanceMemberRole getPublicAccessRole() {
+        return publicAccessRole;
+    }
+
+    public void setPublicAccessRole(InstanceMemberRole publicAccessRole) {
+        this.publicAccessRole = publicAccessRole;
     }
 
     @Transient

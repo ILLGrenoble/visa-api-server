@@ -36,6 +36,9 @@ public class InstanceAuthenticationToken extends Timestampable {
     @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
     private Instance instance;
 
+    @Column(name = "public_access_token", length = 250, nullable = true)
+    private String publicAccessToken;
+
     public InstanceAuthenticationToken() {
 
     }
@@ -45,6 +48,7 @@ public class InstanceAuthenticationToken extends Timestampable {
         this.token = builder.token;
         this.user = builder.user;
         this.instance = builder.instance;
+        this.publicAccessToken = builder.publicAccessToken;
     }
 
     public static Builder newBuilder() {
@@ -92,11 +96,21 @@ public class InstanceAuthenticationToken extends Timestampable {
         this.instance = instance;
     }
 
+    public String getPublicAccessToken() {
+        return publicAccessToken;
+    }
+
+    public void setPublicAccessToken(String accessToken) {
+        this.publicAccessToken = accessToken;
+    }
+
     public static final class Builder {
         private Long   id;
         private String token;
         private User   user;
         private Instance instance;
+        private String publicAccessToken;
+
         private Builder() {
         }
 
@@ -121,6 +135,11 @@ public class InstanceAuthenticationToken extends Timestampable {
 
         public Builder instance(Instance instance) {
             this.instance = instance;
+            return this;
+        }
+
+        public Builder publicAccessToken(String accessToken) {
+            this.publicAccessToken = accessToken;
             return this;
         }
     }

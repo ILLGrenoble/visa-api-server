@@ -3,6 +3,7 @@ package eu.ill.visa.vdi;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.gateway.ClientEventsGateway;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
+import eu.ill.visa.business.services.InstanceSessionMemberService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
@@ -31,6 +32,7 @@ public class RemoteDesktopServer {
     private final DesktopSessionService desktopConnectionService;
     private final InstanceAuthenticationTokenService authenticator;
     private final InstanceSessionService instanceSessionService;
+    private final InstanceSessionMemberService instanceSessionMemberService;
     private final DesktopAccessService desktopAccessService;
     private final VirtualDesktopConfiguration configuration;
     private final ClientEventsGateway clientEventsGateway;
@@ -40,6 +42,7 @@ public class RemoteDesktopServer {
 
     @Inject
     public RemoteDesktopServer(final InstanceSessionService instanceSessionService,
+                               final InstanceSessionMemberService instanceSessionMemberService,
                                final DesktopSessionService desktopConnectionService,
                                final InstanceAuthenticationTokenService authenticator,
                                final DesktopAccessService desktopAccessService,
@@ -49,6 +52,7 @@ public class RemoteDesktopServer {
                                final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket,
                                final WebXRemoteDesktopSocket webXRemoteDesktopSocket) {
         this.instanceSessionService = instanceSessionService;
+        this.instanceSessionMemberService = instanceSessionMemberService;
         this.desktopConnectionService = desktopConnectionService;
         this.authenticator = authenticator;
         this.desktopAccessService = desktopAccessService;
@@ -82,12 +86,12 @@ public class RemoteDesktopServer {
             .next(new AccessRevokedSubscriber(this.desktopConnectionService));
 
         // Set up guacamole display listeners
-        this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.authenticator, this.eventDispatcher));
+        this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.instanceSessionMemberService, this.authenticator, this.eventDispatcher));
         this.guacamoleRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
         this.guacamoleRemoteDesktopSocket.setEventSubscriber(new GuacamoleRemoteDesktopEventSubscriber(this.desktopConnectionService, this.configuration.maxSessionInactivityTimeMinutes()));
 
         // Set up webx display listeners
-        this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.authenticator, this.eventDispatcher));
+        this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.instanceSessionMemberService, this.authenticator, this.eventDispatcher));
         this.webXRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
         this.webXRemoteDesktopSocket.setEventSubscriber(new WebXRemoteDesktopEventSubscriber(this.desktopConnectionService, this.configuration.maxSessionInactivityTimeMinutes()));
     }

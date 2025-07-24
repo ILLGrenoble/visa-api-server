@@ -3,6 +3,7 @@ package eu.ill.visa.vdi.display.subscribers;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.InvalidTokenException;
 import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
+import eu.ill.visa.business.services.InstanceSessionMemberService;
 import eu.ill.visa.business.services.InstanceSessionService;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
@@ -31,17 +32,20 @@ public class RemoteDesktopConnectSubscriber {
     private final DesktopSessionService desktopSessionService;
     private final DesktopAccessService desktopAccessService;
     private final InstanceSessionService instanceSessionService;
+    private final InstanceSessionMemberService instanceSessionMemberService;
     private final InstanceAuthenticationTokenService authenticator;
     private final EventDispatcher eventDispatcher;
 
     public RemoteDesktopConnectSubscriber(final DesktopSessionService desktopSessionService,
                                           final DesktopAccessService desktopAccessService,
                                           final InstanceSessionService instanceSessionService,
+                                          final InstanceSessionMemberService instanceSessionMemberService,
                                           final InstanceAuthenticationTokenService authenticator,
                                           final EventDispatcher eventDispatcher) {
         this.desktopSessionService = desktopSessionService;
         this.desktopAccessService = desktopAccessService;
         this.instanceSessionService = instanceSessionService;
+        this.instanceSessionMemberService = instanceSessionMemberService;
         this.authenticator = authenticator;
         this.eventDispatcher = eventDispatcher;
     }
@@ -56,34 +60,47 @@ public class RemoteDesktopConnectSubscriber {
             final InstanceAuthenticationToken instanceAuthenticationToken = authenticator.authenticate(token);
             final User user = instanceAuthenticationToken.getUser();
             final Instance instance = instanceAuthenticationToken.getInstance();
+            final String publicAccessToken = instanceAuthenticationToken.getPublicAccessToken();
 
-            final InstanceMemberRole role = instanceSessionService.getUserSessionRole(instance, user);
+            InstanceMemberRole role = instanceSessionService.getUserSessionRole(instance, user);
+            boolean usingPublicAccessToken = false;
+
+            // Check if we should examine the accessToken
+            if (role.equals(InstanceMemberRole.NONE) || role.equals(InstanceMemberRole.SUPPORT) && publicAccessToken != null && publicAccessToken.equals(instance.getPublicAccessToken())) {
+                logger.info("User {} is connecting using a public access token for instance {}", user, instance.getId());
+                role = instance.getPublicAccessRole();
+                usingPublicAccessToken = true;
+            }
+
             ConnectedUser connectedUser = new ConnectedUser(user.getId(), user.getFullName(), role);
 
-            if (instance.getUsername() == null) {
-                logger.warn("No username is associated with the instance {}: the owner has never connected. Disconnecting user {}", instance.getId(), user);
-                throw new OwnerNotConnectedException();
-
-            } else {
-                if (connectedUser.getRole().equals(InstanceMemberRole.SUPPORT)) {
-                    // See if user can connect even if owner is away
-                    if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
-                        this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
-
-                    } else {
-                        final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, socketClient.protocol());
-                        if (instanceSession != null && this.desktopSessionService.isOwnerConnected(instanceSession.getId())) {
-                            // Start process of requesting access from the owner
-                            this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), connectedUser, instance.getId(), nopSender);
-
-                        } else {
-                            throw new OwnerNotConnectedException();
-                        }
-                    }
+            if (connectedUser.getRole().equals(InstanceMemberRole.SUPPORT)) {
+                // See if user can connect even if owner is away
+                if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
+                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
 
                 } else {
-                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
+                    final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, socketClient.protocol());
+                    if (instanceSession != null && this.desktopSessionService.isOwnerConnected(instanceSession.getId())) {
+                        // Start process of requesting access from the owner
+                        this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), connectedUser, instance.getId(), nopSender);
+
+                    } else {
+                        throw new OwnerNotConnectedException();
+                    }
                 }
+
+            } else if (usingPublicAccessToken) {
+                // If using a public access token then the owner must be connected
+                if (this.instanceSessionMemberService.isOwnerConnected(instance, socketClient.protocol())) {
+                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
+
+                } else {
+                    throw new OwnerNotConnectedException();
+                }
+
+            } else {
+                this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
             }
 
 

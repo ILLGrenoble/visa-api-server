@@ -82,6 +82,10 @@ public class InstanceSessionMemberService {
         return this.repository.getAllPartialsByInstanceSessionId(sessionId);
     }
 
+    public List<InstanceSessionMemberPartial> getAllPartialsByInstanceIdAndProtocol(@NotNull Long instanceId, @NotNull String protocol) {
+        return this.repository.getAllPartialsByInstanceIdAndProtocol(instanceId, protocol);
+    }
+
     public List<InstanceSessionMemberPartial> getAllPartialsByInstanceId(@NotNull Long instanceId) {
         return this.repository.getAllPartialsByInstanceId(instanceId);
     }
@@ -98,4 +102,10 @@ public class InstanceSessionMemberService {
         this.repository.updateInteractionAt(instanceSessionMember);
     }
 
+    public boolean isOwnerConnected(Instance instance, String protocol) {
+        List<InstanceSessionMemberPartial> sessions = this.getAllPartialsByInstanceIdAndProtocol(instance.getId(), protocol);
+        return sessions.stream()
+            .anyMatch(instanceSessionMember -> instanceSessionMember.getRole().equals(InstanceMemberRole.OWNER));
+
+    }
 }

@@ -386,6 +386,30 @@ public class InstanceService {
         return repository.getThumbnailForInstanceId(instanceId);
     }
 
+    public Instance createPublicAccessToken(Instance instance, final InstanceMemberRole role) {
+        final String token = UUID.randomUUID().toString();
+        instance.setPublicAccessToken(token);
+        instance.setPublicAccessRole(role);
+
+        this.save(instance);
+        return instance;
+    }
+
+    public Instance updatePublicAccessToken(Instance instance, final InstanceMemberRole role) {
+        instance.setPublicAccessRole(role);
+
+        this.save(instance);
+        return instance;
+    }
+
+    public Instance deletePublicAccessToken(Instance instance) {
+        instance.setPublicAccessToken(null);
+        instance.setPublicAccessRole(null);
+
+        this.save(instance);
+        return instance;
+    }
+
     public String getUID() {
         String regex = "^.*[a-zA-Z]+.*";
         Pattern pattern = Pattern.compile(regex);
