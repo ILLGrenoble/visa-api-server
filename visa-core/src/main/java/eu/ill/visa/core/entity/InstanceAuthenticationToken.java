@@ -44,7 +44,6 @@ public class InstanceAuthenticationToken extends Timestampable {
     }
 
     private InstanceAuthenticationToken(Builder builder) {
-        this.id = builder.id;
         this.token = builder.token;
         this.user = builder.user;
         this.instance = builder.instance;
@@ -105,7 +104,6 @@ public class InstanceAuthenticationToken extends Timestampable {
     }
 
     public static final class Builder {
-        private Long   id;
         private String token;
         private User   user;
         private Instance instance;
@@ -116,11 +114,6 @@ public class InstanceAuthenticationToken extends Timestampable {
 
         public InstanceAuthenticationToken build() {
             return new InstanceAuthenticationToken(this);
-        }
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
         }
 
         public Builder token(String token) {

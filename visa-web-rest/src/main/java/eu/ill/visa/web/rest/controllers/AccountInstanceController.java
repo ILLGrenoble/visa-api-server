@@ -66,6 +66,7 @@ public class AccountInstanceController extends AbstractController {
     private final DesktopConfigurationImpl desktopConfiguration;
     private final ClientConfiguration clientConfiguration;
     private final ImageProtocolService imageProtocolService;
+    private final PersonalAccessTokenService personalAccessTokenService;
 
     @Inject
     public AccountInstanceController(final UserService userService,
@@ -81,7 +82,9 @@ public class AccountInstanceController extends AbstractController {
                                      final ExperimentService experimentService,
                                      final EmailManager emailManager,
                                      final DesktopConfigurationImpl desktopConfiguration,
-                                     final ClientConfiguration clientConfiguration, ImageProtocolService imageProtocolService) {
+                                     final ClientConfiguration clientConfiguration,
+                                     final ImageProtocolService imageProtocolService,
+                                     final PersonalAccessTokenService personalAccessTokenService) {
         this.userService = userService;
         this.instanceService = instanceService;
         this.instanceMemberService = instanceMemberService;
@@ -97,6 +100,7 @@ public class AccountInstanceController extends AbstractController {
         this.desktopConfiguration = desktopConfiguration;
         this.clientConfiguration = clientConfiguration;
         this.imageProtocolService = imageProtocolService;
+        this.personalAccessTokenService = personalAccessTokenService;
     }
 
     @GET
@@ -169,10 +173,19 @@ public class AccountInstanceController extends AbstractController {
 
             return createResponse(instanceDto);
 
-        } else if (accessToken != null && accessToken.equals(instance.getPublicAccessToken()) && instance.getPublicAccessRole() != null) {
-            InstanceDto instanceDto = this.mapInstanceForPublicAccessToken(instance, user);
+        } else if (accessToken != null) {
+            if (accessToken.equals(instance.getPublicAccessToken()) && instance.getPublicAccessRole() != null) {
+                InstanceDto instanceDto = this.mapInstanceForPublicAccessToken(instance, user);
+                return createResponse(instanceDto);
+            } else {
+                final PersonalAccessToken personalAccessToken = this.personalAccessTokenService.getByInstanceAndToken(instance, accessToken);
+                if (personalAccessToken != null) {
+                    this.personalAccessTokenService.consume(personalAccessToken, user);
+                    instance = this.instanceService.getFullById(instance.getId());
 
-            return createResponse(instanceDto);
+                    return createResponse(this.mapInstance(instance, user));
+                }
+            }
         }
 
         throw new NotFoundException();
@@ -464,16 +477,11 @@ public class AccountInstanceController extends AbstractController {
     }
 
     @POST
-    @Path("/{instanceUid}/public/access_token")
+    @Path("/{instance}/public_access_token")
     public MetaResponse<InstanceDto> createPublicInstanceAccessToken(@Context final SecurityContext securityContext,
-                                                                     @PathParam("instanceUid") String instanceUid,
+                                                                     @PathParam("instance") Instance instance,
                                                                      @Valid @NotNull final PublicAccessTokenCreatorDto publicAccessTokenCreatorDto) {
         final User user = this.getUserPrincipal(securityContext);
-        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
-
-        if (instance == null) {
-            throw new NotFoundException("Instance not found");
-        }
 
         if (!instance.getOwner().getUser().equals(user)) {
             throw new NotAuthorizedException("You do not have permission");
@@ -483,34 +491,26 @@ public class AccountInstanceController extends AbstractController {
     }
 
     @PUT
-    @Path("/{instanceUid}/public/access_token")
+    @Path("/{instance}/public_access_token")
     public MetaResponse<InstanceDto> updatePublicInstanceAccessToken(@Context final SecurityContext securityContext,
-                                                                     @PathParam("instanceUid") String instanceUid,
+                                                                     @PathParam("instance") Instance instance,
                                                                      @Valid @NotNull final PublicAccessTokenCreatorDto publicAccessTokenCreatorDto) {
         final User user = this.getUserPrincipal(securityContext);
-        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
-
-        if (instance == null) {
-            throw new NotFoundException("Instance not found");
-        }
 
         if (!instance.getOwner().getUser().equals(user)) {
             throw new NotAuthorizedException("You do not have permission");
         }
 
+
+
         return createResponse(mapInstance(this.instanceService.updatePublicAccessToken(instance, publicAccessTokenCreatorDto.getRole()), user));
     }
 
     @DELETE
-    @Path("/{instanceUid}/public/access_token")
+    @Path("/{instance}/public_access_token")
     public MetaResponse<InstanceDto> deletePublicInstanceAccessToken(@Context final SecurityContext securityContext,
-                                                                     @PathParam("instanceUid") String instanceUid) {
+                                                                     @PathParam("instance") Instance instance) {
         final User user = this.getUserPrincipal(securityContext);
-        final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
-
-        if (instance == null) {
-            throw new NotFoundException("Instance not found");
-        }
 
         if (!instance.getOwner().getUser().equals(user)) {
             throw new NotAuthorizedException("You do not have permission");
@@ -518,6 +518,85 @@ public class AccountInstanceController extends AbstractController {
 
         return createResponse(mapInstance(this.instanceService.deletePublicAccessToken(instance), user));
     }
+
+    @GET
+    @Path("/{instance}/personal_access_tokens")
+    public MetaResponse<List<PersonalAccessTokenDto>> getPersonAccessTokens(@Context final SecurityContext securityContext,
+                                                                            @PathParam("instance") Instance instance) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        if (!instance.getOwner().getUser().equals(user)) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        List<PersonalAccessToken> tokens = this.personalAccessTokenService.getAllForInstance(instance);
+
+        return createResponse(tokens.stream().map(PersonalAccessTokenDto::new).toList());
+    }
+
+    @POST
+    @Path("/{instance}/personal_access_tokens")
+    public MetaResponse<PersonalAccessTokenDto> createPersonAccessTokens(@Context final SecurityContext securityContext,
+                                                                         @PathParam("instance") Instance instance,
+                                                                         @Valid @NotNull final PersonalAccessTokenInputDto input) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        if (!instance.getOwner().getUser().equals(user)) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        final PersonalAccessToken personalAccessToken = this.personalAccessTokenService.create(instance, input.getName(), input.getRole());
+
+        return createResponse(new PersonalAccessTokenDto(personalAccessToken));
+    }
+
+    @PUT
+    @Path("/{instance}/personal_access_tokens/{tokenId}")
+    public MetaResponse<PersonalAccessTokenDto> updatePersonAccessTokens(@Context final SecurityContext securityContext,
+                                                                         @PathParam("instance") Instance instance,
+                                                                         @PathParam("tokenId") Long tokenId,
+                                                                         @Valid @NotNull final PersonalAccessTokenInputDto input) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        if (!instance.getOwner().getUser().equals(user)) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        if (!input.getId().equals(tokenId)) {
+            throw new BadRequestException("Invalid personal access token");
+        }
+
+        final PersonalAccessToken token = this.personalAccessTokenService.getByInstanceAndId(instance, input.getId());
+        if (token == null) {
+            throw new NotFoundException("Token not found");
+        }
+
+        token.setName(input.getName());
+        token.setRole(input.getRole());
+
+        return createResponse(new PersonalAccessTokenDto(this.personalAccessTokenService.save(token)));
+    }
+
+    @DELETE
+    @Path("/{instance}/personal_access_tokens/{tokenId}")
+    public MetaResponse<Boolean> deletePersonAccessTokens(@Context final SecurityContext securityContext,
+                                                          @PathParam("instance") Instance instance,
+                                                          @PathParam("tokenId") Long tokenId) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        if (!instance.getOwner().getUser().equals(user)) {
+            throw new NotAuthorizedException("You do not have permission");
+        }
+
+        final PersonalAccessToken token = this.personalAccessTokenService.getByInstanceAndId(instance, tokenId);
+        if (token == null) {
+            throw new NotFoundException("Token not found");
+        }
+        this.personalAccessTokenService.delete(token);
+
+        return createResponse(true);
+    }
+
 
     @POST
     @Path("/{instance}/members")
