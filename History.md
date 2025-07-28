@@ -1,3 +1,11 @@
+3.5.0 28/07/2025
+================
+ * Add personal invitation links to invite anyone to become a member of your instance: email the one-time-use link to someone to add them to the instance members. 
+ * Public access token to share an instance with anyone who has the link. Can be disabled through config values. Access can be read-only/full access. Owner must be connected.
+ * Use non-blocking emailing to avoid thread blocks if SMTP server is slow or blocking
+ * Log to info the logging request filter to enable betting tracing of request and response times
+ * Fix native build
+
 3.4.3 16/07/2025
 ================
  * Fix file log format configuration
