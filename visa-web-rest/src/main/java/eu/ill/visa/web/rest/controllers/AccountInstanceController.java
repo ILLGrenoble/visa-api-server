@@ -174,7 +174,7 @@ public class AccountInstanceController extends AbstractController {
             return createResponse(instanceDto);
 
         } else if (accessToken != null) {
-            if (accessToken.equals(instance.getPublicAccessToken()) && instance.getPublicAccessRole() != null) {
+            if (accessToken.equals(instance.getPublicAccessToken()) && instance.getPublicAccessRole() != null && this.instanceService.publicAccessTokenEnabled()) {
                 InstanceDto instanceDto = this.mapInstanceForPublicAccessToken(instance, user);
                 return createResponse(instanceDto);
             } else {
@@ -460,6 +460,11 @@ public class AccountInstanceController extends AbstractController {
     public RestResponse<MetaResponse<InstanceAuthenticationTokenDto>> createInstanceAuthenticationTicketFromPublicAccessToken(@Context final SecurityContext securityContext,
                                                                                                                               @PathParam("instanceUid") String instanceUid,
                                                                                                                               @PathParam("public_access_token") String publicAccessToken) {
+
+        if (!this.instanceService.publicAccessTokenEnabled()) {
+            throw new NotAuthorizedException("Public Access Tokens are not allowed");
+        }
+
         final User user = this.getUserPrincipal(securityContext);
         final Instance instance = this.instanceService.getByUID(instanceUid, List.of(InstanceFetch.members));
 
@@ -473,6 +478,9 @@ public class AccountInstanceController extends AbstractController {
 
         final InstanceAuthenticationToken token = instanceAuthenticationTokenService.create(user, instance, publicAccessToken);
 
+        if (token == null) {
+            throw new NotAuthorizedException("Public Access Tokens are not allowed");
+        }
         return createResponse(new InstanceAuthenticationTokenDto(token), CREATED);
     }
 

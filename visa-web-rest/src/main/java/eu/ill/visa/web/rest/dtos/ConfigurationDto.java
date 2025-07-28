@@ -1,5 +1,6 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.web.rest.*;
 
 import java.util.List;
@@ -13,10 +14,12 @@ public class ConfigurationDto {
     private final AnalyticsConfigurationDto analytics;
     private final DesktopConfigurationDto desktop;
     private final ExperimentsConfigurationDto experiments;
+    private final InstanceConfigurationDto instance;
     private final Map<String, String> metadata;
 
     public ConfigurationDto(final ClientConfiguration clientConfiguration,
                             final DesktopConfigurationImpl desktopConfiguration,
+                            final InstanceConfiguration instanceConfiguration,
                             final String version,
                             final Map<String, String> metadata) {
         this.contactEmail = clientConfiguration.contactEmail().orElse(null);
@@ -24,6 +27,7 @@ public class ConfigurationDto {
         this.analytics = new AnalyticsConfigurationDto(clientConfiguration.analyticsConfiguration());
         this.desktop = new DesktopConfigurationDto(desktopConfiguration);
         this.experiments = new ExperimentsConfigurationDto(clientConfiguration.experimentsConfiguration());
+        this.instance = new InstanceConfigurationDto(instanceConfiguration);
         this.version = version;
         this.metadata = metadata;
     }
@@ -46,6 +50,10 @@ public class ConfigurationDto {
 
     public ExperimentsConfigurationDto getExperiments() {
         return experiments;
+    }
+
+    public InstanceConfigurationDto getInstance() {
+        return instance;
     }
 
     public Map<String, String> getMetadata() {
@@ -163,6 +171,18 @@ public class ConfigurationDto {
 
         public boolean isOpenDataIncluded() {
             return openDataIncluded;
+        }
+    }
+
+    public static class InstanceConfigurationDto {
+        private final boolean publicAccessTokenEnabled;
+
+        public InstanceConfigurationDto(final InstanceConfiguration configuration) {
+            this.publicAccessTokenEnabled = configuration.publicAccessTokenEnabled();
+        }
+
+        public boolean isPublicAccessTokenEnabled() {
+            return publicAccessTokenEnabled;
         }
     }
 }

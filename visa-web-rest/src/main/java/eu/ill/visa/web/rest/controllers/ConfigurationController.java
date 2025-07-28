@@ -1,5 +1,6 @@
 package eu.ill.visa.web.rest.controllers;
 
+import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.business.services.ConfigurationService;
 import eu.ill.visa.core.entity.Configuration;
 import eu.ill.visa.web.rest.ClientConfiguration;
@@ -33,14 +34,17 @@ public class ConfigurationController extends AbstractController {
     private final ClientConfiguration clientConfiguration;
     private final DesktopConfigurationImpl desktopConfiguration;
     private final ConfigurationService configurationService;
+    private final InstanceConfiguration instanceConfiguration;
 
     @Inject
     ConfigurationController(final ClientConfiguration clientConfiguration,
                             final DesktopConfigurationImpl desktopConfiguration,
-                            final ConfigurationService configurationService) {
+                            final ConfigurationService configurationService,
+                            final InstanceConfiguration instanceConfiguration) {
         this.clientConfiguration = clientConfiguration;
         this.desktopConfiguration = desktopConfiguration;
         this.configurationService = configurationService;
+        this.instanceConfiguration = instanceConfiguration;
     }
 
     @GET
@@ -56,7 +60,7 @@ public class ConfigurationController extends AbstractController {
                 Configuration::getValue
             ));
 
-        ConfigurationDto configurationDto = new ConfigurationDto(this.clientConfiguration, this.desktopConfiguration, version, metadata);
+        ConfigurationDto configurationDto = new ConfigurationDto(this.clientConfiguration, this.desktopConfiguration, this.instanceConfiguration, version, metadata);
 
         return createResponse(configurationDto);
     }

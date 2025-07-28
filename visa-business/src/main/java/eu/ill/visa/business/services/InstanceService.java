@@ -465,4 +465,8 @@ public class InstanceService {
     public void updateVdiProtocolById(Instance instance) {
         this.repository.updateVdiProtocolById(instance);
     }
+
+    public boolean publicAccessTokenEnabled() {
+        return this.configuration.publicAccessTokenEnabled();
+    }
 }

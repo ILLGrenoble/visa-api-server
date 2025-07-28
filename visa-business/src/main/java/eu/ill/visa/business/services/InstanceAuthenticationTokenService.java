@@ -9,6 +9,8 @@ import eu.ill.visa.persistence.repositories.InstanceAuthenticationTokenRepositor
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,9 +18,10 @@ import java.util.UUID;
 @Transactional
 @Singleton
 public class InstanceAuthenticationTokenService {
+    private static final Logger logger = LoggerFactory.getLogger(InstanceAuthenticationTokenService.class);
 
     private final InstanceAuthenticationTokenRepository repository;
-    final InstanceService instanceService;
+    private final InstanceService instanceService;
 
     @Inject
     public InstanceAuthenticationTokenService(final InstanceAuthenticationTokenRepository repository,
@@ -51,6 +54,10 @@ public class InstanceAuthenticationTokenService {
     }
 
     public InstanceAuthenticationToken create(User user, Instance instance, String publicAccessToken) {
+        if (!this.instanceService.publicAccessTokenEnabled()) {
+            logger.warn("Attempt to create authentication token for instance {} using public access token, but this has been disabled", instance.getId());
+            return null;
+        }
 
         InstanceAuthenticationToken instanceAuthenticationToken = InstanceAuthenticationToken.newBuilder()
             .token(UUID.randomUUID().toString())

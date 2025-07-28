@@ -10,5 +10,6 @@ public interface InstanceConfiguration {
     Integer activityRetentionPeriodDays();
     Integer portCheckTimeoutMs();
     String defaultVdiProtocol();
+    Boolean publicAccessTokenEnabled();
 
 }
