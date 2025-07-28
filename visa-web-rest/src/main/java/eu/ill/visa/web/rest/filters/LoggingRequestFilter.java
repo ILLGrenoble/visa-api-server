@@ -1,7 +1,8 @@
 package eu.ill.visa.web.rest.filters;
 
-import eu.ill.visa.core.entity.User;
 import eu.ill.visa.security.tokens.AccountToken;
+import eu.ill.visa.security.tokens.ApplicationToken;
+import eu.ill.visa.security.tokens.InstanceToken;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -13,11 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Provider
 public class LoggingRequestFilter implements ContainerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingRequestFilter.class);
+    private static SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
+
 
     @Context
     UriInfo info;
@@ -37,15 +42,20 @@ public class LoggingRequestFilter implements ContainerRequestFilter {
         final String address = request.remoteAddress().toString();
         final String forwardedIP = request.getHeader("X-Forwarded-For");
 
-        logger.debug("{} {} {}, user: {}", forwardedIP == null ? address : forwardedIP, method, path, principal);
+        logger.info("{} - {} [{}] \"{} {}\"", forwardedIP == null ? address : forwardedIP, principal, format.format(new Date()), method, path);
     }
 
     private String getPrincipal(SecurityContext securityContext) {
         Principal principal = securityContext.getUserPrincipal();
-        if (principal instanceof AccountToken) {
-            User user = ((AccountToken) principal).getUser();
-            return principal.getName() + " (" + user.getId() + ")";
+        if (principal instanceof AccountToken accountToken) {
+            return principal.getName() + " (" + accountToken.getUser().getId() + ")";
+
+        } else if (principal instanceof InstanceToken instanceToken) {
+            return "Instance " + instanceToken.getInstance().getId();
+
+        } else if (principal instanceof ApplicationToken applicationToken) {
+            return "Application credential " + applicationToken.getName();
         }
-        return "anonymous";
+        return "-";
     }
 }
