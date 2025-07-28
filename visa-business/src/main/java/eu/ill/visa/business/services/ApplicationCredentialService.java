@@ -47,9 +47,6 @@ public class ApplicationCredentialService {
             } else {
                 logger.warn("Secret incorrect for application credential {}", applicationCredential.getName());
             }
-
-        } else {
-            logger.info("Application credential with applicationId {} does not exist", applicationId);
         }
 
         return null;

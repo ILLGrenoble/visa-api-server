@@ -34,10 +34,10 @@ public class ChainedBasicAuthIdentitySupplier implements Supplier<SecurityIdenti
 
     @ActivateRequestContext
     public SecurityIdentity get() {
-        SecurityIdentity identity = applicationTokenIdentitySupplier.authenticate(this.username, this.password);
+        SecurityIdentity identity = instanceTokenIdentitySupplier.authenticate(this.username, this.password);
 
         if (identity == null) {
-            identity = instanceTokenIdentitySupplier.authenticate(this.username, this.password);
+            identity = applicationTokenIdentitySupplier.authenticate(this.username, this.password);
         }
 
         if (identity == null) {

@@ -31,7 +31,6 @@ public class HybridAuthenticationMechanism implements HttpAuthenticationMechanis
     private static final String BEARER = "Bearer";
     private static final String BEARER_PREFIX = "bearer ";
     private static final String BASIC_PREFIX = "basic ";
-//    private static final String ACCESS_TOKEN_COOKIE = "access_token";
     private static final String LOWERCASE_BEARER_PREFIX;
     private static final String LOWERCASE_BASIC_PREFIX;
     private static final int BEARER_PREFIX_LENGTH;
@@ -52,7 +51,6 @@ public class HybridAuthenticationMechanism implements HttpAuthenticationMechanis
         logger.debug("Obtaining credentials from request with URI {}", request.uri());
 
         AuthenticationRequest authRequest = fromHeader(request)
-//            .or(() -> this.fromCookie(request))
             .orElse(null);
 
         if (authRequest == null) {
@@ -101,14 +99,4 @@ public class HybridAuthenticationMechanism implements HttpAuthenticationMechanis
         }
         return Optional.empty();
     }
-
-//    private Optional<AuthenticationRequest> fromCookie(final HttpServerRequest request) {
-//        final Cookie cookie = request.getCookie(ACCESS_TOKEN_COOKIE);
-//        if (cookie != null) {
-//            logger.debug("[AccountToken] Obtained account token from request access_token cookie for URI {}", request.uri());
-//            TokenCredential tokenCredential = new TokenCredential(cookie.getValue(), ACCESS_TOKEN_COOKIE);
-//            return Optional.of(new AccountTokenAuthenticationRequest(tokenCredential));
-//        }
-//        return Optional.empty();
-//    }
 }
