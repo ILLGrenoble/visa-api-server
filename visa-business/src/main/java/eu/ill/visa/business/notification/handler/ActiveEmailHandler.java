@@ -10,7 +10,7 @@ import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
-import io.quarkus.mailer.Mailer;
+import io.quarkus.mailer.reactive.ReactiveMailer;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class ActiveEmailHandler implements EmailHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ActiveEmailHandler.class);
 
-    private final Mailer mailer;
+    private final ReactiveMailer mailer;
 
     private final String fromEmailAddress;
     private final String bccEmailAddress;
@@ -45,7 +45,7 @@ public class ActiveEmailHandler implements EmailHandler {
     public ActiveEmailHandler(final MailerConfiguration mailerConfiguration,
                               final InstanceConfiguration instanceConfiguration,
                               final InstanceMemberService instanceMemberService,
-                              final Mailer mailer) {
+                              final ReactiveMailer mailer) {
 
         this.instanceMemberService = instanceMemberService;
 

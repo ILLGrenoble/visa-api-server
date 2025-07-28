@@ -5,8 +5,8 @@ import eu.ill.visa.core.domain.Timer;
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
-import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.MailerName;
+import io.quarkus.mailer.reactive.ReactiveMailer;
 import io.quarkus.runtime.Shutdown;
 import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.inject.Singleton;
@@ -41,7 +41,7 @@ public class ActiveErrorReporter implements ErrorReporter {
 
     private static final Logger logger = LoggerFactory.getLogger(ActiveErrorReporter.class);
 
-    private final Mailer mailer;
+    private final ReactiveMailer mailer;
     private final String subject;
     private final String toAddress;
     private final List<String> ccAddresses;
@@ -57,7 +57,7 @@ public class ActiveErrorReporter implements ErrorReporter {
 
     private final Executor errorReportExecutor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("error-reporter-vt-", 0).factory());;
 
-    public ActiveErrorReporter(final @MailerName("logging") Mailer mailer,
+    public ActiveErrorReporter(final @MailerName("logging") ReactiveMailer mailer,
                                final ErrorReportEmailConfiguration configuration) {
         this.mailer = mailer;
 
