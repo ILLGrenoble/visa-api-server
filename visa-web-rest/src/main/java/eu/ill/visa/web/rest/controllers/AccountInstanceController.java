@@ -168,23 +168,29 @@ public class AccountInstanceController extends AbstractController {
     public MetaResponse<InstanceDto> get(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance, @QueryParam("access_token") String accessToken) {
         final User user = this.getUserPrincipal(securityContext);
 
+        // Check for personal access invitation
+        if (accessToken != null) {
+            final PersonalAccessToken personalAccessToken = this.personalAccessTokenService.getByInstanceAndToken(instance, accessToken);
+            if (personalAccessToken != null) {
+                this.personalAccessTokenService.consume(personalAccessToken, user);
+                instance = this.instanceService.getFullById(instance.getId());
+
+                return createResponse(this.mapInstance(instance, user));
+            }
+        }
+
+        // Check for authorised user
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
             InstanceDto instanceDto = this.mapInstance(instance, user);
 
             return createResponse(instanceDto);
+        }
 
-        } else if (accessToken != null) {
+        // Finally check for public access token
+        if (accessToken != null && instance.getPublicAccessToken() != null) {
             if (accessToken.equals(instance.getPublicAccessToken()) && instance.getPublicAccessRole() != null && this.instanceService.publicAccessTokenEnabled()) {
                 InstanceDto instanceDto = this.mapInstanceForPublicAccessToken(instance, user);
                 return createResponse(instanceDto);
-            } else {
-                final PersonalAccessToken personalAccessToken = this.personalAccessTokenService.getByInstanceAndToken(instance, accessToken);
-                if (personalAccessToken != null) {
-                    this.personalAccessTokenService.consume(personalAccessToken, user);
-                    instance = this.instanceService.getFullById(instance.getId());
-
-                    return createResponse(this.mapInstance(instance, user));
-                }
             }
         }
 
