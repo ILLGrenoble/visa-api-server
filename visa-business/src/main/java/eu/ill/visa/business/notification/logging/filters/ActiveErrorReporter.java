@@ -164,7 +164,10 @@ public class ActiveErrorReporter implements ErrorReporter {
         }
         email.setFrom(this.fromAddress);
         try {
-            this.mailer.send(email);
+            this.mailer.send(email).subscribe().with(
+                unused -> {},
+                error -> logger.warn("Error sending error report email email: {}", error.getMessage())
+            );
 
         } catch (Exception e) {
             logger.warn("Failed to send error report email: {}", e.getMessage());
