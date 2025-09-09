@@ -15,6 +15,7 @@ public class Server {
     public String name;
     public String status;
     public @JsonProperty("OS-EXT-STS:task_state") String taskState;
+    public @JsonProperty("OS-EXT-STS:vm_state") String vmState;
     public ServerImage image;
     public ServerFlavor flavor;
     public @JsonProperty("addresses") Map<String, List<ServerAddress>> addresses;
@@ -74,6 +75,12 @@ public class Server {
             case "REBOOT":
                 return CloudInstanceState.REBOOTING;
             case "MIGRATING":
+                if (vmState != null && vmState.equals("active")) {
+                    return CloudInstanceState.ACTIVE;
+
+                } else {
+                    return CloudInstanceState.UNAVAILABLE;
+                }
             case "RESCUE":
             case "RESIZE":
             case "REVERT_RESIZE":
