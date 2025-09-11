@@ -1,3 +1,7 @@
+3.5.1 11/09/2025
+================
+ * Handle server migration when shared storage is used: keep the instance active if the vm_state remains active during the migration
+
 3.5.0 28/07/2025
 ================
  * Add personal invitation links to invite anyone to become a member of your instance: email the one-time-use link to someone to add them to the instance members. 
