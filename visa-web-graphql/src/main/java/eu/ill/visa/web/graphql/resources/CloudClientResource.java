@@ -99,6 +99,27 @@ public class CloudClientResource {
     }
 
     /**
+     * Get cloud devices from the the cloud provider
+     *
+     * @return a list of cloud devices
+     */
+    @Query
+    public @NotNull CompletableFuture<List<CloudDeviceType>> cloudDevices(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
+        final CompletableFuture<List<CloudDeviceType>> future = new CompletableFuture<>();
+        runAsync(() -> {
+            try {
+                CloudClient cloudClient = this.getCloudClient(cloudId);
+                future.complete(cloudClient.devices().stream().map(CloudDeviceType::new).toList());
+            } catch (DataFetchingException e) {
+                future.completeExceptionally(e);
+            } catch (Exception exception) {
+                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
+            }
+        });
+        return future;
+    }
+
+    /**
      * Get cloud limits from the the cloud provider
      *
      * @return a list of cloud limits

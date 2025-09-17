@@ -43,10 +43,6 @@ public class ImageRepository extends AbstractRepository<Image> {
         }
     }
 
-    public void delete(final Image image) {
-        remove(image);
-    }
-
     public void save(final Image image) {
         if (image.getId() == null) {
             persist(image);

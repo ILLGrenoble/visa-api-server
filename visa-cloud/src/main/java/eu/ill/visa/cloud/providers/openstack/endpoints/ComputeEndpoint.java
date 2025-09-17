@@ -1,9 +1,6 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
-import eu.ill.visa.cloud.domain.CloudFlavour;
-import eu.ill.visa.cloud.domain.CloudInstance;
-import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
-import eu.ill.visa.cloud.domain.CloudLimit;
+import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.providers.openstack.http.requests.ServerInput;
 
@@ -12,6 +9,7 @@ import java.util.List;
 public interface ComputeEndpoint {
     List<CloudFlavour> flavors() throws CloudException;
     CloudFlavour flavor(final String id) throws CloudException;
+    List<CloudDevice> devices() throws CloudException;
     List<CloudInstance> instances() throws CloudException;
     CloudInstance instance(final String id) throws CloudException;
     List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException;

@@ -80,6 +80,16 @@ public class CloudClient {
         return provider.flavor(id);
     }
 
+    public List<CloudDevice> devices() throws CloudException {
+        logger.trace("Fetching cloud devices");
+        return provider.devices();
+    }
+
+    public CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException {
+        logger.trace("Fetching cloud device with identifier: {} and type {}", identifier, deviceType);
+        return provider.device(identifier, deviceType);
+    }
+
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
         logger.trace("Fetching cloud instance identifiers");
         return provider.instanceIdentifiers();

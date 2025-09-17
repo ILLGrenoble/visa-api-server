@@ -9,6 +9,8 @@ import eu.ill.visa.cloud.providers.openstack.http.requests.ServerInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 public class OpenStackProvider implements CloudProvider {
@@ -20,6 +22,9 @@ public class OpenStackProvider implements CloudProvider {
     private final ImageEndpoint imageEndpoint;
     private final ComputeEndpoint computeEndpoint;
     private final NetworkEndpoint networkEndpoint;
+
+    private List<CloudDevice> cloudDevices;
+    private Instant cloudDeviceUpdateTime = Instant.MIN;
 
     public OpenStackProvider(final CloudConfiguration cloudConfiguration,
                              final OpenStackProviderConfiguration openStackConfiguration) {
@@ -52,6 +57,22 @@ public class OpenStackProvider implements CloudProvider {
     @Override
     public CloudFlavour flavor(final String id) throws CloudException {
         return this.computeEndpoint.flavor(id);
+    }
+
+    @Override
+    public List<CloudDevice> devices() throws CloudException {
+        if (Duration.between(this.cloudDeviceUpdateTime, Instant.now()).toMinutes() > 5) {
+            this.cloudDevices = this.computeEndpoint.devices();
+            this.cloudDeviceUpdateTime = Instant.now();
+        }
+        return this.cloudDevices;
+    }
+
+    @Override
+    public CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException {
+        return this.devices().stream()
+            .filter(device -> device.getIdentifier().equals(identifier) && device.getType().equals(deviceType))
+            .findFirst().orElse(null);
     }
 
     @Override

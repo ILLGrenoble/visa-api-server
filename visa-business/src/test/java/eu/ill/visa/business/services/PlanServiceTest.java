@@ -4,7 +4,6 @@ import eu.ill.visa.core.entity.*;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +11,8 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @QuarkusTest
 @TestTransaction
@@ -53,24 +53,6 @@ public class PlanServiceTest {
     void testGetAll() {
         List<Plan> results = planService.getAll();
         assertEquals(4, results.size());
-    }
-
-    @Test
-    @DisplayName("Delete an plan")
-    void testDelete() {
-        Plan plan = planService.getById(1002L);
-        planService.delete(plan);
-        List<Plan> results = planService.getAll();
-        assertEquals(3, results.size());
-    }
-
-    @Test
-    @DisplayName("Should fail to delete an plan because there are instances associated to it")
-    void testDeleteShouldFail() {
-        Plan plan = planService.getById(1000L);
-        assertThrows(PersistenceException.class, () -> {
-            planService.delete(plan);
-        });
     }
 
     @Test

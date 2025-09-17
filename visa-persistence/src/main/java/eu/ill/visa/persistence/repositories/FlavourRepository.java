@@ -43,10 +43,6 @@ public class FlavourRepository extends AbstractRepository<Flavour> {
         }
     }
 
-    public void delete(Flavour flavour) {
-        remove(flavour);
-    }
-
     public void save(final Flavour flavour) {
         if (flavour.getId() == null) {
             persist(flavour);

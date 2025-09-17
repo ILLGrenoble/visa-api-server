@@ -32,10 +32,6 @@ public class FlavourService {
         return this.repository.getById(id);
     }
 
-    public void delete(Flavour flavour) {
-        this.repository.delete(flavour);
-    }
-
     public void save(@NotNull Flavour flavour) {
         this.repository.save(flavour);
     }

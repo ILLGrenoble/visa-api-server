@@ -33,6 +33,12 @@ public interface ComputeEndpointClient {
     FlavorResponse flavor(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("flavourId") String flavourId);
 
     @GET
+    @Path("/v2/flavors/{flavourId}/os-extra_specs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    ExtraSpecsResponse flavorExtraSpecs(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("flavourId") String flavourId);
+
+    @GET
     @Path("/v2/servers")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
