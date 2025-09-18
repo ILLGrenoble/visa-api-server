@@ -57,14 +57,14 @@ public class CloudDevice {
     }
 
     public enum Type {
-        PASSTHROUGH_GPU,
+        PCI_PASSTHROUGH,
         VIRTUAL_GPU,
     }
 
     public static CloudDevice from(String key, String value) {
         if (PCI_PASSTHROUGH_KEY.equals(key) && value.indexOf(":") > 0) {
             String alias = value.substring(0, value.indexOf(":"));
-            return new CloudDevice(alias, Type.PASSTHROUGH_GPU);
+            return new CloudDevice(alias, Type.PCI_PASSTHROUGH);
 
         } else if (key.startsWith(VIRTUAL_GPU_PREFIX)) {
             String alias = key.substring(RESOURCES_PREFIX.length());
