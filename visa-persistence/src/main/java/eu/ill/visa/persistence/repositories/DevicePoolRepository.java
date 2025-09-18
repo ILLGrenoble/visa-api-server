@@ -1,6 +1,7 @@
 package eu.ill.visa.persistence.repositories;
 
 import eu.ill.visa.core.entity.DevicePool;
+import eu.ill.visa.core.entity.enumerations.DeviceType;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -26,6 +27,18 @@ public class DevicePoolRepository extends AbstractRepository<DevicePool> {
         try {
             TypedQuery<DevicePool> query = getEntityManager().createNamedQuery("devicePool.getById", DevicePool.class);
             query.setParameter("id", id);
+            return query.getSingleResult();
+        } catch (
+            NoResultException exception) {
+            return null;
+        }
+    }
+
+    public DevicePool getComputeIdentifierAndType(String computeIdentifier, DeviceType deviceType) {
+        try {
+            TypedQuery<DevicePool> query = getEntityManager().createNamedQuery("devicePool.getComputeIdentifierAndType", DevicePool.class);
+            query.setParameter("computeIdentifier", computeIdentifier);
+            query.setParameter("deviceType", deviceType);
             return query.getSingleResult();
         } catch (
             NoResultException exception) {

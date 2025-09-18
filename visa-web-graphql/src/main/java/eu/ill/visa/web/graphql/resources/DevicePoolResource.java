@@ -70,6 +70,13 @@ public class DevicePoolResource {
     @Mutation
     public @NotNull DevicePoolType createDevicePool(@NotNull @Valid DevicePoolInput input) throws InvalidInputException {
         // Validate the devicePool input
+
+        // Verify we don't already have a device with the same characteristics
+        final DevicePool existingDevicePool = this.devicePoolService.getComputeIdentifierAndType(input.getComputeIdentifier(), input.getDeviceType());
+        if (existingDevicePool != null) {
+            throw new InvalidInputException("Device pool already exists");
+        }
+
         this.validateDevicePoolInput(input);
         final DevicePool devicePool = new DevicePool();
         this.mapToDevicePool(input, devicePool);
@@ -88,6 +95,12 @@ public class DevicePoolResource {
      */
     @Mutation
     public @NotNull DevicePoolType updateDevicePool(@NotNull @AdaptToScalar(Scalar.Int.class) Long id, @NotNull @Valid DevicePoolInput input) throws EntityNotFoundException, InvalidInputException  {
+        // Verify we don't already have a device with the same characteristics
+        final DevicePool existingDevicePool = this.devicePoolService.getComputeIdentifierAndType(input.getComputeIdentifier(), input.getDeviceType());
+        if (existingDevicePool != null && !existingDevicePool.getId().equals(id)) {
+            throw new InvalidInputException("Device pool already exists");
+        }
+
         // Validate the devicePool input
         this.validateDevicePoolInput(input);
 

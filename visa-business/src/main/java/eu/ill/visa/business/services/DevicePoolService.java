@@ -1,6 +1,7 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.entity.DevicePool;
+import eu.ill.visa.core.entity.enumerations.DeviceType;
 import eu.ill.visa.persistence.repositories.DevicePoolRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -26,6 +27,10 @@ public class DevicePoolService {
 
     public DevicePool getById(Long id) {
         return this.repository.getById(id);
+    }
+
+    public DevicePool getComputeIdentifierAndType(String computeIdentifier, DeviceType deviceType) {
+        return this.repository.getComputeIdentifierAndType(computeIdentifier, deviceType);
     }
 
     public void save(@NotNull DevicePool devicePool) {

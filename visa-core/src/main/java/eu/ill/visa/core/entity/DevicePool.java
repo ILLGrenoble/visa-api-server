@@ -17,6 +17,15 @@ import java.util.Date;
             AND dp.deletedAt IS NULL
             AND cpc.deletedAt IS NULL
     """),
+    @NamedQuery(name = "devicePool.getComputeIdentifierAndType", query = """
+            SELECT dp
+            FROM DevicePool dp
+            LEFT JOIN dp.cloudProviderConfiguration cpc
+            WHERE dp.computeIdentifier = :computeIdentifier
+            AND dp.deviceType = :deviceType
+            AND dp.deletedAt IS NULL
+            AND cpc.deletedAt IS NULL
+    """),
     @NamedQuery(name = "devicePool.getAll", query = """
             SELECT dp
             FROM DevicePool dp
