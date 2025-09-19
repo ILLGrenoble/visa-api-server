@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudFlavour;
+import eu.ill.visa.cloud.services.CloudClient;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
@@ -12,13 +13,15 @@ public class CloudFlavourType {
     private final @NotNull Integer cpus;
     private final @NotNull Integer disk;
     private final @NotNull Integer ram;
+    private final @NotNull CloudClientType cloudClient;
 
-    public CloudFlavourType(final CloudFlavour cloudFlavour) {
+    public CloudFlavourType(final CloudFlavour cloudFlavour, final CloudClient cloudClient) {
         this.id = cloudFlavour.getId();
         this.name = cloudFlavour.getName();
         this.cpus = cloudFlavour.getCpus();
         this.disk = cloudFlavour.getDisk();
         this.ram = cloudFlavour.getRam();
+        this.cloudClient = new CloudClientType(cloudClient);
     }
 
     public String getId() {
@@ -39,5 +42,9 @@ public class CloudFlavourType {
 
     public Integer getRam() {
         return ram;
+    }
+
+    public CloudClientType getCloudClient() {
+        return cloudClient;
     }
 }

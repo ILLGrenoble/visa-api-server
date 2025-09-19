@@ -41,7 +41,7 @@ public class FlavourResolver {
             if (cloudClient != null) {
                 CloudFlavour cloudFlavour = cloudClient.flavour(flavour.getComputeId());
                 if (cloudFlavour != null) {
-                    return new CloudFlavourType(cloudFlavour);
+                    return new CloudFlavourType(cloudFlavour, cloudClient);
                 }
             }
         } catch (CloudException ignored) {

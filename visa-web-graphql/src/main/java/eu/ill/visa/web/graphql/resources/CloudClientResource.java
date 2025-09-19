@@ -5,9 +5,9 @@ import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
-import eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
@@ -24,14 +24,15 @@ import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import static java.util.concurrent.CompletableFuture.runAsync;
 
 @GraphQLApi
 @RolesAllowed(Role.ADMIN_ROLE)
 public class CloudClientResource {
+    private static final Logger logger = LoggerFactory.getLogger(CloudClientResource.class);
 
     private final CloudClientService cloudClientService;
     private final InstanceService instanceService;
@@ -62,19 +63,15 @@ public class CloudClientResource {
      * @return a list of cloud images
      */
     @Query
-    public @NotNull CompletableFuture<List<CloudImageType>> cloudImages(@AdaptToScalar(Scalar.Int.class) @NotNull Long cloudId) {
-        final CompletableFuture<List<CloudImageType>> future = new CompletableFuture<>();
-        runAsync(() -> {
-            try {
-                CloudClient cloudClient = this.getCloudClient(cloudId);
-                future.complete(cloudClient.images().stream().map(CloudImageType::new).toList());
-            } catch (DataFetchingException e) {
-                future.completeExceptionally(e);
-            } catch (Exception exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
-            }
-        });
-        return future;
+    public @NotNull List<CloudImageType> cloudImages(@AdaptToScalar(Scalar.Int.class) @NotNull Long cloudId) throws DataFetchingException {
+        try {
+            CloudClient cloudClient = this.getCloudClient(cloudId);
+            return cloudClient.images().stream().map(CloudImageType::new).toList();
+        } catch (DataFetchingException e) {
+            throw e;
+        } catch (Exception exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
     }
 
     /**
@@ -83,19 +80,15 @@ public class CloudClientResource {
      * @return a list of cloud flavours
      */
     @Query
-    public @NotNull CompletableFuture<List<CloudFlavourType>> cloudFlavours(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
-        final CompletableFuture<List<CloudFlavourType>> future = new CompletableFuture<>();
-        runAsync(() -> {
-            try {
-                CloudClient cloudClient = this.getCloudClient(cloudId);
-                future.complete(cloudClient.flavours().stream().map(CloudFlavourType::new).toList());
-            } catch (DataFetchingException e) {
-                future.completeExceptionally(e);
-            } catch (Exception exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
-            }
-        });
-        return future;
+    public @NotNull List<CloudFlavourType> cloudFlavours(@AdaptToScalar(Scalar.Int.class) Long cloudId) throws DataFetchingException {
+        try {
+            CloudClient cloudClient = this.getCloudClient(cloudId);
+            return cloudClient.flavours().stream().map(cloudFlavour -> new CloudFlavourType(cloudFlavour, cloudClient)).toList();
+        } catch (DataFetchingException e) {
+            throw e;
+        } catch (Exception exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
     }
 
     /**
@@ -104,19 +97,15 @@ public class CloudClientResource {
      * @return a list of cloud devices
      */
     @Query
-    public @NotNull CompletableFuture<List<CloudDeviceType>> cloudDevices(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
-        final CompletableFuture<List<CloudDeviceType>> future = new CompletableFuture<>();
-        runAsync(() -> {
-            try {
-                CloudClient cloudClient = this.getCloudClient(cloudId);
-                future.complete(cloudClient.devices().stream().map(CloudDeviceType::new).toList());
-            } catch (DataFetchingException e) {
-                future.completeExceptionally(e);
-            } catch (Exception exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
-            }
-        });
-        return future;
+    public @NotNull List<CloudDeviceType> cloudDevices(@AdaptToScalar(Scalar.Int.class) Long cloudId) throws DataFetchingException {
+        try {
+            CloudClient cloudClient = this.getCloudClient(cloudId);
+            return cloudClient.devices().stream().map(CloudDeviceType::new).toList();
+        } catch (DataFetchingException e) {
+            throw e;
+        } catch (Exception exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
     }
 
     /**
@@ -125,27 +114,18 @@ public class CloudClientResource {
      * @return a list of cloud limits
      */
     @Query
-    public @NotNull CompletableFuture<List<DetailedCloudLimit>> cloudLimits() {
-        final CompletableFuture<List<DetailedCloudLimit>> bigFuture = new CompletableFuture<>();
-        runAsync(() -> {
-            List<CloudClient> cloudClients = this.cloudClientService.getAll();
+    public @NotNull List<DetailedCloudLimit> cloudLimits() {
+        List<CloudClient> cloudClients = this.cloudClientService.getAll();
 
-            List<CompletableFuture<DetailedCloudLimit>> allCloudLimitsFutures = cloudClients.stream().map(cloudClient -> {
-                final CompletableFuture<DetailedCloudLimit> future = new CompletableFuture<>();
-                runAsync(() -> {
-                    try {
-                        CloudLimit cloudLimit = cloudClient.limits();
-                        future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), cloudLimit));
-                    } catch (Exception exception) {
-                        future.complete(new DetailedCloudLimit(new CloudClientType(cloudClient), exception.getMessage()));
-                    }
-                });
-                return future;
-            }).toList();
-
-            bigFuture.complete(allCloudLimitsFutures.stream().map(CompletableFuture::join).toList());
-        });
-        return bigFuture;
+        return cloudClients.stream().map(cloudClient -> {
+            try {
+                CloudLimit cloudLimit = cloudClient.limits();
+                return new DetailedCloudLimit(new CloudClientType(cloudClient), cloudLimit);
+            } catch (Exception exception) {
+                logger.warn("Failed to get cloud limits for {}", cloudClient.getId());
+                return new DetailedCloudLimit(new CloudClientType(cloudClient), exception.getMessage());
+            }
+        }).toList();
     }
 
     /**
@@ -154,22 +134,17 @@ public class CloudClientResource {
      * @return a list of security groups
      */
     @Query
-    public @NotNull CompletableFuture<List<CloudSecurityGroupType>> cloudSecurityGroups(@AdaptToScalar(Scalar.Int.class) Long cloudId) {
-        final CompletableFuture<List<CloudSecurityGroupType>> future = new CompletableFuture<>();
-        runAsync(() -> {
-            try {
-                CloudClient cloudClient = this.getCloudClient(cloudId);
-                final List<CloudSecurityGroupType> cloudSecurityGroups = cloudClient.securityGroups().stream()
-                    .map(CloudSecurityGroupType::new)
-                    .toList();
-                future.complete(cloudSecurityGroups);
-            } catch (DataFetchingException e) {
-                future.completeExceptionally(e);
-            } catch (Exception exception) {
-                future.completeExceptionally(new DataFetchingException(exception.getMessage()));
-            }
-        });
-        return future;
+    public @NotNull List<CloudSecurityGroupType> cloudSecurityGroups(@AdaptToScalar(Scalar.Int.class) Long cloudId) throws DataFetchingException {
+        try {
+            CloudClient cloudClient = this.getCloudClient(cloudId);
+            return cloudClient.securityGroups().stream()
+                .map(CloudSecurityGroupType::new)
+                .toList();
+        } catch (DataFetchingException e) {
+            throw e;
+        } catch (Exception exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
     }
 
 
