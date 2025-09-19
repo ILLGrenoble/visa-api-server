@@ -151,6 +151,7 @@ public class DevicePoolResource {
         devicePool.setDescription(input.getDescription());
         devicePool.setDeviceType(input.getDeviceType());
         devicePool.setComputeIdentifier(input.getComputeIdentifier());
+        devicePool.setTotalUnits(input.getTotalUnits());
         devicePool.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
     }
 

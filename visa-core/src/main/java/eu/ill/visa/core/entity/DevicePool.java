@@ -58,6 +58,10 @@ public class DevicePool extends Timestampable {
     @Column(name = "deleted_at", nullable = true)
     private Date deletedAt;
 
+    // The number of unit devices available in the pool. Null implies managed automatically or un-managed (ignored)
+    @Column(name = "total_units", nullable = true)
+    private Integer totalUnits;
+
     @ManyToOne
     @JoinColumn(name = "cloud_provider_configuration_id", foreignKey = @ForeignKey(name = "fk_cloud_provider_configuration_id"), nullable = true)
     private CloudProviderConfiguration cloudProviderConfiguration;
@@ -108,6 +112,14 @@ public class DevicePool extends Timestampable {
 
     public void setDeletedAt(Date deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public Integer getTotalUnits() {
+        return totalUnits;
+    }
+
+    public void setTotalUnits(Integer totalUnits) {
+        this.totalUnits = totalUnits;
     }
 
     public CloudProviderConfiguration getCloudProviderConfiguration() {

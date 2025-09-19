@@ -17,6 +17,7 @@ public class DevicePoolType {
     private final String description;
     private final @NotNull DeviceType deviceType;
     private final @NotNull String computeIdentifier;
+    private final Integer totalUnits;
     private final Long cloudId;
 
     public DevicePoolType(final DevicePool devicePool) {
@@ -25,6 +26,7 @@ public class DevicePoolType {
         this.description = devicePool.getDescription();
         this.deviceType = devicePool.getDeviceType();
         this.computeIdentifier = devicePool.getComputeIdentifier();
+        this.totalUnits = devicePool.getTotalUnits();
         this.cloudId = devicePool.getCloudId();
     }
 
@@ -46,6 +48,10 @@ public class DevicePoolType {
 
     public String getComputeIdentifier() {
         return computeIdentifier;
+    }
+
+    public Integer getTotalUnits() {
+        return totalUnits;
     }
 
     @JsonIgnore
