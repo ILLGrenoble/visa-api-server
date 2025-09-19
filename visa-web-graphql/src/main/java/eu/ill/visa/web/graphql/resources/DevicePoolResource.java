@@ -3,6 +3,7 @@ package eu.ill.visa.web.graphql.resources;
 import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.CloudProviderService;
 import eu.ill.visa.business.services.DevicePoolService;
+import eu.ill.visa.business.services.FlavourService;
 import eu.ill.visa.cloud.domain.CloudDevice;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.List;
 
-import static eu.ill.visa.web.graphql.tools.CloudDeviceTypeConverter.toCloudDeviceType;
+import static eu.ill.visa.business.tools.CloudDeviceTypeConverter.toCloudDeviceType;
 
 @GraphQLApi
 @RolesAllowed(Role.ADMIN_ROLE)
@@ -37,14 +38,17 @@ public class DevicePoolResource {
     private static final Logger logger = LoggerFactory.getLogger(DevicePoolResource.class);
 
     private final DevicePoolService devicePoolService;
+    private final FlavourService flavourService;
     private final CloudClientService cloudClientService;
     private final CloudProviderService cloudProviderService;
 
     @Inject
     public DevicePoolResource(final DevicePoolService devicePoolService,
+                              final FlavourService flavourService,
                               final CloudClientService cloudClientService,
                               final CloudProviderService cloudProviderService) {
         this.devicePoolService = devicePoolService;
+        this.flavourService = flavourService;
         this.cloudClientService = cloudClientService;
         this.cloudProviderService = cloudProviderService;
     }
@@ -82,6 +86,9 @@ public class DevicePoolResource {
         this.mapToDevicePool(input, devicePool);
         devicePoolService.create(devicePool);
 
+        // Update the flavour device pools
+        this.flavourService.updateAllFlavourDevicePools();
+
         return new DevicePoolType(devicePool);
     }
 
@@ -111,6 +118,9 @@ public class DevicePoolResource {
         this.mapToDevicePool(input, devicePool);
         devicePoolService.save(devicePool);
 
+        // Update the flavour device pools
+        this.flavourService.updateAllFlavourDevicePools();
+
         return new DevicePoolType(devicePool);
     }
 
@@ -129,6 +139,10 @@ public class DevicePoolResource {
         }
         devicePool.setDeletedAt(new Date());
         devicePoolService.save(devicePool);
+
+        // Update the flavour device pools
+        this.flavourService.updateAllFlavourDevicePools();
+
         return new DevicePoolType(devicePool);
     }
 

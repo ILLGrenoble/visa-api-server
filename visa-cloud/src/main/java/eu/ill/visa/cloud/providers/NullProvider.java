@@ -33,7 +33,12 @@ public class NullProvider implements CloudProvider {
     }
 
     @Override
-    public CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException {
+    public CloudDevice device(String identifier, CloudDevice.Type deviceType) {
+        return null;
+    }
+
+    @Override
+    public List<CloudDevice> flavorDevices(String flavourId) {
         return null;
     }
 

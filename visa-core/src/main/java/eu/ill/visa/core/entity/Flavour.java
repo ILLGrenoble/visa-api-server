@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.List;
+
 @Entity
 @NamedQueries({
     @NamedQuery(name = "flavour.getById", query = """
@@ -59,6 +61,14 @@ public class Flavour extends Timestampable {
     @Column(name = "compute_id", length = 250, nullable = false)
     private String computeId;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "flavour_device_pools",
+        joinColumns = @JoinColumn(name = "flavour_id", foreignKey = @ForeignKey(name = "fk_flavour_id")),
+        inverseJoinColumns = @JoinColumn(name = "device_pool_id", foreignKey = @ForeignKey(name = "fk_device_pool_id"))
+    )
+    private List<DevicePool> devicePools;
+
     @Column(name = "deleted", nullable = false, columnDefinition = "")
     private Boolean deleted = false;
 
@@ -104,6 +114,14 @@ public class Flavour extends Timestampable {
 
     public void setComputeId(String computeId) {
         this.computeId = computeId;
+    }
+
+    public List<DevicePool> getDevicePools() {
+        return devicePools;
+    }
+
+    public void setDevicePools(List<DevicePool> devicePools) {
+        this.devicePools = devicePools;
     }
 
     public Boolean getDeleted() {

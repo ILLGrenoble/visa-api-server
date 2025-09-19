@@ -51,6 +51,12 @@ public interface WebProviderClient {
     List<CloudDevice> devices(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
 
     @GET
+    @Path("/api/flavours/{flavourId}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<CloudDevice> flavourDevices(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("flavourId") String flavourId);
+
+    @GET
     @Path("/api/device/{deviceType}/{deviceIdentifier}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

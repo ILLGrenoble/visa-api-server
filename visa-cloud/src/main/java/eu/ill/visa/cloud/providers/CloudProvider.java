@@ -41,7 +41,6 @@ public interface CloudProvider {
      */
     CloudFlavour flavor(String id) throws CloudException;
 
-
     /**
      * Get a list of all devices
      *
@@ -59,6 +58,15 @@ public interface CloudProvider {
      * @throws CloudException if there was an exception executing the request
      */
     CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException;
+
+    /**
+     * Get a list of devices for the flavour
+     *
+     * @param flavourId the flavour id
+     * @return a list of devices for the flavour
+     * @throws CloudException if there was an exception executing the request
+     */
+    List<CloudDevice> flavorDevices(String flavourId) throws CloudException;
 
     /**
      * Get a list of instance identifiers

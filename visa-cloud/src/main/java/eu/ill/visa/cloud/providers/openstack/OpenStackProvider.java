@@ -75,6 +75,12 @@ public class OpenStackProvider implements CloudProvider {
             .findFirst().orElse(null);
     }
 
+
+    @Override
+    public List<CloudDevice> flavorDevices(String flavourId) throws CloudException {
+        return this.computeEndpoint.flavorDevices(flavourId);
+    }
+
     @Override
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
         return this.computeEndpoint.instanceIdentifiers();

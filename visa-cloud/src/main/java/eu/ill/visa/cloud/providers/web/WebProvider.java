@@ -210,6 +210,17 @@ public class WebProvider implements CloudProvider {
     }
 
     @Override
+    public List<CloudDevice> flavorDevices(String flavorId) throws CloudException {
+        try {
+            return this.webProviderClient.flavourDevices(this.configuration.getAuthToken(), flavorId);
+
+        } catch (Exception e) {
+            logger.error("Failed to get cloud devices from Web Provider for flavour {}: {}", flavorId, e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
     public String ip(String id) throws CloudException {
         final CloudInstance instance = instance(id);
         return instance.getAddress();

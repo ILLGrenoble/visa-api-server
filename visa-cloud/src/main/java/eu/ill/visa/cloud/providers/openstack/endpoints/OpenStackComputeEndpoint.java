@@ -110,6 +110,19 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         }
     }
 
+    public List<CloudDevice> flavorDevices(String flavourId) throws CloudException {
+        try {
+            return this.computeEndpointClient.flavorExtraSpecs(this.identityProvider.authenticate(), flavourId).extraSpecs().entrySet().stream()
+                .map(entry -> CloudDevice.from(entry.getKey(), entry.getValue()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        } catch (CloudClientException e) {
+            logger.error("Failed to get cloud devices for flavour {} from OpenStack: {}", flavourId, e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
     public List<CloudInstance> instances() throws CloudException {
         try {
             return this.computeEndpointClient.servers(this.identityProvider.authenticate()).servers().stream()

@@ -13,7 +13,7 @@ import org.eclipse.microprofile.graphql.Source;
 
 import java.util.List;
 
-import static eu.ill.visa.web.graphql.tools.CloudDeviceTypeConverter.toCloudDeviceType;
+import static eu.ill.visa.business.tools.CloudDeviceTypeConverter.toCloudDeviceType;
 
 @RegisterForReflection
 @GraphQLApi

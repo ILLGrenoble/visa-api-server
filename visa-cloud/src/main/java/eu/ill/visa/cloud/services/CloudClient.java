@@ -90,6 +90,11 @@ public class CloudClient {
         return provider.device(identifier, deviceType);
     }
 
+    public List<CloudDevice> flavourDevices(String flavourId) throws CloudException {
+        logger.trace("Fetching cloud devices for flavour with id: {}", flavourId);
+        return provider.flavorDevices(flavourId);
+    }
+
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
         logger.trace("Fetching cloud instance identifiers");
         return provider.instanceIdentifiers();
