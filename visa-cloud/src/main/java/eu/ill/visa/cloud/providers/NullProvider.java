@@ -33,12 +33,17 @@ public class NullProvider implements CloudProvider {
     }
 
     @Override
+    public List<CloudDeviceAllocation> deviceAllocations() {
+        return null;
+    }
+
+    @Override
     public CloudDevice device(String identifier, CloudDevice.Type deviceType) {
         return null;
     }
 
     @Override
-    public List<CloudDevice> flavorDevices(String flavourId) {
+    public List<CloudDeviceAllocation> flavorDeviceAllocations(String flavourId) {
         return null;
     }
 

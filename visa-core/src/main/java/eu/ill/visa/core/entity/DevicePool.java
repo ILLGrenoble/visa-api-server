@@ -33,6 +33,18 @@ import java.util.Date;
             WHERE dp.deletedAt IS NULL
             AND cpc.deletedAt IS NULL
     """),
+    @NamedQuery(name = "devicePool.getDevicePoolUsage", query = """
+            SELECT new eu.ill.visa.core.entity.partial.DevicePoolUsage(dp.id, dp.name, SUM(d.unitCount))
+            FROM Instance i
+            JOIN i.plan p
+            JOIN p.flavour f
+            JOIN f.devices d
+            JOIN d.devicePool dp
+            WHERE i.deletedAt IS NULL
+            AND dp.deletedAt IS NULL
+            GROUP BY dp.id, dp.name
+            ORDER BY dp.name
+    """),
 })
 @Table(name = "device_pool")
 public class DevicePool extends Timestampable {

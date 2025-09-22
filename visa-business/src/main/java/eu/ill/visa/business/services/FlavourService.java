@@ -1,8 +1,10 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.cloud.domain.CloudDevice;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.DevicePool;
 import eu.ill.visa.core.entity.Flavour;
+import eu.ill.visa.core.entity.FlavourDevice;
 import eu.ill.visa.persistence.repositories.FlavourRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -13,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static eu.ill.visa.business.tools.CloudDeviceTypeConverter.fromCloudDeviceType;
 
@@ -73,12 +74,30 @@ public class FlavourService {
         try {
             final CloudClient cloudClient = this.cloudClientService.getCloudClient(flavour.getCloudId());
 
-            final List<DevicePool> requiredDevicePools = cloudClient.flavourDevices(flavour.getComputeId()).stream()
-                .map(cloudDevice -> allDevicePools.stream().filter(devicePool -> devicePool.getComputeIdentifier().equals(cloudDevice.getIdentifier()) && devicePool.getDeviceType().equals(fromCloudDeviceType(cloudDevice.getType()))).findFirst().orElse(null))
+            final List<FlavourDevice> requiredDevices = cloudClient.flavourDeviceAllocations(flavour.getComputeId()).stream()
+                .map(cloudDeviceAllocation -> {
+                    final CloudDevice cloudDevice = cloudDeviceAllocation.getDevice();
+                    return allDevicePools.stream()
+                        .filter(devicePool -> devicePool.getComputeIdentifier().equals(cloudDevice.getIdentifier()) && devicePool.getDeviceType().equals(fromCloudDeviceType(cloudDevice.getType())))
+                        .findFirst()
+                        .map(devicePool -> new FlavourDevice(flavour, devicePool, cloudDeviceAllocation.getUnitCount()))
+                        .orElse(null);
+                })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
-            flavour.setDevicePools(requiredDevicePools);
+            final List<FlavourDevice> flavourDevices = flavour.getDevices();
+
+            // Remove deleted devices
+            flavourDevices.removeIf(flavourDevice -> !requiredDevices.contains(flavourDevice));
+
+            // Add new devices
+            for (final FlavourDevice requiredFlavourDevice : requiredDevices) {
+                if (!flavourDevices.contains(requiredFlavourDevice)) {
+                    flavourDevices.add(requiredFlavourDevice);
+                }
+            }
+
             this.save(flavour);
 
         } catch (Exception e) {

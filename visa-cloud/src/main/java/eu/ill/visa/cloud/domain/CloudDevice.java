@@ -5,9 +5,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class CloudDevice {
 
-    private static final String PCI_PASSTHROUGH_KEY = "pci_passthrough:alias";
-    private static final String RESOURCES_PREFIX = "resources:";
-    private static final String VIRTUAL_GPU_PREFIX = "resources:VGPU";
+    public static final String PCI_PASSTHROUGH_KEY = "pci_passthrough:alias";
+    public static final String RESOURCES_PREFIX = "resources:";
+    public static final String VIRTUAL_GPU_PREFIX = "resources:VGPU";
 
     private String identifier;
     private Type type;
@@ -15,7 +15,7 @@ public class CloudDevice {
     public CloudDevice() {
     }
 
-    private CloudDevice(String identifier, Type type) {
+    CloudDevice(String identifier, Type type) {
         this.identifier = identifier;
         this.type = type;
     }

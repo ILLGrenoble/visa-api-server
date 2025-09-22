@@ -14,6 +14,7 @@ import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.inputs.DevicePoolInput;
 import eu.ill.visa.web.graphql.types.DevicePoolType;
+import eu.ill.visa.web.graphql.types.DevicePoolUsageType;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
@@ -26,7 +27,6 @@ import org.eclipse.microprofile.graphql.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.List;
 
 import static eu.ill.visa.business.tools.CloudDeviceTypeConverter.toCloudDeviceType;
@@ -62,6 +62,13 @@ public class DevicePoolResource {
     public @NotNull List<DevicePoolType> devicePools() {
         return this.devicePoolService.getAll().stream()
             .map(DevicePoolType::new)
+            .toList();
+    }
+
+    @Query
+    public @NotNull List<DevicePoolUsageType> devicePoolUsage() {
+        return devicePoolService.getDevicePoolUsage().stream()
+            .map(DevicePoolUsageType::new)
             .toList();
     }
 
@@ -137,8 +144,7 @@ public class DevicePoolResource {
         if (devicePool == null) {
             throw new EntityNotFoundException("Device pool not found for the given id");
         }
-        devicePool.setDeletedAt(new Date());
-        devicePoolService.save(devicePool);
+        devicePoolService.delete(devicePool);
 
         // Update the flavour device pools
         this.flavourService.updateAllFlavourDevicePools();

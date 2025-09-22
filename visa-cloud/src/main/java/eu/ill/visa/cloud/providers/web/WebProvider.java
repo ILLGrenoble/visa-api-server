@@ -210,12 +210,23 @@ public class WebProvider implements CloudProvider {
     }
 
     @Override
-    public List<CloudDevice> flavorDevices(String flavorId) throws CloudException {
+    public List<CloudDeviceAllocation> deviceAllocations() {
         try {
-            return this.webProviderClient.flavourDevices(this.configuration.getAuthToken(), flavorId);
+            return this.webProviderClient.deviceAllocations(this.configuration.getAuthToken());
 
         } catch (Exception e) {
-            logger.error("Failed to get cloud devices from Web Provider for flavour {}: {}", flavorId, e.getMessage());
+            logger.error("Failed to get cloud device allocations from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<CloudDeviceAllocation> flavorDeviceAllocations(String flavorId) throws CloudException {
+        try {
+            return this.webProviderClient.flavourDeviceAllocations(this.configuration.getAuthToken(), flavorId);
+
+        } catch (Exception e) {
+            logger.error("Failed to get cloud device allocations from Web Provider for flavour {}: {}", flavorId, e.getMessage());
             return new ArrayList<>();
         }
     }

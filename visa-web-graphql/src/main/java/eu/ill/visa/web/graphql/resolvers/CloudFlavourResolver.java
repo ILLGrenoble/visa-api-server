@@ -4,7 +4,7 @@ import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.web.graphql.types.CloudClientType;
-import eu.ill.visa.web.graphql.types.CloudDeviceType;
+import eu.ill.visa.web.graphql.types.CloudDeviceAllocationType;
 import eu.ill.visa.web.graphql.types.CloudFlavourType;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -22,14 +22,14 @@ public class CloudFlavourResolver {
         this.cloudClientService = cloudClientService;
     }
 
-    public List<CloudDeviceType> cloudDevices(@Source CloudFlavourType cloudFlavour) {
+    public List<CloudDeviceAllocationType> deviceAllocations(@Source CloudFlavourType cloudFlavour) {
         try {
             final CloudClientType cloudClientType = cloudFlavour.getCloudClient();
 
             CloudClient cloudClient = this.cloudClientService.getCloudClient(cloudClientType.getId());
             if (cloudClient != null) {
-                return cloudClient.flavourDevices(cloudFlavour.getId()).stream()
-                    .map(CloudDeviceType::new)
+                return cloudClient.flavourDeviceAllocations(cloudFlavour.getId()).stream()
+                    .map(CloudDeviceAllocationType::new)
                     .toList();
             }
         } catch (CloudException ignored) {

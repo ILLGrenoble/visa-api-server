@@ -10,7 +10,7 @@ public interface ComputeEndpoint {
     List<CloudFlavour> flavors() throws CloudException;
     CloudFlavour flavor(final String id) throws CloudException;
     List<CloudDevice> devices() throws CloudException;
-    List<CloudDevice> flavorDevices(String flavourId) throws CloudException;
+    List<CloudDeviceAllocation> flavorDeviceAllocations(String flavourId) throws CloudException;
     List<CloudInstance> instances() throws CloudException;
     CloudInstance instance(final String id) throws CloudException;
     List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException;

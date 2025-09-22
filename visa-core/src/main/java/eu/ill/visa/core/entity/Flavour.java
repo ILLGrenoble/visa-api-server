@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -61,13 +62,8 @@ public class Flavour extends Timestampable {
     @Column(name = "compute_id", length = 250, nullable = false)
     private String computeId;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "flavour_device_pools",
-        joinColumns = @JoinColumn(name = "flavour_id", foreignKey = @ForeignKey(name = "fk_flavour_id")),
-        inverseJoinColumns = @JoinColumn(name = "device_pool_id", foreignKey = @ForeignKey(name = "fk_device_pool_id"))
-    )
-    private List<DevicePool> devicePools;
+    @OneToMany(mappedBy = "flavour", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    private List<FlavourDevice> devices = new ArrayList<>();
 
     @Column(name = "deleted", nullable = false, columnDefinition = "")
     private Boolean deleted = false;
@@ -116,12 +112,12 @@ public class Flavour extends Timestampable {
         this.computeId = computeId;
     }
 
-    public List<DevicePool> getDevicePools() {
-        return devicePools;
+    public List<FlavourDevice> getDevices() {
+        return devices;
     }
 
-    public void setDevicePools(List<DevicePool> devicePools) {
-        this.devicePools = devicePools;
+    public void setDevices(List<FlavourDevice> devices) {
+        this.devices = devices;
     }
 
     public Boolean getDeleted() {

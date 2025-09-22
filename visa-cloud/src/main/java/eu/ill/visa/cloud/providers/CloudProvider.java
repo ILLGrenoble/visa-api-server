@@ -50,6 +50,13 @@ public interface CloudProvider {
     List<CloudDevice> devices() throws CloudException;
 
     /**
+     * Get a list of all flavour device allocations
+     * @return a list of flavour device allocations
+     * @throws CloudException if there was an exception executing the request
+     */
+    List<CloudDeviceAllocation> deviceAllocations() throws CloudException;
+
+    /**
      * Get a device for a given identifier and device type
      *
      * @param identifier the device identifier
@@ -60,13 +67,13 @@ public interface CloudProvider {
     CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException;
 
     /**
-     * Get a list of devices for the flavour
+     * Get a list of device allocations for the flavour
      *
      * @param flavourId the flavour id
-     * @return a list of devices for the flavour
+     * @return a list of device allocations for the flavour
      * @throws CloudException if there was an exception executing the request
      */
-    List<CloudDevice> flavorDevices(String flavourId) throws CloudException;
+    List<CloudDeviceAllocation> flavorDeviceAllocations(String flavourId) throws CloudException;
 
     /**
      * Get a list of instance identifiers

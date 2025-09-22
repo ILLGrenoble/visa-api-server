@@ -2,6 +2,7 @@ package eu.ill.visa.persistence.repositories;
 
 import eu.ill.visa.core.entity.DevicePool;
 import eu.ill.visa.core.entity.enumerations.DeviceType;
+import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -44,6 +45,11 @@ public class DevicePoolRepository extends AbstractRepository<DevicePool> {
             NoResultException exception) {
             return null;
         }
+    }
+
+    public List<DevicePoolUsage> getDevicePoolUsage() {
+        final TypedQuery<DevicePoolUsage> query = getEntityManager().createNamedQuery("devicePool.getDevicePoolUsage", DevicePoolUsage.class);
+        return query.getResultList();
     }
 
     public void save(final DevicePool devicePool) {

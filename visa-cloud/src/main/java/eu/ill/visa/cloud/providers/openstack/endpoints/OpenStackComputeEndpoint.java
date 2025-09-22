@@ -94,12 +94,12 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         try {
             String authToken = this.identityProvider.authenticate();
             return this.flavors().stream()
-                .map(flavor -> this.computeEndpointClient
+                .flatMap(flavor -> this.computeEndpointClient
                     .flavorExtraSpecs(authToken, flavor.getId())
-                    .extraSpecs())
-                .map(Map::entrySet)
-                .flatMap(Set::stream)
-                .map(entry -> CloudDevice.from(entry.getKey(), entry.getValue()))
+                    .extraSpecs()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> CloudDevice.from(entry.getKey(), entry.getValue())))
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
@@ -110,10 +110,30 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         }
     }
 
-    public List<CloudDevice> flavorDevices(String flavourId) throws CloudException {
+    public List<CloudDeviceAllocation> deviceAllocations() throws CloudException {
+        try {
+            String authToken = this.identityProvider.authenticate();
+            return this.flavors().stream()
+                .flatMap(flavor -> this.computeEndpointClient
+                    .flavorExtraSpecs(authToken, flavor.getId())
+                    .extraSpecs()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> CloudDeviceAllocation.from(flavor.getId(), entry.getKey(), entry.getValue())))
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        } catch (CloudClientException e) {
+            logger.error("Failed to get cloud devices from OpenStack: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<CloudDeviceAllocation> flavorDeviceAllocations(String flavourId) throws CloudException {
         try {
             return this.computeEndpointClient.flavorExtraSpecs(this.identityProvider.authenticate(), flavourId).extraSpecs().entrySet().stream()
-                .map(entry -> CloudDevice.from(entry.getKey(), entry.getValue()))
+                .map(entry -> CloudDeviceAllocation.from(flavourId, entry.getKey(), entry.getValue()))
                 .filter(Objects::nonNull)
                 .toList();
 

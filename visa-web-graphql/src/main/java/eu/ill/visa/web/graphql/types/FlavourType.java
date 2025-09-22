@@ -18,7 +18,7 @@ public class FlavourType {
     private final @NotNull Integer memory;
     private final @NotNull Float cpu;
     private final @NotNull String computeId;
-    private final List<DevicePoolType> devicePools;
+    private final List<FlavourDeviceType> devices;
     private final Long cloudId;
 
     public FlavourType(final Flavour flavour) {
@@ -27,7 +27,7 @@ public class FlavourType {
         this.memory = flavour.getMemory();
         this.cpu = flavour.getCpu();
         this.computeId = flavour.getComputeId();
-        this.devicePools = flavour.getDevicePools().stream().map(DevicePoolType::new).toList();
+        this.devices = flavour.getDevices().stream().map(FlavourDeviceType::new).toList();
         this.cloudId = flavour.getCloudId();
     }
 
@@ -51,8 +51,8 @@ public class FlavourType {
         return computeId;
     }
 
-    public List<DevicePoolType> getDevicePools() {
-        return devicePools;
+    public List<FlavourDeviceType> getDevices() {
+        return devices;
     }
 
     @JsonIgnore
