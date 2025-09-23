@@ -1,5 +1,6 @@
 package eu.ill.visa.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.converter.CommaSeparatedListConverter;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @NamedQueries({
@@ -309,6 +311,10 @@ public class Instance extends Timestampable {
     @Column(name = "public_access_role", length = 255, nullable = true)
     private InstanceMemberRole publicAccessRole;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "instance", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    private List<InstanceDeviceAllocation> deviceAllocations = new ArrayList<>();
+
     public Instance() {
     }
 
@@ -319,6 +325,9 @@ public class Instance extends Timestampable {
         this.name = builder.name;
         this.comments = builder.comments;
         this.plan = builder.plan;
+        this.deviceAllocations = this.plan.getFlavour().getDevices().stream()
+            .map(flavourDevice -> new InstanceDeviceAllocation(this, flavourDevice.getDevicePool(), flavourDevice.getUnitCount()))
+            .collect(Collectors.toList());
         this.username = builder.username;
         this.state = builder.state;
         this.screenWidth = builder.screenWidth;
@@ -699,6 +708,14 @@ public class Instance extends Timestampable {
 
     public void setPublicAccessRole(InstanceMemberRole publicAccessRole) {
         this.publicAccessRole = publicAccessRole;
+    }
+
+    public List<InstanceDeviceAllocation> getDeviceAllocations() {
+        return deviceAllocations;
+    }
+
+    public void setDeviceAllocations(List<InstanceDeviceAllocation> deviceAllocations) {
+        this.deviceAllocations = deviceAllocations;
     }
 
     @Transient

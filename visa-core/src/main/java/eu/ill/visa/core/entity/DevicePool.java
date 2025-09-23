@@ -34,12 +34,10 @@ import java.util.Date;
             AND cpc.deletedAt IS NULL
     """),
     @NamedQuery(name = "devicePool.getDevicePoolUsage", query = """
-            SELECT new eu.ill.visa.core.entity.partial.DevicePoolUsage(dp.id, dp.name, SUM(d.unitCount))
+            SELECT new eu.ill.visa.core.entity.partial.DevicePoolUsage(dp.id, dp.name, SUM(a.unitCount))
             FROM Instance i
-            JOIN i.plan p
-            JOIN p.flavour f
-            JOIN f.devices d
-            JOIN d.devicePool dp
+            JOIN InstanceDeviceAllocation a ON a.instance = i
+            JOIN a.devicePool dp
             WHERE i.deletedAt IS NULL
             AND dp.deletedAt IS NULL
             GROUP BY dp.id, dp.name

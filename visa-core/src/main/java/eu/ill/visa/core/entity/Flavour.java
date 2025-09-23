@@ -1,5 +1,6 @@
 package eu.ill.visa.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -62,6 +63,7 @@ public class Flavour extends Timestampable {
     @Column(name = "compute_id", length = 250, nullable = false)
     private String computeId;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "flavour", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     private List<FlavourDevice> devices = new ArrayList<>();
 
