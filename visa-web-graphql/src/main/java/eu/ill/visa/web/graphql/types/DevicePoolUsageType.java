@@ -12,13 +12,14 @@ public class DevicePoolUsageType {
     @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long devicePoolId;
     private final @NotNull String devicePoolName;
-    @AdaptToScalar(Scalar.Int.class)
-    private final @NotNull Long total ;
+    private final @NotNull Integer totalUnits ;
+    private final @NotNull Integer usedUnits ;
 
     public DevicePoolUsageType(final DevicePoolUsage numberInstancesByDevicePool) {
         this.devicePoolId = numberInstancesByDevicePool.getDevicePoolId();
         this.devicePoolName = numberInstancesByDevicePool.getDevicePoolName();
-        this.total = numberInstancesByDevicePool.getTotal();
+        this.totalUnits = numberInstancesByDevicePool.getTotalUnits();
+        this.usedUnits = numberInstancesByDevicePool.getUsedUnits();
     }
 
     public Long getDevicePoolId() {
@@ -29,8 +30,11 @@ public class DevicePoolUsageType {
         return devicePoolName;
     }
 
-    public Long getTotal() {
-        return total;
+    public Integer getTotalUnits() {
+        return totalUnits;
     }
 
+    public Integer getUsedUnits() {
+        return usedUnits;
+    }
 }

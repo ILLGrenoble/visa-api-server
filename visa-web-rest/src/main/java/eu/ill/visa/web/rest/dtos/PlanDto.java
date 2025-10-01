@@ -1,6 +1,9 @@
 package eu.ill.visa.web.rest.dtos;
 
 import eu.ill.visa.core.entity.Plan;
+import eu.ill.visa.core.entity.partial.DevicePoolUsage;
+
+import java.util.List;
 
 public class PlanDto {
 
@@ -13,6 +16,13 @@ public class PlanDto {
         this.id = plan.getId();
         this.image = new ImageDto(plan.getImage());
         this.flavour = new FlavourDto(plan.getFlavour());
+        this.preset = plan.getPreset();
+    }
+
+    public PlanDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage) {
+        this.id = plan.getId();
+        this.image = new ImageDto(plan.getImage());
+        this.flavour = new FlavourDto(plan.getFlavour(), devicePoolUsage);
         this.preset = plan.getPreset();
     }
 

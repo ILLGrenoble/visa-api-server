@@ -6,12 +6,14 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 public class DevicePoolUsage {
     private Long devicePoolId;
     private String devicePoolName;
-    private Long total ;
+    private Integer usedUnits ;
+    private Integer totalUnits ;
 
-    public DevicePoolUsage(final Long devicePoolId, final String devicePoolName, final Long total) {
+    public DevicePoolUsage(final Long devicePoolId, final String devicePoolName, final long totalUnits, final long usedUnits) {
         this.devicePoolId = devicePoolId;
         this.devicePoolName = devicePoolName;
-        this.total = total;
+        this.totalUnits = (int)totalUnits;
+        this.usedUnits = (int)usedUnits;
     }
 
     public Long getDevicePoolId() {
@@ -30,13 +32,19 @@ public class DevicePoolUsage {
         this.devicePoolName = devicePoolName;
     }
 
-    public Long getTotal() {
-        return total;
+    public Integer getUsedUnits() {
+        return usedUnits;
     }
 
-    public void setTotal(Long total) {
-        this.total = total;
+    public void setUsedUnits(Integer usedUnits) {
+        this.usedUnits = usedUnits;
     }
 
+    public Integer getTotalUnits() {
+        return totalUnits;
+    }
 
+    public void setTotalUnits(Integer totalUnits) {
+        this.totalUnits = totalUnits;
+    }
 }
