@@ -30,6 +30,7 @@ public class InstanceResolver {
     private final ExperimentService experimentService;
     private final InstanceAttributeService instanceAttributeService;
     private final PortService portService;
+    private final InstanceDeviceAllocationService instanceDeviceAllocationService;
 
     @Inject
     public InstanceResolver(final CloudClientService cloudClientService,
@@ -37,13 +38,15 @@ public class InstanceResolver {
                             final InstanceMemberService instanceMemberService,
                             final ExperimentService experimentService,
                             final InstanceAttributeService instanceAttributeService,
-                            final PortService portService) {
+                            final PortService portService,
+                            final InstanceDeviceAllocationService instanceDeviceAllocationService) {
         this.cloudClientService = cloudClientService;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceMemberService = instanceMemberService;
         this.experimentService = experimentService;
         this.instanceAttributeService = instanceAttributeService;
         this.portService = portService;
+        this.instanceDeviceAllocationService = instanceDeviceAllocationService;
     }
 
     public List<InstanceMemberType> members(@Source InstanceType instance) {
@@ -151,6 +154,12 @@ public class InstanceResolver {
                 return cloudClient.getId() == -1 ? instanceType.getCloudId() == null : cloudClient.getId().equals(instanceType.getCloudId());
             }).findFirst().orElse(null);
         }).map(cloudClient -> cloudClient == null ? null : new CloudClientType(cloudClient)).toList();
+    }
+
+    public @NotNull List<List<InstanceDeviceAllocationType>> deviceAllocations(@Source final List<InstanceType> instances) {
+        return this.instanceDeviceAllocationService.getAllByInstanceIds(instances.stream().map(InstanceType::getId).toList()).stream()
+            .map(instanceDeviceAllocations -> instanceDeviceAllocations.stream().map(InstanceDeviceAllocationType::new).toList())
+            .toList();
     }
 
 }

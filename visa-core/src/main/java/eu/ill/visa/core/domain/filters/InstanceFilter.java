@@ -29,6 +29,9 @@ public class InstanceFilter {
     @QueryParam("ownerId")
     private String ownerId;
 
+    @QueryParam("devicePoolId")
+    private Long devicePoolId;
+
     public List<Long> getIds() {
         return ids;
     }
@@ -83,5 +86,13 @@ public class InstanceFilter {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Long getDevicePoolId() {
+        return devicePoolId;
+    }
+
+    public void setDevicePoolId(Long devicePoolId) {
+        this.devicePoolId = devicePoolId;
     }
 }

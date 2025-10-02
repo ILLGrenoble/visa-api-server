@@ -8,6 +8,21 @@ import java.io.Serializable;
 
 @Entity
 @NamedQueries({
+    @NamedQuery(name = "instanceDeviceAllocation.getAll", query = """
+        SELECT a FROM InstanceDeviceAllocation a
+        JOIN Instance i ON a.instance.id = i.id
+        WHERE i.deletedAt IS NULL
+    """),
+    @NamedQuery(name = "instanceDeviceAllocation.getAllByInstanceId", query = """
+        SELECT a FROM InstanceDeviceAllocation a
+        JOIN Instance i ON a.instance.id = i.id
+        WHERE i.id = :instanceId
+    """),
+    @NamedQuery(name = "instanceDeviceAllocation.getAllByInstanceIds", query = """
+        SELECT a FROM InstanceDeviceAllocation a
+        JOIN Instance i ON a.instance.id = i.id
+        WHERE i.id IN :instanceIds
+    """),
 })
 @Table(name = "instance_device_allocation")
 public class InstanceDeviceAllocation {
