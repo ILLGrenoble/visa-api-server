@@ -38,8 +38,7 @@ public class FlavourDto {
             if (!deviceIsAvailable) {
                 logger.debug("device pool {} ({}) is not available", devicePool.getId(), devicePool.getName());
             }
-            return false;
-//            return deviceIsAvailable;
+            return deviceIsAvailable;
         });
     }
 
