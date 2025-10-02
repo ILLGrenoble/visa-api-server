@@ -34,7 +34,7 @@ import java.util.Date;
             AND cpc.deletedAt IS NULL
     """),
     @NamedQuery(name = "devicePool.getDevicePoolUsage", query = """
-            SELECT new eu.ill.visa.core.entity.partial.DevicePoolUsage(dp.id, dp.name, dp.totalUnits, COALESCE(SUM(CASE WHEN i IS NOT NULL THEN a.unitCount ELSE 0 END), 0))
+            SELECT new eu.ill.visa.core.entity.partial.DevicePoolUsage(dp.id, dp.cloudProviderConfiguration.id, dp.name, dp.totalUnits, COALESCE(SUM(CASE WHEN i IS NOT NULL THEN a.unitCount ELSE 0 END), 0))
             FROM DevicePool dp
             LEFT OUTER JOIN InstanceDeviceAllocation a on a.devicePool = dp
             LEFT OUTER JOIN Instance i on a.instance = i AND i.deletedAt IS NULL

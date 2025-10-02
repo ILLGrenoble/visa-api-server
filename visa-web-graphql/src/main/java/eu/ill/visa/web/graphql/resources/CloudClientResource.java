@@ -1,12 +1,14 @@
 package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.visa.business.services.CloudClientService;
+import eu.ill.visa.business.services.DevicePoolService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
@@ -36,12 +38,15 @@ public class CloudClientResource {
 
     private final CloudClientService cloudClientService;
     private final InstanceService instanceService;
+    private final DevicePoolService devicePoolService;
 
     @Inject
     public CloudClientResource(final CloudClientService cloudClientService,
-                               final InstanceService instanceService) {
+                               final InstanceService instanceService,
+                               final DevicePoolService devicePoolService) {
         this.cloudClientService = cloudClientService;
         this.instanceService = instanceService;
+        this.devicePoolService = devicePoolService;
     }
 
     /**
@@ -116,11 +121,15 @@ public class CloudClientResource {
     @Query
     public @NotNull List<DetailedCloudLimit> cloudLimits() {
         List<CloudClient> cloudClients = this.cloudClientService.getAll();
+        List<DevicePoolUsage> devicePoolUsages = this.devicePoolService.getDevicePoolUsage();
 
         return cloudClients.stream().map(cloudClient -> {
             try {
                 CloudLimit cloudLimit = cloudClient.limits();
-                return new DetailedCloudLimit(new CloudClientType(cloudClient), cloudLimit);
+                Long cloudId = cloudClient.getId() == null || cloudClient.getId() == -1 ? null : cloudClient.getId();
+                List<DevicePoolUsage> cloudDevicePoolUsage = devicePoolUsages.stream().filter(devicePoolUsage -> devicePoolUsage.getCloudId().equals(cloudId)).toList();
+
+                return new DetailedCloudLimit(new CloudClientType(cloudClient), cloudLimit, cloudDevicePoolUsage);
             } catch (Exception exception) {
                 logger.warn("Failed to get cloud limits for {}", cloudClient.getId());
                 return new DetailedCloudLimit(new CloudClientType(cloudClient), exception.getMessage());
