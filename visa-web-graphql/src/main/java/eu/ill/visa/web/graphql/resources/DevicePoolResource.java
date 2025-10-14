@@ -91,7 +91,7 @@ public class DevicePoolResource {
         this.validateDevicePoolInput(input);
         final DevicePool devicePool = new DevicePool();
         this.mapToDevicePool(input, devicePool);
-        devicePoolService.create(devicePool);
+        devicePoolService.save(devicePool);
 
         // Update the flavour device pools
         this.flavourService.updateAllFlavourDevicePools();

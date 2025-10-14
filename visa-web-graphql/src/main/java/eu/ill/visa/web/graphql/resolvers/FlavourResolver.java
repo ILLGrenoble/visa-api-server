@@ -1,12 +1,11 @@
 package eu.ill.visa.web.graphql.resolvers;
 
 import eu.ill.visa.business.services.CloudClientService;
+import eu.ill.visa.business.services.FlavourRoleLifetimeService;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.web.graphql.types.CloudClientType;
-import eu.ill.visa.web.graphql.types.CloudFlavourType;
-import eu.ill.visa.web.graphql.types.FlavourType;
+import eu.ill.visa.web.graphql.types.*;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
@@ -18,9 +17,12 @@ import java.util.List;
 public class FlavourResolver {
 
     private final CloudClientService cloudClientService;
+    private final FlavourRoleLifetimeService flavourRoleLifetimeService;
 
-    public FlavourResolver(final CloudClientService cloudClientService) {
+    public FlavourResolver(final CloudClientService cloudClientService,
+                           final FlavourRoleLifetimeService flavourRoleLifetimeService) {
         this.cloudClientService = cloudClientService;
+        this.flavourRoleLifetimeService = flavourRoleLifetimeService;
     }
 
     public List<CloudClientType> cloudClient(@Source List<FlavourType> flavours) {
@@ -47,6 +49,12 @@ public class FlavourResolver {
         } catch (CloudException ignored) {
         }
         return null;
+    }
+
+    public List<List<RoleLifetimeType>> roleLifetimes(@Source List<FlavourType> flavours) {
+        return this.flavourRoleLifetimeService.getAllByFlavourIds(flavours.stream().map(FlavourType::getId).toList()).stream()
+            .map(flavourRoleLifetimes -> flavourRoleLifetimes.stream().map(RoleLifetimeType::new).toList())
+            .toList();
     }
 
 }

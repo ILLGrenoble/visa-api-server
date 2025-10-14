@@ -47,8 +47,4 @@ public class DevicePoolService {
         devicePool.setDeletedAt(new Date());
         this.save(devicePool);
     }
-
-    public void create(DevicePool devicePool) {
-        this.repository.create(devicePool);
-    }
 }
