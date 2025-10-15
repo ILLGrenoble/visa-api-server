@@ -16,7 +16,7 @@ public class RoleLifetimeType {
 
     public RoleLifetimeType(final FlavourRoleLifetime flavourRoleLifetime) {
         this.id = flavourRoleLifetime.getId();
-        this.role = new RoleType(flavourRoleLifetime.getRole());
+        this.role = flavourRoleLifetime.getRole() != null ? new RoleType(flavourRoleLifetime.getRole()) : null;
         this.lifetimeMinutes = flavourRoleLifetime.getDuration().getDuration().toMinutes();
     }
 
