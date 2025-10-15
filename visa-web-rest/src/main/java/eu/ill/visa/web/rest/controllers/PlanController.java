@@ -1,9 +1,6 @@
 package eu.ill.visa.web.rest.controllers;
 
-import eu.ill.visa.business.services.DevicePoolService;
-import eu.ill.visa.business.services.ExperimentService;
-import eu.ill.visa.business.services.ImageService;
-import eu.ill.visa.business.services.PlanService;
+import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import eu.ill.visa.web.rest.dtos.PlanDto;
@@ -16,6 +13,7 @@ import jakarta.ws.rs.core.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,16 +32,19 @@ public class PlanController extends AbstractController {
 
     private final PlanService planService;
     private final ImageService imageService;
+    private final InstanceService instanceService;
     private final DevicePoolService devicePoolService;
     final ExperimentService experimentService;
 
     @Inject
     PlanController(final PlanService planService,
                    final ImageService imageService,
+                   final InstanceService instanceService,
                    final DevicePoolService devicePoolService,
                    final ExperimentService experimentService) {
         this.planService = planService;
         this.imageService = imageService;
+        this.instanceService = instanceService;
         this.devicePoolService = devicePoolService;
         this.experimentService = experimentService;
     }
@@ -89,21 +90,23 @@ public class PlanController extends AbstractController {
                     return 1;
                 } else return f1.getMemory().compareTo(f2.getMemory());
             })
-            .map(plan -> this.toDto(plan, devicePoolUsage))
+            .map(plan -> this.toDto(plan, devicePoolUsage, this.instanceService.getInstanceDuration(user, plan.getFlavour())))
             .toList();
         return createResponse(planDtos);
     }
 
     @Path("/{plan}")
     @GET
-    public MetaResponse<PlanDto> get(@PathParam("plan") final Plan plan) {
+    public MetaResponse<PlanDto> get(@Context final SecurityContext securityContext, @PathParam("plan") final Plan plan) {
+        final User user = this.getUserPrincipal(securityContext);
+
         List<DevicePoolUsage> devicePoolUsage = this.devicePoolService.getDevicePoolUsage();
-        return createResponse(this.toDto(plan, devicePoolUsage));
+        return createResponse(this.toDto(plan, devicePoolUsage,  this.instanceService.getInstanceDuration(user, plan.getFlavour())));
     }
 
-    private PlanDto toDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage) {
+    private PlanDto toDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage, final Duration lifetimeDuration) {
         final Image image = plan.getImage();
         image.setDefaultVdiProtocol(imageService.getDefaultVdiProtocolForImage(image));
-        return new PlanDto(plan, devicePoolUsage);
+        return new PlanDto(plan, devicePoolUsage, lifetimeDuration);
     }
 }

@@ -6,10 +6,11 @@ import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
 
 public class FlavourDto {
-    private final Logger logger = LoggerFactory.getLogger(FlavourDto.class);
+    private final static Logger logger = LoggerFactory.getLogger(FlavourDto.class);
 
     private final Long id;
     private final String name;
@@ -17,6 +18,7 @@ public class FlavourDto {
     private final Float cpu;
     private final List<FlavourDeviceDto> devices;
     private final Boolean isAvailable;
+    private final Long lifetimeMinutes;
 
     public FlavourDto(final Flavour flavour) {
         this.id = flavour.getId();
@@ -25,9 +27,10 @@ public class FlavourDto {
         this.cpu = flavour.getCpu();
         this.devices = flavour.getDevices().stream().map(FlavourDeviceDto::new).toList();
         this.isAvailable = true;
+        this.lifetimeMinutes = null;
     }
 
-    public FlavourDto(final Flavour flavour, final List<DevicePoolUsage> devicePoolUsage) {
+    public FlavourDto(final Flavour flavour, final List<DevicePoolUsage> devicePoolUsage, final Duration lifetimeDuration) {
         this.id = flavour.getId();
         this.name = flavour.getName();
         this.memory = flavour.getMemory();
@@ -40,6 +43,7 @@ public class FlavourDto {
             }
             return deviceIsAvailable;
         });
+        this.lifetimeMinutes = lifetimeDuration.toMinutes();
     }
 
     public Long getId() {
@@ -64,5 +68,9 @@ public class FlavourDto {
 
     public Boolean getAvailable() {
         return isAvailable;
+    }
+
+    public Long getLifetimeMinutes() {
+        return lifetimeMinutes;
     }
 }

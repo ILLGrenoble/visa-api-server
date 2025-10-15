@@ -6,7 +6,9 @@ import eu.ill.visa.business.gateway.UserEvent;
 import eu.ill.visa.business.gateway.events.InstanceStateChangedEvent;
 import eu.ill.visa.business.gateway.events.InstanceThumbnailUpdatedEvent;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.domain.*;
+import eu.ill.visa.core.domain.OrderBy;
+import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.SimpleDuration;
 import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
@@ -22,12 +24,15 @@ import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -40,6 +45,7 @@ public class InstanceService {
     private final InstanceConfiguration configuration;
     private final CloudClientService cloudClientService;
     private final InstanceMemberService instanceMemberService;
+    private final FlavourRoleLifetimeService flavourRoleLifetimeService;
     private final EventDispatcher eventDispatcher;
 
     // Specifies a window in which to look for instances for which an instrument control support user can provider support.
@@ -51,11 +57,13 @@ public class InstanceService {
                            final InstanceConfiguration configuration,
                            final CloudClientService cloudClientService,
                            final InstanceMemberService instanceMemberService,
+                           final FlavourRoleLifetimeService flavourRoleLifetimeService,
                            final EventDispatcher eventDispatcher) {
         this.repository = repository;
         this.configuration = configuration;
         this.cloudClientService = cloudClientService;
         this.instanceMemberService = instanceMemberService;
+        this.flavourRoleLifetimeService = flavourRoleLifetimeService;
         this.eventDispatcher = eventDispatcher;
     }
 
@@ -121,7 +129,7 @@ public class InstanceService {
             .build();
 
         // Determine from owner whether to apply staff or user lifetime durations
-        Date terminationDate = this.calculateTerminationDate(null, instance.getOwner());
+        Date terminationDate = this.calculateTerminationDate(null, instance.getOwner().getUser(), instance.getPlan().getFlavour());
         instance.setTerminationDate(terminationDate);
 
         this.save(instance);
@@ -269,18 +277,52 @@ public class InstanceService {
         return 0L;
     }
 
-    public Date calculateTerminationDate(Date startDate, InstanceMember owner) {
+    public Date calculateTerminationDate(Date startDate, User user, final Flavour flavour) {
         if (startDate == null) {
             startDate = new Date();
         }
 
-        if (owner != null && owner.getUser().hasRole(Role.STAFF_ROLE)) {
-            long terminationDate = (startDate.getTime()) + this.configuration.staffMaxLifetimeDurationHours() * 60L * 60L * 1000L;
-            return new Date(terminationDate);
+        final Duration instanceDuration = this.getInstanceDuration(user, flavour);
+        logger.info("Calculated instance termination duration of {} hours for user {} ({}) for flavour {} ({}", new SimpleDuration(instanceDuration).getDurationText(), user.getFullName(), user.getId(), flavour.getName(), flavour.getId());
+
+        long terminationDate = startDate.getTime() + instanceDuration.toMillis();
+        return new Date(terminationDate);
+    }
+
+    public Duration getInstanceDuration(final User user, final Flavour flavour) {
+        final List<Role> userRoles = user != null ? user.getRoles() : new ArrayList<>();
+
+        final List<ImmutablePair<String, Duration>> roleLifetimes = this.flavourRoleLifetimeService.getAllByFlavourId(flavour.getId()).stream()
+            .map(flavourRoleLifetime -> new ImmutablePair<>(flavourRoleLifetime.getRole() != null ? flavourRoleLifetime.getRole().getName() : null, flavourRoleLifetime.getDuration().getDuration()))
+            .collect(Collectors.toList());
+
+        // Ensure that staff and default/user lifetimes are in the list
+        if (roleLifetimes.stream().noneMatch(roleLifetime -> Role.STAFF_ROLE.equals(roleLifetime.left))) {
+            roleLifetimes.add(new ImmutablePair<>(Role.STAFF_ROLE, Duration.ofHours(this.configuration.staffMaxLifetimeDurationHours())));
+        }
+        if (roleLifetimes.stream().noneMatch(roleLifetime -> roleLifetime.left == null)) {
+            roleLifetimes.add(new ImmutablePair<>(null, Duration.ofHours(this.configuration.userMaxLifetimeDurationHours())));
+        }
+
+        return roleLifetimes.stream()
+            .filter(roleLifetime -> {
+                final String roleName = roleLifetime.left;
+                if (roleName == null) {
+                    return true;
+                }
+                return userRoles.stream().anyMatch(userRole -> userRole.getName().equals(roleName));
+            })
+            .map(roleLifetime -> roleLifetime.right)
+            .max(Comparator.comparing(Duration::toMinutes))
+            .orElse(getDefaultInstanceDuration(user)); // Should never need the default at this point
+    }
+
+    public Duration getDefaultInstanceDuration(User user) {
+        if (user != null && user.hasRole(Role.STAFF_ROLE)) {
+            return Duration.ofHours(this.configuration.staffMaxLifetimeDurationHours());
 
         } else {
-            long terminationDate = (startDate.getTime()) + this.configuration.userMaxLifetimeDurationHours() * 60L * 60L * 1000L;
-            return new Date(terminationDate);
+            return Duration.ofHours(this.configuration.userMaxLifetimeDurationHours());
         }
     }
 

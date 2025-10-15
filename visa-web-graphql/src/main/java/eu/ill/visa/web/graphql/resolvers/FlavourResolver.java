@@ -5,6 +5,7 @@ import eu.ill.visa.business.services.FlavourRoleLifetimeService;
 import eu.ill.visa.cloud.domain.CloudFlavour;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.core.entity.FlavourRoleLifetime;
 import eu.ill.visa.web.graphql.types.*;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -53,7 +54,9 @@ public class FlavourResolver {
 
     public List<List<RoleLifetimeType>> roleLifetimes(@Source List<FlavourType> flavours) {
         return this.flavourRoleLifetimeService.getAllByFlavourIds(flavours.stream().map(FlavourType::getId).toList()).stream()
-            .map(flavourRoleLifetimes -> flavourRoleLifetimes.stream().map(RoleLifetimeType::new).toList())
+            .map(flavourRoleLifetimes -> flavourRoleLifetimes.stream()
+                .sorted(FlavourRoleLifetime::compareTo)
+                .map(RoleLifetimeType::new).toList())
             .toList();
     }
 

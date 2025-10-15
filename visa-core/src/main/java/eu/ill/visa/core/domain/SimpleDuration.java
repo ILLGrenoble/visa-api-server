@@ -5,7 +5,7 @@ import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SimpleDuration {
+public class SimpleDuration implements Comparable<SimpleDuration> {
 
     private static final Pattern PATTERN = Pattern.compile("(?i)(\\d+)([mhd])");
     private static final Pattern MULTI_PATTERN = Pattern.compile("(?i)(\\d+)([mhd])");
@@ -74,4 +74,7 @@ public class SimpleDuration {
     }
 
 
+    public int compareTo(SimpleDuration other) {
+        return this.getDuration().compareTo(other.getDuration());
+    }
 }

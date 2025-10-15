@@ -54,7 +54,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 })
 @Table(name = "flavour_role_lifetime",
     uniqueConstraints= @UniqueConstraint(columnNames={"flavour_id", "role_id"}))
-public class FlavourRoleLifetime {
+public class FlavourRoleLifetime implements Comparable<FlavourRoleLifetime> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -145,5 +145,10 @@ public class FlavourRoleLifetime {
             .append(role)
             .append(duration)
             .toHashCode();
+    }
+
+    @Override
+    public int compareTo(FlavourRoleLifetime other) {
+        return this.getDuration().compareTo(other.duration);
     }
 }

@@ -71,7 +71,7 @@ public class InstanceExtensionRequestService {
         if (autoAccept) {
             // Automatically grant the extension if the auto-accept policy is set to ALL
             logger.info("Automatically granting extension for instance {} due to auto-accept policy", instance.getId());
-            final Date terminationDate = this.instanceService.calculateTerminationDate(instance.getTerminationDate(), instance.getOwner());
+            final Date terminationDate = this.instanceService.calculateTerminationDate(instance.getTerminationDate(), instance.getOwner().getUser(), instance.getPlan().getFlavour());
 
             request.setState(InstanceExtensionRequestState.ACCEPTED);
             request.setHandledOn(new Date());
