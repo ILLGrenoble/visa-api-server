@@ -129,8 +129,9 @@ public class InstanceService {
             .build();
 
         // Determine from owner whether to apply staff or user lifetime durations
-        Date terminationDate = this.calculateTerminationDate(null, instance.getOwner().getUser(), instance.getPlan().getFlavour());
-        instance.setTerminationDate(terminationDate);
+        final Duration instanceDuration = this.getInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
+        instance.setLifetimeMinutes(instanceDuration.toMinutes());
+        instance.setTerminationDate(new Date(new Date().getTime() + instanceDuration.toMillis()));
 
         this.save(instance);
 
@@ -289,6 +290,10 @@ public class InstanceService {
         return new Date(terminationDate);
     }
 
+    public Duration getInstanceDuration(final InstanceMember owner, final Flavour flavour) {
+        return this.getInstanceDuration(owner.getUser() != null ? owner.getUser() : null, flavour);
+    }
+
     public Duration getInstanceDuration(final User user, final Flavour flavour) {
         final List<Role> userRoles = user != null ? user.getRoles() : new ArrayList<>();
 
@@ -317,7 +322,7 @@ public class InstanceService {
             .orElse(getDefaultInstanceDuration(user)); // Should never need the default at this point
     }
 
-    public Duration getDefaultInstanceDuration(User user) {
+    public Duration getDefaultInstanceDuration(final User user) {
         if (user != null && user.hasRole(Role.STAFF_ROLE)) {
             return Duration.ofHours(this.configuration.staffMaxLifetimeDurationHours());
 

@@ -315,6 +315,9 @@ public class Instance extends Timestampable {
     @OneToMany(mappedBy = "instance", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     private List<InstanceDeviceAllocation> deviceAllocations = new ArrayList<>();
 
+    @Column(name = "lifetime_minutes", nullable = true)
+    private Long lifetimeMinutes;
+
     public Instance() {
     }
 
@@ -716,6 +719,14 @@ public class Instance extends Timestampable {
 
     public void setDeviceAllocations(List<InstanceDeviceAllocation> deviceAllocations) {
         this.deviceAllocations = deviceAllocations;
+    }
+
+    public Long getLifetimeMinutes() {
+        return lifetimeMinutes;
+    }
+
+    public void setLifetimeMinutes(Long lifetimeMinutes) {
+        this.lifetimeMinutes = lifetimeMinutes;
     }
 
     @Transient

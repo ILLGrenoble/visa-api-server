@@ -36,6 +36,7 @@ public class InstanceDto {
     private final ImageProtocol vdiProtocol;
     private final String publicAccessToken;
     private final InstanceMemberRole publicAccessRole;
+    private final Long lifetimeMinutes;
 
     public InstanceDto(Instance instance) {
         this.id = instance.getId();
@@ -61,6 +62,7 @@ public class InstanceDto {
         this.vdiProtocol = instance.getVdiProtocol();
         this.publicAccessToken = instance.getPublicAccessToken();
         this.publicAccessRole = instance.getPublicAccessRole();
+        this.lifetimeMinutes = instance.getLifetimeMinutes();
     }
 
     public Long getId() {
@@ -177,5 +179,9 @@ public class InstanceDto {
 
     public InstanceMemberRole getPublicAccessRole() {
         return publicAccessRole;
+    }
+
+    public Long getLifetimeMinutes() {
+        return lifetimeMinutes;
     }
 }
