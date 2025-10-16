@@ -1,3 +1,8 @@
+3.5.2 16/10/2025
+================
+ * Fix null pointer exception when getting instance from instance authentication token
+ * show image version in extension request email
+
 3.5.1 11/09/2025
 ================
  * Handle server migration when shared storage is used: keep the instance active if the vm_state remains active during the migration
