@@ -36,6 +36,10 @@ public class InstanceAuthenticationTokenService {
 
     public InstanceAuthenticationToken getByToken(String token) {
         InstanceAuthenticationToken instanceAuthenticationToken = this.repository.getByToken(token);
+        if (instanceAuthenticationToken == null) {
+            logger.warn("Authentication token {} not found", token);
+            return null;
+        }
         Instance instance = instanceAuthenticationToken.getInstance();
         instanceAuthenticationToken.setInstance(this.instanceService.handleFetches(instance, List.of(InstanceFetch.members)));
         return instanceAuthenticationToken;
@@ -48,6 +52,8 @@ public class InstanceAuthenticationTokenService {
             .user(user)
             .instance(instance)
             .build();
+
+        logger.info("Created authentication token {} for user {} ", instanceAuthenticationToken.getToken(), user.getFullName());
 
         this.save(instanceAuthenticationToken);
         return instanceAuthenticationToken;
@@ -65,6 +71,8 @@ public class InstanceAuthenticationTokenService {
             .instance(instance)
             .publicAccessToken(publicAccessToken)
             .build();
+
+        logger.info("Created authentication token {} for user {} using public access token", instanceAuthenticationToken.getToken(), user.getFullName());
 
         this.save(instanceAuthenticationToken);
         return instanceAuthenticationToken;
@@ -92,6 +100,8 @@ public class InstanceAuthenticationTokenService {
         if (authenticationToken.isExpired(15)) {
             throw new InvalidTokenException("Authentication session ticket has expired");
         }
+
+        logger.info("Authentication token {} for user {} is valid", token, authenticationToken.getUser().getFullName());
 
         // Delete the authentication token to ensure it isn't reused
         this.delete(authenticationToken);
