@@ -37,10 +37,6 @@ public class PlanRepository extends AbstractRepository<Plan> {
         }
     }
 
-    public void delete(final Plan plan) {
-        remove(plan);
-    }
-
     public void create(Plan plan) {
         persist(plan);
     }

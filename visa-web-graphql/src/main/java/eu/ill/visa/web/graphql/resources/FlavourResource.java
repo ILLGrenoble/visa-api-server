@@ -90,6 +90,9 @@ public class FlavourResource {
         this.mapToFlavour(input, flavour);
         flavourService.create(flavour);
 
+        // Update device pools
+        flavourService.updateFlavourDevicePools(flavour);
+
         // Handle flavour limits
         this.updateFlavourLimits(flavour, input);
 
@@ -115,6 +118,9 @@ public class FlavourResource {
         }
         this.mapToFlavour(input, flavour);
         flavourService.save(flavour);
+
+        // Update device pools
+        flavourService.updateFlavourDevicePools(flavour);
 
         // Handle flavour limits
         this.updateFlavourLimits(flavour, input);

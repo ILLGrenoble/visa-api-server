@@ -5,7 +5,6 @@ import eu.ill.visa.core.entity.ImageProtocol;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -45,29 +44,6 @@ public class ImageServiceTest {
     void testGetAll() {
         List<Image> results = imageService.getAll();
         assertEquals(4, results.size());
-    }
-
-    @Test
-    @DisplayName("Delete an image")
-    void testDelete() {
-        Image image = imageService.getById(1003L);
-        imageService.delete(image);
-        List<Image> results = imageService.getAll();
-        assertEquals(3, results.size());
-    }
-
-    @Test
-    @DisplayName("Should fail to delete an image because there are instances associated to it")
-    void testDeleteShouldFail() {
-        Image image = imageService.getById(1000L);
-        assertThrows(NullPointerException.class, () -> {
-            Image image2 = null;
-            image2.getId();
-        });
-
-        assertThrows(PersistenceException.class, () -> {
-            imageService.delete(image);
-        });
     }
 
     @Test

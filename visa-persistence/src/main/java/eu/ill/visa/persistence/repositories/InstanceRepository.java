@@ -246,6 +246,11 @@ public class InstanceRepository extends AbstractRepository<Instance> {
             predicates.add(cb.equal(planJoin.get("flavour").get("id"), filter.getFlavourId()));
         }
 
+        if (filter.getDevicePoolId() != null) {
+            Join<Instance, InstanceDeviceAllocation> getDeviceAllocationJoin = context.getDeviceAllocationJoin();
+            predicates.add(cb.equal(getDeviceAllocationJoin.get("devicePool").get("id"), filter.getDevicePoolId()));
+        }
+
         predicates.add(cb.isNull(root.get("deletedAt")));
 
         return predicates;
@@ -636,6 +641,7 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         private Join<Instance, InstanceMember> memberJoin = null;
         private Join<Instance, Experiment> experimentJoin = null;
         private Join<Instance, Plan> planJoin = null;
+        private Join<Instance, InstanceDeviceAllocation> deviceAllocationJoin = null;
 
         public InstanceRequestContext(Root<Instance> root) {
             this.root = root;
@@ -664,6 +670,13 @@ public class InstanceRepository extends AbstractRepository<Instance> {
                 planJoin = root.join("plan", JoinType.INNER);
             }
             return planJoin;
+        }
+
+        public Join<Instance, InstanceDeviceAllocation> getDeviceAllocationJoin() {
+            if (deviceAllocationJoin == null) {
+                deviceAllocationJoin = root.join("deviceAllocations", JoinType.INNER);
+            }
+            return deviceAllocationJoin;
         }
     }
 }

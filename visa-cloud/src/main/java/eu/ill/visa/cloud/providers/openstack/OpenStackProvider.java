@@ -9,17 +9,23 @@ import eu.ill.visa.cloud.providers.openstack.http.requests.ServerInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
 
 public class OpenStackProvider implements CloudProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenStackProvider.class);
+    private static final int FLAVOUR_REFRESH_TIME_MINUTES = 5;
 
     private final OpenStackProviderConfiguration openStackConfiguration;
 
     private final ImageEndpoint imageEndpoint;
     private final ComputeEndpoint computeEndpoint;
     private final NetworkEndpoint networkEndpoint;
+
+    private Map<CloudFlavour, List<CloudDeviceAllocation>> cloudFlavourDeviceAllocations;
+    private Instant flavoursUpdateTime = Instant.MIN;
 
     public OpenStackProvider(final CloudConfiguration cloudConfiguration,
                              final OpenStackProviderConfiguration openStackConfiguration) {
@@ -44,14 +50,63 @@ public class OpenStackProvider implements CloudProvider {
         return this.imageEndpoint.image(id);
     }
 
+    private synchronized Map<CloudFlavour, List<CloudDeviceAllocation>> getCloudFlavourDeviceAllocations() throws CloudException {
+        if (Duration.between(this.flavoursUpdateTime, Instant.now()).toMinutes() > FLAVOUR_REFRESH_TIME_MINUTES) {
+            this.cloudFlavourDeviceAllocations = new LinkedHashMap<>();
+            final List<CloudFlavour> flavours = this.computeEndpoint.flavors();
+            for  (CloudFlavour flavour : flavours) {
+                final List<CloudDeviceAllocation> cloudDeviceAllocations = this.computeEndpoint.flavorDeviceAllocations(flavour.getId());
+                this.cloudFlavourDeviceAllocations.put(flavour, cloudDeviceAllocations);
+            }
+            this.flavoursUpdateTime = Instant.now();
+        }
+        return this.cloudFlavourDeviceAllocations;
+    }
+
     @Override
     public List<CloudFlavour> flavors() throws CloudException {
-        return this.computeEndpoint.flavors();
+        return this.getCloudFlavourDeviceAllocations().keySet().stream().toList();
     }
 
     @Override
     public CloudFlavour flavor(final String id) throws CloudException {
-        return this.computeEndpoint.flavor(id);
+        return this.getCloudFlavourDeviceAllocations().keySet().stream()
+            .filter(flavour -> flavour.getId().equals(id))
+            .findFirst().orElse(null);
+    }
+
+    @Override
+    public List<CloudDevice> devices() throws CloudException {
+        return this.getCloudFlavourDeviceAllocations().values().stream()
+            .flatMap(List::stream)
+            .map(CloudDeviceAllocation::getDevice)
+            .distinct()
+            .toList();
+    }
+
+    @Override
+    public List<CloudDeviceAllocation> deviceAllocations() throws CloudException {
+        return this.getCloudFlavourDeviceAllocations().values().stream()
+            .flatMap(List::stream)
+            .distinct()
+            .toList();
+    }
+
+    @Override
+    public CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException {
+        return this.devices().stream()
+            .filter(device -> device.getIdentifier().equals(identifier) && device.getType().equals(deviceType))
+            .findFirst().orElse(null);
+    }
+
+
+    @Override
+    public List<CloudDeviceAllocation> flavorDeviceAllocations(String flavourId) throws CloudException {
+        return this.getCloudFlavourDeviceAllocations().entrySet().stream()
+            .filter(entry -> entry.getKey().getId().equals(flavourId))
+            .findFirst()
+            .map(Map.Entry::getValue)
+            .orElse(new ArrayList<>());
     }
 
     @Override

@@ -171,7 +171,7 @@ public class WebProvider implements CloudProvider {
             return this.webProviderClient.flavours(this.configuration.getAuthToken());
 
         } catch (Exception e) {
-            logger.error("Failed to get cloud images from Web Provider: {}", e.getMessage());
+            logger.error("Failed to get cloud flavours from Web Provider: {}", e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -182,8 +182,52 @@ public class WebProvider implements CloudProvider {
             return this.webProviderClient.flavour(this.configuration.getAuthToken(), id);
 
         } catch (Exception e) {
-            logger.warn("Failed to get cloud image with id {} from Web Provider: {}", id, e.getMessage());
+            logger.warn("Failed to get cloud flavour with id {} from Web Provider: {}", id, e.getMessage());
             return null;
+        }
+    }
+
+    @Override
+    public List<CloudDevice> devices() throws CloudException {
+        try {
+            return this.webProviderClient.devices(this.configuration.getAuthToken());
+
+        } catch (Exception e) {
+            logger.error("Failed to get cloud devices from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException {
+        try {
+            return this.webProviderClient.device(this.configuration.getAuthToken(), deviceType, identifier);
+
+        } catch (Exception e) {
+            logger.warn("Failed to get cloud device with identifier {} and type {} from Web Provider: {}", identifier, deviceType, e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public List<CloudDeviceAllocation> deviceAllocations() {
+        try {
+            return this.webProviderClient.deviceAllocations(this.configuration.getAuthToken());
+
+        } catch (Exception e) {
+            logger.error("Failed to get cloud device allocations from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<CloudDeviceAllocation> flavorDeviceAllocations(String flavorId) throws CloudException {
+        try {
+            return this.webProviderClient.flavourDeviceAllocations(this.configuration.getAuthToken(), flavorId);
+
+        } catch (Exception e) {
+            logger.error("Failed to get cloud device allocations from Web Provider for flavour {}: {}", flavorId, e.getMessage());
+            return new ArrayList<>();
         }
     }
 

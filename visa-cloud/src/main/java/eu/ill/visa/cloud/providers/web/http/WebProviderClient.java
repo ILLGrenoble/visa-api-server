@@ -45,6 +45,30 @@ public interface WebProviderClient {
     CloudFlavour flavour(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("flavourId") String flavourId);
 
     @GET
+    @Path("/api/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<CloudDevice> devices(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
+
+    @GET
+    @Path("/api/device/{deviceType}/{deviceIdentifier}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    CloudDevice device(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("deviceType") CloudDevice.Type deviceType, @PathParam("deviceIdentifier") String deviceIdentifier);
+
+    @GET
+    @Path("/api/device_allocations")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<CloudDeviceAllocation> deviceAllocations(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
+
+    @GET
+    @Path("/api/flavours/{flavourId}/device_allocations")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<CloudDeviceAllocation> flavourDeviceAllocations(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("flavourId") String flavourId);
+
+    @GET
     @Path("/api/instances")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

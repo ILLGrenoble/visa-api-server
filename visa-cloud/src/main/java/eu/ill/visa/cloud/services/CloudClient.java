@@ -80,6 +80,26 @@ public class CloudClient {
         return provider.flavor(id);
     }
 
+    public List<CloudDevice> devices() throws CloudException {
+        logger.trace("Fetching cloud devices");
+        return provider.devices();
+    }
+
+    public List<CloudDeviceAllocation> deviceAllocations() throws CloudException {
+        logger.trace("Fetching cloud device allocations");
+        return provider.deviceAllocations();
+    }
+
+    public CloudDevice device(String identifier, CloudDevice.Type deviceType) throws CloudException {
+        logger.trace("Fetching cloud device with identifier: {} and type {}", identifier, deviceType);
+        return provider.device(identifier, deviceType);
+    }
+
+    public List<CloudDeviceAllocation> flavourDeviceAllocations(String flavourId) throws CloudException {
+        logger.trace("Fetching cloud devices for flavour with id: {}", flavourId);
+        return provider.flavorDeviceAllocations(flavourId);
+    }
+
     public List<CloudInstanceIdentifier> instanceIdentifiers() throws CloudException {
         logger.trace("Fetching cloud instance identifiers");
         return provider.instanceIdentifiers();

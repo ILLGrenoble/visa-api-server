@@ -34,10 +34,6 @@ public class ImageService {
         return this.repository.getById(id);
     }
 
-    public void delete(Image image) {
-        this.repository.delete(image);
-    }
-
     public void save(@NotNull Image image) {
         this.repository.save(image);
     }

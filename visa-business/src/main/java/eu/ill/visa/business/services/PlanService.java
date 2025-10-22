@@ -34,10 +34,6 @@ public class PlanService {
         return this.repository.getById(id);
     }
 
-    public void delete(Plan Plan) {
-        this.repository.delete(Plan);
-    }
-
     public void create(Plan plan) {
         this.repository.create(plan);
     }

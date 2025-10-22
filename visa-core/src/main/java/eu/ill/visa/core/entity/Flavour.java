@@ -1,8 +1,12 @@
 package eu.ill.visa.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NamedQueries({
@@ -59,6 +63,10 @@ public class Flavour extends Timestampable {
     @Column(name = "compute_id", length = 250, nullable = false)
     private String computeId;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "flavour", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    private List<FlavourDevice> devices = new ArrayList<>();
+
     @Column(name = "deleted", nullable = false, columnDefinition = "")
     private Boolean deleted = false;
 
@@ -104,6 +112,14 @@ public class Flavour extends Timestampable {
 
     public void setComputeId(String computeId) {
         this.computeId = computeId;
+    }
+
+    public List<FlavourDevice> getDevices() {
+        return devices;
+    }
+
+    public void setDevices(List<FlavourDevice> devices) {
+        this.devices = devices;
     }
 
     public Boolean getDeleted() {

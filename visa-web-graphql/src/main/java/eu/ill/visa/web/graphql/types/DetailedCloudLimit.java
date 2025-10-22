@@ -1,23 +1,37 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudLimit;
+import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DetailedCloudLimit {
 
     private final @NotNull CloudClientType cloudClient;
     private final CloudLimit cloudLimit;
+    private final List<DevicePoolUsage> devicePoolUsage;
     private final String error;
+
+    public DetailedCloudLimit(CloudClientType cloudClient, CloudLimit cloudLimit, List<DevicePoolUsage> devicePoolUsage) {
+        this.cloudClient = cloudClient;
+        this.cloudLimit = cloudLimit;
+        this.devicePoolUsage = devicePoolUsage;
+        this.error = null;
+    }
 
     public DetailedCloudLimit(CloudClientType cloudClient, CloudLimit cloudLimit) {
         this.cloudClient = cloudClient;
         this.cloudLimit = cloudLimit;
+        this.devicePoolUsage = new ArrayList<>();
         this.error = null;
     }
 
     public DetailedCloudLimit(CloudClientType cloudClient, String error) {
         this.cloudClient = cloudClient;
         this.cloudLimit = null;
+        this.devicePoolUsage = new ArrayList<>();
         this.error = error;
     }
 
@@ -27,6 +41,10 @@ public class DetailedCloudLimit {
 
     public CloudLimit getCloudLimit() {
         return cloudLimit;
+    }
+
+    public List<DevicePoolUsage> getDevicePoolUsage() {
+        return devicePoolUsage;
     }
 
     public String getError() {

@@ -1,9 +1,11 @@
 package eu.ill.visa.web.rest.controllers;
 
+import eu.ill.visa.business.services.DevicePoolService;
 import eu.ill.visa.business.services.ExperimentService;
 import eu.ill.visa.business.services.ImageService;
 import eu.ill.visa.business.services.PlanService;
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import eu.ill.visa.web.rest.dtos.PlanDto;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.Authenticated;
@@ -32,14 +34,17 @@ public class PlanController extends AbstractController {
 
     private final PlanService planService;
     private final ImageService imageService;
+    private final DevicePoolService devicePoolService;
     final ExperimentService experimentService;
 
     @Inject
     PlanController(final PlanService planService,
                    final ImageService imageService,
+                   final DevicePoolService devicePoolService,
                    final ExperimentService experimentService) {
         this.planService = planService;
         this.imageService = imageService;
+        this.devicePoolService = devicePoolService;
         this.experimentService = experimentService;
     }
 
@@ -72,6 +77,8 @@ public class PlanController extends AbstractController {
             }
         }
 
+        List<DevicePoolUsage> devicePoolUsage = this.devicePoolService.getDevicePoolUsage();
+
         List<PlanDto> planDtos = plans.stream()
             .sorted((p1, p2) -> {
                 Flavour f1 = p1.getFlavour();
@@ -82,7 +89,7 @@ public class PlanController extends AbstractController {
                     return 1;
                 } else return f1.getMemory().compareTo(f2.getMemory());
             })
-            .map(this::toDto)
+            .map(plan -> this.toDto(plan, devicePoolUsage))
             .toList();
         return createResponse(planDtos);
     }
@@ -90,12 +97,13 @@ public class PlanController extends AbstractController {
     @Path("/{plan}")
     @GET
     public MetaResponse<PlanDto> get(@PathParam("plan") final Plan plan) {
-        return createResponse(this.toDto(plan));
+        List<DevicePoolUsage> devicePoolUsage = this.devicePoolService.getDevicePoolUsage();
+        return createResponse(this.toDto(plan, devicePoolUsage));
     }
 
-    private PlanDto toDto(final Plan plan) {
+    private PlanDto toDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage) {
         final Image image = plan.getImage();
         image.setDefaultVdiProtocol(imageService.getDefaultVdiProtocolForImage(image));
-        return new PlanDto(plan);
+        return new PlanDto(plan, devicePoolUsage);
     }
 }

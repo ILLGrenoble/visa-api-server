@@ -4,14 +4,14 @@ import eu.ill.visa.core.entity.Flavour;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @QuarkusTest
 @TestTransaction
@@ -43,23 +43,6 @@ public class FlavourServiceTest {
     }
 
     @Test
-    @DisplayName("Delete a flavour")
-    void testDelete() {
-        Flavour flavour = flavourService.getById(1002L);
-        flavourService.delete(flavour);
-        List<Flavour> results = flavourService.getAll();
-        assertEquals(2, results.size());
-    }
-
-    @Test
-    @DisplayName("Failed to delete a flavour because plans are associated to it")
-    void testFailedToDeleteBecausePlansAreAssociatedToIt() {
-        assertThrows(PersistenceException.class, () -> {
-            Flavour flavour = flavourService.getById(1000L);
-            flavourService.delete(flavour);
-        });
-    }
-    @Test
     @DisplayName("Create a flavour")
     void testCreate() {
         Flavour.Builder builder = new Flavour.Builder();
@@ -73,6 +56,4 @@ public class FlavourServiceTest {
         flavourService.create(flavour);
         assertEquals(4, flavourService.getAll().size());
     }
-
-
 }

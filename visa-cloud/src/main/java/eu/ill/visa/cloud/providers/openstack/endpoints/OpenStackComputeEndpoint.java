@@ -1,14 +1,11 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
 import eu.ill.visa.cloud.CloudConfiguration;
-import eu.ill.visa.cloud.domain.CloudFlavour;
-import eu.ill.visa.cloud.domain.CloudInstance;
-import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
-import eu.ill.visa.cloud.domain.CloudLimit;
+import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
+import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
-import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.providers.openstack.OpenStackProviderConfiguration;
 import eu.ill.visa.cloud.providers.openstack.http.ComputeEndpointClient;
 import eu.ill.visa.cloud.providers.openstack.http.requests.*;
@@ -21,8 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
@@ -74,7 +70,7 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
             });
     }
 
-    public List<CloudFlavour> flavors() throws CloudException{
+    public List<CloudFlavour> flavors() throws CloudException {
         try {
             return this.computeEndpointClient.flavors(this.identityProvider.authenticate()).flavors();
 
@@ -91,6 +87,59 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         } catch (CloudClientException e) {
             logger.warn("Failed to get cloud flavour with id {} from OpenStack: {}", id, e.getMessage());
             return null;
+        }
+    }
+
+    public List<CloudDevice> devices() throws CloudException {
+        try {
+            String authToken = this.identityProvider.authenticate();
+            return this.flavors().stream()
+                .flatMap(flavor -> this.computeEndpointClient
+                    .flavorExtraSpecs(authToken, flavor.getId())
+                    .extraSpecs()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> CloudDevice.from(entry.getKey(), entry.getValue())))
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        } catch (CloudClientException e) {
+            logger.error("Failed to get cloud devices from OpenStack: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<CloudDeviceAllocation> deviceAllocations() throws CloudException {
+        try {
+            String authToken = this.identityProvider.authenticate();
+            return this.flavors().stream()
+                .flatMap(flavor -> this.computeEndpointClient
+                    .flavorExtraSpecs(authToken, flavor.getId())
+                    .extraSpecs()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> CloudDeviceAllocation.from(flavor.getId(), entry.getKey(), entry.getValue())))
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        } catch (CloudClientException e) {
+            logger.error("Failed to get cloud devices from OpenStack: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<CloudDeviceAllocation> flavorDeviceAllocations(String flavourId) throws CloudException {
+        try {
+            return this.computeEndpointClient.flavorExtraSpecs(this.identityProvider.authenticate(), flavourId).extraSpecs().entrySet().stream()
+                .map(entry -> CloudDeviceAllocation.from(flavourId, entry.getKey(), entry.getValue()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        } catch (CloudClientException e) {
+            logger.error("Failed to get cloud devices for flavour {} from OpenStack: {}", flavourId, e.getMessage());
+            return new ArrayList<>();
         }
     }
 
