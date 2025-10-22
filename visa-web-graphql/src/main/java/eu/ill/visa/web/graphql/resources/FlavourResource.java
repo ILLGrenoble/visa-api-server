@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @GraphQLApi
@@ -32,6 +33,7 @@ public class FlavourResource {
 
     private final FlavourService flavourService;
     private final FlavourLimitService flavourLimitService;
+    private final FlavourRoleLifetimeService flavourRoleLifetimeService;
     private final InstrumentService instrumentService;
     private final RoleService roleService;
     private final CloudClientService cloudClientService;
@@ -40,12 +42,14 @@ public class FlavourResource {
     @Inject
     public FlavourResource(final FlavourService flavourService,
                            final FlavourLimitService flavourLimitService,
+                           final FlavourRoleLifetimeService flavourRoleLifetimeService,
                            final InstrumentService instrumentService,
                            final RoleService roleService,
                            final CloudClientService cloudClientService,
                            final CloudProviderService cloudProviderService) {
         this.flavourService = flavourService;
         this.flavourLimitService = flavourLimitService;
+        this.flavourRoleLifetimeService = flavourRoleLifetimeService;
         this.instrumentService = instrumentService;
         this.roleService = roleService;
         this.cloudClientService = cloudClientService;
@@ -96,6 +100,9 @@ public class FlavourResource {
         // Handle flavour limits
         this.updateFlavourLimits(flavour, input);
 
+        // Handle flavour role lifetimes
+        this.updateFlavourRoleLifetimes(flavour, input);
+
         return new FlavourType(flavour);
     }
 
@@ -124,6 +131,9 @@ public class FlavourResource {
 
         // Handle flavour limits
         this.updateFlavourLimits(flavour, input);
+
+        // Handle flavour role lifetimes
+        this.updateFlavourRoleLifetimes(flavour, input);
 
         return new FlavourType(flavour);
     }
@@ -214,6 +224,26 @@ public class FlavourResource {
                 logger.warn("Cannot create FlavourLimit with {} Id {} for Flavour {} as it does not exist", type, objectId, flavour.getName());
             }
         });
+    }
+
+    private void updateFlavourRoleLifetimes(Flavour flavour, FlavourInput input) {
+        List<FlavourRoleLifetime> flavourRoleLifetimes = input.getRoleLifetimes().stream()
+            .map(roleLifetime -> {
+                if (roleLifetime.getRoleId() != null) {
+                    final Role role = this.roleService.getById(roleLifetime.getRoleId());
+                    if (role == null) {
+                        logger.warn("Role with id {} not found when creating role lifetime for Flavour {}", roleLifetime.getRoleId(), flavour.getName());
+                        return null;
+                    } else {
+                        return new FlavourRoleLifetime(roleLifetime.getId(), flavour, role, roleLifetime.getLifetimeMinutes());
+                    }
+                } else {
+                    return new FlavourRoleLifetime(roleLifetime.getId(), flavour, roleLifetime.getLifetimeMinutes());
+                }
+            })
+            .filter(Objects::nonNull)
+            .toList();
+        this.flavourRoleLifetimeService.setRoleLifeTimesForFlavour(flavour, flavourRoleLifetimes);
     }
 
     private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {

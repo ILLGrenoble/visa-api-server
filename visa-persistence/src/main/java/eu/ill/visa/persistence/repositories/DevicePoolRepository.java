@@ -60,8 +60,4 @@ public class DevicePoolRepository extends AbstractRepository<DevicePool> {
             merge(devicePool);
         }
     }
-
-    public void create(DevicePool devicePool) {
-        persist(devicePool);
-    }
 }

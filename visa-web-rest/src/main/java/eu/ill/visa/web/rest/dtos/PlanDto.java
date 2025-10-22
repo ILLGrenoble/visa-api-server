@@ -3,6 +3,7 @@ package eu.ill.visa.web.rest.dtos;
 import eu.ill.visa.core.entity.Plan;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 
+import java.time.Duration;
 import java.util.List;
 
 public class PlanDto {
@@ -19,10 +20,10 @@ public class PlanDto {
         this.preset = plan.getPreset();
     }
 
-    public PlanDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage) {
+    public PlanDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage, final Duration lifetimeDuration) {
         this.id = plan.getId();
         this.image = new ImageDto(plan.getImage());
-        this.flavour = new FlavourDto(plan.getFlavour(), devicePoolUsage);
+        this.flavour = new FlavourDto(plan.getFlavour(), devicePoolUsage, lifetimeDuration);
         this.preset = plan.getPreset();
     }
 

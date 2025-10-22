@@ -22,6 +22,7 @@ public class FlavourInput {
     private @NotNull String computeId;
     private @AdaptToScalar(Scalar.Int.class) List<Long> instrumentIds;
     private @AdaptToScalar(Scalar.Int.class) List<Long> roleIds;
+    private List<RoleLifetimeInput> roleLifetimes;
 
     public String getName() {
         return name;
@@ -85,5 +86,43 @@ public class FlavourInput {
 
     public void setRoleIds(List<Long> roleIds) {
         this.roleIds = roleIds;
+    }
+
+    public List<RoleLifetimeInput> getRoleLifetimes() {
+        return roleLifetimes;
+    }
+
+    public void setRoleLifetimes(List<RoleLifetimeInput> roleLifetimes) {
+        this.roleLifetimes = roleLifetimes;
+    }
+
+    public static final class RoleLifetimeInput {
+        @AdaptToScalar(Scalar.Int.class) Long id;
+        @AdaptToScalar(Scalar.Int.class) Long roleId;
+        @AdaptToScalar(Scalar.Int.class) Long lifetimeMinutes;
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public Long getRoleId() {
+            return roleId;
+        }
+
+        public void setRoleId(Long roleId) {
+            this.roleId = roleId;
+        }
+
+        public Long getLifetimeMinutes() {
+            return lifetimeMinutes;
+        }
+
+        public void setLifetimeMinutes(Long lifetimeMinutes) {
+            this.lifetimeMinutes = lifetimeMinutes;
+        }
     }
 }

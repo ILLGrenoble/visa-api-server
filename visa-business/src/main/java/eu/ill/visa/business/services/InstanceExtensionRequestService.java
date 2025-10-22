@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 
@@ -71,7 +72,9 @@ public class InstanceExtensionRequestService {
         if (autoAccept) {
             // Automatically grant the extension if the auto-accept policy is set to ALL
             logger.info("Automatically granting extension for instance {} due to auto-accept policy", instance.getId());
-            final Date terminationDate = this.instanceService.calculateTerminationDate(instance.getTerminationDate(), instance.getOwner());
+            final Duration instanceDuration = this.instanceService.getInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
+            instance.setLifetimeMinutes(instanceDuration.toMinutes());
+            final Date terminationDate = this.instanceService.calculateTerminationDate(instance.getTerminationDate(), instance.getOwner().getUser(), instance.getPlan().getFlavour());
 
             request.setState(InstanceExtensionRequestState.ACCEPTED);
             request.setHandledOn(new Date());
