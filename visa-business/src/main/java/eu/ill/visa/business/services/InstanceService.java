@@ -8,7 +8,6 @@ import eu.ill.visa.business.gateway.events.InstanceThumbnailUpdatedEvent;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
-import eu.ill.visa.core.domain.SimpleDuration;
 import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
@@ -128,10 +127,14 @@ public class InstanceService {
             .lastSeenAt(new Date())
             .build();
 
-        // Determine from owner whether to apply staff or user lifetime durations
-        final Duration instanceDuration = this.getInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
-        instance.setLifetimeMinutes(instanceDuration.toMinutes());
-        instance.setTerminationDate(new Date(new Date().getTime() + instanceDuration.toMillis()));
+        // Determine from owner the maximum lifetime (staff, user, other roles)
+        final Duration maxInstanceDuration = this.getMaxInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
+        if (instance.getLifetimeMinutes() == null || instance.getLifetimeMinutes() == 0 || instance.getLifetimeMinutes() > maxInstanceDuration.toMinutes()) {
+            instance.setLifetimeMinutes(maxInstanceDuration.toMinutes());
+        }
+
+        // Set the termination date
+        instance.setTerminationDate(this.calculateTerminationDate(null, Duration.ofMinutes(instance.getLifetimeMinutes())));
 
         this.save(instance);
 
@@ -278,23 +281,20 @@ public class InstanceService {
         return 0L;
     }
 
-    public Date calculateTerminationDate(Date startDate, User user, final Flavour flavour) {
+    public Date calculateTerminationDate(Date startDate, Duration instanceDuration) {
         if (startDate == null) {
             startDate = new Date();
         }
-
-        final Duration instanceDuration = this.getInstanceDuration(user, flavour);
-        logger.info("Calculated instance termination duration of {} hours for user {} ({}) for flavour {} ({}", new SimpleDuration(instanceDuration).getDurationText(), user.getFullName(), user.getId(), flavour.getName(), flavour.getId());
 
         long terminationDate = startDate.getTime() + instanceDuration.toMillis();
         return new Date(terminationDate);
     }
 
-    public Duration getInstanceDuration(final InstanceMember owner, final Flavour flavour) {
-        return this.getInstanceDuration(owner.getUser() != null ? owner.getUser() : null, flavour);
+    public Duration getMaxInstanceDuration(final InstanceMember owner, final Flavour flavour) {
+        return this.getMaxInstanceDuration(owner.getUser() != null ? owner.getUser() : null, flavour);
     }
 
-    public Duration getInstanceDuration(final User user, final Flavour flavour) {
+    public Duration getMaxInstanceDuration(final User user, final Flavour flavour) {
         final List<Role> userRoles = user != null ? user.getRoles() : new ArrayList<>();
 
         final List<ImmutablePair<String, Duration>> roleLifetimes = this.flavourRoleLifetimeService.getAllByFlavourId(flavour.getId()).stream()

@@ -328,6 +328,7 @@ public class Instance extends Timestampable {
         this.name = builder.name;
         this.comments = builder.comments;
         this.plan = builder.plan;
+        this.lifetimeMinutes = builder.lifetimeMinutes;
         this.deviceAllocations = this.plan.getFlavour().getDevices().stream()
             .map(flavourDevice -> new InstanceDeviceAllocation(this, flavourDevice.getDevicePool(), flavourDevice.getUnitCount()))
             .collect(Collectors.toList());
@@ -794,6 +795,7 @@ public class Instance extends Timestampable {
         private String name;
         private String comments;
         private Plan plan;
+        private Long lifetimeMinutes;
         private String username;
         private InstanceState state = InstanceState.UNKNOWN;
         private Integer screenWidth;
@@ -839,6 +841,11 @@ public class Instance extends Timestampable {
 
         public Builder plan(Plan plan) {
             this.plan = plan;
+            return this;
+        }
+
+        public Builder lifetimeMinutes(Long lifetimeMinutes) {
+            this.lifetimeMinutes = lifetimeMinutes;
             return this;
         }
 

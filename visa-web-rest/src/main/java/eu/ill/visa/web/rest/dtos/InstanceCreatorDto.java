@@ -17,6 +17,8 @@ public class InstanceCreatorDto {
     @NotNull
     private Long planId;
 
+    private Long lifetimeMinutes;
+
     @NotNull
     private Integer screenWidth;
 
@@ -59,6 +61,14 @@ public class InstanceCreatorDto {
 
     public void setPlanId(Long planId) {
         this.planId = planId;
+    }
+
+    public Long getLifetimeMinutes() {
+        return lifetimeMinutes;
+    }
+
+    public void setLifetimeMinutes(Long lifetimeMinutes) {
+        this.lifetimeMinutes = lifetimeMinutes;
     }
 
     public Integer getScreenWidth() {

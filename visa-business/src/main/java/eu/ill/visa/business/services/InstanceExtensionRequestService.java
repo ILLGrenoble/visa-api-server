@@ -3,6 +3,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.business.notification.EmailManager;
+import eu.ill.visa.core.domain.SimpleDuration;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceExtensionRequestState;
 import eu.ill.visa.persistence.repositories.InstanceExtensionRequestRepository;
@@ -71,10 +72,18 @@ public class InstanceExtensionRequestService {
 
         if (autoAccept) {
             // Automatically grant the extension if the auto-accept policy is set to ALL
-            logger.info("Automatically granting extension for instance {} due to auto-accept policy", instance.getId());
-            final Duration instanceDuration = this.instanceService.getInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
-            instance.setLifetimeMinutes(instanceDuration.toMinutes());
-            final Date terminationDate = this.instanceService.calculateTerminationDate(instance.getTerminationDate(), instance.getOwner().getUser(), instance.getPlan().getFlavour());
+            final User user = instance.getOwner().getUser();
+            final Flavour flavour = instance.getPlan().getFlavour();
+            final Duration maxInstanceDuration = this.instanceService.getMaxInstanceDuration(instance.getOwner(), flavour);
+            Long instanceDuration = instance.getLifetimeMinutes();
+            if (instanceDuration == null || instanceDuration == 0 || instanceDuration > maxInstanceDuration.toMinutes()) {
+                instanceDuration = maxInstanceDuration.toMinutes();
+            }
+
+            logger.info("Automatically granting extension for instance {} (owner {}, flavour {}) due to auto-accept policy. Extension duration calculated as {}", instance.getId(), user.getFullName(), flavour.getName(), new SimpleDuration(instanceDuration).getDurationText());
+
+            instance.setLifetimeMinutes(instanceDuration);
+            final Date terminationDate = this.instanceService.calculateTerminationDate(instance.getTerminationDate(), Duration.ofMinutes(instanceDuration));
 
             request.setState(InstanceExtensionRequestState.ACCEPTED);
             request.setHandledOn(new Date());

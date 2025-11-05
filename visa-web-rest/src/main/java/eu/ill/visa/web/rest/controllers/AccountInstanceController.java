@@ -303,6 +303,7 @@ public class AccountInstanceController extends AbstractController {
         accountToken.getAccountParameters().forEach((s, s2) -> instanceAttributes.add(new InstanceAttribute(s, s2)));
         Instance.Builder instanceBuilder = Instance.builder()
             .plan(plan)
+            .lifetimeMinutes(dto.getLifetimeMinutes())
             .name(dto.getName())
             .comments(dto.getComments())
             .screenWidth(dto.getScreenWidth())

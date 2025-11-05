@@ -90,7 +90,7 @@ public class PlanController extends AbstractController {
                     return 1;
                 } else return f1.getMemory().compareTo(f2.getMemory());
             })
-            .map(plan -> this.toDto(plan, devicePoolUsage, this.instanceService.getInstanceDuration(user, plan.getFlavour())))
+            .map(plan -> this.toDto(plan, devicePoolUsage, this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())))
             .toList();
         return createResponse(planDtos);
     }
@@ -101,7 +101,7 @@ public class PlanController extends AbstractController {
         final User user = this.getUserPrincipal(securityContext);
 
         List<DevicePoolUsage> devicePoolUsage = this.devicePoolService.getDevicePoolUsage();
-        return createResponse(this.toDto(plan, devicePoolUsage,  this.instanceService.getInstanceDuration(user, plan.getFlavour())));
+        return createResponse(this.toDto(plan, devicePoolUsage,  this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())));
     }
 
     private PlanDto toDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage, final Duration lifetimeDuration) {
