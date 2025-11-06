@@ -2,6 +2,7 @@ package eu.ill.visa.cloud.providers;
 
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 
 import java.util.List;
 
@@ -178,4 +179,29 @@ public interface CloudProvider {
     CloudLimit limits() throws CloudException;
 
     List<String> securityGroups() throws CloudException;
+
+    /**
+     * Returns a list of custom resource classes
+     * @return a list of resource classes
+     * @throws CloudException if there was an exception executing the request
+     * @throws CloudUnavailableException if the resource classes functionality is unavailable
+     */
+    List<String> resourceClasses() throws CloudException, CloudUnavailableException;
+
+    /**
+     * Returns a list of cloud hypervisor inventories (available resources)
+     * @return a list of cloud hypervisor inventories
+     * @throws CloudException if there was an exception executing the request
+     * @throws CloudUnavailableException if the resource classes functionality is unavailable
+     */
+    List<CloudHypervisorInventory> hypervisorInventories() throws CloudException, CloudUnavailableException;
+
+    /**
+     * Returns a list of cloud hypervisor usages (resource usage)
+     * @return a list of cloud hypervisor usages
+     * @throws CloudException if there was an exception executing the request
+     * @throws CloudUnavailableException if the resource classes functionality is unavailable
+     */
+    List<CloudHypervisorUsage> hypervisorUsages() throws CloudException, CloudUnavailableException;
+
 }

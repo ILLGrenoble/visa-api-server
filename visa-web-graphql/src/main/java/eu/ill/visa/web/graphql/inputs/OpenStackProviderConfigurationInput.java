@@ -9,6 +9,7 @@ public class OpenStackProviderConfigurationInput {
     private @NotNull String applicationId;
     private @NotNull String applicationSecret;
     private @NotNull String computeEndpoint;
+    private String placementEndpoint; // Added to optionally manage PCI devices (eg PCI_PASSTHROUGH GPUs)
     private @NotNull String imageEndpoint;
     private @NotNull String networkEndpoint;
     private @NotNull String identityEndpoint;
@@ -37,6 +38,14 @@ public class OpenStackProviderConfigurationInput {
 
     public void setComputeEndpoint(String computeEndpoint) {
         this.computeEndpoint = computeEndpoint;
+    }
+
+    public String getPlacementEndpoint() {
+        return placementEndpoint;
+    }
+
+    public void setPlacementEndpoint(String placementEndpoint) {
+        this.placementEndpoint = placementEndpoint;
     }
 
     public String getImageEndpoint() {

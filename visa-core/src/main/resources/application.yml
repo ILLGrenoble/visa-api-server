@@ -90,6 +90,7 @@ cloud:
       parameters:
         identityEndpoint: ${VISA_CLOUD_IDENTITY_ENDPOINT:null}
         computeEndpoint: ${VISA_CLOUD_COMPUTE_ENDPOINT:null}
+        placementEndpoint: ${VISA_CLOUD_PLACEMENT_ENDPOINT:null}
         imageEndpoint: ${VISA_CLOUD_IMAGE_ENDPOINT:null}
         networkEndpoint: ${VISA_CLOUD_NETWORK_ENDPOINT:null}
         applicationId: ${VISA_CLOUD_APPLICATION_ID:null}

@@ -8,6 +8,7 @@ public class OpenStackProviderConfiguration {
     private final String applicationSecret;
 
     private final String computeEndpoint;
+    private final String placementEndpoint;
     private final String imageEndpoint;
     private final String identityEndpoint;
     private final String networkEndpoint;
@@ -17,14 +18,22 @@ public class OpenStackProviderConfiguration {
     private final String addressProviderUUID;
 
     public OpenStackProviderConfiguration(final Map<String, String> values) {
-        this.applicationId = values.get("applicationId");
-        this.applicationSecret = values.get("applicationSecret");
-        this.computeEndpoint = values.get("computeEndpoint");
-        this.imageEndpoint = values.get("imageEndpoint");
-        this.networkEndpoint = values.get("networkEndpoint");
-        this.identityEndpoint = values.get("identityEndpoint");
-        this.addressProvider = values.get("addressProvider");
-        this.addressProviderUUID = values.get("addressProviderUUID");
+        this.applicationId = this.getValidParameterValue(values, "applicationId");
+        this.applicationSecret = this.getValidParameterValue(values, "applicationSecret");
+        this.computeEndpoint = this.getValidParameterValue(values, "computeEndpoint");
+        this.placementEndpoint = this.getValidParameterValue(values, "placementEndpoint");
+        this.imageEndpoint = this.getValidParameterValue(values, "imageEndpoint");
+        this.identityEndpoint = this.getValidParameterValue(values, "identityEndpoint");
+        this.networkEndpoint = this.getValidParameterValue(values, "networkEndpoint");
+        this.addressProvider = this.getValidParameterValue(values, "addressProvider");
+        this.addressProviderUUID = this.getValidParameterValue(values, "addressProviderUUID");
+    }
+
+    private String getValidParameterValue(final Map<String, String> parameters, final String parameterName) {
+        if (parameters.containsKey(parameterName)) {
+            return parameters.get(parameterName).equals("null") ? null : parameters.get(parameterName);
+        }
+        return null;
     }
 
     public String getAddressProviderUUID() {
@@ -41,6 +50,10 @@ public class OpenStackProviderConfiguration {
 
     public String getComputeEndpoint() {
         return computeEndpoint;
+    }
+
+    public String getPlacementEndpoint() {
+        return placementEndpoint;
     }
 
     public String getImageEndpoint() {

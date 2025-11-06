@@ -9,6 +9,7 @@ public class OpenStackProviderConfigurationType {
     private final @NotNull String applicationId;
     private final @NotNull String applicationSecret;
     private final @NotNull String computeEndpoint;
+    private final String placementEndpoint;
     private final @NotNull String imageEndpoint;
     private final @NotNull String networkEndpoint;
     private final @NotNull String identityEndpoint;
@@ -19,6 +20,7 @@ public class OpenStackProviderConfigurationType {
         this.applicationId = configuration.getApplicationId();
         this.applicationSecret = configuration.getApplicationSecret();
         this.computeEndpoint = configuration.getComputeEndpoint();
+        this.placementEndpoint = configuration.getPlacementEndpoint();
         this.imageEndpoint = configuration.getImageEndpoint();
         this.networkEndpoint = configuration.getNetworkEndpoint();
         this.identityEndpoint = configuration.getIdentityEndpoint();
@@ -36,6 +38,10 @@ public class OpenStackProviderConfigurationType {
 
     public String getComputeEndpoint() {
         return computeEndpoint;
+    }
+
+    public String getPlacementEndpoint() {
+        return placementEndpoint;
     }
 
     public String getImageEndpoint() {

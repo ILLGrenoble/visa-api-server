@@ -250,4 +250,16 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
     }
 
 
+    public List<CloudHypervisor> hypervisors() throws CloudException {
+        try {
+            return this.computeEndpointClient.hypervisors(this.identityProvider.authenticate()).hypervisors();
+
+        } catch (CloudClientException e) {
+            logger.error("Failed to get cloud hypervisors from OpenStack: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+
+
 }

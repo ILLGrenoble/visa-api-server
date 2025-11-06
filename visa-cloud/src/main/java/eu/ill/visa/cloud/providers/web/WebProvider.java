@@ -2,10 +2,7 @@ package eu.ill.visa.cloud.providers.web;
 
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.domain.*;
-import eu.ill.visa.cloud.exceptions.CloudClientException;
-import eu.ill.visa.cloud.exceptions.CloudException;
-import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
-import eu.ill.visa.cloud.exceptions.CloudRuntimeException;
+import eu.ill.visa.cloud.exceptions.*;
 import eu.ill.visa.cloud.providers.CloudProvider;
 import eu.ill.visa.cloud.providers.web.http.WebProviderClient;
 import eu.ill.visa.cloud.providers.web.http.requests.InstanceSecurityGroupRequest;
@@ -303,4 +300,57 @@ public class WebProvider implements CloudProvider {
             throw new CloudException("Failed to get security groups from Web Provider " + e.getMessage());
         }
     }
+
+    @Override
+    public List<String> resourceClasses() throws CloudException, CloudUnavailableException {
+        try {
+            return this.webProviderClient.resourceClasses(this.configuration.getAuthToken());
+
+        } catch (CloudNotFoundException e) {
+            throw new CloudUnavailableException("Obtaining resource classes is not available from the Web Provider");
+
+        } catch (CloudRuntimeException e) {
+            logger.warn("Failed to get resource classes from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+
+        } catch (Exception e) {
+            throw new CloudException("Failed to get resource classes from Web Provider " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<CloudHypervisorInventory> hypervisorInventories() throws CloudException, CloudUnavailableException {
+        try {
+            return this.webProviderClient.hypervisorInventories(this.configuration.getAuthToken());
+
+        } catch (CloudNotFoundException e) {
+            throw new CloudUnavailableException("Obtaining hypervisor inventories is not available from the Web Provider");
+
+        } catch (CloudRuntimeException e) {
+            logger.warn("Failed to get hypervisor inventories from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+
+        } catch (Exception e) {
+            throw new CloudException("Failed to get hypervisor inventories from Web Provider " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<CloudHypervisorUsage> hypervisorUsages() throws CloudException, CloudUnavailableException {
+        try {
+            return this.webProviderClient.hypervisorUsages(this.configuration.getAuthToken());
+
+        } catch (CloudNotFoundException e) {
+            throw new CloudUnavailableException("Obtaining hypervisor usages is not available from the Web Provider");
+
+        } catch (CloudRuntimeException e) {
+            logger.warn("Failed to get hypervisor usages from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+
+        } catch (Exception e) {
+            throw new CloudException("Failed to get hypervisor usages from Web Provider " + e.getMessage());
+        }
+    }
+
+
 }

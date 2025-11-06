@@ -2,6 +2,7 @@ package eu.ill.visa.cloud.services;
 
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 import eu.ill.visa.cloud.providers.CloudProvider;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -164,6 +165,10 @@ public class CloudClient {
     public List<String> securityGroups() throws CloudException {
         logger.info("Fetching cloud security groups");
         return provider.securityGroups();
+    }
+
+    public List<String> resourceClasses() throws CloudException, CloudUnavailableException {
+        return provider.resourceClasses();
     }
 
     @Override

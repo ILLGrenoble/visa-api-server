@@ -70,7 +70,7 @@ public class CloudClientFactory {
         requireNonNull(parameters.get("addressProviderUUID"), "addressProviderUUID must be set");
 
         final OpenStackProviderConfiguration openStackProviderConfiguration = new OpenStackProviderConfiguration(parameters);
-        return new CloudClient(id, name, provider, new OpenStackProvider(cloudConfiguration, openStackProviderConfiguration), serverNamePrefix, visible);
+        return new CloudClient(id, name, provider, new OpenStackProvider(name, cloudConfiguration, openStackProviderConfiguration), serverNamePrefix, visible);
     }
 
     /**

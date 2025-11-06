@@ -23,4 +23,5 @@ public interface ComputeEndpoint {
     String createInstance(final ServerInput input) throws CloudException;
     List<String> serverSecurityGroups(final String id) throws CloudException;
     CloudLimit limits() throws CloudException;
+    List<CloudHypervisor> hypervisors() throws CloudException;
 }

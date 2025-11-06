@@ -3,6 +3,7 @@ package eu.ill.visa.cloud.providers.openstack;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 import eu.ill.visa.cloud.providers.CloudProvider;
 import eu.ill.visa.cloud.providers.openstack.endpoints.*;
 import eu.ill.visa.cloud.providers.openstack.http.requests.ServerInput;
@@ -17,23 +18,32 @@ public class OpenStackProvider implements CloudProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenStackProvider.class);
     private static final int FLAVOUR_REFRESH_TIME_MINUTES = 5;
+    private static final int HYPERVISOR_REFRESH_TIME_MINUTES = 5;
 
     private final OpenStackProviderConfiguration openStackConfiguration;
 
     private final ImageEndpoint imageEndpoint;
     private final ComputeEndpoint computeEndpoint;
+    private final PlacementEndpoint placementEndpoint;
     private final NetworkEndpoint networkEndpoint;
 
     private Map<CloudFlavour, List<CloudDeviceAllocation>> cloudFlavourDeviceAllocations;
     private Instant flavoursUpdateTime = Instant.MIN;
 
-    public OpenStackProvider(final CloudConfiguration cloudConfiguration,
+    private List<CloudHypervisor> cloudHypervisors;
+    private List<CloudResourceProvider> resourceProviders;
+    private List<CloudHypervisorInventory> hypervisorInventories;
+    private Instant hypervisorUpdateTime = Instant.MIN;
+
+    public OpenStackProvider(final String name,
+                             final CloudConfiguration cloudConfiguration,
                              final OpenStackProviderConfiguration openStackConfiguration) {
         this.openStackConfiguration = openStackConfiguration;
         OpenStackIdentityEndpoint identityEndpoint = new OpenStackIdentityEndpoint(cloudConfiguration, this.openStackConfiguration);
         this.imageEndpoint = OpenStackImageEndpoint.authenticationProxy(cloudConfiguration, this.openStackConfiguration, identityEndpoint);
         this.networkEndpoint = OpenStackNetworkEndpoint.authenticationProxy(cloudConfiguration, this.openStackConfiguration, identityEndpoint);
         this.computeEndpoint = OpenStackComputeEndpoint.authenticationProxy(cloudConfiguration, openStackConfiguration, identityEndpoint);
+        this.placementEndpoint = OpenStackPlacementEndpoint.authenticationProxy(name, cloudConfiguration, openStackConfiguration, identityEndpoint);
     }
 
     public OpenStackProviderConfiguration getOpenStackConfiguration() {
@@ -54,13 +64,43 @@ public class OpenStackProvider implements CloudProvider {
         if (Duration.between(this.flavoursUpdateTime, Instant.now()).toMinutes() > FLAVOUR_REFRESH_TIME_MINUTES) {
             this.cloudFlavourDeviceAllocations = new LinkedHashMap<>();
             final List<CloudFlavour> flavours = this.computeEndpoint.flavors();
-            for  (CloudFlavour flavour : flavours) {
+            for (CloudFlavour flavour : flavours) {
                 final List<CloudDeviceAllocation> cloudDeviceAllocations = this.computeEndpoint.flavorDeviceAllocations(flavour.getId());
                 this.cloudFlavourDeviceAllocations.put(flavour, cloudDeviceAllocations);
             }
             this.flavoursUpdateTime = Instant.now();
         }
         return this.cloudFlavourDeviceAllocations;
+    }
+
+    private synchronized void updateHypervisors() throws CloudException, CloudUnavailableException {
+        if (Duration.between(this.hypervisorUpdateTime, Instant.now()).toMinutes() > HYPERVISOR_REFRESH_TIME_MINUTES) {
+            this.cloudHypervisors = this.computeEndpoint.hypervisors();
+            this.resourceProviders = this.placementEndpoint.resourceProviders();
+
+            List<CloudHypervisorInventory> hypervisorInventories = this.cloudHypervisors.stream().map(CloudHypervisorInventory::new).toList();
+
+            for (CloudResourceProvider resourceProvider : this.resourceProviders) {
+                // For each resource provider get the inventories
+                List<CloudResourceInventory> resourceInventories = this.placementEndpoint.resourceInventories(resourceProvider.getUuid());
+
+                // Get the hypervisor associated to the resource provider (either directly the resource provider or the parent if it is a PCI device) and add resource inventories to it
+                this.resourceProviders.stream()
+                    .filter(aProvider -> aProvider.getUuid().equals(resourceProvider.getHypervisorUuid()))
+                    .findFirst()
+                    .flatMap(aProvider -> hypervisorInventories.stream()
+                        .filter(aHypervisorInventory -> aHypervisorInventory.getHypervisor().getHostname().equals(aProvider.getName()))
+                        .findFirst())
+                    .ifPresent(hypervisorInventory -> {
+                        for (CloudResourceInventory inventory : resourceInventories) {
+                            hypervisorInventory.addResource(inventory);
+                        }
+                    });
+            }
+            this.hypervisorInventories = hypervisorInventories;
+
+            this.hypervisorUpdateTime = Instant.now();
+        }
     }
 
     @Override
@@ -148,7 +188,7 @@ public class OpenStackProvider implements CloudProvider {
     @Override
     public void updateSecurityGroups(String id, List<String> securityGroupNames) throws CloudException {
 
-        final List<String> currentSecurityGroupNames =this.computeEndpoint.serverSecurityGroups(id);
+        final List<String> currentSecurityGroupNames = this.computeEndpoint.serverSecurityGroups(id);
         List<String> securityGroupNamesToRemove = currentSecurityGroupNames.stream().filter(name -> !securityGroupNames.contains(name)).toList();
         List<String> securityGroupNamesToAdd = securityGroupNames.stream().filter(name -> !currentSecurityGroupNames.contains(name)).toList();
 
@@ -201,4 +241,50 @@ public class OpenStackProvider implements CloudProvider {
     public List<String> securityGroups() throws CloudException {
         return this.networkEndpoint.securityGroups();
     }
+
+    @Override
+    public List<String> resourceClasses() throws CloudException, CloudUnavailableException {
+        // Update all hypervisors and resource providers
+        this.updateHypervisors();
+
+        return this.hypervisorInventories.stream()
+            .flatMap(inventory -> inventory.getInventory().keySet().stream())
+            .distinct()
+            .toList();
+    }
+
+    @Override
+    public List<CloudHypervisorInventory> hypervisorInventories() throws CloudException, CloudUnavailableException {
+        // Update all hypervisors and resource providers
+        this.updateHypervisors();
+
+        return this.hypervisorInventories;
+    }
+
+    @Override
+    public List<CloudHypervisorUsage> hypervisorUsages() throws CloudException, CloudUnavailableException {
+        // Update all hypervisors and resource providers
+        this.updateHypervisors();
+        List<CloudHypervisorUsage> hypervisorUsages = this.cloudHypervisors.stream().map(CloudHypervisorUsage::new).toList();
+        for (CloudResourceProvider resourceProvider : this.resourceProviders) {
+            // For each resource provider get the usages
+            List<CloudResourceUsage> resourceUsages = this.placementEndpoint.resourceUsages(resourceProvider.getUuid());
+
+            // Get the hypervisor associated to the resource provider and add resource usage to it
+            this.resourceProviders.stream()
+                .filter(aProvider -> aProvider.getUuid().equals(resourceProvider.getHypervisorUuid()))
+                .findFirst()
+                .flatMap(aProvider -> hypervisorUsages.stream()
+                    .filter(aHypervisorUsage -> aHypervisorUsage.getHypervisor().getHostname().equals(aProvider.getName()))
+                    .findFirst())
+                .ifPresent(hypervisorUsage -> {
+                    for (CloudResourceUsage usage : resourceUsages) {
+                        hypervisorUsage.addResource(usage);
+                    }
+                });
+        }
+
+        return hypervisorUsages;
+    }
+
 }

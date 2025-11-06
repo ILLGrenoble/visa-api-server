@@ -4,6 +4,7 @@ import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.DevicePoolService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudLimit;
+import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
@@ -106,6 +107,25 @@ public class CloudClientResource {
         try {
             CloudClient cloudClient = this.getCloudClient(cloudId);
             return cloudClient.devices().stream().map(CloudDeviceType::new).toList();
+        } catch (DataFetchingException e) {
+            throw e;
+        } catch (Exception exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    /**
+     * Get custom cloud resource classes from the the cloud provider (if available)
+     *
+     * @return a response containing a list of cloud resource classes if available
+     */
+    @Query
+    public @NotNull PlacementArrayResponse<String> cloudResourceClasses(@AdaptToScalar(Scalar.Int.class) Long cloudId) throws DataFetchingException {
+        try {
+            CloudClient cloudClient = this.getCloudClient(cloudId);
+            return PlacementArrayResponse.Response(cloudClient.resourceClasses());
+        } catch (CloudUnavailableException e) {
+            return PlacementArrayResponse.Unavailable();
         } catch (DataFetchingException e) {
             throw e;
         } catch (Exception exception) {
@@ -255,6 +275,7 @@ public class CloudClientResource {
             cloudProviderConfiguration.setParameter("applicationId", configurationInput.getApplicationId());
             cloudProviderConfiguration.setParameter("applicationSecret", configurationInput.getApplicationSecret());
             cloudProviderConfiguration.setParameter("computeEndpoint", configurationInput.getComputeEndpoint());
+            cloudProviderConfiguration.setParameter("placementEndpoint", configurationInput.getPlacementEndpoint());
             cloudProviderConfiguration.setParameter("imageEndpoint", configurationInput.getImageEndpoint());
             cloudProviderConfiguration.setParameter("networkEndpoint", configurationInput.getNetworkEndpoint());
             cloudProviderConfiguration.setParameter("identityEndpoint", configurationInput.getIdentityEndpoint());

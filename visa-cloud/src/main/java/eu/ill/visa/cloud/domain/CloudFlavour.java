@@ -1,5 +1,6 @@
 package eu.ill.visa.cloud.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -8,7 +9,7 @@ public class CloudFlavour {
 
     private String id;
     private String name;
-    private Integer cpus;
+    private @JsonProperty("vcpus") Integer cpus;
     private Integer disk;
     private Integer ram;
 

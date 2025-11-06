@@ -8,8 +8,8 @@ public class WebProviderConfiguration {
 
     public WebProviderConfiguration(final String url,
                                     final String authToken) {
-        this.url = url;
-        this.authToken = authToken;
+        this.url = url.equals("null") ? null : url;
+        this.authToken = authToken.equals("null") ? null : authToken;
     }
 
     public String getUrl() {

@@ -146,6 +146,24 @@ public interface WebProviderClient {
     @Consumes(MediaType.APPLICATION_JSON)
     List<String> securityGroups(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
 
+    @GET
+    @Path("/api/custom_resource_classes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<String> resourceClasses(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
+
+    @GET
+    @Path("/api/hypervisor_inventories")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<CloudHypervisorInventory> hypervisorInventories(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
+
+    @GET
+    @Path("/api/hypervisor_usages")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<CloudHypervisorUsage> hypervisorUsages(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
+
     @ClientObjectMapper
     static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {
         return defaultObjectMapper.copy()

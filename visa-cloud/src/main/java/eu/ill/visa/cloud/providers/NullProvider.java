@@ -2,6 +2,7 @@ package eu.ill.visa.cloud.providers;
 
 import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 
 import java.util.List;
 
@@ -112,4 +113,18 @@ public class NullProvider implements CloudProvider {
         return null;
     }
 
+    @Override
+    public List<String> resourceClasses() throws CloudUnavailableException {
+        throw new CloudUnavailableException();
+    }
+
+    @Override
+    public List<CloudHypervisorInventory> hypervisorInventories() throws CloudUnavailableException {
+        throw new CloudUnavailableException();
+    }
+
+    @Override
+    public List<CloudHypervisorUsage> hypervisorUsages() throws CloudUnavailableException {
+        throw new CloudUnavailableException();
+    }
 }
