@@ -291,7 +291,7 @@ public class InstanceService {
     }
 
     public Duration getMaxInstanceDuration(final InstanceMember owner, final Flavour flavour) {
-        return this.getMaxInstanceDuration(owner.getUser() != null ? owner.getUser() : null, flavour);
+        return this.getMaxInstanceDuration(owner != null ? owner.getUser() : null, flavour);
     }
 
     public Duration getMaxInstanceDuration(final User user, final Flavour flavour) {
