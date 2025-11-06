@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk AS builder
+FROM amazoncorretto:21-alpine-jdk AS builder
 
 ARG MAVEN_OPTS
 
