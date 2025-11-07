@@ -23,6 +23,6 @@ public class CloudHypervisorInventory {
 
     public void addResource(CloudResourceInventory resourceInventory) {
         Long total = resourceInventory.getTotal() * resourceInventory.getAllocationRatio();
-        inventory.merge(resourceInventory.getResourceClass(), total, Long::sum);
+        inventory.merge(resourceInventory.getResourceClass().getName(), total, Long::sum);
     }
 }

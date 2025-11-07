@@ -1,7 +1,5 @@
 package eu.ill.visa.cloud.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CloudHypervisor {
 
     private String id;
@@ -21,7 +19,6 @@ public class CloudHypervisor {
         return hostname;
     }
 
-    @JsonProperty("hypervisor_hostname")
     public void setHostname(String hostname) {
         this.hostname = hostname;
     }

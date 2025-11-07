@@ -2,22 +2,22 @@ package eu.ill.visa.cloud.domain;
 
 public class CloudResourceUsage {
 
-    private String resourceClass;
+    private CloudResourceClass resourceClass;
     private Long usage;
 
     public CloudResourceUsage() {
     }
 
-    public CloudResourceUsage(String resourceClass, Long resourceUsage) {
+    public CloudResourceUsage(CloudResourceClass resourceClass, Long resourceUsage) {
         this.resourceClass = resourceClass;
         this.usage = resourceUsage;
     }
 
-    public String getResourceClass() {
+    public CloudResourceClass getResourceClass() {
         return resourceClass;
     }
 
-    public void setResourceClass(String resourceClass) {
+    public void setResourceClass(CloudResourceClass resourceClass) {
         this.resourceClass = resourceClass;
     }
 

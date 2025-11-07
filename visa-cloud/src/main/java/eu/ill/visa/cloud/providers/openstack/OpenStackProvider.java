@@ -265,6 +265,7 @@ public class OpenStackProvider implements CloudProvider {
     public List<CloudHypervisorUsage> hypervisorUsages() throws CloudException, CloudUnavailableException {
         // Update all hypervisors and resource providers
         this.updateHypervisors();
+
         List<CloudHypervisorUsage> hypervisorUsages = this.cloudHypervisors.stream().map(CloudHypervisorUsage::new).toList();
         for (CloudResourceProvider resourceProvider : this.resourceProviders) {
             // For each resource provider get the usages

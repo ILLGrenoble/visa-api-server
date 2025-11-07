@@ -1,13 +1,19 @@
 package eu.ill.visa.cloud.providers.openstack.http;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.ill.visa.cloud.domain.CloudFlavour;
+import eu.ill.visa.cloud.domain.CloudHypervisor;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
+import eu.ill.visa.cloud.providers.openstack.converters.CloudFlavourMixin;
+import eu.ill.visa.cloud.providers.openstack.converters.CloudHypervisorMixin;
 import eu.ill.visa.cloud.providers.openstack.http.requests.InstanceActionRequest;
 import eu.ill.visa.cloud.providers.openstack.http.requests.ServerRequest;
 import eu.ill.visa.cloud.providers.openstack.http.responses.*;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
+import io.quarkus.rest.client.reactive.jackson.ClientObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -81,6 +87,14 @@ public interface ComputeEndpointClient {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     HypervisorsResponse hypervisors(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
+
+    @ClientObjectMapper
+    static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {
+        return defaultObjectMapper.copy()
+            .addMixIn(CloudFlavour.class, CloudFlavourMixin.class)
+            .addMixIn(CloudHypervisor.class, CloudHypervisorMixin.class)
+        ;
+    }
 
     @ClientExceptionMapper
     static RuntimeException toException(Response response) {

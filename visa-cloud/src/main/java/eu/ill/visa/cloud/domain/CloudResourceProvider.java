@@ -1,7 +1,5 @@
 package eu.ill.visa.cloud.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CloudResourceProvider {
 
     private String uuid;
@@ -20,7 +18,6 @@ public class CloudResourceProvider {
         return parentUuid;
     }
 
-    @JsonProperty("parent_provider_uuid")
     public void setParentUuid(String parentUuid) {
         this.parentUuid = parentUuid;
     }

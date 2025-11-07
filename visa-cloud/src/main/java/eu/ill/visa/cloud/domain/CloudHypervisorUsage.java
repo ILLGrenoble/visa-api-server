@@ -6,8 +6,7 @@ import java.util.Map;
 public class CloudHypervisorUsage {
 
     private final CloudHypervisor hypervisor;
-    private final Map<String, Long> usage
-        ;
+    private final Map<String, Long> usage;
 
     public CloudHypervisorUsage(CloudHypervisor hypervisor) {
         this.hypervisor = hypervisor;
@@ -23,6 +22,6 @@ public class CloudHypervisorUsage {
     }
 
     public void addResource(CloudResourceUsage resourceUsage) {
-        usage.merge(resourceUsage.getResourceClass(), resourceUsage.getUsage(), Long::sum);
+        usage.merge(resourceUsage.getResourceClass().getName(), resourceUsage.getUsage(), Long::sum);
     }
 }

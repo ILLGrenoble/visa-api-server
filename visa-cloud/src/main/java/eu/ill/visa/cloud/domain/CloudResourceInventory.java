@@ -1,10 +1,8 @@
 package eu.ill.visa.cloud.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CloudResourceInventory {
 
-    private String resourceClass;
+    private CloudResourceClass resourceClass;
     private Long total;
     private Long reserved;
     private Long minUnit;
@@ -12,11 +10,11 @@ public class CloudResourceInventory {
     private Long stepSize;
     private Long allocationRatio;
 
-    public String getResourceClass() {
+    public CloudResourceClass getResourceClass() {
         return resourceClass;
     }
 
-    public void setResourceClass(String resourceClass) {
+    public void setResourceClass(CloudResourceClass resourceClass) {
         this.resourceClass = resourceClass;
     }
 
@@ -40,7 +38,6 @@ public class CloudResourceInventory {
         return minUnit;
     }
 
-    @JsonProperty("min_unit")
     public void setMinUnit(Long minUnit) {
         this.minUnit = minUnit;
     }
@@ -49,7 +46,6 @@ public class CloudResourceInventory {
         return maxUnit;
     }
 
-    @JsonProperty("max_unit")
     public void setMaxUnit(Long maxUnit) {
         this.maxUnit = maxUnit;
     }
@@ -58,7 +54,6 @@ public class CloudResourceInventory {
         return stepSize;
     }
 
-    @JsonProperty("step_size")
     public void setStepSize(Long stepSize) {
         this.stepSize = stepSize;
     }
@@ -67,7 +62,6 @@ public class CloudResourceInventory {
         return allocationRatio;
     }
 
-    @JsonProperty("allocation_ratio")
     public void setAllocationRatio(Long allocationRatio) {
         this.allocationRatio = allocationRatio;
     }

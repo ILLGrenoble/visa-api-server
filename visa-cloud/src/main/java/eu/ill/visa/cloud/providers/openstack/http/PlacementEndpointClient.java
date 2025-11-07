@@ -1,13 +1,19 @@
 package eu.ill.visa.cloud.providers.openstack.http;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.ill.visa.cloud.domain.CloudResourceInventory;
+import eu.ill.visa.cloud.domain.CloudResourceProvider;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
+import eu.ill.visa.cloud.providers.openstack.converters.CloudResourceInventoryMixin;
+import eu.ill.visa.cloud.providers.openstack.converters.CloudResourceProviderMixin;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ResourceInventoriesResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ResourceProvidersResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ResourceUsagesResponse;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
+import io.quarkus.rest.client.reactive.jackson.ClientObjectMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -35,6 +41,14 @@ public interface PlacementEndpointClient {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     ResourceUsagesResponse resourceUsages(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("resource_provider_id") String resourceProviderId);
+
+    @ClientObjectMapper
+    static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {
+        return defaultObjectMapper.copy()
+            .addMixIn(CloudResourceInventory.class, CloudResourceInventoryMixin.class)
+            .addMixIn(CloudResourceProvider.class, CloudResourceProviderMixin.class)
+            ;
+    }
 
     @ClientExceptionMapper
     static RuntimeException toException(Response response) {

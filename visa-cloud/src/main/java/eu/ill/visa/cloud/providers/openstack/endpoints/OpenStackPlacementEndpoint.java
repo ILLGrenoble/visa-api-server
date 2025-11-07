@@ -1,6 +1,7 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
 import eu.ill.visa.cloud.CloudConfiguration;
+import eu.ill.visa.cloud.domain.CloudResourceClass;
 import eu.ill.visa.cloud.domain.CloudResourceInventory;
 import eu.ill.visa.cloud.domain.CloudResourceProvider;
 import eu.ill.visa.cloud.domain.CloudResourceUsage;
@@ -94,7 +95,7 @@ public class OpenStackPlacementEndpoint implements PlacementEndpoint {
                 .entrySet().stream().map(entry -> {
                     String resourceClass =  entry.getKey();
                     CloudResourceInventory resourceInventory = entry.getValue();
-                    resourceInventory.setResourceClass(resourceClass);
+                    resourceInventory.setResourceClass(this.toResourceClass(resourceClass));
                     return resourceInventory;
                 })
                 .toList();
@@ -111,13 +112,28 @@ public class OpenStackPlacementEndpoint implements PlacementEndpoint {
                 .entrySet().stream().map(entry -> {
                     String resourceClass =  entry.getKey();
                     Long resourceUsage = entry.getValue();
-                    return new CloudResourceUsage(resourceClass, resourceUsage);
+                    return new CloudResourceUsage(this.toResourceClass(resourceClass), resourceUsage);
                 })
                 .toList();
 
         } catch (CloudClientException e) {
             logger.error("Failed to get cloud resource usages from OpenStack: {}", e.getMessage());
             return new ArrayList<>();
+        }
+    }
+
+    private CloudResourceClass toResourceClass(final String resourceClassName) {
+        if (resourceClassName.equals(CloudResourceClass.VCPU_RESOURCE_CLASS)) {
+            return CloudResourceClass.VCPUResourceClass();
+
+        } else if (resourceClassName.equals(CloudResourceClass.MEMORY_MB_RESOURCE_CLASS)) {
+            return CloudResourceClass.MemoryMBResourceClass();
+
+        } else if (resourceClassName.equals(CloudResourceClass.DISK_GM_RESOURCE_CLASS)) {
+            return CloudResourceClass.DiskGBResourceClass();
+
+        } else {
+            return CloudResourceClass.CustomResourceClass(resourceClassName);
         }
     }
 
