@@ -120,12 +120,12 @@ public class CloudClientResource {
      * @return a response containing a list of cloud resource classes if available
      */
     @Query
-    public @NotNull PlacementArrayResponse<String> cloudResourceClasses(@AdaptToScalar(Scalar.Int.class) Long cloudId) throws DataFetchingException {
+    public @NotNull CloudResourceClassesResponse cloudResourceClasses(@AdaptToScalar(Scalar.Int.class) Long cloudId) throws DataFetchingException {
         try {
             CloudClient cloudClient = this.getCloudClient(cloudId);
-            return PlacementArrayResponse.Response(cloudClient.resourceClasses());
+            return CloudResourceClassesResponse.Response(cloudClient.resourceClasses());
         } catch (CloudUnavailableException e) {
-            return PlacementArrayResponse.Unavailable();
+            return CloudResourceClassesResponse.Unavailable();
         } catch (DataFetchingException e) {
             throw e;
         } catch (Exception exception) {

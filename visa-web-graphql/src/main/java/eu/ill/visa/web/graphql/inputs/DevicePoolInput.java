@@ -17,6 +17,7 @@ public class DevicePoolInput {
     private String description;
     private @NotNull DeviceType deviceType;
     private @NotNull String computeIdentifier;
+    private String resourceClass;
     private Integer totalUnits;
     @Min(1)
     private @AdaptToScalar(Scalar.Int.class) Long cloudId;
@@ -51,6 +52,14 @@ public class DevicePoolInput {
 
     public void setComputeIdentifier(String computeIdentifier) {
         this.computeIdentifier = computeIdentifier;
+    }
+
+    public String getResourceClass() {
+        return resourceClass;
+    }
+
+    public void setResourceClass(String resourceClass) {
+        this.resourceClass = resourceClass;
     }
 
     public Integer getTotalUnits() {

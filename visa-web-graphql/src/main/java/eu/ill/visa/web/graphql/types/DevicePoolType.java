@@ -15,6 +15,7 @@ public class DevicePoolType {
     private final @NotNull Long id;
     private final @NotNull String name;
     private final String description;
+    private final String resourceClass;
     private final @NotNull DeviceType deviceType;
     private final @NotNull String computeIdentifier;
     private final Integer totalUnits;
@@ -24,6 +25,7 @@ public class DevicePoolType {
         this.id = devicePool.getId();
         this.name = devicePool.getName();
         this.description = devicePool.getDescription();
+        this.resourceClass = devicePool.getResourceClass();
         this.deviceType = devicePool.getDeviceType();
         this.computeIdentifier = devicePool.getComputeIdentifier();
         this.totalUnits = devicePool.getTotalUnits();
@@ -40,6 +42,10 @@ public class DevicePoolType {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getResourceClass() {
+        return resourceClass;
     }
 
     public DeviceType getDeviceType() {

@@ -6,6 +6,7 @@ import eu.ill.visa.business.services.DevicePoolService;
 import eu.ill.visa.business.services.FlavourService;
 import eu.ill.visa.cloud.domain.CloudDevice;
 import eu.ill.visa.cloud.exceptions.CloudException;
+import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.DevicePool;
@@ -27,6 +28,7 @@ import org.eclipse.microprofile.graphql.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static eu.ill.visa.business.tools.CloudDeviceTypeConverter.toCloudDeviceType;
@@ -157,17 +159,20 @@ public class DevicePoolResource {
         devicePool.setDescription(input.getDescription());
         devicePool.setDeviceType(input.getDeviceType());
         devicePool.setComputeIdentifier(input.getComputeIdentifier());
+        devicePool.setResourceClass(input.getResourceClass());
         devicePool.setTotalUnits(input.getTotalUnits());
         devicePool.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
     }
 
     private void validateDevicePoolInput(DevicePoolInput devicePoolInput) throws InvalidInputException {
         try {
+            // Verify cloud client
             CloudClient cloudClient = this.cloudClientService.getCloudClient(devicePoolInput.getCloudId());
             if (cloudClient == null) {
                 throw new InvalidInputException("Invalid cloud Id");
             }
 
+            // Verify cloud device
             List<CloudDevice> cloudDevices = cloudClient.devices();
             CloudDevice cloudDevice = cloudDevices.stream()
                 .filter(device -> device.getIdentifier().equals(devicePoolInput.getComputeIdentifier()))
@@ -176,6 +181,22 @@ public class DevicePoolResource {
 
             if (cloudDevice == null) {
                 throw new InvalidInputException("Invalid Cloud Device details");
+            }
+
+            // Verify resource class
+            if (devicePoolInput.getResourceClass() != null && !devicePoolInput.getResourceClass().isEmpty()) {
+                List<String> resourceClasses = new ArrayList<>();
+                try {
+                    resourceClasses = cloudClient.resourceClasses();
+                } catch (CloudUnavailableException ignored) {
+                }
+
+                if (!resourceClasses.contains(devicePoolInput.getResourceClass())) {
+                    throw new InvalidInputException("Resource class not found");
+                }
+
+            } else {
+                devicePoolInput.setResourceClass(null);
             }
 
         } catch (CloudException exception) {

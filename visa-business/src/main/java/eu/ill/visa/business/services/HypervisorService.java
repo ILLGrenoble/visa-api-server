@@ -6,6 +6,7 @@ import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Hypervisor;
+import eu.ill.visa.core.entity.HypervisorResource;
 import eu.ill.visa.persistence.repositories.HypervisorRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Transactional
 @Singleton
@@ -36,6 +38,19 @@ public class HypervisorService {
 
     public List<Hypervisor> getAll() {
         return this.repository.getAll();
+    }
+
+    public List<Resource> getTotalResources() {
+        return this.getAll().stream()
+            .flatMap(hypervisor -> hypervisor.getResources().stream())
+            .collect(Collectors.toMap(
+                HypervisorResource::getResourceClass,
+                r -> new Resource(r.getResourceClass(), r.getTotal(), r.getUsage()),
+                (r1, r2) -> new Resource(r1.getResourceClass(), r1.getTotal() + r2.getTotal(), r1.getUsage() + r2.getUsage())
+            ))
+            .values()
+            .stream()
+            .toList();
     }
 
     public void save(@NotNull Hypervisor hypervisor) {
@@ -124,6 +139,42 @@ public class HypervisorService {
                 // Ignore
             }
         });
+    }
+
+    public final static class Resource {
+        private String resourceClass;
+        private Long total;
+        private Long usage;
+
+        public Resource(String resourceClass, Long total, Long usage) {
+            this.resourceClass = resourceClass;
+            this.total = total;
+            this.usage = usage;
+        }
+
+        public String getResourceClass() {
+            return resourceClass;
+        }
+
+        public void setResourceClass(String resourceClass) {
+            this.resourceClass = resourceClass;
+        }
+
+        public Long getTotal() {
+            return total;
+        }
+
+        public void setTotal(Long total) {
+            this.total = total;
+        }
+
+        public Long getUsage() {
+            return usage;
+        }
+
+        public void setUsage(Long usage) {
+            this.usage = usage;
+        }
     }
 
 }

@@ -17,10 +17,13 @@ import java.util.List;
 public class DevicePoolService {
 
     private final DevicePoolRepository repository;
+    private final HypervisorService hypervisorService;
 
     @Inject
-    public DevicePoolService(DevicePoolRepository repository) {
+    public DevicePoolService(final DevicePoolRepository repository,
+                             final HypervisorService hypervisorService) {
         this.repository = repository;
+        this.hypervisorService = hypervisorService;
     }
 
     public List<DevicePool> getAll() {
@@ -36,7 +39,22 @@ public class DevicePoolService {
     }
 
     public List<DevicePoolUsage> getDevicePoolUsage() {
-        return this.repository.getDevicePoolUsage();
+        List<DevicePoolUsage> devicePoolUsages = this.repository.getDevicePoolUsage();
+        List<HypervisorService.Resource> totalResources = this.hypervisorService.getTotalResources();
+        return devicePoolUsages.stream()
+            .map(devicePoolUsage ->  {
+                if (devicePoolUsage.getTotalUnits() == -1 && devicePoolUsage.getResourceClass() != null) {
+                    HypervisorService.Resource resource = totalResources.stream()
+                        .filter(aResource -> aResource.getResourceClass().equals(devicePoolUsage.getResourceClass()))
+                        .findFirst()
+                        .orElse(null);
+                    if (resource != null) {
+                        return new DevicePoolUsage(devicePoolUsage.getDevicePoolId(), devicePoolUsage.getCloudId(), devicePoolUsage.getDevicePoolName(), devicePoolUsage.getResourceClass(), resource.getTotal(), resource.getUsage());
+                    }
+                }
+                return devicePoolUsage;
+            })
+            .toList();
     }
 
     public void save(@NotNull DevicePool devicePool) {

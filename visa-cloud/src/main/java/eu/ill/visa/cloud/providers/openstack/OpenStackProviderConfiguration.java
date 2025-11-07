@@ -31,7 +31,14 @@ public class OpenStackProviderConfiguration {
 
     private String getValidParameterValue(final Map<String, String> parameters, final String parameterName) {
         if (parameters.containsKey(parameterName)) {
-            return parameters.get(parameterName).equals("null") ? null : parameters.get(parameterName);
+            final String parameterValue = parameters.get(parameterName);
+            if (parameterValue.equals("null")) {
+                return null;
+            } else if (parameterValue.isEmpty()) {
+                return null;
+            } else {
+                return parameterValue;
+            }
         }
         return null;
     }

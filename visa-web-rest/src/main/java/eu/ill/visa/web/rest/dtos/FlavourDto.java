@@ -37,7 +37,12 @@ public class FlavourDto {
         this.cpu = flavour.getCpu();
         this.devices = flavour.getDevices().stream().map(FlavourDeviceDto::new).toList();
         this.isAvailable = flavour.getDevices().stream().map(FlavourDevice::getDevicePool).allMatch(devicePool -> {
-            boolean deviceIsAvailable = devicePoolUsage.stream().filter(usage -> usage.getDevicePoolId().equals(devicePool.getId())).map(usage -> usage.getUsedUnits() < devicePool.getTotalUnits()).findAny().orElse(true);
+            boolean deviceIsAvailable = devicePoolUsage.stream()
+                .filter(usage -> usage.getDevicePoolId().equals(devicePool.getId()))
+                .filter(usage -> usage.getTotalUnits() != null && usage.getTotalUnits() >= 0) // If total not available then don't control access
+                .map(usage -> usage.getUsedUnits() < usage.getTotalUnits())
+                .findAny()
+                .orElse(true);
             if (!deviceIsAvailable) {
                 logger.debug("device pool {} ({}) is not available", devicePool.getId(), devicePool.getName());
             }

@@ -102,6 +102,11 @@ public class Hypervisor {
         this.resources = resources;
     }
 
+    @Transient
+    public Long getCloudClientId() {
+        return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
+    }
+
     public static Builder Builder() {
         return new Builder();
     }

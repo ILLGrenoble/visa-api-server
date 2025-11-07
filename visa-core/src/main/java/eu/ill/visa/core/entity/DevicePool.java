@@ -34,7 +34,7 @@ import java.util.Date;
             AND cpc.deletedAt IS NULL
     """),
     @NamedQuery(name = "devicePool.getDevicePoolUsage", query = """
-            SELECT new eu.ill.visa.core.entity.partial.DevicePoolUsage(dp.id, dp.cloudProviderConfiguration.id, dp.name, dp.totalUnits, COALESCE(SUM(CASE WHEN i IS NOT NULL THEN a.unitCount ELSE 0 END), 0))
+            SELECT new eu.ill.visa.core.entity.partial.DevicePoolUsage(dp.id, dp.cloudProviderConfiguration.id, dp.name, dp.resourceClass, CASE WHEN dp.totalUnits IS NULL THEN -1 ELSE dp.totalUnits END, COALESCE(SUM(CASE WHEN i IS NOT NULL THEN a.unitCount ELSE 0 END), 0))
             FROM DevicePool dp
             LEFT OUTER JOIN InstanceDeviceAllocation a on a.devicePool = dp
             LEFT OUTER JOIN Instance i on a.instance = i AND i.deletedAt IS NULL
@@ -59,6 +59,9 @@ public class DevicePool extends Timestampable {
 
     @Column(name = "description", length = 1000, nullable = false)
     private String description;
+
+    @Column(name = "resource_class", length = 250, nullable = true)
+    private String resourceClass;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "device_type", length = 255, nullable = true)
@@ -105,6 +108,14 @@ public class DevicePool extends Timestampable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getResourceClass() {
+        return resourceClass;
+    }
+
+    public void setResourceClass(String resourceClass) {
+        this.resourceClass = resourceClass;
     }
 
     public DeviceType getDeviceType() {
