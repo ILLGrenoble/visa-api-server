@@ -17,17 +17,27 @@ import java.util.Map;
         AND COALESCE(cpc.visible, true) = true
         ORDER BY h.id
     """),
+    @NamedQuery(name = "hypervisor.getAllAvailable", query = """
+        SELECT h
+        FROM Hypervisor h
+        LEFT JOIN h.cloudProviderConfiguration cpc
+        WHERE cpc.deletedAt IS NULL
+        AND COALESCE(cpc.visible, true) = true
+        AND h.state = 'up'
+        AND h.status = 'enabled'
+        ORDER BY h.id
+    """),
 })
 @Table(name = "hypervisor")
-public class Hypervisor {
+public class Hypervisor extends Timestampable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "cloud_id", length = 250, nullable = false)
-    private String cloudId;
+    @Column(name = "compute_id", length = 250, nullable = false)
+    private String computeId;
 
     @Column(name = "hostname", length = 250, nullable = false)
     private String hostname;
@@ -54,12 +64,12 @@ public class Hypervisor {
         this.id = id;
     }
 
-    public String getCloudId() {
-        return cloudId;
+    public String getComputeId() {
+        return computeId;
     }
 
-    public void setCloudId(String cloudId) {
-        this.cloudId = cloudId;
+    public void setComputeId(String computeId) {
+        this.computeId = computeId;
     }
 
     public String getHostname() {
@@ -103,7 +113,7 @@ public class Hypervisor {
     }
 
     @Transient
-    public Long getCloudClientId() {
+    public Long getCloudId() {
         return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
     }
 
@@ -135,8 +145,16 @@ public class Hypervisor {
             .ifPresent(hypervisorResource -> hypervisorResource.setUsage(value)));
     }
 
+    public long getAvailableResource(String resourceClass) {
+        return this.resources.stream()
+            .filter(resource -> resource.getResourceClass().equals(resourceClass))
+            .map(HypervisorResource::getAvailable)
+            .findFirst()
+            .orElse(0L);
+    }
+
     public static final class Builder {
-        private String cloudId;
+        private String computeId;
         private String hostname;
         private String state;
         private String status;
@@ -146,8 +164,8 @@ public class Hypervisor {
         public Builder() {
         }
 
-        public Builder cloudId(String cloudId) {
-            this.cloudId = cloudId;
+        public Builder computeId(String computeId) {
+            this.computeId = computeId;
             return this;
         }
 
@@ -178,7 +196,7 @@ public class Hypervisor {
 
         public Hypervisor build() {
             Hypervisor hypervisor = new Hypervisor();
-            hypervisor.setCloudId(cloudId);
+            hypervisor.setComputeId(computeId);
             hypervisor.setHostname(hostname);
             hypervisor.setState(state);
             hypervisor.setStatus(status);

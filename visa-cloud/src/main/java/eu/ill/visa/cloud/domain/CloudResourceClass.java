@@ -3,7 +3,7 @@ package eu.ill.visa.cloud.domain;
 
 public class CloudResourceClass {
 
-    public final static String VCPU_RESOURCE_CLASS = "VPU";
+    public final static String VCPU_RESOURCE_CLASS = "VCPU";
     public final static String MEMORY_MB_RESOURCE_CLASS = "MEMORY_MB";
     public final static String DISK_GM_RESOURCE_CLASS = "DISK_GB";
 

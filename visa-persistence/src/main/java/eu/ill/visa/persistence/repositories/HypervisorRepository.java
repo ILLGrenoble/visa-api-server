@@ -21,6 +21,11 @@ public class HypervisorRepository extends AbstractRepository<Hypervisor> {
         return query.getResultList();
     }
 
+    public List<Hypervisor> getAllAvailable() {
+        final TypedQuery<Hypervisor> query = getEntityManager().createNamedQuery("hypervisor.getAllAvailable", Hypervisor.class);
+        return query.getResultList();
+    }
+
     public void save(final Hypervisor hypervisor) {
         if (hypervisor.getId() == null) {
             persist(hypervisor);

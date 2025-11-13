@@ -20,17 +20,10 @@ public class HypervisorResourceUpdateJob {
         this.hypervisorService = hypervisorService;
     }
 
-    // Update inventory every 5 minutes
-    @Scheduled(cron="0 0/5 * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
-    public synchronized void updateInventory() {
-        logger.info("Running hypervisor inventory update job");
-        this.hypervisorService.updateHypervisorInventories();
-    }
-
-    // Update usage every minute
+    // Update inventory and usage every minute
     @Scheduled(cron="30 0/1 * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public synchronized void updateUsage() {
-        logger.info("Running hypervisor usage update job");
+        this.hypervisorService.updateHypervisorInventories();
         this.hypervisorService.updateHypervisorUsages();
     }
 }

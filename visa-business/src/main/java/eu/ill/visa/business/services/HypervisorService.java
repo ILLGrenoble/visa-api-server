@@ -40,6 +40,10 @@ public class HypervisorService {
         return this.repository.getAll();
     }
 
+    public List<Hypervisor> getAllAvailable() {
+        return this.repository.getAllAvailable();
+    }
+
     public List<Resource> getTotalResources() {
         return this.getAll().stream()
             .flatMap(hypervisor -> hypervisor.getResources().stream())
@@ -72,8 +76,13 @@ public class HypervisorService {
 
                 // Find removed hypervisors
                 currentHypervisors.stream()
+                    .filter(hypervisor -> {
+                        long hypervisorCloudId = hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId();
+                        long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
+                        return  hypervisorCloudId == cloudClientId;
+                    })
                     .filter(hypervisor -> hypervisorInventories.stream()
-                        .filter(hypervisorInventory -> hypervisorInventory.getHypervisor().getId().equals(hypervisor.getCloudId()))
+                        .filter(hypervisorInventory -> hypervisorInventory.getHypervisor().getId().equals(hypervisor.getComputeId()))
                         .findFirst()
                         .isEmpty())
                     .forEach(this::delete);
@@ -81,7 +90,7 @@ public class HypervisorService {
                 // Update or create
                 hypervisorInventories.forEach(hypervisorInventory -> {
                     currentHypervisors.stream()
-                        .filter(hypervisor -> hypervisor.getCloudId().equals(hypervisorInventory.getHypervisor().getId()))
+                        .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorInventory.getHypervisor().getId()))
                         .findFirst()
                         .ifPresentOrElse(hypervisor -> {
                             hypervisor.setHostname(hypervisorInventory.getHypervisor().getHostname());
@@ -91,7 +100,7 @@ public class HypervisorService {
                             this.save(hypervisor);
                         }, () -> {
                             Hypervisor newHypervisor = Hypervisor.Builder()
-                                .cloudId(hypervisorInventory.getHypervisor().getId())
+                                .computeId(hypervisorInventory.getHypervisor().getId())
                                 .hostname(hypervisorInventory.getHypervisor().getHostname())
                                 .status(hypervisorInventory.getHypervisor().getStatus())
                                 .state(hypervisorInventory.getHypervisor().getState())
@@ -124,7 +133,7 @@ public class HypervisorService {
                 // Update or create
                 hypervisorUsages.forEach(hypervisorUsage -> {
                     hypervisors.stream()
-                        .filter(hypervisor -> hypervisor.getCloudId().equals(hypervisorUsage.getHypervisor().getId()))
+                        .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorUsage.getHypervisor().getId()))
                         .findFirst()
                         .ifPresent(hypervisor -> {
                             hypervisor.updateResourceUsage(hypervisorUsage.getUsage());

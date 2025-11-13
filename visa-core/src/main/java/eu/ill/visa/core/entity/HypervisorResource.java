@@ -31,6 +31,12 @@ public class HypervisorResource {
         this.total = total;
     }
 
+    public HypervisorResource(String resourceClass, Long total, Long usage) {
+        this.resourceClass = resourceClass;
+        this.total = total;
+        this.usage = usage;
+    }
+
     public Long getId() {
         return id;
     }
@@ -61,5 +67,14 @@ public class HypervisorResource {
 
     public void setUsage(Long usage) {
         this.usage = usage;
+    }
+
+    @Transient
+    public Long getAvailable() {
+        return total -  usage;
+    }
+
+    public HypervisorResource onDeviceReleased(Integer unitCount) {
+        return new HypervisorResource(this.resourceClass, this.total, this.usage - unitCount);
     }
 }

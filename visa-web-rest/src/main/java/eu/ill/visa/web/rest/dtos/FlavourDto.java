@@ -1,8 +1,7 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.entity.Flavour;
-import eu.ill.visa.core.entity.FlavourDevice;
-import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,24 +29,13 @@ public class FlavourDto {
         this.lifetimeMinutes = null;
     }
 
-    public FlavourDto(final Flavour flavour, final List<DevicePoolUsage> devicePoolUsage, final Duration lifetimeDuration) {
+    public FlavourDto(final Flavour flavour, final FlavourAvailability flavourAvailability, final Duration lifetimeDuration) {
         this.id = flavour.getId();
         this.name = flavour.getName();
         this.memory = flavour.getMemory();
         this.cpu = flavour.getCpu();
         this.devices = flavour.getDevices().stream().map(FlavourDeviceDto::new).toList();
-        this.isAvailable = flavour.getDevices().stream().map(FlavourDevice::getDevicePool).allMatch(devicePool -> {
-            boolean deviceIsAvailable = devicePoolUsage.stream()
-                .filter(usage -> usage.getDevicePoolId().equals(devicePool.getId()))
-                .filter(usage -> usage.getTotalUnits() != null && usage.getTotalUnits() >= 0) // If total not available then don't control access
-                .map(usage -> usage.getUsedUnits() < usage.getTotalUnits())
-                .findAny()
-                .orElse(true);
-            if (!deviceIsAvailable) {
-                logger.debug("device pool {} ({}) is not available", devicePool.getId(), devicePool.getName());
-            }
-            return deviceIsAvailable;
-        });
+        this.isAvailable = flavourAvailability == null || !flavourAvailability.isAvailable().equals(FlavourAvailability.AvailabilityState.NO);
         this.lifetimeMinutes = lifetimeDuration.toMinutes();
     }
 

@@ -13,20 +13,20 @@ public class HypervisorType {
 
     @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long id;
-    private final @NotNull String cloudId;
+    private final @NotNull String computeId;
     private final @NotNull String hostname;
     private final String state;
     private final String status;
-    private final @NotNull Long cloudClientId;
+    private final Long cloudId;
     private final @NotNull List<HypervisorResourceType> resources;
 
     public HypervisorType(final Hypervisor hypervisor) {
         this.id = hypervisor.getId();
-        this.cloudId = hypervisor.getCloudId();
+        this.computeId = hypervisor.getComputeId();
         this.hostname = hypervisor.getHostname();
         this.state = hypervisor.getState();
         this.status = hypervisor.getStatus();
-        this.cloudClientId = hypervisor.getCloudClientId();
+        this.cloudId = hypervisor.getCloudId();
         this.resources = hypervisor.getResources().stream().map(HypervisorResourceType::new).toList();
     }
 
@@ -34,8 +34,8 @@ public class HypervisorType {
         return id;
     }
 
-    public String getCloudId() {
-        return cloudId;
+    public String getComputeId() {
+        return computeId;
     }
 
     public String getHostname() {
@@ -50,8 +50,8 @@ public class HypervisorType {
         return status;
     }
 
-    public Long getCloudClientId() {
-        return cloudClientId;
+    public Long getCloudId() {
+        return cloudId;
     }
 
     public List<HypervisorResourceType> getResources() {

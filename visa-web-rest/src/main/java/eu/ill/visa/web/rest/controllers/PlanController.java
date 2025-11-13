@@ -1,8 +1,8 @@
 package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.business.services.*;
+import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.entity.*;
-import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import eu.ill.visa.web.rest.dtos.PlanDto;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.Authenticated;
@@ -33,19 +33,19 @@ public class PlanController extends AbstractController {
     private final PlanService planService;
     private final ImageService imageService;
     private final InstanceService instanceService;
-    private final DevicePoolService devicePoolService;
+    private final FlavourAvailabilityService flavourAvailabilityService;
     final ExperimentService experimentService;
 
     @Inject
     PlanController(final PlanService planService,
                    final ImageService imageService,
                    final InstanceService instanceService,
-                   final DevicePoolService devicePoolService,
+                   final FlavourAvailabilityService flavourAvailabilityService,
                    final ExperimentService experimentService) {
         this.planService = planService;
         this.imageService = imageService;
         this.instanceService = instanceService;
-        this.devicePoolService = devicePoolService;
+        this.flavourAvailabilityService = flavourAvailabilityService;
         this.experimentService = experimentService;
     }
 
@@ -78,7 +78,10 @@ public class PlanController extends AbstractController {
             }
         }
 
-        List<DevicePoolUsage> devicePoolUsage = this.devicePoolService.getDevicePoolUsage();
+        final List<FlavourAvailability> flavourAvailabilities = this.flavourAvailabilityService.getAllAvailabilities();
+        flavourAvailabilities.forEach(flavourAvailability -> {
+            logger.info("Flavour {} ({} cpus, {} MB RAM): available = {}, units = {}, confidence = {}", flavourAvailability.flavour().getName(), flavourAvailability.flavour().getCpu(), flavourAvailability.flavour().getMemory(), flavourAvailability.isAvailable(),  flavourAvailability.availableUnits(), flavourAvailability.confidence());
+        });
 
         List<PlanDto> planDtos = plans.stream()
             .sorted((p1, p2) -> {
@@ -90,7 +93,13 @@ public class PlanController extends AbstractController {
                     return 1;
                 } else return f1.getMemory().compareTo(f2.getMemory());
             })
-            .map(plan -> this.toDto(plan, devicePoolUsage, this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())))
+            .map(plan -> {
+                final FlavourAvailability flavourAvailability = flavourAvailabilities.stream()
+                    .filter(availability -> availability.flavour().equals(plan.getFlavour()))
+                    .findFirst()
+                    .orElse(null);
+                return this.toDto(plan, flavourAvailability, this.instanceService.getMaxInstanceDuration(user, plan.getFlavour()));
+            })
             .toList();
         return createResponse(planDtos);
     }
@@ -100,13 +109,12 @@ public class PlanController extends AbstractController {
     public MetaResponse<PlanDto> get(@Context final SecurityContext securityContext, @PathParam("plan") final Plan plan) {
         final User user = this.getUserPrincipal(securityContext);
 
-        List<DevicePoolUsage> devicePoolUsage = this.devicePoolService.getDevicePoolUsage();
-        return createResponse(this.toDto(plan, devicePoolUsage,  this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())));
+        return createResponse(this.toDto(plan, this.flavourAvailabilityService.getAvailability(plan.getFlavour()),  this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())));
     }
 
-    private PlanDto toDto(final Plan plan, final List<DevicePoolUsage> devicePoolUsage, final Duration lifetimeDuration) {
+    private PlanDto toDto(final Plan plan, final FlavourAvailability flavourAvailability, final Duration lifetimeDuration) {
         final Image image = plan.getImage();
         image.setDefaultVdiProtocol(imageService.getDefaultVdiProtocolForImage(image));
-        return new PlanDto(plan, devicePoolUsage, lifetimeDuration);
+        return new PlanDto(plan, flavourAvailability, lifetimeDuration);
     }
 }
