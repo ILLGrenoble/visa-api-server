@@ -78,7 +78,7 @@ public class PlanController extends AbstractController {
             }
         }
 
-        final List<FlavourAvailability> flavourAvailabilities = this.flavourAvailabilityService.getAllAvailabilities();
+        final List<FlavourAvailability> flavourAvailabilities = this.flavourAvailabilityService.getAllFirstAvailabilities();
         flavourAvailabilities.forEach(flavourAvailability -> {
             logger.info("Flavour {} ({} cpus, {} MB RAM): available = {}, units = {}, confidence = {}", flavourAvailability.flavour().getName(), flavourAvailability.flavour().getCpu(), flavourAvailability.flavour().getMemory(), flavourAvailability.isAvailable(),  flavourAvailability.availableUnits(), flavourAvailability.confidence());
         });
@@ -109,7 +109,7 @@ public class PlanController extends AbstractController {
     public MetaResponse<PlanDto> get(@Context final SecurityContext securityContext, @PathParam("plan") final Plan plan) {
         final User user = this.getUserPrincipal(securityContext);
 
-        return createResponse(this.toDto(plan, this.flavourAvailabilityService.getAvailability(plan.getFlavour()),  this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())));
+        return createResponse(this.toDto(plan, this.flavourAvailabilityService.getFirstAvailability(plan.getFlavour()),  this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())));
     }
 
     private PlanDto toDto(final Plan plan, final FlavourAvailability flavourAvailability, final Duration lifetimeDuration) {

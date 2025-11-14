@@ -132,7 +132,8 @@ public class CloudResources extends Timestampable {
         return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
     }
 
-    public CloudResources onFlavourReleased(final Flavour flavour) {
+    public CloudResources onInstanceReleased(final Instance instance) {
+        final Flavour flavour = instance.getPlan().getFlavour();
         return Builder()
             .vcpuTotal(vcpuTotal)
             .vcpuUsage(vcpuUsage - flavour.getCpu().longValue())

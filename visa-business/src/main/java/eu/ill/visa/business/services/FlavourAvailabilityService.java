@@ -5,9 +5,11 @@ import eu.ill.visa.cloud.domain.CloudResourceClass;
 import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.domain.HypervisorInventory;
 import eu.ill.visa.core.domain.SystemResources;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.CloudResources;
 import eu.ill.visa.core.entity.Flavour;
 import eu.ill.visa.core.entity.Hypervisor;
+import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -28,42 +30,143 @@ public class FlavourAvailabilityService {
     private final HypervisorService hypervisorService;
     private final CloudResourcesService cloudResourcesService;
     private final DevicePoolService devicePoolService;
+    private final InstanceService instanceService;
 
     @Inject
     public FlavourAvailabilityService(final FlavourService flavourService,
                                       final HypervisorService hypervisorService,
                                       final CloudResourcesService cloudResourcesService,
-                                      final DevicePoolService devicePoolService) {
+                                      final DevicePoolService devicePoolService,
+                                      final InstanceService instanceService) {
         this.flavourService = flavourService;
         this.hypervisorService = hypervisorService;
         this.cloudResourcesService = cloudResourcesService;
         this.devicePoolService = devicePoolService;
+        this.instanceService = instanceService;
     }
 
-    public List<FlavourAvailability> getAllAvailabilities() {
+    public List<FlavourAvailability> getAllCurrentAvailabilities() {
         final List<Flavour> flavours = this.flavourService.getAllForAdmin();
         final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
 
         return flavours.stream()
-            .map(flavour -> this.getAvailability(flavour, allSystemResource))
+            .map(flavour -> {
+                Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+                return this.getAvailability(flavour, allSystemResource.get(cloudId));
+            })
             .toList();
     }
 
-    public FlavourAvailability getAvailability(final Flavour flavour) {
+    public FlavourAvailability getCurrentAvailability(final Flavour flavour) {
         final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
 
-        return this.getAvailability(flavour, allSystemResource);
+        Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+        return this.getAvailability(flavour, allSystemResource.get(cloudId));
     }
 
-    public FlavourAvailability getAvailability(final Flavour flavour, final  Map<Long, SystemResources> allSystemResource) {
-        final Long cloudId = flavour.getCloudId();
-        final SystemResources systemResources = allSystemResource.get(cloudId);
+    public List<FlavourAvailability> getAllFirstAvailabilities() {
+        final List<Flavour> flavours = this.flavourService.getAllForAdmin();
+        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+
+        return flavours.stream()
+            .map(flavour -> {
+                Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+                return this.getFirstAvailability(flavour, allSystemResource.get(cloudId));
+            })
+            .toList();
+    }
+
+    public FlavourAvailability getFirstAvailability(final Flavour flavour) {
+        Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+        SystemResources systemResources = this.getAllSystemResources().get(cloudId);
+        return this.getFirstAvailability(flavour, systemResources);
+    }
+
+    public List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour) {
+        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+
+        // TODO Get the right order
+        final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
+
+        Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+        return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudInstances.get(cloudId));
+    }
+
+    public Map<Flavour, List<FlavourAvailability>> getAllFutureAvailabilities() {
+        final List<Flavour> flavours = this.flavourService.getAllForAdmin();
+        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+        // TODO Get the right order
+        final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
+
+        return flavours.stream()
+            .collect(Collectors.toMap(
+                flavour -> flavour,
+                flavour -> {
+                    Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+                    return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudInstances.get(cloudId));
+                }
+            ));
+    }
+
+
+    private FlavourAvailability getAvailability(final Flavour flavour, final SystemResources systemResources) {
         if (systemResources == null) {
             // We don't know anything so return unknown response
             return new FlavourAvailability(flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
 
         } else {
             return systemResources.getAvailability(flavour);
+        }
+    }
+
+    private FlavourAvailability getFirstAvailability(final Flavour flavour, final SystemResources systemResources) {
+        // Check for immediate availability
+        FlavourAvailability availability = this.getAvailability(flavour, systemResources);
+        if (!availability.isAvailable().equals(FlavourAvailability.AvailabilityState.NO)) {
+            return availability;
+        }
+
+        // TODO Get the right order
+        // TODO manage hypervisor Id
+        Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+        SystemResources futureSystemResources = systemResources;
+
+        final List<Instance> cloudInstances = this.getCloudInstances().get(cloudId);
+        while (cloudInstances != null && !cloudInstances.isEmpty() && !availability.isAvailable().equals(FlavourAvailability.AvailabilityState.NO)) {
+            final Instance instance = cloudInstances.removeFirst();
+            futureSystemResources = futureSystemResources.onInstanceDeleted(instance, -1L);
+            availability = this.getAvailability(flavour, futureSystemResources);
+        }
+
+        return availability;
+
+    }
+
+    private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<Instance> instances) {
+        if (systemResources == null) {
+            // We don't know anything so return unknown response
+            return List.of(new FlavourAvailability(flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN));
+
+        } else {
+            List<FlavourAvailability> futures = new ArrayList<>();
+
+            // Initialise array with the current availability
+            futures.add(systemResources.getAvailability(flavour));
+
+            if (instances != null) {
+                for (Instance instance : instances) {
+                    // TODO manage hypervisor Id
+                    systemResources = systemResources.onInstanceDeleted(instance, -1L);
+                    futures.add(systemResources.getAvailability(flavour));
+                }
+            }
+            return futures;
         }
     }
 
@@ -94,7 +197,6 @@ public class FlavourAvailabilityService {
             ));
     }
 
-
     private Map<Long, CloudResources> getCloudResources() {
         return this.cloudResourcesService.getAll().stream()
             .collect(Collectors.toMap(
@@ -107,6 +209,16 @@ public class FlavourAvailabilityService {
         final List<Hypervisor> hypervisors = this.hypervisorService.getAllAvailable();
         return hypervisors.stream()
             .collect(Collectors.groupingBy(hypervisor -> hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId()));
+    }
+
+    private Map<Long, List<Instance>> getCloudInstances() {
+        final List<Instance> instances = this.instanceService.getAll(new InstanceFilter());
+        return instances.stream()
+            .collect(Collectors
+                .groupingBy(instance -> {
+                    final Flavour flavour = instance.getPlan().getFlavour();
+                    return flavour.getCloudId() == null ? -1 : flavour.getCloudId();
+                }));
     }
 
 }

@@ -1,27 +1,27 @@
 package eu.ill.visa.core.domain;
 
 
-import eu.ill.visa.core.entity.Flavour;
-import eu.ill.visa.core.entity.FlavourDevice;
-import eu.ill.visa.core.entity.HypervisorResource;
+import eu.ill.visa.core.entity.*;
 
 import java.util.List;
 
 public record HypervisorInventory(Long hypervisorId, String hostname, long cpusAvailable, long memoryMBAvailable, List<HypervisorResource> resources) {
 
-    public HypervisorInventory onFlavourReleased(final Flavour flavour) {
+    public HypervisorInventory onInstanceReleased(final Instance instance) {
+        final Flavour flavour = instance.getPlan().getFlavour();
+        final List<InstanceDeviceAllocation> deviceAllocations = instance.getDeviceAllocations();
+
         long cpusAvailable = this.cpusAvailable + flavour.getCpu().longValue();
         long memoryMBAvailable = this.memoryMBAvailable + flavour.getMemory().longValue();
-        List<FlavourDevice> flavourDevices = flavour.getDevices();
         List<HypervisorResource> resources = this.resources.stream()
             .map(resource -> {
-                final FlavourDevice flavourDevice = flavourDevices.stream()
-                    .filter(fd -> fd.getDevicePool().getResourceClass() != null)
-                    .filter(fd -> fd.getDevicePool().getResourceClass().equals(resource.getResourceClass()))
+                final InstanceDeviceAllocation instanceDeviceAllocation = deviceAllocations.stream()
+                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass() != null)
+                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass().equals(resource.getResourceClass()))
                     .findFirst()
                     .orElse(null);
-                if (flavourDevice != null) {
-                    return resource.onDeviceReleased(flavourDevice.getUnitCount());
+                if (instanceDeviceAllocation != null) {
+                    return resource.onDeviceReleased(instanceDeviceAllocation.getUnitCount());
                 } else {
                     return resource;
                 }

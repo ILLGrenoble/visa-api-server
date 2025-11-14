@@ -24,25 +24,24 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
     }
 
     public SystemResources onInstanceDeleted(final Instance instance, final Long hostHypervisorId) {
-        final Flavour flavour = instance.getPlan().getFlavour();
         Date date = instance.getTerminationDate();
 
-        CloudResources cloudResources = this.cloudResources.onFlavourReleased(flavour);
+        CloudResources cloudResources = this.cloudResources.onInstanceReleased(instance);
 
         List<DevicePoolUsage> devicePoolUsages = this.devicePoolUsages;
-        for (FlavourDevice flavourDevice : flavour.getDevices()) {
-            final DevicePool devicePool = flavourDevice.getDevicePool();
+        for (InstanceDeviceAllocation instanceDeviceAllocation : instance.getDeviceAllocations()) {
+            final DevicePool devicePool = instanceDeviceAllocation.getDevicePool();
             DevicePoolUsage devicePoolUsage = devicePoolUsages.stream()
                 .filter(usage -> usage.getDevicePoolId().equals(devicePool.getId()))
                 .findFirst()
                 .orElse(new DevicePoolUsage(devicePool.getId(), this.cloudId, devicePool.getName(), devicePool.getResourceClass(), -1, 0))
-                .onUnitsReleased(flavourDevice.getUnitCount());
+                .onUnitsReleased(instanceDeviceAllocation.getUnitCount());
         }
 
         List<HypervisorInventory> hypervisorInventories = this.hypervisorInventories.stream()
             .map(inventory -> {
                 if (inventory.hypervisorId().equals(hostHypervisorId)) {
-                    return inventory.onFlavourReleased(flavour);
+                    return inventory.onInstanceReleased(instance);
                 } else {
                     return inventory;
                 }
@@ -55,11 +54,11 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
     public FlavourAvailability getAvailability(final Flavour flavour) {
         FlavourResourceRequirement resourceRequirements = this.requirementsForFlavour(flavour);
 
-        if (!resourceRequirements.hasDevices()) {
-            return this.getAvailabilityForSimpleFlavour(resourceRequirements);
+        if (resourceRequirements.hasDevices()) {
+            return this.getAvailabilityForDeviceFlavour(resourceRequirements);
 
         } else {
-            return this.getAvailabilityForDeviceFlavour(resourceRequirements);
+            return this.getAvailabilityForSimpleFlavour(resourceRequirements);
         }
     }
 
