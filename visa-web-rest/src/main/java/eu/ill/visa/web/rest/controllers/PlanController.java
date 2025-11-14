@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +28,8 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 @Consumes(APPLICATION_JSON)
 @Authenticated
 public class PlanController extends AbstractController {
+
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("E MMM dd HH:mm:ss yyyy");
 
     private static final Logger logger = LoggerFactory.getLogger(PlanController.class);
 
@@ -80,7 +83,7 @@ public class PlanController extends AbstractController {
 
         final List<FlavourAvailability> flavourAvailabilities = this.flavourAvailabilityService.getAllFirstAvailabilities();
         flavourAvailabilities.forEach(flavourAvailability -> {
-            logger.info("Flavour {} ({} cpus, {} MB RAM): available = {}, units = {}, confidence = {}", flavourAvailability.flavour().getName(), flavourAvailability.flavour().getCpu(), flavourAvailability.flavour().getMemory(), flavourAvailability.isAvailable(),  flavourAvailability.availableUnits(), flavourAvailability.confidence());
+            logger.info("Flavour {} ({} cpus, {} MB RAM): available = {} ({}), units = {}, confidence = {}", flavourAvailability.flavour().getName(), flavourAvailability.flavour().getCpu(), flavourAvailability.flavour().getMemory(), flavourAvailability.isAvailable(), dateFormat.format(flavourAvailability.date()), flavourAvailability.availableUnits(), flavourAvailability.confidence());
         });
 
         List<PlanDto> planDtos = plans.stream()

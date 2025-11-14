@@ -23,7 +23,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
         this(cloudId, new Date(), cloudResources, devicePoolUsages, hypervisorInventories);
     }
 
-    public SystemResources onInstanceDeleted(final Instance instance, final Long hostHypervisorId) {
+    public SystemResources onInstanceDeleted(final Instance instance) {
         Date date = instance.getTerminationDate();
 
         CloudResources cloudResources = this.cloudResources.onInstanceReleased(instance);
@@ -40,7 +40,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
         List<HypervisorInventory> hypervisorInventories = this.hypervisorInventories.stream()
             .map(inventory -> {
-                if (inventory.hypervisorId().equals(hostHypervisorId)) {
+                if (inventory.hostsServer(instance.getComputeId())) {
                     return inventory.onInstanceReleased(instance);
                 } else {
                     return inventory;
@@ -94,7 +94,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
                 .mapToLong(Long::longValue)
                 .sum();
 
-            availability = new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(totalAvailableUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+            availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(totalAvailableUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
         }
 
         if (cloudResources != null) {
@@ -103,16 +103,16 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
             if (availability != null && availability.availableUnits().isPresent()) {
                 long minUnits = Math.min(availableUnits, availability.availableUnits().get());
-                availability = new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(minUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+                availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(minUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
 
             } else {
-                availability = new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+                availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
             }
         }
 
         if (availability == null) {
             // If we have no hypervisor information nor cloud limit information then we know nothing about the availability
-            availability = new FlavourAvailability(flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+            availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
         }
 
         return availability;
@@ -132,7 +132,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
             if (availability != null && availability.availableUnits().isPresent()) {
                 // Make sure cloud limits are taken into account even when hypervisor data in known
                 long minUnits = Math.min(availableUnits, availability.availableUnits().get());
-                availability = new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(minUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+                availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(minUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
 
             } else {
                 if (availableUnits > 0) {
@@ -142,14 +142,14 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
                 } else {
                     logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Units 0", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);
-                    availability = new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(0L), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+                    availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(0L), FlavourAvailability.AvailabilityConfidence.CERTAIN);
                 }
             }
         }
 
         if (availability == null) {
             // If we have no hypervisor information nor cloud limit information then we know nothing about the availability
-            availability = new FlavourAvailability(flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+            availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
         }
 
         return availability;
@@ -233,7 +233,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
         } else {
             // This is a definite value obtained directly from the hypervisors, taking into account manually managed device limits
-            return new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+            return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
         }
 
     }
@@ -281,18 +281,18 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
         if (deviceAvailability.isEmpty()) {
             // If we have no knowledge of whether all the devices are available
             logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Device Units Unknown", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);
-            return new FlavourAvailability(flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+            return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
 
         } else {
             long devicesAvailable = deviceAvailability.get();
             if (devicesAvailable == 0) {
                 logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Device Units 0", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);
-                return new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(0L), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+                return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(0L), FlavourAvailability.AvailabilityConfidence.CERTAIN);
 
             } else {
                 long availableUnits = Math.min(knownFlavourAvailability, devicesAvailable);
                 logger.debug("Flavour {} (RAM_MB {} vCPUs {}), Devices available {}, available Units {}", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus, devicesAvailable, availableUnits);
-                return new FlavourAvailability(flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+                return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
             }
         }
     }

@@ -8,28 +8,12 @@ import java.util.Optional;
 
 public record FlavourAvailability(Date date, Flavour flavour, Optional<Long> availableUnits, AvailabilityConfidence confidence) {
 
-    public FlavourAvailability(Flavour flavour, Optional<Long> availableUnits, AvailabilityConfidence confidence) {
-        this(new Date(), flavour, availableUnits, confidence);
-    }
-
     public AvailabilityState isAvailable() {
         if (date.after(new Date())) {
             return AvailabilityState.NO;
 
-        } else if (availableUnits.isPresent()) {
-            long units = availableUnits.get();
-            if (units == 0) {
-                return AvailabilityState.NO;
-
-            } else if (confidence.equals(AvailabilityConfidence.CERTAIN)) {
-                return  AvailabilityState.YES;
-
-            } else  {
-                return  AvailabilityState.MAYBE;
-            }
-
         } else {
-            return AvailabilityState.MAYBE;
+            return this.hasUnits();
         }
 
     }
@@ -43,5 +27,23 @@ public record FlavourAvailability(Date date, Flavour flavour, Optional<Long> ava
         YES,
         NO,
         MAYBE,
+    }
+
+    public AvailabilityState hasUnits() {
+        if (availableUnits.isPresent()) {
+            long units = availableUnits.get();
+            if (units == 0) {
+                return AvailabilityState.NO;
+
+            } else if (confidence.equals(AvailabilityConfidence.CERTAIN)) {
+                return AvailabilityState.YES;
+
+            } else  {
+                return AvailabilityState.MAYBE;
+            }
+
+        } else {
+            return AvailabilityState.MAYBE;
+        }
     }
 }
