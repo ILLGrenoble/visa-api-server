@@ -21,7 +21,7 @@ public class CloudResourceUpdateJob {
     }
 
     // Update usage every minute
-    @Scheduled(cron="15 0/1 * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="15 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public synchronized void updateUsage() {
         this.cloudResourcesService.updateCloudResources();
     }

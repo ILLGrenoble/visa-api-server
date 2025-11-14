@@ -21,7 +21,7 @@ public class HypervisorResourceUpdateJob {
     }
 
     // Update inventory and usage every minute
-    @Scheduled(cron="30 0/1 * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="30 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public synchronized void updateUsage() {
         this.hypervisorService.updateHypervisorInventories();
         this.hypervisorService.updateHypervisorUsages();
