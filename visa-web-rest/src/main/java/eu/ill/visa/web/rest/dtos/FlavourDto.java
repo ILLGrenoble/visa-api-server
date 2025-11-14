@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 
 public class FlavourDto {
@@ -17,6 +18,7 @@ public class FlavourDto {
     private final Float cpu;
     private final List<FlavourDeviceDto> devices;
     private final Boolean isAvailable;
+    private final Date availableAt;
     private final Long lifetimeMinutes;
 
     public FlavourDto(final Flavour flavour) {
@@ -26,6 +28,7 @@ public class FlavourDto {
         this.cpu = flavour.getCpu();
         this.devices = flavour.getDevices().stream().map(FlavourDeviceDto::new).toList();
         this.isAvailable = true;
+        this.availableAt = new Date();
         this.lifetimeMinutes = null;
     }
 
@@ -36,6 +39,7 @@ public class FlavourDto {
         this.cpu = flavour.getCpu();
         this.devices = flavour.getDevices().stream().map(FlavourDeviceDto::new).toList();
         this.isAvailable = flavourAvailability == null || !flavourAvailability.isAvailable().equals(FlavourAvailability.AvailabilityState.NO);
+        this.availableAt = flavourAvailability.date();
         this.lifetimeMinutes = lifetimeDuration.toMinutes();
     }
 
@@ -61,6 +65,10 @@ public class FlavourDto {
 
     public Boolean getAvailable() {
         return isAvailable;
+    }
+
+    public Date getAvailableAt() {
+        return availableAt;
     }
 
     public Long getLifetimeMinutes() {
