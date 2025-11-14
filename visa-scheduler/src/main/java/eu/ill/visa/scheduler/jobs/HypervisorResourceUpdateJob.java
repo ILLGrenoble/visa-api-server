@@ -25,5 +25,6 @@ public class HypervisorResourceUpdateJob {
     public synchronized void updateUsage() {
         this.hypervisorService.updateHypervisorInventories();
         this.hypervisorService.updateHypervisorUsages();
+        this.hypervisorService.updateHypervisorAllocations();
     }
 }

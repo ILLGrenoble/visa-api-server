@@ -56,6 +56,10 @@ public class Hypervisor extends Timestampable {
     @JoinColumn(name = "hypervisor_id", foreignKey = @ForeignKey(name = "fk_hypervisor_resource_id"), nullable = false)
     private List<HypervisorResource> resources = new ArrayList<>();
 
+    @OneToMany(orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "hypervisor_id", foreignKey = @ForeignKey(name = "fk_hypervisor_allocation_id"), nullable = false)
+    private List<HypervisorAllocation> allocations = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
@@ -112,6 +116,14 @@ public class Hypervisor extends Timestampable {
         this.resources = resources;
     }
 
+    public List<HypervisorAllocation> getAllocations() {
+        return allocations;
+    }
+
+    public void setAllocations(List<HypervisorAllocation> allocations) {
+        this.allocations = allocations;
+    }
+
     @Transient
     public Long getCloudId() {
         return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
@@ -143,6 +155,26 @@ public class Hypervisor extends Timestampable {
             .filter(resource -> resource.getResourceClass().equals(key))
             .findFirst()
             .ifPresent(hypervisorResource -> hypervisorResource.setUsage(value)));
+    }
+
+    public void updateAllocations(List<HypervisorAllocation> currentAllocations) {
+        // Remove allocations that no longer exist
+        List<HypervisorAllocation> removedAllocations = this.allocations.stream()
+            .filter(allocation -> currentAllocations.stream()
+                .filter(existingAllocation -> existingAllocation.getServerComputeId().equals(allocation.getServerComputeId()))
+                .findFirst()
+                .isEmpty()
+            )
+            .toList();
+        this.allocations.removeAll(removedAllocations);
+
+        // Update (nothing done yet) or add allocations
+        List<HypervisorAllocation> newAllocations = new ArrayList<>();
+        currentAllocations.forEach(allocation -> this.allocations.stream()
+            .filter(existingAllocation -> existingAllocation.getServerComputeId().equals(allocation.getServerComputeId()))
+            .findFirst()
+            .ifPresentOrElse(existingAllocation -> { /* no action yet */ }, () -> newAllocations.add(new HypervisorAllocation(allocation.getServerComputeId()))));
+        this.allocations.addAll(newAllocations);
     }
 
     public long getAvailableResource(String resourceClass) {

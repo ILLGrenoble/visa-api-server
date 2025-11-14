@@ -184,7 +184,7 @@ public interface CloudProvider {
      * Returns a list of custom resource classes
      * @return a list of resource classes
      * @throws CloudException if there was an exception executing the request
-     * @throws CloudUnavailableException if the resource classes functionality is unavailable
+     * @throws CloudUnavailableException if the functionality is unavailable
      */
     List<String> resourceClasses() throws CloudException, CloudUnavailableException;
 
@@ -192,7 +192,7 @@ public interface CloudProvider {
      * Returns a list of cloud hypervisor inventories (available resources)
      * @return a list of cloud hypervisor inventories
      * @throws CloudException if there was an exception executing the request
-     * @throws CloudUnavailableException if the resource classes functionality is unavailable
+     * @throws CloudUnavailableException if the functionality is unavailable
      */
     List<CloudHypervisorInventory> hypervisorInventories() throws CloudException, CloudUnavailableException;
 
@@ -200,8 +200,16 @@ public interface CloudProvider {
      * Returns a list of cloud hypervisor usages (resource usage)
      * @return a list of cloud hypervisor usages
      * @throws CloudException if there was an exception executing the request
-     * @throws CloudUnavailableException if the resource classes functionality is unavailable
+     * @throws CloudUnavailableException if the functionality is unavailable
      */
     List<CloudHypervisorUsage> hypervisorUsages() throws CloudException, CloudUnavailableException;
+
+    /**
+     * Returns a list of cloud hypervisor allocations (server computer Ids)
+     * @return a list of cloud hypervisor allocations
+     * @throws CloudException if there was an exception executing the request
+     * @throws CloudUnavailableException if the functionality is unavailable
+     */
+    List<CloudHypervisorAllocation> hypervisorAllocations() throws CloudException, CloudUnavailableException;
 
 }

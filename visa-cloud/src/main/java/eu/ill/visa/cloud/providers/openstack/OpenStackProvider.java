@@ -288,4 +288,25 @@ public class OpenStackProvider implements CloudProvider {
         return hypervisorUsages;
     }
 
+    @Override
+    public List<CloudHypervisorAllocation> hypervisorAllocations() throws CloudException, CloudUnavailableException {
+        // Update all hypervisors and resource providers
+        this.updateHypervisors();
+
+        List<CloudHypervisorAllocation> hypervisorAllocations = this.cloudHypervisors.stream().map(CloudHypervisorAllocation::new).toList();
+
+        List<CloudResourceProvider> hypervisorResourceProviders = this.resourceProviders.stream()
+            .filter(resourceProvider -> resourceProvider.getParentUuid() == null)
+            .toList();
+        for (CloudResourceProvider resourceProvider : hypervisorResourceProviders) {
+            List<CloudResourceAllocation> allocations = this.placementEndpoint.resourceAllocations(resourceProvider.getUuid());
+            hypervisorAllocations.stream()
+                .filter(hypervisorAllocation -> hypervisorAllocation.getHypervisor().getHostname().equals(resourceProvider.getName()))
+                .findFirst()
+                .ifPresent(hypervisorAllocation -> hypervisorAllocation.setAllocations(allocations));
+        }
+
+        return hypervisorAllocations;
+    }
+
 }

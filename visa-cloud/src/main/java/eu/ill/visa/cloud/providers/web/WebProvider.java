@@ -352,5 +352,22 @@ public class WebProvider implements CloudProvider {
         }
     }
 
+    @Override
+    public List<CloudHypervisorAllocation> hypervisorAllocations() throws CloudException, CloudUnavailableException {
+        try {
+            return this.webProviderClient.hypervisorAllocations(this.configuration.getAuthToken());
+
+        } catch (CloudNotFoundException e) {
+            throw new CloudUnavailableException("Obtaining hypervisor allocations is not available from the Web Provider");
+
+        } catch (CloudRuntimeException e) {
+            logger.warn("Failed to get hypervisor allocations from Web Provider: {}", e.getMessage());
+            return new ArrayList<>();
+
+        } catch (Exception e) {
+            throw new CloudException("Failed to get hypervisor allocations from Web Provider " + e.getMessage());
+        }
+    }
+
 
 }

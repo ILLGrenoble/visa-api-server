@@ -164,6 +164,12 @@ public interface WebProviderClient {
     @Consumes(MediaType.APPLICATION_JSON)
     List<CloudHypervisorUsage> hypervisorUsages(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
 
+    @GET
+    @Path("/api/hypervisor_allocations")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    List<CloudHypervisorAllocation> hypervisorAllocations(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);
+
     @ClientObjectMapper
     static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {
         return defaultObjectMapper.copy()

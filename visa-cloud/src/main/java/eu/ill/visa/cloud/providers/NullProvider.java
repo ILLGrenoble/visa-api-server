@@ -127,4 +127,9 @@ public class NullProvider implements CloudProvider {
     public List<CloudHypervisorUsage> hypervisorUsages() throws CloudUnavailableException {
         throw new CloudUnavailableException();
     }
+
+    @Override
+    public List<CloudHypervisorAllocation> hypervisorAllocations() throws CloudUnavailableException {
+        throw new CloudUnavailableException();
+    }
 }

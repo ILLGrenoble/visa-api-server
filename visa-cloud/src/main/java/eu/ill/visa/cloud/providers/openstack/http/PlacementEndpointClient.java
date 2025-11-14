@@ -9,6 +9,7 @@ import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
 import eu.ill.visa.cloud.providers.openstack.converters.CloudResourceInventoryMixin;
 import eu.ill.visa.cloud.providers.openstack.converters.CloudResourceProviderMixin;
+import eu.ill.visa.cloud.providers.openstack.http.responses.ResourceAllocationsResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ResourceInventoriesResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ResourceProvidersResponse;
 import eu.ill.visa.cloud.providers.openstack.http.responses.ResourceUsagesResponse;
@@ -41,6 +42,12 @@ public interface PlacementEndpointClient {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     ResourceUsagesResponse resourceUsages(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("resource_provider_id") String resourceProviderId);
+
+    @GET
+    @Path("/resource_providers/{resource_provider_id}/allocations")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    ResourceAllocationsResponse resourceAllocations(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("resource_provider_id") String resourceProviderId);
 
     @ClientObjectMapper
     static ObjectMapper objectMapper(ObjectMapper defaultObjectMapper) {

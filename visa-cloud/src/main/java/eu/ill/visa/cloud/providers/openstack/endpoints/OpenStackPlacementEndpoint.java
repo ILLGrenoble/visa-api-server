@@ -1,10 +1,7 @@
 package eu.ill.visa.cloud.providers.openstack.endpoints;
 
 import eu.ill.visa.cloud.CloudConfiguration;
-import eu.ill.visa.cloud.domain.CloudResourceClass;
-import eu.ill.visa.cloud.domain.CloudResourceInventory;
-import eu.ill.visa.cloud.domain.CloudResourceProvider;
-import eu.ill.visa.cloud.domain.CloudResourceUsage;
+import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.CloudAuthenticationException;
 import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -122,6 +119,21 @@ public class OpenStackPlacementEndpoint implements PlacementEndpoint {
         }
     }
 
+    public List<CloudResourceAllocation> resourceAllocations(final String resourceProviderId) throws CloudException {
+        try {
+            return this.placementEndpointClient.resourceAllocations(this.identityProvider.authenticate(), resourceProviderId).resourceAllocations()
+                .entrySet().stream().map(entry -> {
+                    String serverComputeId = entry.getKey();
+                    return new CloudResourceAllocation(serverComputeId);
+                })
+                .toList();
+
+        } catch (CloudClientException e) {
+            logger.error("Failed to get cloud resource allocations from OpenStack: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
     private CloudResourceClass toResourceClass(final String resourceClassName) {
         if (resourceClassName.equals(CloudResourceClass.VCPU_RESOURCE_CLASS)) {
             return CloudResourceClass.VCPUResourceClass();
@@ -136,5 +148,6 @@ public class OpenStackPlacementEndpoint implements PlacementEndpoint {
             return CloudResourceClass.CustomResourceClass(resourceClassName);
         }
     }
+
 
 }
