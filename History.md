@@ -1,5 +1,7 @@
 3.6.0 17/11/2025
 ================
+ * Notify via redis load-balanced servers when cloud client configuration changes
+ * Update hypervisor data immediately when cloud client is updated
  * Flavour availability calculated
    * Determine from Hypervisor usage, Cloud limits and Device Pool Usage currently available flavours
    * Calculate future availability of flavours from current instance lifetimes and using the available sources of cloud usage
