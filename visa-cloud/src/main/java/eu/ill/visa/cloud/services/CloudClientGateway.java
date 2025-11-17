@@ -46,10 +46,6 @@ public class CloudClientGateway {
 
         CloudClient cloudClient = this.secondaryCloudClients.get(id);
 
-        if (cloudClient == null) {
-            logger.error("Failed to get Cloud Client with ID {}", id);
-        }
-
         return cloudClient;
     }
 

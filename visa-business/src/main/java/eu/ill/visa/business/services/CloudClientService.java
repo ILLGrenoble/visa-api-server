@@ -142,18 +142,19 @@ public class CloudClientService {
 
     private void onCloudClientUpdateEvent(final Long cloudClientId, final String serverSpecificUuid) {
         CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudClientId);
+        if (cloudClient != null) {
+            // Get last update in database for cloud client
+            CloudProviderConfiguration configuration = this.cloudProviderService.getById(cloudClient.getId());
+            Date latestUpdate = configuration.getParameters().stream()
+                .map(CloudProviderConfiguration.CloudProviderConfigurationParameter::getUpdatedAt)
+                .reduce(configuration.getUpdatedAt(), (acc, next) -> next.after(acc) ? next : acc);
 
-        // Get last update in database for cloud client
-        CloudProviderConfiguration configuration = this.cloudProviderService.getById(cloudClient.getId());
-        Date latestUpdate = configuration.getParameters().stream()
-            .map(CloudProviderConfiguration.CloudProviderConfigurationParameter::getUpdatedAt)
-            .reduce(configuration.getUpdatedAt(), (acc, next) -> next.after(acc) ? next : acc);
+            // Check if event comes from a different server
+            if (!serverSpecificUuid.equals(cloudClient.getUuid())) {
+                logger.info("Received CloudClientUpdateEvent for client {}: updating the client", cloudClientId);
 
-        // Check if event comes from a different server
-        if (!serverSpecificUuid.equals(cloudClient.getUuid())) {
-            logger.info("Received CloudClientUpdateEvent for client {}: updating the client", cloudClientId);
-
-            this.addCloudClient(configuration);
+                this.addCloudClient(configuration);
+            }
         }
     }
 
