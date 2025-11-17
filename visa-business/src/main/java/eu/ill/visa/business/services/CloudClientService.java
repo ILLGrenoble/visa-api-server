@@ -5,6 +5,7 @@ import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.ProviderConfigurationImpl;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
+import eu.ill.visa.core.domain.Timer;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import io.quarkus.runtime.Startup;
 import jakarta.inject.Singleton;
@@ -16,11 +17,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Transactional
 @Singleton
 public class CloudClientService {
-    public record CloudClientUpdateEvent(Long cloudClientId) {}
+    public record CloudClientUpdateEvent(Long cloudClientId, String serverSpecificUuid) {}
     public record CloudClientDeleteEvent(Long cloudClientId) {}
 
     private static final Logger logger = LoggerFactory.getLogger(CloudClientService.class);
@@ -35,7 +37,7 @@ public class CloudClientService {
         this.cloudProviderService = cloudProviderService;
         this.cloudClientGateway = cloudClientGateway;
         this.messageBroker = messageBrokerInstance.get();
-        this.messageBroker.subscribe(CloudClientUpdateEvent.class).next((message) -> this.onCloudClientUpdateEvent(message.cloudClientId()));
+        this.messageBroker.subscribe(CloudClientUpdateEvent.class).next((message) -> this.onCloudClientUpdateEvent(message.cloudClientId(), message.serverSpecificUuid));
         this.messageBroker.subscribe(CloudClientDeleteEvent.class).next((message) -> this.onCloudClientDeleteEvent(message.cloudClientId()));
     }
 
@@ -117,8 +119,10 @@ public class CloudClientService {
         this.cloudProviderService.save(configuration);
         CloudClient cloudClient = this.addCloudClient(configuration);
 
-        // Notify load-balanced servers
-        this.messageBroker.broadcast(new CloudClientUpdateEvent(configuration.getId()));
+        // Notify load-balanced servers. Use a timeout to ensure that transaction has closed
+        Timer.setTimeout(() -> {
+            this.messageBroker.broadcast(new CloudClientUpdateEvent(configuration.getId(), cloudClient.getUuid()));
+        }, 500, TimeUnit.MILLISECONDS);
 
         return cloudClient;
     }
@@ -130,11 +134,13 @@ public class CloudClientService {
         }
         this.cloudClientGateway.removeCloudClient(cloudClient.getId());
 
-        // Notify load-balanced servers
-        this.messageBroker.broadcast(new CloudClientDeleteEvent(cloudClient.getId()));
+        // Notify load-balanced servers. Use a timeout to ensure that transaction has closed
+        Timer.setTimeout(() -> {
+            this.messageBroker.broadcast(new CloudClientDeleteEvent(cloudClient.getId()));
+        }, 500, TimeUnit.MILLISECONDS);
     }
 
-    private void onCloudClientUpdateEvent(final Long cloudClientId) {
+    private void onCloudClientUpdateEvent(final Long cloudClientId, final String serverSpecificUuid) {
         CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudClientId);
 
         // Get last update in database for cloud client
@@ -143,8 +149,8 @@ public class CloudClientService {
             .map(CloudProviderConfiguration.CloudProviderConfigurationParameter::getUpdatedAt)
             .reduce(configuration.getUpdatedAt(), (acc, next) -> next.after(acc) ? next : acc);
 
-        // Check if cloud client is older than configuration
-        if (latestUpdate.after(cloudClient.getCreationDate())) {
+        // Check if event comes from a different server
+        if (!serverSpecificUuid.equals(cloudClient.getUuid())) {
             logger.info("Received CloudClientUpdateEvent for client {}: updating the client", cloudClientId);
 
             this.addCloudClient(configuration);

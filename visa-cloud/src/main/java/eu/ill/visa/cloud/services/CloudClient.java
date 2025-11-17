@@ -9,8 +9,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class CloudClient {
 
@@ -22,7 +22,8 @@ public class CloudClient {
     private final CloudProvider provider;
     private final String serverNamePrefix;
     private final Boolean visible;
-    private final Date creationDate;
+    private final String uuid = UUID.randomUUID().toString();
+    ;
 
     public CloudClient(final Long id,
                        final String name,
@@ -36,7 +37,6 @@ public class CloudClient {
         this.provider = provider;
         this.serverNamePrefix = serverNamePrefix;
         this.visible = visible;
-        this.creationDate = new Date();
     }
 
     public Long getId() {
@@ -59,8 +59,8 @@ public class CloudClient {
         return visible;
     }
 
-    public Date getCreationDate() {
-        return creationDate;
+    public String getUuid() {
+        return uuid;
     }
 
     public CloudProvider getProvider() {
