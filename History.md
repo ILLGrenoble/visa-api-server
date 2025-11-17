@@ -1,3 +1,33 @@
+3.6.0 17/11/2025
+================
+ * Flavour availability calculated
+   * Determine from Hypervisor usage, Cloud limits and Device Pool Usage currently available flavours
+   * Calculate future availability of flavours from current instance lifetimes and using the available sources of cloud usage
+   * Flavour availability calculated with a confidence level depending on which sources of cloud usage are available
+   * If flavour unavailable, calculate date when next available (show in UI when creating an instance)
+ * OpenStack placement API added:
+   * PCI Device usage automatically determined
+   * Hypervisor resource availability and usage obtained
+   * Obtain current server placement on hypervisors
+   * Backward compatibility for unconfigured placement APIs (and web providers)
+ * Customisable Flavour Lifetimes:
+   * Role-based lifetimes can be added to flavours
+   * Each flavour can have different lifetime rules
+   * Flavour selection when creating instances show lifetime available
+   * User can reduce lifetime if required
+   * Config-based lifetimes are used if custom lifetimes not set (compatibility with previous versions)
+   * Extensions requests take into account the lifetime rules
+ * GPU (pci-passthrough) integration:
+   * Add Device Pools data model
+   * Devices determines from cloud flavour extra flags
+   * Flavours automatically associated with configured device pools
+   * Resource Classes from cloud (placement api in openstack) allow for automatic management of pci devices (GPUs)
+   * Manual limits of devices possible
+   * Admin interface for Flavours updated to allow for Device Pool configuration
+   * Usage/limits of Devices obtained from either cloud or instance usage (depending on configuration)
+   * Disable gpu flavour selection when gpus no longer available
+   * Cloud limits on admin show device usage
+
 3.5.2 16/10/2025
 ================
  * Fix null pointer exception when getting instance from instance authentication token
