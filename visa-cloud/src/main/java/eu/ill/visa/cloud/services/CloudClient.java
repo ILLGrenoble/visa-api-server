@@ -9,19 +9,20 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 
 public class CloudClient {
 
-    private final static Logger        logger = LoggerFactory.getLogger(CloudClient.class);
+    private final static Logger logger = LoggerFactory.getLogger(CloudClient.class);
 
-    private final        Long          id;
-    private final        String        name;
-    private final        String        type;
-    private final        CloudProvider provider;
-    private final        String        serverNamePrefix;
-    private final        Boolean       visible;
-
+    private final Long id;
+    private final String name;
+    private final String type;
+    private final CloudProvider provider;
+    private final String serverNamePrefix;
+    private final Boolean visible;
+    private final Date creationDate;
 
     public CloudClient(final Long id,
                        final String name,
@@ -35,6 +36,7 @@ public class CloudClient {
         this.provider = provider;
         this.serverNamePrefix = serverNamePrefix;
         this.visible = visible;
+        this.creationDate = new Date();
     }
 
     public Long getId() {
@@ -55,6 +57,10 @@ public class CloudClient {
 
     public Boolean getVisible() {
         return visible;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
     }
 
     public CloudProvider getProvider() {

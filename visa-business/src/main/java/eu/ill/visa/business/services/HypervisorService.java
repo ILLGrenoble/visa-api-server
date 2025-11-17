@@ -5,6 +5,7 @@ import eu.ill.visa.cloud.domain.CloudHypervisorInventory;
 import eu.ill.visa.cloud.domain.CloudHypervisorUsage;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
+import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import eu.ill.visa.core.entity.Hypervisor;
 import eu.ill.visa.core.entity.HypervisorAllocation;
@@ -67,125 +68,154 @@ public class HypervisorService {
         this.repository.delete(hypervisor);
     }
 
-    public void updateHypervisorInventories() {
-        this.cloudClientService.getAll().forEach(cloudClient -> {
-            CloudProviderConfiguration cloudProviderConfiguration = this.cloudProviderService.getById(cloudClient.getId());
+    public synchronized void updateHypervisorInventories() {
+        this.cloudClientService.getAll().forEach(this::updateCloudClientHypervisorInventories);
+    }
 
-            try {
-                final List<CloudHypervisorInventory> hypervisorInventories = cloudClient.getProvider().hypervisorInventories();
+    public synchronized void updateHypervisorUsages() {
+        this.cloudClientService.getAll().forEach(this::updateCloudClientHypervisorUsages);
+    }
 
-                final List<Hypervisor> currentHypervisors = this.getAll();
+    public void updateHypervisorAllocations() {
+        this.cloudClientService.getAll().forEach(this::updateCloudClientHypervisorAllocations);
+    }
 
-                // Find removed hypervisors
+    private synchronized void updateCloudClientHypervisorInventories(final CloudClient cloudClient) {
+        CloudProviderConfiguration cloudProviderConfiguration = this.cloudProviderService.getById(cloudClient.getId());
+
+        try {
+            final List<CloudHypervisorInventory> hypervisorInventories = cloudClient.getProvider().hypervisorInventories();
+
+            final List<Hypervisor> currentHypervisors = this.getAll();
+
+            // Find removed hypervisors
+            currentHypervisors.stream()
+                .filter(hypervisor -> {
+                    long hypervisorCloudId = hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId();
+                    long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
+                    return hypervisorCloudId == cloudClientId;
+                })
+                .filter(hypervisor -> hypervisorInventories.stream()
+                    .filter(hypervisorInventory -> hypervisorInventory.getHypervisor().getId().equals(hypervisor.getComputeId()))
+                    .findFirst()
+                    .isEmpty())
+                .forEach(this::delete);
+
+            // Update or create
+            hypervisorInventories.forEach(hypervisorInventory -> {
                 currentHypervisors.stream()
+                    .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorInventory.getHypervisor().getId()))
+                    .findFirst()
+                    .ifPresentOrElse(hypervisor -> {
+                        hypervisor.setHostname(hypervisorInventory.getHypervisor().getHostname());
+                        hypervisor.setStatus(hypervisorInventory.getHypervisor().getStatus());
+                        hypervisor.setState(hypervisorInventory.getHypervisor().getState());
+                        hypervisor.updateResourceInventory(hypervisorInventory.getInventory());
+                        this.save(hypervisor);
+                    }, () -> {
+                        Hypervisor newHypervisor = Hypervisor.Builder()
+                            .computeId(hypervisorInventory.getHypervisor().getId())
+                            .hostname(hypervisorInventory.getHypervisor().getHostname())
+                            .status(hypervisorInventory.getHypervisor().getStatus())
+                            .state(hypervisorInventory.getHypervisor().getState())
+                            .resourceInventory(hypervisorInventory.getInventory())
+                            .cloudProviderConfiguration(cloudProviderConfiguration)
+                            .build();
+                        this.save(newHypervisor);
+                    });
+            });
+
+        } catch (CloudException e) {
+            logger.warn("Failed to retrieve hypervisor inventories from CloudClient: {}", e.getMessage());
+
+        } catch (CloudUnavailableException e) {
+            // Ignore
+        }
+    }
+
+    private synchronized void updateCloudClientHypervisorUsages(final CloudClient cloudClient) {
+        try {
+            final List<CloudHypervisorUsage> hypervisorUsages = cloudClient.getProvider().hypervisorUsages();
+
+            final List<Hypervisor> hypervisors = this.getAll();
+
+            // Update usages
+            hypervisorUsages.forEach(hypervisorUsage -> {
+                hypervisors.stream()
                     .filter(hypervisor -> {
                         long hypervisorCloudId = hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId();
                         long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
                         return  hypervisorCloudId == cloudClientId;
                     })
-                    .filter(hypervisor -> hypervisorInventories.stream()
-                        .filter(hypervisorInventory -> hypervisorInventory.getHypervisor().getId().equals(hypervisor.getComputeId()))
-                        .findFirst()
-                        .isEmpty())
-                    .forEach(this::delete);
+                    .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorUsage.getHypervisor().getId()))
+                    .findFirst()
+                    .ifPresent(hypervisor -> {
+                        hypervisor.updateResourceUsage(hypervisorUsage.getUsage());
+                        this.save(hypervisor);
+                    });
+            });
 
-                // Update or create
-                hypervisorInventories.forEach(hypervisorInventory -> {
-                    currentHypervisors.stream()
-                        .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorInventory.getHypervisor().getId()))
-                        .findFirst()
-                        .ifPresentOrElse(hypervisor -> {
-                            hypervisor.setHostname(hypervisorInventory.getHypervisor().getHostname());
-                            hypervisor.setStatus(hypervisorInventory.getHypervisor().getStatus());
-                            hypervisor.setState(hypervisorInventory.getHypervisor().getState());
-                            hypervisor.updateResourceInventory(hypervisorInventory.getInventory());
-                            this.save(hypervisor);
-                        }, () -> {
-                            Hypervisor newHypervisor = Hypervisor.Builder()
-                                .computeId(hypervisorInventory.getHypervisor().getId())
-                                .hostname(hypervisorInventory.getHypervisor().getHostname())
-                                .status(hypervisorInventory.getHypervisor().getStatus())
-                                .state(hypervisorInventory.getHypervisor().getState())
-                                .resourceInventory(hypervisorInventory.getInventory())
-                                .cloudProviderConfiguration(cloudProviderConfiguration)
-                                .build();
-                            this.save(newHypervisor);
-                        });
-                });
+        } catch (CloudException e) {
+            logger.warn("Failed to retrieve hypervisor usages from CloudClient: {}", e.getMessage());
 
-            } catch (CloudException e) {
-                logger.warn("Failed to retrieve hypervisor inventories from CloudClient: {}", e.getMessage());
-
-            } catch (CloudUnavailableException e) {
-                // Ignore
-            }
-
-
-        });
+        } catch (CloudUnavailableException e) {
+            // Ignore
+        }
     }
 
-    public void updateHypervisorUsages() {
-        this.cloudClientService.getAll().forEach(cloudClient -> {
-            try {
-                final List<CloudHypervisorUsage> hypervisorUsages = cloudClient.getProvider().hypervisorUsages();
+    private synchronized void updateCloudClientHypervisorAllocations(final CloudClient cloudClient) {
+        try {
+            final List<CloudHypervisorAllocation> hypervisorAllocations = cloudClient.getProvider().hypervisorAllocations();
 
-                final List<Hypervisor> hypervisors = this.getAll();
+            final List<Hypervisor> hypervisors = this.getAll();
 
-                // Update usages
-                hypervisorUsages.forEach(hypervisorUsage -> {
-                    hypervisors.stream()
-                        .filter(hypervisor -> {
-                            long hypervisorCloudId = hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId();
-                            long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
-                            return  hypervisorCloudId == cloudClientId;
-                        })
-                        .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorUsage.getHypervisor().getId()))
-                        .findFirst()
-                        .ifPresent(hypervisor -> {
-                            hypervisor.updateResourceUsage(hypervisorUsage.getUsage());
-                            this.save(hypervisor);
-                        });
-                });
+            // Update allocations
+            hypervisorAllocations.forEach(hypervisorAllocation -> {
+                hypervisors.stream()
+                    .filter(hypervisor -> {
+                        long hypervisorCloudId = hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId();
+                        long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
+                        return hypervisorCloudId == cloudClientId;
+                    })
+                    .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorAllocation.getHypervisor().getId()))
+                    .findFirst()
+                    .ifPresent(hypervisor -> {
+                        hypervisor.updateAllocations(hypervisorAllocation.getAllocations().stream().map(cloudAllocation -> new HypervisorAllocation(cloudAllocation.getServerComputeId())).toList());
+                        this.save(hypervisor);
+                    });
+            });
 
-            } catch (CloudException e) {
-                logger.warn("Failed to retrieve hypervisor usages from CloudClient: {}", e.getMessage());
+        } catch (CloudException e) {
+            logger.warn("Failed to retrieve hypervisor allocations from CloudClient: {}", e.getMessage());
 
-            } catch (CloudUnavailableException e) {
-                // Ignore
-            }
-        });
+        } catch (CloudUnavailableException e) {
+            // Ignore
+        }
+
     }
 
-    public void updateHypervisorAllocations() {
-        this.cloudClientService.getAll().forEach(cloudClient -> {
-            try {
-                final List<CloudHypervisorAllocation> hypervisorAllocations = cloudClient.getProvider().hypervisorAllocations();
+    public void onCloudClientUpdated(final CloudClient cloudClient) {
+        if (cloudClient != null) {
+            // Run in thread to avoid latency with request
+            Thread.startVirtualThread(() -> {
+                this.updateCloudClientHypervisorInventories(cloudClient);
+                this.updateCloudClientHypervisorUsages(cloudClient);
+                this.updateCloudClientHypervisorAllocations(cloudClient);
+            });
+        }
+    }
 
-                final List<Hypervisor> hypervisors = this.getAll();
+    public void onCloudClientDeleted(final CloudClient cloudClient) {
+        final List<Hypervisor> currentHypervisors = this.getAll();
 
-                // Update allocations
-                hypervisorAllocations.forEach(hypervisorAllocation -> {
-                    hypervisors.stream()
-                        .filter(hypervisor -> {
-                            long hypervisorCloudId = hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId();
-                            long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
-                            return  hypervisorCloudId == cloudClientId;
-                        })
-                        .filter(hypervisor -> hypervisor.getComputeId().equals(hypervisorAllocation.getHypervisor().getId()))
-                        .findFirst()
-                        .ifPresent(hypervisor -> {
-                            hypervisor.updateAllocations(hypervisorAllocation.getAllocations().stream().map(cloudAllocation -> new HypervisorAllocation(cloudAllocation.getServerComputeId())).toList());
-                            this.save(hypervisor);
-                        });
-                });
-
-            } catch (CloudException e) {
-                logger.warn("Failed to retrieve hypervisor allocations from CloudClient: {}", e.getMessage());
-
-            } catch (CloudUnavailableException e) {
-                // Ignore
-            }
-        });
+        // Find removed hypervisors
+        currentHypervisors.stream()
+            .filter(hypervisor -> {
+                long hypervisorCloudId = hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId();
+                long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
+                return hypervisorCloudId == cloudClientId;
+            })
+            .forEach(this::delete);
     }
 
     public final static class Resource {

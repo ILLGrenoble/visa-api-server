@@ -1,5 +1,6 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.ProviderConfigurationImpl;
 import eu.ill.visa.cloud.services.CloudClient;
@@ -8,7 +9,10 @@ import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import io.quarkus.runtime.Startup;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +20,23 @@ import java.util.Map;
 @Transactional
 @Singleton
 public class CloudClientService {
+    public record CloudClientUpdateEvent(Long cloudClientId) {}
+    public record CloudClientDeleteEvent(Long cloudClientId) {}
+
+    private static final Logger logger = LoggerFactory.getLogger(CloudClientService.class);
 
     private final CloudProviderService cloudProviderService;
     private final CloudClientGateway cloudClientGateway;
+    private final MessageBroker messageBroker;
 
     public CloudClientService(final CloudProviderService cloudProviderService,
-                              final CloudClientGateway cloudClientGateway) {
+                              final CloudClientGateway cloudClientGateway,
+                              final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance) {
         this.cloudProviderService = cloudProviderService;
         this.cloudClientGateway = cloudClientGateway;
+        this.messageBroker = messageBrokerInstance.get();
+        this.messageBroker.subscribe(CloudClientUpdateEvent.class).next((message) -> this.onCloudClientUpdateEvent(message.cloudClientId()));
+        this.messageBroker.subscribe(CloudClientDeleteEvent.class).next((message) -> this.onCloudClientDeleteEvent(message.cloudClientId()));
     }
 
     @Startup
@@ -32,6 +45,7 @@ public class CloudClientService {
         for (CloudProviderConfiguration cloudProviderConfiguration : cloudProviderConfigurations) {
             this.addCloudClient(cloudProviderConfiguration);
         }
+
     }
 
     public List<CloudClient> getAll() {
@@ -101,7 +115,12 @@ public class CloudClientService {
 
     public CloudClient createOrUpdateCloudClient(CloudProviderConfiguration configuration) {
         this.cloudProviderService.save(configuration);
-        return this.addCloudClient(configuration);
+        CloudClient cloudClient = this.addCloudClient(configuration);
+
+        // Notify load-balanced servers
+        this.messageBroker.broadcast(new CloudClientUpdateEvent(configuration.getId()));
+
+        return cloudClient;
     }
 
     public void delete(CloudClient cloudClient) {
@@ -110,6 +129,30 @@ public class CloudClientService {
             this.cloudProviderService.delete(cloudProviderConfiguration);
         }
         this.cloudClientGateway.removeCloudClient(cloudClient.getId());
+
+        // Notify load-balanced servers
+        this.messageBroker.broadcast(new CloudClientDeleteEvent(cloudClient.getId()));
+    }
+
+    private void onCloudClientUpdateEvent(final Long cloudClientId) {
+        CloudClient cloudClient = this.cloudClientGateway.getCloudClient(cloudClientId);
+
+        // Get last update in database for cloud client
+        CloudProviderConfiguration configuration = this.cloudProviderService.getById(cloudClient.getId());
+        Date latestUpdate = configuration.getParameters().stream()
+            .map(CloudProviderConfiguration.CloudProviderConfigurationParameter::getUpdatedAt)
+            .reduce(configuration.getUpdatedAt(), (acc, next) -> next.after(acc) ? next : acc);
+
+        // Check if cloud client is older than configuration
+        if (latestUpdate.after(cloudClient.getCreationDate())) {
+            logger.info("Received CloudClientUpdateEvent for client {}: updating the client", cloudClientId);
+
+            this.addCloudClient(configuration);
+        }
+    }
+
+    private void onCloudClientDeleteEvent(final Long cloudClientId) {
+        this.cloudClientGateway.removeCloudClient(cloudClientId);
     }
 
     private ProviderConfiguration convert(CloudProviderConfiguration cloudProviderConfiguration) {

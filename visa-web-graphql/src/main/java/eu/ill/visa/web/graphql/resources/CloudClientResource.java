@@ -2,6 +2,7 @@ package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.visa.business.services.CloudClientService;
 import eu.ill.visa.business.services.DevicePoolService;
+import eu.ill.visa.business.services.HypervisorService;
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
@@ -38,14 +39,17 @@ public class CloudClientResource {
     private static final Logger logger = LoggerFactory.getLogger(CloudClientResource.class);
 
     private final CloudClientService cloudClientService;
+    private final HypervisorService hypervisorService;
     private final InstanceService instanceService;
     private final DevicePoolService devicePoolService;
 
     @Inject
     public CloudClientResource(final CloudClientService cloudClientService,
+                               final HypervisorService hypervisorService,
                                final InstanceService instanceService,
                                final DevicePoolService devicePoolService) {
         this.cloudClientService = cloudClientService;
+        this.hypervisorService = hypervisorService;
         this.instanceService = instanceService;
         this.devicePoolService = devicePoolService;
     }
@@ -195,7 +199,12 @@ public class CloudClientResource {
 
         this.setCloudConfigurationParameters(configuration, input);
 
-        return new CloudClientType(this.cloudClientService.createOrUpdateCloudClient(configuration));
+        final CloudClient cloudClient = this.cloudClientService.createOrUpdateCloudClient(configuration);
+
+        // Update hypervisor data
+        this.hypervisorService.onCloudClientUpdated(cloudClient);
+
+        return new CloudClientType(cloudClient);
     }
 
     /**
@@ -228,7 +237,12 @@ public class CloudClientResource {
 
         this.setCloudConfigurationParameters(configuration, input);
 
-        return new CloudClientType(this.cloudClientService.createOrUpdateCloudClient(configuration));
+        final CloudClient cloudClient = this.cloudClientService.createOrUpdateCloudClient(configuration);
+
+        // Update hypervisor data
+        this.hypervisorService.onCloudClientUpdated(cloudClient);
+
+        return new CloudClientType(cloudClient);
     }
 
     /**
@@ -262,6 +276,10 @@ public class CloudClientResource {
         }
 
         this.cloudClientService.delete(cloudClient);
+
+        // Update hypervisor data
+        this.hypervisorService.onCloudClientDeleted(cloudClient);
+
         return true;
     }
 
@@ -275,7 +293,9 @@ public class CloudClientResource {
             cloudProviderConfiguration.setParameter("applicationId", configurationInput.getApplicationId());
             cloudProviderConfiguration.setParameter("applicationSecret", configurationInput.getApplicationSecret());
             cloudProviderConfiguration.setParameter("computeEndpoint", configurationInput.getComputeEndpoint());
-            cloudProviderConfiguration.setParameter("placementEndpoint", configurationInput.getPlacementEndpoint());
+            if (configurationInput.getPlacementEndpoint() != null) {
+                cloudProviderConfiguration.setParameter("placementEndpoint", configurationInput.getPlacementEndpoint());
+            }
             cloudProviderConfiguration.setParameter("imageEndpoint", configurationInput.getImageEndpoint());
             cloudProviderConfiguration.setParameter("networkEndpoint", configurationInput.getNetworkEndpoint());
             cloudProviderConfiguration.setParameter("identityEndpoint", configurationInput.getIdentityEndpoint());
