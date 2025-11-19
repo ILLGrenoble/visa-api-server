@@ -21,6 +21,11 @@ public class HypervisorRepository extends AbstractRepository<Hypervisor> {
         return query.getResultList();
     }
 
+    public Long countAll() {
+        final TypedQuery<Long> query = getEntityManager().createNamedQuery("hypervisor.countAll", Long.class);
+        return query.getSingleResult();
+    }
+
     public List<Hypervisor> getAllAvailable() {
         final TypedQuery<Hypervisor> query = getEntityManager().createNamedQuery("hypervisor.getAllAvailable", Hypervisor.class);
         return query.getResultList();

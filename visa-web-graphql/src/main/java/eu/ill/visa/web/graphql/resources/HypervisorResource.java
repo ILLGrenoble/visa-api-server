@@ -23,6 +23,16 @@ public class HypervisorResource {
     }
 
     /**
+     * Determine if hypervisor data available
+     *
+     * @return true if hypervisor data is available
+     */
+    @Query
+    public @NotNull boolean hypervisorsAvailable() {
+        return this.hypervisorService.countAll() > 0;
+    }
+
+    /**
      * Get a list of hypervisors
      *
      * @return a list of hypervisors

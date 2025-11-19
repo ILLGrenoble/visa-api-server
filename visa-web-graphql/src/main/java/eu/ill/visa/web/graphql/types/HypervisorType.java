@@ -19,6 +19,7 @@ public class HypervisorType {
     private final String status;
     private final Long cloudId;
     private final @NotNull List<HypervisorResourceType> resources;
+    private final @NotNull List<HypervisorAllocationType> allocations;
 
     public HypervisorType(final Hypervisor hypervisor) {
         this.id = hypervisor.getId();
@@ -28,6 +29,7 @@ public class HypervisorType {
         this.status = hypervisor.getStatus();
         this.cloudId = hypervisor.getCloudId();
         this.resources = hypervisor.getResources().stream().map(HypervisorResourceType::new).toList();
+        this.allocations = hypervisor.getAllocations().stream().map(HypervisorAllocationType::new).toList();
     }
 
     public Long getId() {
@@ -56,5 +58,9 @@ public class HypervisorType {
 
     public List<HypervisorResourceType> getResources() {
         return resources;
+    }
+
+    public List<HypervisorAllocationType> getAllocations() {
+        return allocations;
     }
 }

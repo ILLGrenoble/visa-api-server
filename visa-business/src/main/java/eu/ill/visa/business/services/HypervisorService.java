@@ -43,6 +43,10 @@ public class HypervisorService {
         return this.repository.getAll();
     }
 
+    public Long countAll() {
+        return this.repository.countAll();
+    }
+
     public List<Hypervisor> getAllAvailable() {
         return this.repository.getAllAvailable();
     }
