@@ -4,6 +4,7 @@ import eu.ill.visa.core.entity.Hypervisor;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
@@ -19,6 +20,17 @@ public class HypervisorRepository extends AbstractRepository<Hypervisor> {
     public List<Hypervisor> getAll() {
         final TypedQuery<Hypervisor> query = getEntityManager().createNamedQuery("hypervisor.getAll", Hypervisor.class);
         return query.getResultList();
+    }
+
+    public Hypervisor getById(Long id) {
+        final TypedQuery<Hypervisor> query = getEntityManager().createNamedQuery("hypervisor.getById", Hypervisor.class);
+        query.setParameter("id", id);
+        try {
+            return query.getSingleResult();
+
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     public Long countAll() {

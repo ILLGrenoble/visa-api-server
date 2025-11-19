@@ -136,6 +136,11 @@ import java.util.stream.Collectors;
             WHERE i.state in :states
             AND i.deletedAt IS NULL
     """),
+    @NamedQuery(name = "instance.getAllWithComputeIds", query = """
+            SELECT i FROM Instance i
+            WHERE i.computeId in :computeIds
+            AND i.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instance.getAllToDelete", query = """
             SELECT i FROM Instance i
             WHERE i.state = 'STOPPED'

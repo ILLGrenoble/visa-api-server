@@ -92,6 +92,10 @@ public class InstanceService {
         return this.repository.getAllWithStates(states);
     }
 
+    public List<Instance> getAllWithComputeIds(List<String> computeIds) {
+        return this.repository.getAllWithComputeIds(computeIds);
+    }
+
     public Long getIdByUid(final String uid) {
         return this.repository.getIdByUid(uid);
     }

@@ -17,6 +17,15 @@ import java.util.Map;
         AND COALESCE(cpc.visible, true) = true
         ORDER BY h.id
     """),
+    @NamedQuery(name = "hypervisor.getById", query = """
+        SELECT h
+        FROM Hypervisor h
+        LEFT JOIN h.cloudProviderConfiguration cpc
+        WHERE cpc.deletedAt IS NULL
+        AND COALESCE(cpc.visible, true) = true
+        AND h.id = :id
+        ORDER BY h.id
+    """),
     @NamedQuery(name = "hypervisor.countAll", query = """
         SELECT COUNT(h)
         FROM Hypervisor h

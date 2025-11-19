@@ -75,6 +75,13 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         return query.getResultList();
     }
 
+    public List<Instance> getAllWithComputeIds(List<String> computeIds) {
+        final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getAllWithComputeIds", Instance.class);
+        query.setParameter("computeIds", computeIds);
+
+        return query.getResultList();
+    }
+
     public Long getIdByUid(final String uid) {
         try {
             final TypedQuery<Long> query = getEntityManager().createNamedQuery("instance.getIdByUid", Long.class);
