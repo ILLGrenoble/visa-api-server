@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.types;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.Image;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
@@ -25,6 +24,7 @@ public class ImageType {
     private final ImageProtocolType secondaryVdiProtocol;
     private final String bootCommand;
     private final String autologin;
+    @AdaptToScalar(Scalar.Int.class)
     private final Long cloudId;
     private final Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest;
 
@@ -97,7 +97,6 @@ public class ImageType {
         return autoAcceptExtensionRequest;
     }
 
-    @JsonIgnore
     public Long getCloudId() {
         return cloudId;
     }

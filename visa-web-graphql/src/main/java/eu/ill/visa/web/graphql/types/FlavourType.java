@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.types;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.Flavour;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
@@ -19,6 +18,7 @@ public class FlavourType {
     private final @NotNull Float cpu;
     private final @NotNull String computeId;
     private final List<FlavourDeviceType> devices;
+    @AdaptToScalar(Scalar.Int.class)
     private final Long cloudId;
 
     public FlavourType(final Flavour flavour) {
@@ -55,7 +55,6 @@ public class FlavourType {
         return devices;
     }
 
-    @JsonIgnore
     public Long getCloudId() {
         return cloudId;
     }

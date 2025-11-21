@@ -206,7 +206,9 @@ public class FlavourAvailabilityService {
     }
 
     private Map<Long, List<Instance>> getCloudInstances() {
-        final List<Instance> instances = this.instanceService.getAll(new InstanceFilter(), new OrderBy("terminationDate", false));
+        final List<Instance> instances = this.instanceService.getAll(new InstanceFilter(), new OrderBy("terminationDate", true)).stream()
+            .filter(instance -> instance.getTerminationDate() != null)
+            .toList();
         return instances.stream()
             .collect(Collectors
                 .groupingBy(instance -> {

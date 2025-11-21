@@ -9,19 +9,30 @@ public record HypervisorInventory(Long hypervisorId, String hostname, long cpusA
 
     public HypervisorInventory onInstanceReleased(final Instance instance) {
         final Flavour flavour = instance.getPlan().getFlavour();
-        final List<InstanceDeviceAllocation> deviceAllocations = instance.getDeviceAllocations();
+//        final List<InstanceDeviceAllocation> deviceAllocations = instance.getDeviceAllocations();
+        final List<FlavourDevice> flavourDevices = flavour.getDevices();
 
         long cpusAvailable = this.cpusAvailable + flavour.getCpu().longValue();
         long memoryMBAvailable = this.memoryMBAvailable + flavour.getMemory().longValue();
         List<HypervisorResource> resources = this.resources.stream()
             .map(resource -> {
-                final InstanceDeviceAllocation instanceDeviceAllocation = deviceAllocations.stream()
-                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass() != null)
-                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass().equals(resource.getResourceClass()))
+//                final InstanceDeviceAllocation instanceDeviceAllocation = deviceAllocations.stream()
+//                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass() != null)
+//                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass().equals(resource.getResourceClass()))
+//                    .findFirst()
+//                    .orElse(null);
+//                if (instanceDeviceAllocation != null) {
+//                    return resource.onDeviceReleased(instanceDeviceAllocation.getUnitCount());
+//                } else {
+//                    return resource;
+//                }
+                final FlavourDevice flavourDevice = flavourDevices.stream()
+                    .filter(aFlavourDevice -> aFlavourDevice.getDevicePool().getResourceClass() != null)
+                    .filter(aFlavourDevice -> aFlavourDevice.getDevicePool().getResourceClass().equals(resource.getResourceClass()))
                     .findFirst()
                     .orElse(null);
-                if (instanceDeviceAllocation != null) {
-                    return resource.onDeviceReleased(instanceDeviceAllocation.getUnitCount());
+                if (flavourDevice != null) {
+                    return resource.onDeviceReleased(flavourDevice.getUnitCount());
                 } else {
                     return resource;
                 }

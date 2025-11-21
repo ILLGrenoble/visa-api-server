@@ -12,6 +12,7 @@ public class SecurityGroupType {
     @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long id;
     private final @NotNull String name;
+    @AdaptToScalar(Scalar.Int.class)
     private final Long cloudId;
 
     public SecurityGroupType(final SecurityGroup securityGroup) {

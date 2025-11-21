@@ -28,15 +28,30 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
         CloudResources cloudResources = this.cloudResources.onInstanceReleased(instance);
 
-        List<DevicePoolUsage> devicePoolUsages = this.devicePoolUsages;
-        for (InstanceDeviceAllocation instanceDeviceAllocation : instance.getDeviceAllocations()) {
-            final DevicePool devicePool = instanceDeviceAllocation.getDevicePool();
-            DevicePoolUsage devicePoolUsage = devicePoolUsages.stream()
-                .filter(usage -> usage.getDevicePoolId().equals(devicePool.getId()))
-                .findFirst()
-                .orElse(new DevicePoolUsage(devicePool.getId(), this.cloudId, devicePool.getName(), devicePool.getResourceClass(), -1, 0))
-                .onUnitsReleased(instanceDeviceAllocation.getUnitCount());
-        }
+        List<DevicePoolUsage> devicePoolUsages = this.devicePoolUsages.stream()
+            .map(devicePoolUsage -> {
+//                final InstanceDeviceAllocation instanceDeviceAllocation = instance.getDeviceAllocations().stream()
+//                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getId().equals(devicePoolUsage.getDevicePoolId()))
+//                    .findFirst()
+//                    .orElse(null);
+//
+//                if (instanceDeviceAllocation == null) {
+//                    return devicePoolUsage;
+//                } else {
+//                    return devicePoolUsage.onUnitsReleased(instanceDeviceAllocation.getUnitCount());
+//                }
+                final FlavourDevice flavourDevice = instance.getPlan().getFlavour().getDevices().stream()
+                    .filter(aFlavourDevice -> aFlavourDevice.getDevicePool().getId().equals(devicePoolUsage.getDevicePoolId()))
+                    .findFirst()
+                    .orElse(null);
+
+                if (flavourDevice == null) {
+                    return devicePoolUsage;
+                } else {
+                    return devicePoolUsage.onUnitsReleased(flavourDevice.getUnitCount());
+                }
+            })
+            .toList();
 
         List<HypervisorInventory> hypervisorInventories = this.hypervisorInventories.stream()
             .map(inventory -> {
