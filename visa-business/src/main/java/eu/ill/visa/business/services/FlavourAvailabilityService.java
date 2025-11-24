@@ -181,8 +181,10 @@ public class FlavourAvailabilityService {
                         .map(hypervisor -> {
                             long cpusAvailable = hypervisor.getAvailableResource(CloudResourceClass.VCPU_RESOURCE_CLASS);
                             long ramMBAvailable = hypervisor.getAvailableResource(CloudResourceClass.MEMORY_MB_RESOURCE_CLASS);
+                            long cpusTotal = hypervisor.getTotalResource(CloudResourceClass.VCPU_RESOURCE_CLASS);
+                            long ramMBTotal = hypervisor.getTotalResource(CloudResourceClass.MEMORY_MB_RESOURCE_CLASS);
                             List<String> serverComputeIds = hypervisor.getAllocations().stream().map(HypervisorAllocation::getServerComputeId).toList();
-                            return new HypervisorInventory(hypervisor.getId(), hypervisor.getHostname(), cpusAvailable, ramMBAvailable, hypervisor.getResources(), serverComputeIds);
+                            return new HypervisorInventory(hypervisor.getId(), hypervisor.getHostname(), cpusAvailable, cpusTotal, ramMBAvailable, ramMBTotal, hypervisor.getResources(), serverComputeIds);
                         })
                         .toList();
 

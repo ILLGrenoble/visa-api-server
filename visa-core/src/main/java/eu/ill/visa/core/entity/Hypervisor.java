@@ -201,6 +201,14 @@ public class Hypervisor extends Timestampable {
             .orElse(0L);
     }
 
+    public long getTotalResource(String resourceClass) {
+        return this.resources.stream()
+            .filter(resource -> resource.getResourceClass().equals(resourceClass))
+            .map(HypervisorResource::getTotal)
+            .findFirst()
+            .orElse(0L);
+    }
+
     public static final class Builder {
         private String computeId;
         private String hostname;

@@ -2,6 +2,7 @@ package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.domain.FlavourAvailability.AvailabilityConfidence;
+import eu.ill.visa.core.domain.FlavourAvailability.AvailabilityData;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
@@ -15,12 +16,15 @@ public class FlavourAvailabilityType {
     private final @NotNull Date date;
     private final @NotNull AvailabilityConfidence confidence;
     @AdaptToScalar(Scalar.Int.class)
-    private final Long units;
+    private final Long availableUnits;
+    private final Long totalUnits;
 
     public FlavourAvailabilityType(final FlavourAvailability flavourAvailability) {
         this.date = flavourAvailability.date();
         this.confidence = flavourAvailability.confidence();
-        this.units = flavourAvailability.availableUnits().orElse(null);
+        final AvailabilityData availabilityData = flavourAvailability.availability().orElse(null);
+        this.availableUnits = availabilityData == null ? null : availabilityData.available();
+        this.totalUnits = availabilityData == null ? null : availabilityData.total();
     }
 
     public Date getDate() {
@@ -31,7 +35,11 @@ public class FlavourAvailabilityType {
         return confidence;
     }
 
-    public Long getUnits() {
-        return units;
+    public Long getAvailableUnits() {
+        return availableUnits;
+    }
+
+    public Long getTotalUnits() {
+        return totalUnits;
     }
 }

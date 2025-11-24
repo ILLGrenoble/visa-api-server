@@ -82,10 +82,6 @@ public class PlanController extends AbstractController {
         }
 
         final List<FlavourAvailability> flavourAvailabilities = this.flavourAvailabilityService.getAllFirstAvailabilities();
-        flavourAvailabilities.forEach(flavourAvailability -> {
-            logger.info("Flavour {} ({} cpus, {} MB RAM): available = {} ({}), units = {}, confidence = {}", flavourAvailability.flavour().getName(), flavourAvailability.flavour().getCpu(), flavourAvailability.flavour().getMemory(), flavourAvailability.isAvailable(), dateFormat.format(flavourAvailability.date()), flavourAvailability.availableUnits(), flavourAvailability.confidence());
-        });
-
         List<PlanDto> planDtos = plans.stream()
             .sorted((p1, p2) -> {
                 Flavour f1 = p1.getFlavour();

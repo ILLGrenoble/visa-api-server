@@ -1,6 +1,7 @@
 package eu.ill.visa.core.domain;
 
 
+import eu.ill.visa.core.domain.FlavourAvailability.AvailabilityData;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import org.slf4j.Logger;
@@ -87,99 +88,118 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
     private FlavourAvailability getAvailabilityForSimpleFlavour(final FlavourResourceRequirement flavourResourceRequirement) {
 
-        FlavourAvailability availability = null;
+        FlavourAvailability flavourAvailability = null;
         if (hypervisorInventories != null && !hypervisorInventories.isEmpty()) {
             // Determine total number of units possible
-            long totalAvailableUnits = hypervisorInventories.stream()
+            AvailabilityData availabilityData = hypervisorInventories.stream()
                 .map(hypervisorInventory -> {
                     long vcpusAvailable = hypervisorInventory.cpusAvailable();
                     long ramMBAvailable = hypervisorInventory.memoryMBAvailable();
+                    long totalCPUs = hypervisorInventory.totalCPUs();
+                    long totalMemoryMB = hypervisorInventory.totalMemoryMB();
 
-                    long vcpuUnits = vcpusAvailable / flavourResourceRequirement.vcpus;
-                    long ramUnits = ramMBAvailable / flavourResourceRequirement.memoryMB;
+                    long vcpuUnitsAvailable = vcpusAvailable / flavourResourceRequirement.vcpus;
+                    long ramUnitsAvailable = ramMBAvailable / flavourResourceRequirement.memoryMB;
+                    long vcpuUnitsTotal = totalCPUs / flavourResourceRequirement.vcpus;
+                    long ramUnitsTotal = totalMemoryMB / flavourResourceRequirement.memoryMB;
 
 
-                    long hypervisorAvailableUnits = Math.min(vcpuUnits, ramUnits);
+                    long hypervisorAvailableUnits = Math.min(vcpuUnitsAvailable, ramUnitsAvailable);
+                    long hypervisorTotalUnits = Math.min(vcpuUnitsTotal, ramUnitsTotal);
 
                     logger.debug("Flavour {} (RAM_MB {} vCPUs {}), hypervisor {} RAM_MB {} vCPUs {}, available Units {}", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus, hypervisorInventory.hostname(), ramMBAvailable, vcpusAvailable, hypervisorAvailableUnits);
 
-                    return hypervisorAvailableUnits;
+                    return new AvailabilityData(hypervisorAvailableUnits, hypervisorTotalUnits);
 
                 })
-                .mapToLong(Long::longValue)
-                .sum();
+                .reduce(new AvailabilityData(0L, 0L), (acc, next) -> {
+                  return new  AvailabilityData(acc.available() + next.available(), acc.total() + next.total());
+                });
 
-            availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(totalAvailableUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+            flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availabilityData), FlavourAvailability.AvailabilityConfidence.CERTAIN);
         }
 
         if (cloudResources != null) {
-            long availableUnits = this.getAvailableUnitsFromCloudResources(flavourResourceRequirement);
-            logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Units {}", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus, availableUnits);
+            AvailabilityData cloudAvailability = this.getAvailableUnitsFromCloudResources(flavourResourceRequirement);
+            logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Units {}", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus, cloudAvailability.available());
 
-            if (availability != null && availability.availableUnits().isPresent()) {
-                long minUnits = Math.min(availableUnits, availability.availableUnits().get());
-                availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(minUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+            if (flavourAvailability != null && flavourAvailability.availability().isPresent()) {
+                long unitsAvailable = Math.min(cloudAvailability.available(), flavourAvailability.availability().get().available());
+                long unitsTotal = Math.min(cloudAvailability.total(), flavourAvailability.availability().get().total());
+                AvailabilityData combinedAvailability = new AvailabilityData(unitsAvailable, unitsTotal);
+
+                flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(combinedAvailability), FlavourAvailability.AvailabilityConfidence.CERTAIN);
 
             } else {
-                availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+                flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(cloudAvailability), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
             }
         }
 
-        if (availability == null) {
+        if (flavourAvailability == null) {
             // If we have no hypervisor information nor cloud limit information then we know nothing about the availability
-            availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+            flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
         }
 
-        return availability;
+        return flavourAvailability;
     }
 
 
     private FlavourAvailability getAvailabilityForDeviceFlavour(final FlavourResourceRequirement flavourResourceRequirement) {
 
-        FlavourAvailability availability = null;
+        FlavourAvailability flavourAvailability = null;
         if (hypervisorInventories != null && !hypervisorInventories.isEmpty()) {
-            availability = this.getDeviceFlavourAvailabilityWithHypervisor(flavourResourceRequirement);
+            flavourAvailability = this.getDeviceFlavourAvailabilityWithHypervisor(flavourResourceRequirement);
         }
 
         if (cloudResources != null) {
-            long availableUnits = this.getAvailableUnitsFromCloudResources(flavourResourceRequirement);
+            AvailabilityData cloudAvailability = this.getAvailableUnitsFromCloudResources(flavourResourceRequirement);
 
-            if (availability != null && availability.availableUnits().isPresent()) {
+            if (flavourAvailability != null && flavourAvailability.availability().isPresent()) {
                 // Make sure cloud limits are taken into account even when hypervisor data in known
-                long minUnits = Math.min(availableUnits, availability.availableUnits().get());
-                availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(minUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+                long unitsAvailable = Math.min(cloudAvailability.available(), flavourAvailability.availability().get().available());
+                long unitsTotal = Math.min(cloudAvailability.total(), flavourAvailability.availability().get().total());
+                AvailabilityData combinedAvailability = new AvailabilityData(unitsAvailable, unitsTotal);
+                flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(combinedAvailability), FlavourAvailability.AvailabilityConfidence.CERTAIN);
 
             } else {
-                if (availableUnits > 0) {
+                if (cloudAvailability.available() > 0) {
                     // Check device availability from
-                    Optional<Long> deviceAvailability = this.getDeviceAvailability(flavourResourceRequirement.flavourDevices);
-                    availability = this.convertDeviceAvailabilityToFlavourAvailability(flavourResourceRequirement, availableUnits, deviceAvailability);
+                    Optional<AvailabilityData> deviceAvailability = this.getDeviceAvailability(flavourResourceRequirement.flavourDevices);
+                    flavourAvailability = this.convertDeviceAvailabilityToFlavourAvailability(flavourResourceRequirement, cloudAvailability, deviceAvailability.orElse(null));
 
                 } else {
                     logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Units 0", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);
-                    availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(0L), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+                    flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(new AvailabilityData(0L, 0L)), FlavourAvailability.AvailabilityConfidence.CERTAIN);
                 }
             }
         }
 
-        if (availability == null) {
+        if (flavourAvailability == null) {
             // If we have no hypervisor information nor cloud limit information then we know nothing about the availability
-            availability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
+            flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
         }
 
-        return availability;
+        return flavourAvailability;
     }
 
 
-    private long getAvailableUnitsFromCloudResources(final FlavourResourceRequirement flavourResourceRequirement) {
+    private AvailabilityData getAvailableUnitsFromCloudResources(final FlavourResourceRequirement flavourResourceRequirement) {
         long cloudVCPUsAvailable = cloudResources.getVcpuAvailable();
         long cloudMemoryMBAvailable = cloudResources.getMemoryMBAvailable();
+        long cloudVCPUsTotal = cloudResources.getVcpuTotal();
+        long cloudMemoryMBTotal = cloudResources.getMemoryMbTotal();
 
-        long vcpuUnits = cloudVCPUsAvailable / flavourResourceRequirement.vcpus;
-        long ramUnits = cloudMemoryMBAvailable / flavourResourceRequirement.memoryMB;
-        long instanceUnits = cloudResources.getInstancesAvailable();
+        long vcpuUnitsAvailable = cloudVCPUsAvailable / flavourResourceRequirement.vcpus;
+        long ramUnitsAvailable = cloudMemoryMBAvailable / flavourResourceRequirement.memoryMB;
+        long instanceUnitsAvailable = cloudResources.getInstancesAvailable();
 
-        return Math.min(instanceUnits, Math.min(vcpuUnits, ramUnits));
+        long vcpuUnitsTotal = cloudVCPUsTotal / flavourResourceRequirement.vcpus;
+        long ramUnitsTotal = cloudMemoryMBTotal / flavourResourceRequirement.memoryMB;
+        long instanceUnitsTotal = cloudResources.getInstancesTotal();
+
+        long unitsAvailable = Math.min(instanceUnitsAvailable, Math.min(vcpuUnitsAvailable, ramUnitsAvailable));
+        long unitsTotal = Math.min(instanceUnitsTotal, Math.min(vcpuUnitsTotal, ramUnitsTotal));
+        return new AvailabilityData(unitsAvailable, unitsTotal);
     }
 
 
@@ -193,7 +213,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
             .toList();
 
 
-        long availableUnits = hypervisorInventories.stream()
+        AvailabilityData availabilityData = hypervisorInventories.stream()
             .filter (hypervisorInventory -> {
                 // Get hypervisors where we know the Device resource units match those of the hypervisors
                 List<String> requiredResourceClasses = managedDevices.stream()
@@ -207,83 +227,101 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
                 // Get the number of available flavours for each hypervisor
                 long vcpusAvailable = hypervisorInventory.cpusAvailable();
                 long ramMBAvailable = hypervisorInventory.memoryMBAvailable();
-                long devicesAvailable = managedDevices.stream()
+                long totalCPUs = hypervisorInventory.totalCPUs();
+                long totalMemoryMB = hypervisorInventory.totalMemoryMB();
+
+                AvailabilityData devicesAvailabilityData = managedDevices.stream()
                     .map(flavourDevice -> {
                         final DevicePool devicePool = flavourDevice.getDevicePool();
                         final String resourceClass = devicePool.getResourceClass();
                         // Get number of units on the hypervisor
-                        long hypervisorAvailability = hypervisorInventory.getAvailableResource(resourceClass);
+                        long hypervisorAvailable = hypervisorInventory.getAvailableResource(resourceClass);
+                        long hypervisorTotal = hypervisorInventory.getTotalResource(resourceClass);
+                        long availableHypervisorUnits = hypervisorAvailable / flavourDevice.getUnitCount();
+                        long totalHypervisorUnits = hypervisorTotal / flavourDevice.getUnitCount();
 
-                        return hypervisorAvailability / flavourDevice.getUnitCount();
+                        return new AvailabilityData(availableHypervisorUnits, totalHypervisorUnits);
                     })
-                    .mapToLong(Long::longValue)
-                    .min()
-                    .orElse(0L);
+                    .reduce(new AvailabilityData(999999L, 999999L), (acc, curr) -> {
+                        return new AvailabilityData(Math.min(acc.available(), curr.available()), Math.min(acc.total(), curr.total()));
+                    });
 
-                long vcpuUnits = vcpusAvailable / flavourResourceRequirement.vcpus;
-                long ramUnits = ramMBAvailable / flavourResourceRequirement.memoryMB;
+                long vcpuUnitsAvailable = vcpusAvailable / flavourResourceRequirement.vcpus;
+                long ramUnitsAvailable = ramMBAvailable / flavourResourceRequirement.memoryMB;
+                long vcpuUnitsTotal = totalCPUs / flavourResourceRequirement.vcpus;
+                long ramUnitsTotal = totalMemoryMB / flavourResourceRequirement.memoryMB;
 
-                return Math.min(devicesAvailable, Math.min(vcpuUnits, ramUnits));
+                long unitsAvailable = Math.min(devicesAvailabilityData.available(), Math.min(vcpuUnitsAvailable, ramUnitsAvailable));
+                long unitsTotal = Math.min(devicesAvailabilityData.total(), Math.min(vcpuUnitsTotal, ramUnitsTotal));
+                return new AvailabilityData(unitsAvailable, unitsTotal);
+
             })
-            .mapToLong(Long::longValue)
-            .sum();
+            .reduce(new AvailabilityData(0L, 0L), (acc, cur) -> {
+                return new AvailabilityData(acc.available() + cur.available(), acc.total() + cur.total());
+            });
 
         // Take into account device pool usage/manual limits
         for (FlavourDevice device : managedDevices) {
-            final Integer available = devicePoolUsages.stream()
+            final AvailabilityData devicePoolAvailability = devicePoolUsages.stream()
                 .filter(aUsage -> device.getDevicePool().getResourceClass().equals(aUsage.getResourceClass()))
-                .map(DevicePoolUsage::getAvailableUnits)
+                .map(devicePoolUsage -> {
+                    return new AvailabilityData((long)devicePoolUsage.getAvailableUnits(), (long)devicePoolUsage.getTotalUnits());
+                })
                 .findAny()
                 .orElse(null);
 
             // availability goes to the manually specified value if it is lower
-            if (available != null) {
-                availableUnits = Math.min(availableUnits, available / device.getUnitCount());
+            if (devicePoolAvailability != null) {
+                long availableUnits = Math.min(availabilityData.available(), devicePoolAvailability.available() / device.getUnitCount());
+                long totalUnits = Math.min(availabilityData.total(), devicePoolAvailability.total() / device.getUnitCount());
+                availabilityData = new AvailabilityData(availableUnits, totalUnits);
             }
         }
 
         if (!unmanagedDevices.isEmpty()) {
-            Optional<Long> unmanagedDeviceAvailability = this.getDeviceAvailability(unmanagedDevices);
-            return this.convertDeviceAvailabilityToFlavourAvailability(flavourResourceRequirement, availableUnits, unmanagedDeviceAvailability);
+            Optional<AvailabilityData> unmanagedDeviceAvailability = this.getDeviceAvailability(unmanagedDevices);
+            return this.convertDeviceAvailabilityToFlavourAvailability(flavourResourceRequirement, availabilityData, unmanagedDeviceAvailability.orElse(null));
 
         } else {
             // This is a definite value obtained directly from the hypervisors, taking into account manually managed device limits
-            return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.CERTAIN);
+            return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availabilityData), FlavourAvailability.AvailabilityConfidence.CERTAIN);
         }
 
     }
 
 
-    private Optional<Long> getDeviceAvailability(final List<FlavourDevice> flavourDevices) {
+    private Optional<AvailabilityData> getDeviceAvailability(final List<FlavourDevice> flavourDevices) {
         return flavourDevices.stream()
             .map(flavourDevice -> {
                 final DevicePool devicePool = flavourDevice.getDevicePool();
-                Optional<Long> availability;
                 final DevicePoolUsage devicePoolUsage = devicePoolUsages.stream()
                     .filter(aDevicePoolUsage -> aDevicePoolUsage.getDevicePoolId().equals(devicePool.getId()))
                     .findFirst()
                     .orElse(null);
 
+                Optional<AvailabilityData> availabilityData;
                 if (devicePoolUsage == null) {
-                    availability = Optional.empty();
+                    availabilityData =  Optional.empty();
 
                 } else {
                     if (devicePoolUsage.getAvailableUnits() == null) {
-                        availability = Optional.empty();
+                        availabilityData = Optional.empty();
                     } else {
-                        availability = Optional.of(((long)devicePoolUsage.getAvailableUnits() / (long)flavourDevice.getUnitCount()));
+                        long availability = (long)devicePoolUsage.getAvailableUnits() / (long)flavourDevice.getUnitCount();
+                        long total = (long)devicePoolUsage.getTotalUnits() / (long)flavourDevice.getUnitCount();
+                        availabilityData = Optional.of(new AvailabilityData(availability, total));
                     }
                 }
-                return availability;
+                return availabilityData;
             })
-            .reduce(Optional.of(99999L), (acc, next) -> {
+            .reduce(Optional.of(new AvailabilityData(99999L, 99999L)), (acc, next) -> {
                 // If any are zero, return zero, otherwise return if any are unknown, otherwise the minimum of non empty ones
-                if (acc.isPresent() && acc.get() == 0L) {
+                if (acc.isPresent() && acc.get().available() == 0L) {
                     return acc;
-                } else if (next.isPresent() && next.get() == 0L) {
+                } else if (next.isPresent() && next.get().available() == 0L) {
                     return next;
                 } else if (next.isPresent() && acc.isPresent()) {
-                    return next.get() < acc.get() ? next : acc;
+                    return Optional.of(new AvailabilityData(Math.min(next.get().available(), acc.get().available()), Math.min(next.get().total(), acc.get().total())));
                 } else if (acc.isEmpty()) {
                     return acc;
                 } else {
@@ -292,23 +330,17 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
             });
     }
 
-    private FlavourAvailability convertDeviceAvailabilityToFlavourAvailability(final FlavourResourceRequirement flavourResourceRequirement, final Long knownFlavourAvailability, final Optional<Long> deviceAvailability) {
-        if (deviceAvailability.isEmpty()) {
+    private FlavourAvailability convertDeviceAvailabilityToFlavourAvailability(final FlavourResourceRequirement flavourResourceRequirement, final AvailabilityData knownFlavourAvailability, final AvailabilityData deviceAvailability) {
+        if (deviceAvailability == null) {
             // If we have no knowledge of whether all the devices are available
             logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Device Units Unknown", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);
             return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
 
         } else {
-            long devicesAvailable = deviceAvailability.get();
-            if (devicesAvailable == 0) {
-                logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Device Units 0", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);
-                return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(0L), FlavourAvailability.AvailabilityConfidence.CERTAIN);
-
-            } else {
-                long availableUnits = Math.min(knownFlavourAvailability, devicesAvailable);
-                logger.debug("Flavour {} (RAM_MB {} vCPUs {}), Devices available {}, available Units {}", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus, devicesAvailable, availableUnits);
-                return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(availableUnits), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
-            }
+            long availableUnits = Math.min(knownFlavourAvailability.available(), deviceAvailability.available());
+            long totalUnits = Math.min(knownFlavourAvailability.total(), deviceAvailability.total());
+            logger.debug("Flavour {} (RAM_MB {} vCPUs {}), Devices available {}, available Units {}", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus, deviceAvailability.available(), availableUnits);
+            return new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(new AvailabilityData(availableUnits, totalUnits)), FlavourAvailability.AvailabilityConfidence.UNCERTAIN);
         }
     }
 

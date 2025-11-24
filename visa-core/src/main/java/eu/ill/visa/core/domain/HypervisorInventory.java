@@ -5,7 +5,7 @@ import eu.ill.visa.core.entity.*;
 
 import java.util.List;
 
-public record HypervisorInventory(Long hypervisorId, String hostname, long cpusAvailable, long memoryMBAvailable, List<HypervisorResource> resources, List<String> serverComputeIds) {
+public record HypervisorInventory(Long hypervisorId, String hostname, long cpusAvailable, long totalCPUs,long memoryMBAvailable, long totalMemoryMB, List<HypervisorResource> resources, List<String> serverComputeIds) {
 
     public HypervisorInventory onInstanceReleased(final Instance instance) {
         final Flavour flavour = instance.getPlan().getFlavour();
@@ -43,7 +43,7 @@ public record HypervisorInventory(Long hypervisorId, String hostname, long cpusA
             .filter(serverComputeId -> !instance.getComputeId().equals(serverComputeId))
             .toList();
 
-        return new HypervisorInventory(hypervisorId, hostname, cpusAvailable, memoryMBAvailable, resources, serverComputeIds);
+        return new HypervisorInventory(hypervisorId, hostname, cpusAvailable, this.totalCPUs, memoryMBAvailable, this.totalMemoryMB, resources, serverComputeIds);
     }
 
     public boolean hasResourceClasses(List<String> requiredResourceClasses) {
@@ -63,6 +63,14 @@ public record HypervisorInventory(Long hypervisorId, String hostname, long cpusA
         return this.resources.stream()
             .filter(resource -> resource.getResourceClass().equals(resourceClass))
             .map(HypervisorResource::getAvailable)
+            .findFirst()
+            .orElse(0L);
+    }
+
+    public long getTotalResource(String resourceClass) {
+        return this.resources.stream()
+            .filter(resource -> resource.getResourceClass().equals(resourceClass))
+            .map(HypervisorResource::getTotal)
             .findFirst()
             .orElse(0L);
     }

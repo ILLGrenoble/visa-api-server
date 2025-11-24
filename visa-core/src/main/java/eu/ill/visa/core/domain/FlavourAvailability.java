@@ -6,7 +6,9 @@ import eu.ill.visa.core.entity.Flavour;
 import java.util.Date;
 import java.util.Optional;
 
-public record FlavourAvailability(Date date, Flavour flavour, Optional<Long> availableUnits, AvailabilityConfidence confidence) {
+public record FlavourAvailability(Date date, Flavour flavour, Optional<AvailabilityData> availability, AvailabilityConfidence confidence) {
+
+    public record AvailabilityData(Long available, Long total) {}
 
     public AvailabilityState isAvailable() {
         if (date.after(new Date())) {
@@ -30,8 +32,8 @@ public record FlavourAvailability(Date date, Flavour flavour, Optional<Long> ava
     }
 
     public AvailabilityState hasUnits() {
-        if (availableUnits.isPresent()) {
-            long units = availableUnits.get();
+        if (availability.isPresent()) {
+            long units = availability.get().available;
             if (units == 0) {
                 return AvailabilityState.NO;
 
