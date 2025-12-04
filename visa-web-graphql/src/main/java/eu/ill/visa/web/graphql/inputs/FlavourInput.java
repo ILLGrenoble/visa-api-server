@@ -97,9 +97,9 @@ public class FlavourInput {
     }
 
     public static final class RoleLifetimeInput {
-        @AdaptToScalar(Scalar.Int.class) Long id;
-        @AdaptToScalar(Scalar.Int.class) Long roleId;
-        @AdaptToScalar(Scalar.Int.class) Long lifetimeMinutes;
+        private @AdaptToScalar(Scalar.Int.class) Long id;
+        private @AdaptToScalar(Scalar.Int.class) Long roleId;
+        private @AdaptToScalar(Scalar.Int.class) Long lifetimeMinutes;
 
         public Long getId() {
             return id;
