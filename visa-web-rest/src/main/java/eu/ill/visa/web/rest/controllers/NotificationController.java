@@ -49,7 +49,7 @@ public class NotificationController extends AbstractController {
         // Check for auth and admin user
         if (securityContext.getUserPrincipal() != null && securityContext.getUserPrincipal() instanceof AccountToken accountToken) {
             User user = accountToken.getUser();
-            if (user.hasRole(Role.ADMIN_ROLE)) {
+            if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
 
                 List<ClientNotification> clientNotifications = this.clientNotificationService.getAllAdminNotifications();
                 notificationPayload.setAdminNotifications(clientNotifications);

@@ -68,7 +68,7 @@ public class InstanceExtensionRequestService {
         final Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest = instance.getPlan().getImage().getAutoAcceptExtensionRequest();
         final boolean autoAccept = autoAcceptExtensionRequest != null &&
             (autoAcceptExtensionRequest.equals(Image.AutoAcceptExtensionRequest.ALL) ||
-                autoAcceptExtensionRequest.equals(Image.AutoAcceptExtensionRequest.STAFF) && instance.getOwner().getUser().hasRole(Role.STAFF_ROLE));
+                autoAcceptExtensionRequest.equals(Image.AutoAcceptExtensionRequest.STAFF) && instance.getOwner().getUser().hasRoleWithName(Role.STAFF_ROLE));
 
         if (autoAccept) {
             // Automatically grant the extension if the auto-accept policy is set to ALL

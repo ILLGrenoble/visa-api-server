@@ -257,9 +257,18 @@ public class User {
         }
     }
 
-    public boolean hasRole(String targetRole) {
+    public boolean hasRoleWithName(String targetRole) {
         for (final Role role : this.getRoles()) {
             if (role.getName().equals(targetRole)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasRole(final Role targetRole) {
+        for (final Role role : this.getRoles()) {
+            if (role.equals(targetRole)) {
                 return true;
             }
         }
@@ -275,8 +284,17 @@ public class User {
         return null;
     }
 
-    public boolean hasAnyRole(List<String> targetRoles) {
+    public boolean hasAnyRoleWithName(List<String> targetRoles) {
         for (final String targetRole : targetRoles) {
+            if (this.hasRoleWithName(targetRole)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasAnyRole(List<Role> targetRoles) {
+        for (final Role targetRole : targetRoles) {
             if (this.hasRole(targetRole)) {
                 return true;
             }

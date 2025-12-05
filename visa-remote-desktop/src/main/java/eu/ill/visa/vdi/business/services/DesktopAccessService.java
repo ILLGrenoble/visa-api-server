@@ -224,7 +224,7 @@ public class DesktopAccessService {
     private InstanceMemberRole convertAccessReplyRole(InstanceMemberRole replyRole, Instance instance, ConnectedUser user) {
         if (replyRole.equals(InstanceMemberRole.SUPPORT)) {
             InstanceMember owner = instance.getOwner();
-            boolean ownerIsExternalUser = !owner.getUser().hasRole(eu.ill.visa.core.entity.Role.STAFF_ROLE);
+            boolean ownerIsExternalUser = !owner.getUser().hasRoleWithName(eu.ill.visa.core.entity.Role.STAFF_ROLE);
             if (ownerIsExternalUser) {
                 // See if user has right to access instance when owner away (support role, otherwise user role)
                 if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {

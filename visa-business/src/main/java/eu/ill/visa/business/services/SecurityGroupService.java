@@ -79,7 +79,7 @@ public class SecurityGroupService {
         // Get security groups from security-groups web service
         List<String> customSecurityGroups = this.getCustomSecurityGroups(instance);
 
-        if (owner.hasRole(Role.ADMIN_ROLE)) {
+        if (owner.hasRoleWithName(Role.ADMIN_ROLE)) {
             List<String> allSecurityGroups = this.getAllForCloudClient(cloudClientId).stream()
                 .map(SecurityGroup::getName)
                 .toList();

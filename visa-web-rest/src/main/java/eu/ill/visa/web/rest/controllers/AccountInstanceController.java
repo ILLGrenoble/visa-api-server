@@ -275,7 +275,7 @@ public class AccountInstanceController extends AbstractController {
         if (experiments.size() != dto.getExperiments().size()) {
             throw new NotAuthorizedException("Not authorized to associate instance to requested experiments");
 
-        } else if (user.hasRole(Role.ADMIN_ROLE)) {
+        } else if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
             List<Plan> plansForAdmin = this.planService.getAllForAdmin();
             if (plansForAdmin.stream().noneMatch(aPlan -> aPlan.getId().equals(plan.getId()))) {
                 throw new NotAuthorizedException("Not authorized to create an instance with the selected Plan for the requested experiments");
@@ -283,7 +283,7 @@ public class AccountInstanceController extends AbstractController {
 
         } else if (experiments.isEmpty()) {
             // Validate no experiments valid for user (only admin and scientific support)
-            if (!user.hasAnyRole(List.of(Role.ADMIN_ROLE, Role.STAFF_ROLE, Role.GUEST_ROLE))) {
+            if (!user.hasAnyRoleWithName(List.of(Role.ADMIN_ROLE, Role.STAFF_ROLE, Role.GUEST_ROLE))) {
                 throw new NotAuthorizedException("Not authorized to create an instance without any associated experiments");
             }
             List<Plan> plansForInstruments = this.planService.getAllForUserAndAllInstruments(user);
@@ -755,10 +755,10 @@ public class AccountInstanceController extends AbstractController {
         if (instanceMember != null) {
             instanceDto.setMembership(new InstanceMemberDto(instanceMember));
 
-        } else if (user.hasRole(Role.ADMIN_ROLE)) {
+        } else if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
             instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
 
-        } else if (user.hasAnyRole(List.of(Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
+        } else if (user.hasAnyRoleWithName(List.of(Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
             instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
         }
         instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));

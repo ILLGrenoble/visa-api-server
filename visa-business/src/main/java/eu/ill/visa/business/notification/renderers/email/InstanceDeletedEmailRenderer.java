@@ -60,11 +60,11 @@ public class InstanceDeletedEmailRenderer extends BaseRenderer implements Notifi
             final Writer writer = new StringWriter();
             final Map<String, Object> variables = new HashMap<>();
 
-            final Long maxInactivityDurationDays = user.hasRole(Role.STAFF_ROLE) ? staffMaxInactivityDurationDays : userMaxInactivityDurationDays;
-            final Long maxLifetimeDurationDays = user.hasRole(Role.STAFF_ROLE) ? staffMaxLifetimeDurationDays : userMaxLifetimeDurationDays;
+            final Long maxInactivityDurationDays = user.hasRoleWithName(Role.STAFF_ROLE) ? staffMaxInactivityDurationDays : userMaxInactivityDurationDays;
+            final Long maxLifetimeDurationDays = user.hasRoleWithName(Role.STAFF_ROLE) ? staffMaxLifetimeDurationDays : userMaxLifetimeDurationDays;
             variables.put("instance", instance);
             variables.put("user", user);
-            variables.put("isStaff", user.hasRole(Role.STAFF_ROLE));
+            variables.put("isStaff", user.hasRoleWithName(Role.STAFF_ROLE));
             variables.put("maxInactivityDurationDays", maxInactivityDurationDays);
             variables.put("maxLifetimeDurationDays", maxLifetimeDurationDays);
             if (instance.getTerminationDate() == null || instance.getTerminationDate().compareTo(instanceExpiration.getExpirationDate()) > 0) {

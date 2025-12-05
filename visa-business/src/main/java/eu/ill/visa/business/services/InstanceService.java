@@ -272,13 +272,13 @@ public class InstanceService {
     }
 
     public Long countAllForSupportUser(User user, InstanceFilter filter) {
-        if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
+        if (user.hasRoleWithName(Role.INSTRUMENT_CONTROL_ROLE)) {
             return this.countAllForInstrumentControlSupport(filter);
 
-        } else if (user.hasRole(Role.IT_SUPPORT_ROLE)) {
+        } else if (user.hasRoleWithName(Role.IT_SUPPORT_ROLE)) {
             return this.countAllForITSupport(filter);
 
-        } else if (user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE)) {
+        } else if (user.hasRoleWithName(Role.INSTRUMENT_SCIENTIST_ROLE)) {
             return this.countAllForInstrumentScientist(user, filter);
         }
 
@@ -327,7 +327,7 @@ public class InstanceService {
     }
 
     public Duration getDefaultInstanceDuration(final User user) {
-        if (user != null && user.hasRole(Role.STAFF_ROLE)) {
+        if (user != null && user.hasRoleWithName(Role.STAFF_ROLE)) {
             return Duration.ofHours(this.configuration.staffMaxLifetimeDurationHours());
 
         } else {
@@ -336,11 +336,11 @@ public class InstanceService {
     }
 
     public boolean isOwnerOrAdmin(User user, Instance instance) {
-        return instance.isOwner(user) || user.hasRole(Role.ADMIN_ROLE);
+        return instance.isOwner(user) || user.hasRoleWithName(Role.ADMIN_ROLE);
     }
 
     public boolean isOwnerOrAdmin(User user, Long instanceId) {
-        if (user.hasRole(Role.ADMIN_ROLE)) {
+        if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
             return true;
         }
         return this.getByIdForOwner(user, instanceId) != null;
@@ -357,18 +357,18 @@ public class InstanceService {
 
     public boolean isInstanceSupport(User user, Instance instance) {
         // Check specific instances for the different support roles
-        if (user.hasRole(Role.ADMIN_ROLE)) {
+        if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
             return true;
 
-        } else if (user.hasRole(Role.IT_SUPPORT_ROLE)) {
+        } else if (user.hasRoleWithName(Role.IT_SUPPORT_ROLE)) {
             Instance instanceForITSupport = this.getByIdForITSupport(instance.getId());
             return (instanceForITSupport != null);
 
-        } else if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
+        } else if (user.hasRoleWithName(Role.INSTRUMENT_CONTROL_ROLE)) {
             Instance instanceForInstrumentControl = this.getByIdForInstrumentControlSupport(instance.getId());
             return (instanceForInstrumentControl != null);
 
-        } else if (user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE)) {
+        } else if (user.hasRoleWithName(Role.INSTRUMENT_SCIENTIST_ROLE)) {
             Instance instanceForInstrumentScientist = this.getByIdForInstrumentScientist(user, instance.getId());
             return (instanceForInstrumentScientist != null);
         }
@@ -400,13 +400,13 @@ public class InstanceService {
     }
 
     private List<Instance> getAllForSupportByUserRole(User user, InstanceFilter filter, OrderBy orderBy, Pagination pagination) {
-        if (user.hasRole(Role.INSTRUMENT_CONTROL_ROLE)) {
+        if (user.hasRoleWithName(Role.INSTRUMENT_CONTROL_ROLE)) {
             return this.getAllForInstrumentControlSupport(filter, orderBy, pagination);
 
-        } else if (user.hasRole(Role.IT_SUPPORT_ROLE)) {
+        } else if (user.hasRoleWithName(Role.IT_SUPPORT_ROLE)) {
             return this.getAllForITSupport(filter, orderBy, pagination);
 
-        } else if (user.hasRole(Role.INSTRUMENT_SCIENTIST_ROLE)) {
+        } else if (user.hasRoleWithName(Role.INSTRUMENT_SCIENTIST_ROLE)) {
             return this.getAllForInstrumentScientist(user, filter, orderBy, pagination);
         }
 

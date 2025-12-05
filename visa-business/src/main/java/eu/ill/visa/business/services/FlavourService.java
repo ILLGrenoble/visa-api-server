@@ -44,6 +44,16 @@ public class FlavourService {
         return this.repository.getAllForAdmin();
     }
 
+    public List<Flavour> getAllForCloudClient(Long cloudClientId) {
+        long clientId = cloudClientId == null ? -1L : cloudClientId;
+        return this.repository.getAllForAdmin().stream()
+            .filter(flavour -> {
+                long flavourCloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+                return clientId == flavourCloudId;
+            })
+            .toList();
+    }
+
     public Flavour getById(Long id) {
         return this.repository.getById(id);
     }

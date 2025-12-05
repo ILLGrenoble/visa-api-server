@@ -168,7 +168,7 @@ public class InstanceSessionService {
         // Check for support/admin access: can access if owner is standard user (not staff) or has granted unrestricted access
         boolean userIsSupport = this.instanceService.isInstanceSupport(user, instance);
         InstanceMember owner = instance.getOwner();
-        boolean ownerIsExternalUser = !owner.getUser().hasRole(Role.STAFF_ROLE);
+        boolean ownerIsExternalUser = !owner.getUser().hasRoleWithName(Role.STAFF_ROLE);
         if (userIsSupport) {
             return instance.canAccessWhenOwnerAway() || ownerIsExternalUser;
         }
@@ -182,7 +182,7 @@ public class InstanceSessionService {
 
         final InstanceMember member = instance.getMember(user);
         if (member == null) {
-            if (user.hasAnyRole(List.of(Role.ADMIN_ROLE, Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
+            if (user.hasAnyRoleWithName(List.of(Role.ADMIN_ROLE, Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
                 return InstanceMemberRole.SUPPORT;
             }
 

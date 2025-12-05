@@ -55,7 +55,7 @@ public class InstanceExtensionRenderer extends BaseRenderer implements Notificat
             final Writer writer = new StringWriter();
             final Map<String, Object> variables = new HashMap<>();
 
-            final Long maxInactivityDurationDays = user.hasRole(Role.STAFF_ROLE) ? staffMaxInactivityDurationDays : userMaxInactivityDurationDays;
+            final Long maxInactivityDurationDays = user.hasRoleWithName(Role.STAFF_ROLE) ? staffMaxInactivityDurationDays : userMaxInactivityDurationDays;
 
             variables.put("instance", instance);
             variables.put("handlerComments", handlerComments == null ? "" : handlerComments.replaceAll("\n", "<br>"));

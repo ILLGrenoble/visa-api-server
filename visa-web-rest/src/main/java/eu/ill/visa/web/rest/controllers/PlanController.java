@@ -58,7 +58,7 @@ public class PlanController extends AbstractController {
 
         List<Plan> plans = null;
 
-        if (user.hasRole(Role.ADMIN_ROLE)) {
+        if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
             plans = planService.getAllForAdmin();
 
         } else {

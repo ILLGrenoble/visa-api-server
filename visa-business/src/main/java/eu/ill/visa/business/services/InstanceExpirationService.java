@@ -154,12 +154,12 @@ public class InstanceExpirationService {
         Integer staffInactivityDurationHours = this.configuration.staffMaxInactivityDurationHours() - HOURS_BEFORE_EXPIRATION_INACTIVITY;
 
         var userInstancesStream = this.instanceService.getAllNewInactive(userInactivityDurationHours).stream()
-            .filter(instance -> !instance.getOwner().getUser().hasRole(Role.STAFF_ROLE));
+            .filter(instance -> !instance.getOwner().getUser().hasRoleWithName(Role.STAFF_ROLE));
         var staffInstancesStream = this.instanceService.getAllNewInactive(staffInactivityDurationHours).stream()
-            .filter(instance -> instance.getOwner().getUser().hasRole(Role.STAFF_ROLE));
+            .filter(instance -> instance.getOwner().getUser().hasRoleWithName(Role.STAFF_ROLE));
         var instances = Stream.concat(userInstancesStream, staffInstancesStream).toList();
         for (var instance : instances) {
-            boolean isStaffOwner = instance.getOwner().getUser().hasRole(Role.STAFF_ROLE);
+            boolean isStaffOwner = instance.getOwner().getUser().hasRoleWithName(Role.STAFF_ROLE);
             var maxInactivityDurationHours = isStaffOwner
                 ? this.configuration.staffMaxInactivityDurationHours()
                 : this.configuration.userMaxInactivityDurationHours();
