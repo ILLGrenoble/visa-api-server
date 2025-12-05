@@ -20,7 +20,7 @@ public class BookingFlavourRoleConfigurationType {
         this.maxInstancesPerReservation = bookingFlavourRoleConfiguration.getMaxInstancesPerReservation();
         this.maxDaysReservation = bookingFlavourRoleConfiguration.getMaxDaysReservation();
         this.flavour = new FlavourType(bookingFlavourRoleConfiguration.getFlavour());
-        this.role = new RoleType(bookingFlavourRoleConfiguration.getRole());
+        this.role = bookingFlavourRoleConfiguration.getRole() == null ? null : new RoleType(bookingFlavourRoleConfiguration.getRole());
     }
 
     public Long getMaxInstancesPerReservation() {

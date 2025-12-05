@@ -2,6 +2,7 @@ package eu.ill.visa.web.graphql.inputs;
 
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -11,9 +12,9 @@ import java.util.List;
 public class BookingConfigurationInput {
 
     private @NotNull Boolean enabled;
-    private @AdaptToScalar(Scalar.Int.class) Long maxInstancesPerReservation;
-    private @AdaptToScalar(Scalar.Int.class) Long maxDaysInAdvance;
-    private @AdaptToScalar(Scalar.Int.class) Long maxDaysReservation;
+    private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxInstancesPerReservation;
+    private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxDaysInAdvance;
+    private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxDaysReservation;
     private @AdaptToScalar(Scalar.Int.class) Long cloudId;
     private @AdaptToScalar(Scalar.Int.class) @NotNull List<Long> flavourIds;
     private @AdaptToScalar(Scalar.Int.class) @NotNull List<Long> roleIds;
@@ -85,9 +86,9 @@ public class BookingConfigurationInput {
 
     public static final class BookingFlavourRoleConfigurationInput {
         private @AdaptToScalar(Scalar.Int.class) @NotNull Long flavourId;
-        private @AdaptToScalar(Scalar.Int.class) @NotNull Long roleId;
-        private @AdaptToScalar(Scalar.Int.class) Long maxInstancesPerReservation;
-        private @AdaptToScalar(Scalar.Int.class) Long maxDaysReservation;
+        private @AdaptToScalar(Scalar.Int.class) Long roleId;
+        private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxInstancesPerReservation;
+        private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxDaysReservation;
 
         public Long getFlavourId() {
             return flavourId;

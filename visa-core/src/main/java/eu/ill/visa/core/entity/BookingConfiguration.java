@@ -58,7 +58,7 @@ public class BookingConfiguration extends Timestampable {
         joinColumns = @JoinColumn(name = "booking_configuration_id", foreignKey = @ForeignKey(name = "fk_booking_configuration_id")),
         inverseJoinColumns = @JoinColumn(name = "flavour_id", foreignKey = @ForeignKey(name = "fk_flavour_id"))
     )
-    private List<Flavour> flavours;
+    private List<Flavour> flavours = new ArrayList<>();
 
     @ManyToMany(fetch =  FetchType.EAGER)
     @JoinTable(
@@ -66,7 +66,7 @@ public class BookingConfiguration extends Timestampable {
         joinColumns = @JoinColumn(name = "booking_configuration_id", foreignKey = @ForeignKey(name = "fk_booking_configuration_id")),
         inverseJoinColumns = @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role_id"))
     )
-    private List<Role> roles;
+    private List<Role> roles = new ArrayList<>();
 
     @OneToMany(orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinColumn(name = "booking_configuration_id", foreignKey = @ForeignKey(name = "fk_booking_configuration_id"), nullable = false)
