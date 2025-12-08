@@ -2,6 +2,7 @@ package eu.ill.visa.business.services;
 
 
 import eu.ill.visa.core.domain.BookingFlavourConfiguration;
+import eu.ill.visa.core.domain.BookingUserConfiguration;
 import eu.ill.visa.core.entity.*;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -23,8 +24,11 @@ public class BookingService {
         this.flavourService = flavourService;
     }
 
-    public List<BookingFlavourConfiguration> getBookingFlavourConfigurations(final User user) {
-        List<BookingConfiguration> bookingConfigurations = this.bookingConfigurationService.getAll();
+    public BookingUserConfiguration getBookingUserConfigurations(final User user) {
+        List<BookingConfiguration> bookingConfigurations = this.bookingConfigurationService.getAll().stream()
+            .filter(BookingConfiguration::isEnabled)
+            .toList();
+
         List<BookingFlavourConfiguration> flavourConfigurations = new ArrayList<>();
         for (BookingConfiguration bookingConfiguration : bookingConfigurations) {
             // Check if user has a valid role
@@ -40,7 +44,9 @@ public class BookingService {
             }
         }
 
-        return flavourConfigurations;
+        boolean enabled = !flavourConfigurations.isEmpty();
+
+        return new BookingUserConfiguration(enabled, flavourConfigurations);
     }
 
     private BookingFlavourConfiguration getBookingFlavourConfiguration(final User user, final Flavour flavour, BookingConfiguration bookingConfiguration) {
