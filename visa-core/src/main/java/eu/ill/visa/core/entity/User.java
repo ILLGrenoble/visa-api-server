@@ -164,6 +164,11 @@ public class User {
         return String.format("%s %s", this.firstName, this.lastName);
     }
 
+    @Transient
+    public String getFullNameAndId() {
+        return String.format("%s %s (%s)", this.firstName, this.lastName, this.id);
+    }
+
     public String getFirstName() {
         return firstName;
     }

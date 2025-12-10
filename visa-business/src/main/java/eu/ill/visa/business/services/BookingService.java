@@ -3,28 +3,45 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.core.domain.BookingFlavourConfiguration;
 import eu.ill.visa.core.domain.BookingUserConfiguration;
+import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.entity.*;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
+import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
+import static java.lang.String.format;
+
 @Singleton
+@Transactional
 public class BookingService {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BookingService.class);
 
     private final BookingConfigurationService bookingConfigurationService;
+    private final BookingRequestService bookingRequestService;
+    private final FlavourAvailabilityService flavourAvailabilityService;
     private final FlavourService flavourService;
 
     @Inject
     public BookingService(final BookingConfigurationService bookingConfigurationService,
+                          final BookingRequestService bookingRequestService,
+                          final FlavourAvailabilityService flavourAvailabilityService,
                           final FlavourService flavourService) {
         this.bookingConfigurationService = bookingConfigurationService;
+        this.bookingRequestService = bookingRequestService;
+        this.flavourAvailabilityService = flavourAvailabilityService;
         this.flavourService = flavourService;
     }
 
-    public BookingUserConfiguration getBookingUserConfigurations(final User user) {
+    public BookingUserConfiguration getBookingUserConfiguration(final User user) {
         List<BookingConfiguration> bookingConfigurations = this.bookingConfigurationService.getAll().stream()
             .filter(BookingConfiguration::isEnabled)
             .toList();
@@ -47,6 +64,97 @@ public class BookingService {
         boolean enabled = !flavourConfigurations.isEmpty();
 
         return new BookingUserConfiguration(enabled, flavourConfigurations);
+    }
+
+    public BookingRequestValidation validateAndSaveBookingRequest(final BookingRequest bookingRequest) {
+        List<String> errors = new ArrayList<>();
+        // Verify user access to flavours in the request
+        final BookingUserConfiguration bookingUserConfiguration = this.getBookingUserConfiguration(bookingRequest.getOwner());
+
+        // Verify dates of request
+        final LocalDate startDate = bookingRequest.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        final LocalDate endDate = bookingRequest.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (!startDate.isAfter(LocalDate.now())) {
+            errors.add(format("The reservation start date (%s) is too early", startDate));
+        }
+        long daysToReservation = ChronoUnit.DAYS.between(LocalDate.now(), startDate);
+        long reservationDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+
+        final List<Flavour> flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavour::getFlavour).toList();
+        final Map<Flavour, List<FlavourAvailability>> flavoursAvailabilities = this.flavourAvailabilityService.getFutureAvailabilities(flavours, startDate, endDate);
+
+        // Verify flavour
+        for (BookingRequestFlavour requestFlavour : bookingRequest.getFlavours()) {
+            final Flavour requestedFlavour = requestFlavour.getFlavour();
+            final Long requestedQuantity = requestFlavour.getQuantity();
+
+            // Ensure flavour is available to user
+            final BookingFlavourConfiguration flavourConfiguration = bookingUserConfiguration.flavourConfigurations().stream()
+                .filter(configuration -> configuration.flavour().equals(requestedFlavour))
+                .findFirst().orElse(null);
+
+            boolean flavourOk = true;
+
+            if (flavourConfiguration == null) {
+                flavourOk = false;
+                logger.warn("User ({}) has requested a flavour ({}) that is not available to them for reservation", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName());
+
+            } else {
+                final Long maxDaysInAdvance = flavourConfiguration.maxDaysInAdvance();
+                final Long maxReservationDays = flavourConfiguration.maxReservationDays();
+                final Long maxInstances =  flavourConfiguration.maxInstances();
+
+                // Ensure days in advance is valid
+                if (maxDaysInAdvance != null && daysToReservation > maxDaysInAdvance) {
+                    flavourOk = false;
+                    logger.warn("User ({}) has requested a flavour ({}) after the max allowed days in the future ({} > {})", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName(), daysToReservation, flavourConfiguration.maxDaysInAdvance());
+                }
+
+                // Ensure days reservation is valid
+                if (maxReservationDays != null && reservationDays > maxReservationDays) {
+                    flavourOk = false;
+                    logger.warn("User ({}) has requested a flavour ({}) for an unacceptable duration ({} > {})", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName(), reservationDays, flavourConfiguration.maxReservationDays());
+                }
+
+                // Ensure quantity of instances is valid
+                if (maxInstances != null && requestFlavour.getQuantity() > maxInstances) {
+                    flavourOk = false;
+                    logger.warn("User ({}) has requested too many instances of a flavour ({}) ({} > {})", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName(), requestFlavour.getQuantity(), flavourConfiguration.maxInstances());
+                }
+
+                // Ensure availability of flavour for the dates
+                final List<FlavourAvailability> flavourAvailabilities = flavoursAvailabilities.get(requestedFlavour);
+                if (flavourAvailabilities == null) {
+                    flavourOk = false;
+                    logger.warn("Unable to obtain flavour availabilities for flavour \"{}\"",  requestedFlavour.getName());
+
+                } else {
+                    // determine if any of the availabilities returned have insufficient available quantities
+                    boolean availabilityOk = flavourAvailabilities.stream()
+                        .noneMatch(aFlavourAvailability -> {
+                            final FlavourAvailability.AvailabilityData availability = aFlavourAvailability.availability().orElse(null);
+                            return availability == null || availability.available() < requestedQuantity;
+                        });
+
+                    if (!availabilityOk) {
+                        flavourOk = false;
+                        logger.info("The flavour \"{}\" is unavailable in sufficient quantities (or cannot be determined) during the reservation dates ({} to {})",  requestedFlavour.getName(), startDate, endDate);
+                    }
+                }
+
+                if (!flavourOk) {
+                    errors.add(format("The requested flavour (%s) is not available for the reservation request", requestedFlavour.getName()));
+                }
+            }
+        }
+
+        boolean isValid = errors.isEmpty();
+        if (isValid) {
+            this.bookingRequestService.save(bookingRequest);
+            logger.info("Booking request has been successfully validated: {}", bookingRequest);
+        }
+
+        return new BookingRequestValidation(bookingRequest, isValid, errors);
     }
 
     private BookingFlavourConfiguration getBookingFlavourConfiguration(final User user, final Flavour flavour, BookingConfiguration bookingConfiguration) {
@@ -81,4 +189,6 @@ public class BookingService {
                 }
             });
     }
+
+    public record BookingRequestValidation(BookingRequest bookingRequest, boolean isValid, List<String> errors) {}
 }

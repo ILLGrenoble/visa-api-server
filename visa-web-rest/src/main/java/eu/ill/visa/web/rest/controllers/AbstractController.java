@@ -32,6 +32,10 @@ public abstract class AbstractController {
         return new MetaResponse<>(entity, metadata, errors);
     }
 
+    protected <T> MetaResponse<T> createResponse(final T entity, final List<String> errors) {
+        return new MetaResponse<>(entity, null, errors);
+    }
+
     protected <T> RestResponse<MetaResponse<T>> createResponse(final T entity, final Status status) {
         return ResponseBuilder.create(status, new MetaResponse<>(entity, null, null)).build();
     }

@@ -108,13 +108,13 @@ public class BookingFlavourRoleConfiguration {
         }
 
         public BookingFlavourRoleConfiguration build() {
-            BookingFlavourRoleConfiguration devicePool = new BookingFlavourRoleConfiguration();
-            devicePool.setId(id);
-            devicePool.setMaxInstancesPerReservation(maxInstancesPerReservation);
-            devicePool.setMaxDaysReservation(maxDaysReservation);
-            devicePool.setFlavour(flavour);
-            devicePool.setRole(role);
-            return devicePool;
+            BookingFlavourRoleConfiguration flavourRoleConfiguration = new BookingFlavourRoleConfiguration();
+            flavourRoleConfiguration.setId(id);
+            flavourRoleConfiguration.setMaxInstancesPerReservation(maxInstancesPerReservation);
+            flavourRoleConfiguration.setMaxDaysReservation(maxDaysReservation);
+            flavourRoleConfiguration.setFlavour(flavour);
+            flavourRoleConfiguration.setRole(role);
+            return flavourRoleConfiguration;
         }
     }
 }

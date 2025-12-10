@@ -213,17 +213,17 @@ public class BookingConfiguration extends Timestampable {
         }
 
         public BookingConfiguration build() {
-            BookingConfiguration devicePool = new BookingConfiguration();
-            devicePool.setId(id);
-            devicePool.setEnabled(enabled);
-            devicePool.setMaxInstancesPerReservation(maxInstancesPerReservation);
-            devicePool.setMaxDaysInAdvance(maxDaysInAdvance);
-            devicePool.setMaxDaysReservation(maxDaysReservation);
-            devicePool.setCloudProviderConfiguration(cloudProviderConfiguration);
-            devicePool.setFlavours(flavours);
-            devicePool.setRoles(roles);
-            devicePool.setFlavourRoleConfigurations(flavourRoleConfigurations);
-            return devicePool;
+            BookingConfiguration bookingConfiguration = new BookingConfiguration();
+            bookingConfiguration.setId(id);
+            bookingConfiguration.setEnabled(enabled);
+            bookingConfiguration.setMaxInstancesPerReservation(maxInstancesPerReservation);
+            bookingConfiguration.setMaxDaysInAdvance(maxDaysInAdvance);
+            bookingConfiguration.setMaxDaysReservation(maxDaysReservation);
+            bookingConfiguration.setCloudProviderConfiguration(cloudProviderConfiguration);
+            bookingConfiguration.setFlavours(flavours);
+            bookingConfiguration.setRoles(roles);
+            bookingConfiguration.setFlavourRoleConfigurations(flavourRoleConfigurations);
+            return bookingConfiguration;
         }
     }
 }

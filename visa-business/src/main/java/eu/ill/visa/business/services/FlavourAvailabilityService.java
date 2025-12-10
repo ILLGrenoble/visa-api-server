@@ -15,6 +15,8 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,17 +87,33 @@ public class FlavourAvailabilityService {
     }
 
     public List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour) {
+        return this.getFutureAvailabilities(flavour, LocalDate.now(), LocalDate.now().plusYears(1000));
+    }
+
+    public List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, final LocalDate from, final LocalDate to) {
         final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
 
         final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
 
         Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
 
-        return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudInstances.get(cloudId));
+        return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudInstances.get(cloudId), from, to);
     }
 
     public Map<Flavour, List<FlavourAvailability>> getAllFutureAvailabilities() {
+        return this.getAllFutureAvailabilities(LocalDate.now(), LocalDate.now().plusYears(1000));
+    }
+
+    public Map<Flavour, List<FlavourAvailability>> getAllFutureAvailabilities(final LocalDate from, final LocalDate to) {
         final List<Flavour> flavours = this.flavourService.getAllForAdmin();
+        return this.getFutureAvailabilities(flavours, from, to);
+    }
+
+    public Map<Flavour, List<FlavourAvailability>> getFutureAvailabilities(final List<Flavour> flavours) {
+        return this.getFutureAvailabilities(flavours, LocalDate.now(), LocalDate.now().plusYears(1000));
+    }
+
+    public Map<Flavour, List<FlavourAvailability>> getFutureAvailabilities(final List<Flavour> flavours, final LocalDate from, final LocalDate to) {
         final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
         final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
 
@@ -109,7 +127,6 @@ public class FlavourAvailabilityService {
                 }
             ));
     }
-
 
     private FlavourAvailability getAvailability(final Flavour flavour, final SystemResources systemResources) {
         if (systemResources == null) {
@@ -143,6 +160,10 @@ public class FlavourAvailabilityService {
     }
 
     private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<Instance> instances) {
+        return this.getFutureAvailabilities(flavour, systemResources, instances, LocalDate.now(), LocalDate.now().plusYears(1000));
+    }
+
+    private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<Instance> instances, final LocalDate from, final LocalDate to) {
         if (systemResources == null) {
             // We don't know anything so return unknown response
             return List.of(new FlavourAvailability(new Date(), flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN));
@@ -151,12 +172,19 @@ public class FlavourAvailabilityService {
             List<FlavourAvailability> futures = new ArrayList<>();
 
             // Initialise array with the current availability
-            futures.add(systemResources.getAvailability(flavour));
+            LocalDate referenceDate = LocalDate.now();
+            if (!from.isAfter(referenceDate)) {
+                futures.add(systemResources.getAvailability(flavour));
+            }
 
             if (instances != null) {
                 for (Instance instance : instances) {
                     systemResources = systemResources.onInstanceDeleted(instance);
-                    futures.add(systemResources.getAvailability(flavour));
+                    referenceDate = instance.getTerminationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+                    if (!from.isAfter(referenceDate) && !to.isBefore(referenceDate)) {
+                        futures.add(systemResources.getAvailability(flavour));
+                    }
                 }
             }
             return futures;
