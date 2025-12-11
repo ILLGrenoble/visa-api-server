@@ -59,6 +59,9 @@ public class BookingRequest extends Timestampable {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name", length = 250, nullable = false)
+    private String name;
+
     @Column(name = "start_date", nullable = false)
     private Date startDate;
 
@@ -84,14 +87,15 @@ public class BookingRequest extends Timestampable {
     @JoinColumn(name = "booking_request_id", foreignKey = @ForeignKey(name = "fk_booking_request_id"), nullable = false)
     private List<BookingRequestHistory> history = new ArrayList<>();
 
-    public static BookingRequest Create(Date startDate, Date endDate, User owner, String comments, List<BookingRequestFlavour> flavours) {
-        return new BookingRequest(startDate, endDate, owner, comments, flavours);
+    public static BookingRequest Create(String name, Date startDate, Date endDate, User owner, String comments, List<BookingRequestFlavour> flavours) {
+        return new BookingRequest(name, startDate, endDate, owner, comments, flavours);
     }
 
     public BookingRequest() {
     }
 
-    private BookingRequest(Date startDate, Date endDate, User owner, String comments, List<BookingRequestFlavour> flavours) {
+    private BookingRequest(String name, Date startDate, Date endDate, User owner, String comments, List<BookingRequestFlavour> flavours) {
+        this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
         this.owner = owner;
@@ -106,6 +110,14 @@ public class BookingRequest extends Timestampable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Date getStartDate() {

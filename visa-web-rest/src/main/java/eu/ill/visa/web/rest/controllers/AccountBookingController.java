@@ -1,5 +1,6 @@
 package eu.ill.visa.web.rest.controllers;
 
+import eu.ill.visa.business.services.BookingRequestService;
 import eu.ill.visa.business.services.BookingService;
 import eu.ill.visa.business.services.BookingService.BookingRequestValidation;
 import eu.ill.visa.business.services.FlavourService;
@@ -28,13 +29,23 @@ import java.util.List;
 public class AccountBookingController extends AbstractController {
 
     private final BookingService bookingService;
+    private final BookingRequestService bookingRequestService;
     private final FlavourService flavourService;
 
     @Inject
     public AccountBookingController(final BookingService bookingService,
+                                    final BookingRequestService bookingRequestService,
                                     final FlavourService flavourService) {
         this.bookingService = bookingService;
+        this.bookingRequestService = bookingRequestService;
         this.flavourService = flavourService;
+    }
+
+    @GET
+    public MetaResponse<List<BookingRequestDto>> getBookings(@Context SecurityContext securityContext) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        return createResponse(this.bookingRequestService.getAllForOwner(user).stream().map(BookingRequestDto::new).toList());
     }
 
     @POST
@@ -57,7 +68,7 @@ public class AccountBookingController extends AbstractController {
                 return new BookingRequestFlavour(flavour, flavourInput.getQuantity());
             }).toList();
 
-        BookingRequest bookingRequest = BookingRequest.Create(input.getStartDate(), input.getEndDate(), user, input.getComments(), flavourRequests);
+        BookingRequest bookingRequest = BookingRequest.Create(input.getName(), input.getStartDate(), input.getEndDate(), user, input.getComments(), flavourRequests);
         final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest);
 
         if (validation.isValid()) {

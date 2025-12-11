@@ -36,7 +36,7 @@ public class BookingRequestService {
     }
 
 
-    public List<BookingRequest> getAllForOwnerId(final User owner) {
+    public List<BookingRequest> getAllForOwner(final User owner) {
         return this.repository.getAllForOwnerId(owner.getId());
     }
 

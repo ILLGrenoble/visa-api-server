@@ -12,6 +12,10 @@ import java.util.List;
 public class BookingRequestInput {
 
     @NotNull
+    @Size(max = 250)
+    private String name;
+
+    @NotNull
     private Date startDate;
 
     @NotNull
@@ -25,6 +29,14 @@ public class BookingRequestInput {
     private String comments;
 
     public BookingRequestInput() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Date getStartDate() {
