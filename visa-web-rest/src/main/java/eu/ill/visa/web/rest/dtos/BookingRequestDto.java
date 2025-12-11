@@ -11,6 +11,7 @@ import java.util.List;
 public class BookingRequestDto {
 
     private final Long id;
+    private final String uid;
     private final String name;
     private final Date createdAt;
     private final Date startDate;
@@ -22,6 +23,7 @@ public class BookingRequestDto {
 
     public BookingRequestDto(BookingRequest bookingRequest) {
         this.id = bookingRequest.getId();
+        this.uid = bookingRequest.getUid();
         this.name = bookingRequest.getName();
         this.createdAt = bookingRequest.getCreatedAt();
         this.startDate = bookingRequest.getStartDate();
@@ -34,6 +36,10 @@ public class BookingRequestDto {
 
     public Long getId() {
         return id;
+    }
+
+    public String getUid() {
+        return uid;
     }
 
     public String getName() {

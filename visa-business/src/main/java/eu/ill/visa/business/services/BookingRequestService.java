@@ -9,11 +9,14 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Transactional
 @Singleton
@@ -29,6 +32,10 @@ public class BookingRequestService {
 
     public BookingRequest getById(Long id) {
         return this.repository.getById(id);
+    }
+
+    public BookingRequest getByUid(String uid) {
+        return this.repository.getByUid(uid);
     }
 
     public List<BookingRequest> getAll() {
@@ -57,6 +64,22 @@ public class BookingRequestService {
         bookingRequest.setState(BookingRequestState.DELETED);
         bookingRequest.getHistory().add(new BookingRequestHistory(BookingRequestState.DELETED, null, user));
         this.save(bookingRequest);
+    }
+
+    public String getUID() {
+        String regex = "^.*[a-zA-Z]+.*";
+        Pattern pattern = Pattern.compile(regex);
+
+        do {
+            String uid = RandomStringUtils.randomAlphanumeric(8);
+
+            // Ensure UID has at least one character to make it distinguishable from a valid ID
+            Matcher matcher = pattern.matcher(uid);
+
+            if (matcher.matches() && this.repository.getByUid(uid) == null) {
+                return uid;
+            }
+        } while (true);
     }
 
 }

@@ -20,6 +20,12 @@ import static java.lang.String.format;
         WHERE br.id = :id
         AND br.deletedAt IS NULL
     """),
+    @NamedQuery(name = "bookingRequest.getByUid", query = """
+        SELECT br
+        FROM BookingRequest br
+        WHERE br.uid = :uid
+        AND br.deletedAt IS NULL
+    """),
     @NamedQuery(name = "bookingRequest.getAll", query = """
         SELECT br
         FROM BookingRequest br
@@ -59,6 +65,9 @@ public class BookingRequest extends Timestampable {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "uid", length = 16, nullable = false)
+    private String uid;
+
     @Column(name = "name", length = 250, nullable = false)
     private String name;
 
@@ -87,21 +96,8 @@ public class BookingRequest extends Timestampable {
     @JoinColumn(name = "booking_request_id", foreignKey = @ForeignKey(name = "fk_booking_request_id"), nullable = false)
     private List<BookingRequestHistory> history = new ArrayList<>();
 
-    public static BookingRequest Create(String name, Date startDate, Date endDate, User owner, String comments, List<BookingRequestFlavour> flavours) {
-        return new BookingRequest(name, startDate, endDate, owner, comments, flavours);
-    }
-
-    public BookingRequest() {
-    }
-
-    private BookingRequest(String name, Date startDate, Date endDate, User owner, String comments, List<BookingRequestFlavour> flavours) {
-        this.name = name;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.owner = owner;
-        this.state = BookingRequestState.CREATED;
-        this.flavours = flavours;
-        this.history.add(new BookingRequestHistory(BookingRequestState.CREATED, comments, owner));
+    public static Builder Builder() {
+        return new Builder();
     }
 
     public Long getId() {
@@ -110,6 +106,14 @@ public class BookingRequest extends Timestampable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getName() {
@@ -184,5 +188,64 @@ public class BookingRequest extends Timestampable {
         String formattedFlavours = this.flavours.stream().map(BookingRequestFlavour::toString).collect(Collectors.joining(", "));
         return format("%s. Flavours: %s", formatted, formattedFlavours);
     }
+
+    public static final class Builder {
+        private String uid;
+        private String name;
+        private Date startDate;
+        private Date endDate;
+        private User owner;
+        private String comments;
+        private List<BookingRequestFlavour> flavours;
+
+        public Builder uid(String uid) {
+            this.uid = uid;
+            return this;
+        }
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder startDate(Date startDate) {
+            this.startDate = startDate;
+            return this;
+        }
+
+        public Builder endDate(Date endDate) {
+            this.endDate = endDate;
+            return this;
+        }
+
+        public Builder owner(User owner) {
+            this.owner = owner;
+            return this;
+        }
+
+        public Builder comments(String comments) {
+            this.comments = comments;
+            return this;
+        }
+
+        public Builder flavours(List<BookingRequestFlavour> flavours) {
+            this.flavours = flavours;
+            return this;
+        }
+
+        public BookingRequest build() {
+            BookingRequest request = new BookingRequest();
+            request.uid = uid;
+            request.name = name;
+            request.startDate = startDate;
+            request.endDate = endDate;
+            request.owner = owner;
+            request.state = BookingRequestState.CREATED;
+            request.history.add(new BookingRequestHistory(BookingRequestState.CREATED, comments, owner));
+            request.flavours = flavours;
+            return request;
+        }
+    }
+
+
 
 }

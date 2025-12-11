@@ -28,6 +28,17 @@ public class BookingRequestRepository extends AbstractRepository<BookingRequest>
         }
     }
 
+    public BookingRequest getByUid(String uid) {
+        final TypedQuery<BookingRequest> query = getEntityManager().createNamedQuery("bookingRequest.getByUid", BookingRequest.class);
+        query.setParameter("uid", uid);
+        try {
+            return query.getSingleResult();
+
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
     public List<BookingRequest> getAll() {
         final TypedQuery<BookingRequest> query = getEntityManager().createNamedQuery("bookingRequest.getAll", BookingRequest.class);
         return query.getResultList();

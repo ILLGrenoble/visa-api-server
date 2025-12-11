@@ -21,6 +21,7 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
     private final PlanParamConverter planParamConverter;
     private final InstanceParamConverter instanceParamConverter;
     private final InstanceMemberParamConverter instanceMemberParamConverter;
+    private final BookingRequestParamConverter bookingRequestParamConverter;
 
     @Inject
     public HttpParamConverterProvider(final InstrumentParamConverter instrumentParamConverter,
@@ -30,7 +31,8 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
                                       final FlavourParamConverter flavourParamConverter,
                                       final PlanParamConverter planParamConverter,
                                       final InstanceParamConverter instanceParamConverter,
-                                      final InstanceMemberParamConverter instanceMemberParamConverter) {
+                                      final InstanceMemberParamConverter instanceMemberParamConverter,
+                                      final BookingRequestParamConverter bookingRequestParamConverter) {
         this.instrumentParamConverter = instrumentParamConverter;
         this.userParamConverter = userParamConverter;
         this.experimentParamConverter = experimentParamConverter;
@@ -39,6 +41,7 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
         this.planParamConverter = planParamConverter;
         this.instanceParamConverter = instanceParamConverter;
         this.instanceMemberParamConverter = instanceMemberParamConverter;
+        this.bookingRequestParamConverter = bookingRequestParamConverter;
     }
 
     @Override
@@ -75,6 +78,10 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
 
         if (InstanceMember.class.isAssignableFrom(rawType)) {
             return (ParamConverter<T>) instanceMemberParamConverter;
+        }
+
+        if (BookingRequest.class.isAssignableFrom(rawType)) {
+            return (ParamConverter<T>) bookingRequestParamConverter;
         }
 
         return null;

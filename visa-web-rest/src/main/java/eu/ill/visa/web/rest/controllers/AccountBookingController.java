@@ -68,7 +68,15 @@ public class AccountBookingController extends AbstractController {
                 return new BookingRequestFlavour(flavour, flavourInput.getQuantity());
             }).toList();
 
-        BookingRequest bookingRequest = BookingRequest.Create(input.getName(), input.getStartDate(), input.getEndDate(), user, input.getComments(), flavourRequests);
+        BookingRequest bookingRequest = BookingRequest.Builder()
+            .uid(this.bookingRequestService.getUID())
+            .name(input.getName())
+            .startDate(input.getStartDate())
+            .endDate(input.getEndDate())
+            .owner(user)
+            .comments(input.getComments())
+            .flavours(flavourRequests)
+            .build();
         final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest);
 
         if (validation.isValid()) {
@@ -77,6 +85,30 @@ public class AccountBookingController extends AbstractController {
         } else {
             return createResponse(null, validation.errors());
         }
+    }
+
+    @GET
+    @Path("/{bookingRequest}")
+    public MetaResponse<BookingRequestDto> getBookingRequest(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingRequest.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to access the booking request");
+        }
+
+        return createResponse(new BookingRequestDto(bookingRequest));
+    }
+
+    @DELETE
+    @Path("/{bookingRequest}")
+    public MetaResponse<BookingRequestDto> deleteBookingRequest(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingRequest.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to access the booking request");
+        }
+
+        this.bookingRequestService.delete(bookingRequest, user);
+
+        return createResponse(new BookingRequestDto(bookingRequest));
     }
 
     @GET
