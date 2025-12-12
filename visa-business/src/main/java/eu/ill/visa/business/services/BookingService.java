@@ -170,22 +170,26 @@ public class BookingService {
 
         } else {
             // Only use the specific rules: if User Role is not included then they can't reserve this flavour
-            return this.flavourConfigurationFromSpecificRules(user, flavour, bookingConfiguration.getFlavourRoleConfigurations(), bookingConfiguration.getMaxDaysInAdvance());
+            BookingFlavourConfiguration specificConfiguration = this.flavourConfigurationFromSpecificRules(user, flavour, bookingConfiguration.getFlavourRoleConfigurations());
+            return specificConfiguration.withDefaults(bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation(), bookingConfiguration.getMaxDaysInAdvance());
         }
     }
 
-    private BookingFlavourConfiguration flavourConfigurationFromSpecificRules(final User user, final Flavour flavour, List<BookingFlavourRoleConfiguration> flavourRoleConfigurations, Long maxDaysInAdvance) {
+    private BookingFlavourConfiguration flavourConfigurationFromSpecificRules(final User user, final Flavour flavour, List<BookingFlavourRoleConfiguration> flavourRoleConfigurations) {
         // Ensure that the user has the right Roles applying to the flavour rules and find the best conditions for them
         return flavourRoleConfigurations.stream()
+            .filter(config -> config.getFlavour().equals(flavour))
             .filter(config -> config.getRole() == null || user.hasRole(config.getRole()) || user.hasRoleWithName(Role.ADMIN_ROLE))
-            .map(config -> new BookingFlavourConfiguration(flavour, config.getMaxInstancesPerReservation(), config.getMaxDaysReservation(), maxDaysInAdvance))
+            .map(config -> {
+                return new BookingFlavourConfiguration(flavour, config.getMaxInstancesPerReservation(), config.getMaxDaysReservation());
+            })
             .reduce(null, (acc, next) -> {
                 if (acc == null) {
                     return next;
                 } else {
-                    Long maxInstances = Math.max(next.maxInstances(),  acc.maxInstances());
-                    Long maxReservationDays = Math.max(next.maxReservationDays(), acc.maxReservationDays());
-                    return new BookingFlavourConfiguration(flavour, maxInstances, maxReservationDays, maxDaysInAdvance);
+                    Long maxInstances = acc.maxInstances() == null ? next.maxInstances() : next.maxInstances() == null ? acc.maxInstances() : Math.max(next.maxInstances(),  acc.maxInstances());
+                    Long maxReservationDays = acc.maxReservationDays() == null ? next.maxReservationDays() : next.maxReservationDays() == null ? acc.maxReservationDays() : Math.max(next.maxReservationDays(),  acc.maxReservationDays());
+                    return new BookingFlavourConfiguration(flavour, maxInstances, maxReservationDays);
                 }
             });
     }
