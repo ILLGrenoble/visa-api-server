@@ -1,10 +1,7 @@
 package eu.ill.visa.web.rest.controllers;
 
-import eu.ill.visa.business.services.BookingRequestService;
-import eu.ill.visa.business.services.BookingService;
+import eu.ill.visa.business.services.*;
 import eu.ill.visa.business.services.BookingService.BookingRequestValidation;
-import eu.ill.visa.business.services.FlavourAvailabilityService;
-import eu.ill.visa.business.services.FlavourService;
 import eu.ill.visa.core.domain.BookingFlavourConfiguration;
 import eu.ill.visa.core.domain.BookingUserConfiguration;
 import eu.ill.visa.core.domain.FlavourAvailability;
@@ -12,10 +9,7 @@ import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.BookingRequestFlavour;
 import eu.ill.visa.core.entity.Flavour;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.web.rest.dtos.BookingRequestDto;
-import eu.ill.visa.web.rest.dtos.BookingRequestInput;
-import eu.ill.visa.web.rest.dtos.BookingUserConfigurationDto;
-import eu.ill.visa.web.rest.dtos.FlavourAvailabilitiesFutureDto;
+import eu.ill.visa.web.rest.dtos.*;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
@@ -37,16 +31,19 @@ public class AccountBookingController extends AbstractController {
 
     private final BookingService bookingService;
     private final BookingRequestService bookingRequestService;
+    private final BookingTokenService  bookingTokenService;
     private final FlavourService flavourService;
     private final FlavourAvailabilityService flavourAvailabilityService;
 
     @Inject
     public AccountBookingController(final BookingService bookingService,
                                     final BookingRequestService bookingRequestService,
+                                    final BookingTokenService  bookingTokenService,
                                     final FlavourService flavourService,
                                     final FlavourAvailabilityService flavourAvailabilityService) {
         this.bookingService = bookingService;
         this.bookingRequestService = bookingRequestService;
+        this.bookingTokenService = bookingTokenService;
         this.flavourService = flavourService;
         this.flavourAvailabilityService = flavourAvailabilityService;
     }
@@ -87,7 +84,7 @@ public class AccountBookingController extends AbstractController {
             .comments(input.getComments())
             .flavours(flavourRequests)
             .build();
-        final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest);
+        final BookingRequestValidation validation = this.bookingService.validateAndCreateBookingRequest(bookingRequest);
 
         if (validation.isValid()) {
             return createResponse(new BookingRequestDto(validation.bookingRequest()));
@@ -119,6 +116,17 @@ public class AccountBookingController extends AbstractController {
         this.bookingRequestService.delete(bookingRequest, user);
 
         return createResponse(new BookingRequestDto(bookingRequest));
+    }
+
+    @GET
+    @Path("/{bookingRequest}/tokens")
+    public MetaResponse<List<BookingTokenDto>> getBookingRequestTokens(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingRequest.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to access the booking request");
+        }
+
+        return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(BookingTokenDto::new).toList());
     }
 
     @GET

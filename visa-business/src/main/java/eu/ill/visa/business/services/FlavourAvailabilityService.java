@@ -31,23 +31,26 @@ public class FlavourAvailabilityService {
     private final CloudResourcesService cloudResourcesService;
     private final DevicePoolService devicePoolService;
     private final InstanceService instanceService;
+    private final BookingRequestService bookingRequestService;
 
     @Inject
     public FlavourAvailabilityService(final FlavourService flavourService,
                                       final HypervisorService hypervisorService,
                                       final CloudResourcesService cloudResourcesService,
                                       final DevicePoolService devicePoolService,
-                                      final InstanceService instanceService) {
+                                      final InstanceService instanceService,
+                                      final BookingRequestService bookingRequestService) {
         this.flavourService = flavourService;
         this.hypervisorService = hypervisorService;
         this.cloudResourcesService = cloudResourcesService;
         this.devicePoolService = devicePoolService;
         this.instanceService = instanceService;
+        this.bookingRequestService = bookingRequestService;
     }
 
     public List<FlavourAvailability> getAllCurrentAvailabilities() {
         final List<Flavour> flavours = this.flavourService.getAllForAdmin();
-        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
 
         return flavours.stream()
             .map(flavour -> {
@@ -59,7 +62,7 @@ public class FlavourAvailabilityService {
     }
 
     public FlavourAvailability getCurrentAvailability(final Flavour flavour) {
-        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
 
         Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
 
@@ -68,7 +71,7 @@ public class FlavourAvailabilityService {
 
     public List<FlavourAvailability> getAllFirstAvailabilities() {
         final List<Flavour> flavours = this.flavourService.getAllForAdmin();
-        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
 
         return flavours.stream()
             .map(flavour -> {
@@ -82,7 +85,7 @@ public class FlavourAvailabilityService {
     public FlavourAvailability getFirstAvailability(final Flavour flavour) {
         Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
 
-        SystemResources systemResources = this.getAllSystemResources().get(cloudId);
+        SystemResources systemResources = this.getAllAvailableSystemResources().get(cloudId);
         return this.getFirstAvailability(flavour, systemResources);
     }
 
@@ -91,7 +94,7 @@ public class FlavourAvailabilityService {
     }
 
     public List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, final LocalDate from, final LocalDate to) {
-        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
 
         final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
 
@@ -114,7 +117,7 @@ public class FlavourAvailabilityService {
     }
 
     public Map<Flavour, List<FlavourAvailability>> getFutureAvailabilities(final List<Flavour> flavours, final LocalDate from, final LocalDate to) {
-        final Map<Long, SystemResources> allSystemResource = this.getAllSystemResources();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
         final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
 
         return flavours.stream()
@@ -189,6 +192,17 @@ public class FlavourAvailabilityService {
             }
             return futures;
         }
+    }
+
+    private Map<Long, SystemResources> getAllAvailableSystemResources() {
+
+        Map<Long, SystemResources> allSystemResources = this.getAllSystemResources();
+
+        // Remove all resources that are from active bookings but haven't got associated instances yet
+
+
+
+        return allSystemResources;
     }
 
     private Map<Long, SystemResources> getAllSystemResources() {

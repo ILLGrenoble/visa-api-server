@@ -24,10 +24,13 @@ public class BookingRequestService {
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
 
     private final BookingRequestRepository repository;
+    private final BookingTokenService  bookingTokenService;
 
     @Inject
-    public BookingRequestService(final BookingRequestRepository repository) {
+    public BookingRequestService(final BookingRequestRepository repository,
+                                 final BookingTokenService  bookingTokenService) {
         this.repository = repository;
+        this.bookingTokenService = bookingTokenService;
     }
 
     public BookingRequest getById(Long id) {
@@ -53,6 +56,13 @@ public class BookingRequestService {
 
     public List<BookingRequest> getAllPending() {
         return this.repository.getAllPending();
+    }
+
+    public void create(final BookingRequest bookingRequest) {
+        this.save(bookingRequest);
+
+        // Create the tokens
+        this.bookingTokenService.createBookingTokensForBookingRequest(bookingRequest);
     }
 
     public void save(@NotNull BookingRequest bookingRequest) {

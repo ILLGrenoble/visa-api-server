@@ -66,7 +66,7 @@ public class BookingService {
         return new BookingUserConfiguration(enabled, flavourConfigurations);
     }
 
-    public BookingRequestValidation validateAndSaveBookingRequest(final BookingRequest bookingRequest) {
+    public BookingRequestValidation validateAndCreateBookingRequest(final BookingRequest bookingRequest) {
         List<String> errors = new ArrayList<>();
         // Verify user access to flavours in the request
         final BookingUserConfiguration bookingUserConfiguration = this.getBookingUserConfiguration(bookingRequest.getOwner());
@@ -150,8 +150,8 @@ public class BookingService {
 
         boolean isValid = errors.isEmpty();
         if (isValid) {
-            this.bookingRequestService.save(bookingRequest);
-            logger.info("Booking request has been successfully validated: {}", bookingRequest);
+            this.bookingRequestService.create(bookingRequest);
+            logger.info("Booking request has been successfully validated and created: {}", bookingRequest);
         }
 
         return new BookingRequestValidation(bookingRequest, isValid, errors);
