@@ -1,6 +1,7 @@
 package eu.ill.visa.core.entity;
 
 
+import eu.ill.visa.core.domain.ResourceUsageModifier;
 import jakarta.persistence.*;
 
 @Entity
@@ -132,15 +133,14 @@ public class CloudResources extends Timestampable {
         return this.cloudProviderConfiguration == null ? null : this.cloudProviderConfiguration.getId();
     }
 
-    public CloudResources onInstanceReleased(final Instance instance) {
-        final Flavour flavour = instance.getPlan().getFlavour();
+    public CloudResources onResourcesModification(final ResourceUsageModifier resourceModifier) {
         return Builder()
             .vcpuTotal(vcpuTotal)
-            .vcpuUsage(vcpuUsage - flavour.getCpu().longValue())
+            .vcpuUsage(vcpuUsage + resourceModifier.cpuModifier())
             .memoryMbTotal(memoryMbTotal)
-            .memoryMbUsage(memoryMbUsage - flavour.getMemory())
+            .memoryMbUsage(memoryMbUsage + resourceModifier.memoryModifier())
             .instancesTotal(instancesTotal)
-            .instancesUsage(instancesUsage - 1)
+            .instancesUsage(instancesUsage + resourceModifier.instanceModifier())
             .cloudProviderConfiguration(this.cloudProviderConfiguration)
             .build();
     }

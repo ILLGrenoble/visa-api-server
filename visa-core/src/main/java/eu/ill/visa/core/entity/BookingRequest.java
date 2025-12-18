@@ -2,6 +2,7 @@ package eu.ill.visa.core.entity;
 
 import eu.ill.visa.core.entity.enumerations.BookingRequestState;
 import jakarta.persistence.*;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -134,6 +135,11 @@ public class BookingRequest extends Timestampable {
 
     public Date getEndDate() {
         return endDate;
+    }
+
+    @Transient
+    public Date getDayAfterEndDate() {
+        return DateUtils.addDays(this.endDate, 1);
     }
 
     public void setEndDate(Date endDate) {

@@ -68,6 +68,19 @@ public class HypervisorService {
             .toList();
     }
 
+    public List<Resource> getTotalAvailableResources() {
+        return this.getAllAvailable().stream()
+            .flatMap(hypervisor -> hypervisor.getResources().stream())
+            .collect(Collectors.toMap(
+                HypervisorResource::getResourceClass,
+                r -> new Resource(r.getResourceClass(), r.getTotal(), r.getUsage()),
+                (r1, r2) -> new Resource(r1.getResourceClass(), r1.getTotal() + r2.getTotal(), r1.getUsage() + r2.getUsage())
+            ))
+            .values()
+            .stream()
+            .toList();
+    }
+
     public void save(@NotNull Hypervisor hypervisor) {
         this.repository.save(hypervisor);
     }

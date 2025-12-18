@@ -7,6 +7,7 @@ import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,47 +25,48 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
         this(cloudId, new Date(), cloudResources, devicePoolUsages, hypervisorInventories);
     }
 
-    public SystemResources onInstanceDeleted(final Instance instance) {
-        Date date = instance.getTerminationDate();
 
-        CloudResources cloudResources = this.cloudResources.onInstanceReleased(instance);
+    public SystemResources onResourcesModification(final ResourceUsageModifier resourceModifier) {
+        Date date = resourceModifier.modificationDate();
+
+        CloudResources cloudResources = this.cloudResources.onResourcesModification(resourceModifier);
 
         List<DevicePoolUsage> devicePoolUsages = this.devicePoolUsages.stream()
             .map(devicePoolUsage -> {
-//                final InstanceDeviceAllocation instanceDeviceAllocation = instance.getDeviceAllocations().stream()
-//                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getId().equals(devicePoolUsage.getDevicePoolId()))
-//                    .findFirst()
-//                    .orElse(null);
-//
-//                if (instanceDeviceAllocation == null) {
-//                    return devicePoolUsage;
-//                } else {
-//                    return devicePoolUsage.onUnitsReleased(instanceDeviceAllocation.getUnitCount());
-//                }
-                final FlavourDevice flavourDevice = instance.getPlan().getFlavour().getDevices().stream()
-                    .filter(aFlavourDevice -> aFlavourDevice.getDevicePool().getId().equals(devicePoolUsage.getDevicePoolId()))
+                final ResourceUsageModifier.DeviceResourceUsageModifier deviceResourceModifier = resourceModifier.deviceResourceModifiers().stream()
+                    .filter(modifier -> modifier.devicePoolId() == devicePoolUsage.getDevicePoolId())
                     .findFirst()
                     .orElse(null);
 
-                if (flavourDevice == null) {
+                if (deviceResourceModifier == null) {
                     return devicePoolUsage;
                 } else {
-                    return devicePoolUsage.onUnitsReleased(flavourDevice.getUnitCount());
+                    return devicePoolUsage.onUnitsModified(deviceResourceModifier.modifier());
                 }
             })
             .toList();
 
-        List<HypervisorInventory> hypervisorInventories = this.hypervisorInventories.stream()
-            .map(inventory -> {
-                if (inventory.hostsServer(instance.getComputeId())) {
-                    return inventory.onInstanceReleased(instance);
-                } else {
-                    return inventory;
-                }
+        if (resourceModifier.computeId() != null) {
+            List<HypervisorInventory> hypervisorInventories = this.hypervisorInventories.stream()
+                .map(inventory -> {
+                    if (inventory.hostsServer(resourceModifier.computeId())) {
+                        return inventory.onResourcesModification(resourceModifier);
+                    } else {
+                        return inventory;
+                    }
 
-            }).toList();
+                }).toList();
 
-        return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, hypervisorInventories);
+            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, hypervisorInventories);
+
+        } else {
+            // Compute Id unknown, so hypervisor can't be determined: from here-on we cannot precisely determine the
+            // hypervisor inventories after the modification.
+            // Therefor empty all hypervisor inventories since they can't be used to evaluate the system resources
+
+            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, new ArrayList<>());
+        }
+
     }
 
     public FlavourAvailability getAvailability(final Flavour flavour) {

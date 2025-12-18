@@ -20,8 +20,8 @@ public class DevicePoolUsage {
         this.usedUnits = (int)usedUnits;
     }
 
-    public DevicePoolUsage onUnitsReleased(long unitsReleased) {
-        return new DevicePoolUsage(devicePoolId, cloudId, devicePoolName, resourceClass, totalUnits, usedUnits - unitsReleased);
+    public DevicePoolUsage onUnitsModified(long modifier) {
+        return new DevicePoolUsage(devicePoolId, cloudId, devicePoolName, resourceClass, totalUnits, usedUnits + modifier);
     }
 
     public Long getDevicePoolId() {

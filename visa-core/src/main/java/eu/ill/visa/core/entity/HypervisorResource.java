@@ -74,7 +74,7 @@ public class HypervisorResource {
         return total -  usage;
     }
 
-    public HypervisorResource onDeviceReleased(Integer unitCount) {
-        return new HypervisorResource(this.resourceClass, this.total, this.usage - unitCount);
+    public HypervisorResource onDeviceUsageModification(long modification) {
+        return new HypervisorResource(this.resourceClass, this.total, this.usage + modification);
     }
 }

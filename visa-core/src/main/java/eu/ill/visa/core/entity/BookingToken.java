@@ -25,7 +25,7 @@ import java.util.List;
         WHERE br.id = :bookingRequestId
         ORDER By bt.id
     """),
-    @NamedQuery(name = "bookingToken.getAllActiveUnassigned", query = """
+    @NamedQuery(name = "bookingToken.getAllActiveUnusedTokens", query = """
         SELECT bt
         FROM BookingToken bt
         LEFT JOIN BookingRequest br ON bt.bookingRequest = br
@@ -33,6 +33,16 @@ import java.util.List;
         AND bt.instance IS NULL
         AND br.endDate >= CURRENT_DATE()
         AND br.startDate <= CURRENT_DATE()
+        AND br.deletedAt IS NULL
+        AND br.state IN ('CREATED', 'ACCEPTED')
+        ORDER BY bt.id
+    """),
+    @NamedQuery(name = "bookingToken.getAllFutureTokens", query = """
+        SELECT bt
+        FROM BookingToken bt
+        LEFT JOIN BookingRequest br ON bt.bookingRequest = br
+        WHERE bt.deletedAt IS NULL
+        AND br.startDate > CURRENT_DATE()
         AND br.deletedAt IS NULL
         AND br.state IN ('CREATED', 'ACCEPTED')
         ORDER BY bt.id

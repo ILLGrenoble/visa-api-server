@@ -7,32 +7,18 @@ import java.util.List;
 
 public record HypervisorInventory(Long hypervisorId, String hostname, long cpusAvailable, long totalCPUs,long memoryMBAvailable, long totalMemoryMB, List<HypervisorResource> resources, List<String> serverComputeIds) {
 
-    public HypervisorInventory onInstanceReleased(final Instance instance) {
-        final Flavour flavour = instance.getPlan().getFlavour();
-//        final List<InstanceDeviceAllocation> deviceAllocations = instance.getDeviceAllocations();
-        final List<FlavourDevice> flavourDevices = flavour.getDevices();
-
-        long cpusAvailable = this.cpusAvailable + flavour.getCpu().longValue();
-        long memoryMBAvailable = this.memoryMBAvailable + flavour.getMemory().longValue();
+    public HypervisorInventory onResourcesModification(final ResourceUsageModifier resourceModifier) {
+        long cpusAvailable = this.cpusAvailable - resourceModifier.cpuModifier();
+        long memoryMBAvailable = this.memoryMBAvailable - resourceModifier.memoryModifier();
         List<HypervisorResource> resources = this.resources.stream()
             .map(resource -> {
-//                final InstanceDeviceAllocation instanceDeviceAllocation = deviceAllocations.stream()
-//                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass() != null)
-//                    .filter(deviceAllocation -> deviceAllocation.getDevicePool().getResourceClass().equals(resource.getResourceClass()))
-//                    .findFirst()
-//                    .orElse(null);
-//                if (instanceDeviceAllocation != null) {
-//                    return resource.onDeviceReleased(instanceDeviceAllocation.getUnitCount());
-//                } else {
-//                    return resource;
-//                }
-                final FlavourDevice flavourDevice = flavourDevices.stream()
-                    .filter(aFlavourDevice -> aFlavourDevice.getDevicePool().getResourceClass() != null)
-                    .filter(aFlavourDevice -> aFlavourDevice.getDevicePool().getResourceClass().equals(resource.getResourceClass()))
+                final ResourceUsageModifier.DeviceResourceUsageModifier deviceResourceModifier = resourceModifier.deviceResourceModifiers().stream()
+                    .filter(modifier -> modifier.resourceClass() != null)
+                    .filter(modifier -> modifier.resourceClass().equals(resource.getResourceClass()))
                     .findFirst()
                     .orElse(null);
-                if (flavourDevice != null) {
-                    return resource.onDeviceReleased(flavourDevice.getUnitCount());
+                if (deviceResourceModifier != null) {
+                    return resource.onDeviceUsageModification(deviceResourceModifier.modifier());
                 } else {
                     return resource;
                 }
@@ -40,7 +26,7 @@ public record HypervisorInventory(Long hypervisorId, String hostname, long cpusA
             .toList();
 
         List<String> serverComputeIds = this.serverComputeIds.stream()
-            .filter(serverComputeId -> !instance.getComputeId().equals(serverComputeId))
+            .filter(serverComputeId -> !resourceModifier.computeId().equals(serverComputeId))
             .toList();
 
         return new HypervisorInventory(hypervisorId, hostname, cpusAvailable, this.totalCPUs, memoryMBAvailable, this.totalMemoryMB, resources, serverComputeIds);

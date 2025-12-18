@@ -45,11 +45,15 @@ public class BookingTokenRepository extends AbstractRepository<BookingToken> {
         return query.getResultList();
     }
 
-    public List<BookingToken> getAllActiveUnassigned() {
-        final TypedQuery<BookingToken> query = getEntityManager().createNamedQuery("bookingToken.getAllActiveUnassigned", BookingToken.class);
+    public List<BookingToken> getAllActiveUnusedTokens() {
+        final TypedQuery<BookingToken> query = getEntityManager().createNamedQuery("bookingToken.getAllActiveUnusedTokens", BookingToken.class);
         return query.getResultList();
     }
 
+    public List<BookingToken> getAllFutureTokens() {
+        final TypedQuery<BookingToken> query = getEntityManager().createNamedQuery("bookingToken.getAllFutureTokens", BookingToken.class);
+        return query.getResultList();
+    }
 
     public void save(final BookingToken bookingToken) {
         if (bookingToken.getId() == null) {

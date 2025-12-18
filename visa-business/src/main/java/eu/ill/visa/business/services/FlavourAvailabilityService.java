@@ -2,12 +2,12 @@ package eu.ill.visa.business.services;
 
 
 import eu.ill.visa.cloud.domain.CloudResourceClass;
-import eu.ill.visa.core.domain.FlavourAvailability;
-import eu.ill.visa.core.domain.HypervisorInventory;
-import eu.ill.visa.core.domain.OrderBy;
-import eu.ill.visa.core.domain.SystemResources;
+import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
-import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.CloudResources;
+import eu.ill.visa.core.entity.Flavour;
+import eu.ill.visa.core.entity.Hypervisor;
+import eu.ill.visa.core.entity.HypervisorAllocation;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Transactional
 @Singleton
@@ -31,7 +32,7 @@ public class FlavourAvailabilityService {
     private final CloudResourcesService cloudResourcesService;
     private final DevicePoolService devicePoolService;
     private final InstanceService instanceService;
-    private final BookingRequestService bookingRequestService;
+    private final BookingTokenService bookingTokenService;
 
     @Inject
     public FlavourAvailabilityService(final FlavourService flavourService,
@@ -39,13 +40,13 @@ public class FlavourAvailabilityService {
                                       final CloudResourcesService cloudResourcesService,
                                       final DevicePoolService devicePoolService,
                                       final InstanceService instanceService,
-                                      final BookingRequestService bookingRequestService) {
+                                      final BookingTokenService bookingTokenService) {
         this.flavourService = flavourService;
         this.hypervisorService = hypervisorService;
         this.cloudResourcesService = cloudResourcesService;
         this.devicePoolService = devicePoolService;
         this.instanceService = instanceService;
-        this.bookingRequestService = bookingRequestService;
+        this.bookingTokenService = bookingTokenService;
     }
 
     public List<FlavourAvailability> getAllCurrentAvailabilities() {
@@ -96,11 +97,11 @@ public class FlavourAvailabilityService {
     public List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, final LocalDate from, final LocalDate to) {
         final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
 
-        final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
+        final Map<Long, List<ResourceUsageModifier>> cloudResourceUsageModifiers = this.getCloudResourceUsageModifiers();
 
         Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
 
-        return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudInstances.get(cloudId), from, to);
+        return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudResourceUsageModifiers.get(cloudId), from, to);
     }
 
     public Map<Flavour, List<FlavourAvailability>> getAllFutureAvailabilities() {
@@ -118,7 +119,7 @@ public class FlavourAvailabilityService {
 
     public Map<Flavour, List<FlavourAvailability>> getFutureAvailabilities(final List<Flavour> flavours, final LocalDate from, final LocalDate to) {
         final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
-        final Map<Long, List<Instance>> cloudInstances = this.getCloudInstances();
+        final Map<Long, List<ResourceUsageModifier>> cloudResourceUsageModifiers = this.getCloudResourceUsageModifiers();
 
         return flavours.stream()
             .collect(Collectors.toMap(
@@ -126,7 +127,7 @@ public class FlavourAvailabilityService {
                 flavour -> {
                     Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
 
-                    return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudInstances.get(cloudId));
+                    return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudResourceUsageModifiers.get(cloudId));
                 }
             ));
     }
@@ -151,10 +152,10 @@ public class FlavourAvailabilityService {
         Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
         SystemResources futureSystemResources = systemResources;
 
-        final List<Instance> cloudInstances = this.getCloudInstances().get(cloudId);
-        while (cloudInstances != null && !cloudInstances.isEmpty() && availability.hasUnits().equals(FlavourAvailability.AvailabilityState.NO)) {
-            final Instance instance = cloudInstances.removeFirst();
-            futureSystemResources = futureSystemResources.onInstanceDeleted(instance);
+        final List<ResourceUsageModifier> resourceUsageModifiers = this.getCloudResourceUsageModifiers().get(cloudId);
+        while (resourceUsageModifiers != null && !resourceUsageModifiers.isEmpty() && availability.hasUnits().equals(FlavourAvailability.AvailabilityState.NO)) {
+            final ResourceUsageModifier resourceUsageModifier = resourceUsageModifiers.removeFirst();
+            futureSystemResources = futureSystemResources.onResourcesModification(resourceUsageModifier);
             availability = this.getAvailability(flavour, futureSystemResources);
         }
 
@@ -162,11 +163,11 @@ public class FlavourAvailabilityService {
 
     }
 
-    private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<Instance> instances) {
-        return this.getFutureAvailabilities(flavour, systemResources, instances, LocalDate.now(), LocalDate.now().plusYears(1000));
+    private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<ResourceUsageModifier> resourceUsageModifiers) {
+        return this.getFutureAvailabilities(flavour, systemResources, resourceUsageModifiers, LocalDate.now(), LocalDate.now().plusYears(1000));
     }
 
-    private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<Instance> instances, final LocalDate from, final LocalDate to) {
+    private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<ResourceUsageModifier> resourceUsageModifiers, final LocalDate from, final LocalDate to) {
         if (systemResources == null) {
             // We don't know anything so return unknown response
             return List.of(new FlavourAvailability(new Date(), flavour, Optional.empty(), FlavourAvailability.AvailabilityConfidence.UNCERTAIN));
@@ -180,10 +181,10 @@ public class FlavourAvailabilityService {
                 futures.add(systemResources.getAvailability(flavour));
             }
 
-            if (instances != null) {
-                for (Instance instance : instances) {
-                    systemResources = systemResources.onInstanceDeleted(instance);
-                    referenceDate = instance.getTerminationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            if (resourceUsageModifiers != null) {
+                for (ResourceUsageModifier resourceUsageModifier : resourceUsageModifiers) {
+                    systemResources = systemResources.onResourcesModification(resourceUsageModifier);
+                    referenceDate = resourceUsageModifier.modificationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
                     if (!from.isAfter(referenceDate) && !to.isBefore(referenceDate)) {
                         futures.add(systemResources.getAvailability(flavour));
@@ -199,8 +200,12 @@ public class FlavourAvailabilityService {
         Map<Long, SystemResources> allSystemResources = this.getAllSystemResources();
 
         // Remove all resources that are from active bookings but haven't got associated instances yet
-
-
+        this.bookingTokenService.getAllActiveUnusedTokens().forEach(token -> {
+            final ResourceUsageModifier modifier = ResourceUsageModifier.fromBookingTokenStart(token);
+            Long cloudId = modifier.cloudId();
+            SystemResources systemResources = allSystemResources.get(cloudId).onResourcesModification(modifier);
+            allSystemResources.put(cloudId, systemResources);
+        });
 
         return allSystemResources;
     }
@@ -249,16 +254,59 @@ public class FlavourAvailabilityService {
             .collect(Collectors.groupingBy(hypervisor -> hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId()));
     }
 
-    private Map<Long, List<Instance>> getCloudInstances() {
-        final List<Instance> instances = this.instanceService.getAll(new InstanceFilter(), new OrderBy("terminationDate", true)).stream()
+    private Map<Long, List<ResourceUsageModifier>> getCloudResourceUsageModifiers() {
+        final List<ResourceUsageModifier> allModifiers = this.getInstanceTerminationResourceUsageModifiers();
+        allModifiers.addAll(this.getFutureBookingResourceUsageModifiers());
+//        allModifiers.sort((m1, m2) -> m1.modificationDate().before(m2.modificationDate()) ? -1 : m1.modificationDate().equals(m2.modificationDate()) ? 0 : 1);
+        Map<Long, List<ResourceUsageModifier>> resourceUsageModifiers = allModifiers.stream().collect(Collectors.groupingBy(ResourceUsageModifier::cloudId));
+
+        // Combine multiple modifiers with the same date into a single modifier
+        return resourceUsageModifiers.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> {
+                    List<ResourceUsageModifier> reduced = this.reduceResourceUsageModifiers(e.getValue());
+                    reduced.sort((m1, m2) -> m1.modificationDate().before(m2.modificationDate()) ? -1 : m1.modificationDate().equals(m2.modificationDate()) ? 0 : 1);
+                    return reduced;
+                }
+            ));
+    }
+
+    private List<ResourceUsageModifier> reduceResourceUsageModifiers(final List<ResourceUsageModifier> resourceUsageModifiers) {
+        return new ArrayList<>(resourceUsageModifiers.stream()
+            .collect(Collectors.groupingBy(
+                ResourceUsageModifier::modificationDate,
+                Collectors.reducing(
+                    null,
+                    m -> m,
+                    (a, b) -> b.combine(a)
+                )
+            ))
+            .values());
+    }
+
+    private List<ResourceUsageModifier> getInstanceTerminationResourceUsageModifiers() {
+        return this.instanceService.getAll(new InstanceFilter(), new OrderBy("terminationDate", true)).stream()
             .filter(instance -> instance.getTerminationDate() != null)
+            .map(ResourceUsageModifier::fromInstanceTermination)
+            .collect(Collectors.toList());
+    }
+
+    private List<ResourceUsageModifier> getFutureBookingResourceUsageModifiers() {
+        List<ResourceUsageModifier> futureModifiers = this.bookingTokenService.getAllFutureTokens().stream()
+            .flatMap(token -> {
+                    ResourceUsageModifier startModifier = ResourceUsageModifier.fromBookingTokenStart(token);
+                    ResourceUsageModifier endModifier = ResourceUsageModifier.fromBookingTokenEnd(token);
+                    return Stream.of(startModifier, endModifier);
+                }
+            ).collect(Collectors.toList());
+
+        List <ResourceUsageModifier> currentUnusedModifiers = this.bookingTokenService.getAllActiveUnusedTokens().stream()
+            .map(ResourceUsageModifier::fromBookingTokenEnd)
             .toList();
-        return instances.stream()
-            .collect(Collectors
-                .groupingBy(instance -> {
-                    final Flavour flavour = instance.getPlan().getFlavour();
-                    return flavour.getCloudId() == null ? -1 : flavour.getCloudId();
-                }));
+
+        futureModifiers.addAll(currentUnusedModifiers);
+        return futureModifiers;
     }
 
 }

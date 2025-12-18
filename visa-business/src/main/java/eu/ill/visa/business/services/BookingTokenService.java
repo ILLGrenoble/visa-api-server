@@ -43,8 +43,15 @@ public class BookingTokenService {
         return this.createBookingTokensForBookingRequest(bookingRequest);
     }
 
-    public List<BookingToken> getAllActiveUnassigned() {
-        return this.repository.getAllActiveUnassigned();
+    /**
+     * Returns all BookingTokens for active BookingRequests that haven't been used yet
+     */
+    public List<BookingToken> getAllActiveUnusedTokens() {
+        return this.repository.getAllActiveUnusedTokens();
+    }
+
+    public List<BookingToken> getAllFutureTokens() {
+        return this.repository.getAllFutureTokens();
     }
 
     public void save(final BookingToken bookingToken) {

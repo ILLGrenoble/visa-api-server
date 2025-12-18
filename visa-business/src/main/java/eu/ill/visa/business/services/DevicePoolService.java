@@ -40,7 +40,7 @@ public class DevicePoolService {
 
     public List<DevicePoolUsage> getDevicePoolUsage() {
         List<DevicePoolUsage> devicePoolUsages = this.repository.getDevicePoolUsage();
-        List<HypervisorService.Resource> totalResources = this.hypervisorService.getTotalResources();
+        List<HypervisorService.Resource> totalResources = this.hypervisorService.getTotalAvailableResources();
         return devicePoolUsages.stream()
             .map(devicePoolUsage ->  {
                 if (devicePoolUsage.getTotalUnits() == -1 && devicePoolUsage.getResourceClass() != null) {
