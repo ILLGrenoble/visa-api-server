@@ -2,10 +2,9 @@ package eu.ill.visa.core.entity;
 
 import eu.ill.visa.core.entity.enumerations.BookingRequestState;
 import jakarta.persistence.*;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -73,10 +72,10 @@ public class BookingRequest extends Timestampable {
     private String name;
 
     @Column(name = "start_date", nullable = false)
-    private Date startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "end_date", nullable = false)
-    private Date endDate;
+    private LocalDateTime endDate;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = false)
@@ -125,24 +124,24 @@ public class BookingRequest extends Timestampable {
         this.name = name;
     }
 
-    public Date getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
 
     @Transient
-    public Date getDayAfterEndDate() {
-        return DateUtils.addDays(this.endDate, 1);
+    public LocalDateTime getDayAfterEndDate() {
+        return this.endDate.plusDays(1);
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
     }
 
@@ -187,8 +186,8 @@ public class BookingRequest extends Timestampable {
     }
 
     public String toString() {
-        final LocalDate startDate = this.startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        final LocalDate endDate = this.endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        final LocalDate startDate = this.startDate.toLocalDate();
+        final LocalDate endDate = this.endDate.toLocalDate();
 
         String formatted = format("BookingRequest id: %d, owner: %s, start: %s, end %s",  id, owner.getFullNameAndId(), startDate, endDate);
         String formattedFlavours = this.flavours.stream().map(BookingRequestFlavour::toString).collect(Collectors.joining(", "));
@@ -198,8 +197,8 @@ public class BookingRequest extends Timestampable {
     public static final class Builder {
         private String uid;
         private String name;
-        private Date startDate;
-        private Date endDate;
+        private LocalDateTime startDate;
+        private LocalDateTime endDate;
         private User owner;
         private String comments;
         private List<BookingRequestFlavour> flavours;
@@ -213,12 +212,12 @@ public class BookingRequest extends Timestampable {
             return this;
         }
 
-        public Builder startDate(Date startDate) {
+        public Builder startDate(LocalDateTime startDate) {
             this.startDate = startDate;
             return this;
         }
 
-        public Builder endDate(Date endDate) {
+        public Builder endDate(LocalDateTime endDate) {
             this.endDate = endDate;
             return this;
         }

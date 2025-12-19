@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +71,8 @@ public class BookingService {
         final BookingUserConfiguration bookingUserConfiguration = this.getBookingUserConfiguration(bookingRequest.getOwner());
 
         // Verify dates of request
-        final LocalDate startDate = bookingRequest.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        final LocalDate endDate = bookingRequest.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        final LocalDate startDate = bookingRequest.getStartDate().toLocalDate();
+        final LocalDate endDate = bookingRequest.getEndDate().toLocalDate();
         if (!startDate.isAfter(LocalDate.now())) {
             errors.add(format("The reservation start date (%s) is too early", startDate));
         }

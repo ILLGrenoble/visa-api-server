@@ -5,6 +5,7 @@ import eu.ill.visa.core.entity.BookingRequestFlavour;
 import eu.ill.visa.core.entity.BookingRequestHistory;
 import eu.ill.visa.core.entity.enumerations.BookingRequestState;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -26,8 +27,8 @@ public class BookingRequestDto {
         this.uid = bookingRequest.getUid();
         this.name = bookingRequest.getName();
         this.createdAt = bookingRequest.getCreatedAt();
-        this.startDate = bookingRequest.getStartDate();
-        this.endDate = bookingRequest.getEndDate();
+        this.startDate = Date.from(bookingRequest.getStartDate().atZone(ZoneId.systemDefault()).toInstant());
+        this.endDate = Date.from(bookingRequest.getEndDate().atZone(ZoneId.systemDefault()).toInstant());
         this.owner = new UserDto(bookingRequest.getOwner());
         this.state = bookingRequest.getState();
         this.flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavourDto::new).toList();

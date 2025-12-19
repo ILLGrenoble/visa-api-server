@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class BookingRequestInput {
@@ -16,10 +16,10 @@ public class BookingRequestInput {
     private String name;
 
     @NotNull
-    private Date startDate;
+    private LocalDate startDate;
 
     @NotNull
-    private Date endDate;
+    private LocalDate endDate;
 
     @NotEmpty
     private List<BookingRequestFlavourInput> flavourRequests = new ArrayList<>();
@@ -39,19 +39,19 @@ public class BookingRequestInput {
         this.name = name;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

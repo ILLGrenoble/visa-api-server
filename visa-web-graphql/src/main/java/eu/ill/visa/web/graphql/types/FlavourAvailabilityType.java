@@ -8,26 +8,27 @@ import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Type("FlavourAvailability")
 public class FlavourAvailabilityType {
 
-    private final @NotNull Date date;
+    private final @NotNull OffsetDateTime date;
     private final @NotNull AvailabilityConfidence confidence;
     @AdaptToScalar(Scalar.Int.class)
     private final Long availableUnits;
     private final Long totalUnits;
 
     public FlavourAvailabilityType(final FlavourAvailability flavourAvailability) {
-        this.date = flavourAvailability.date();
+        this.date = flavourAvailability.date().toInstant().atOffset(ZoneOffset.UTC);;
         this.confidence = flavourAvailability.confidence();
         final AvailabilityData availabilityData = flavourAvailability.availability().orElse(null);
         this.availableUnits = availabilityData == null ? null : availabilityData.available();
         this.totalUnits = availabilityData == null ? null : availabilityData.total();
     }
 
-    public Date getDate() {
+    public OffsetDateTime getDate() {
         return date;
     }
 

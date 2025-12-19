@@ -3,6 +3,7 @@ package eu.ill.visa.core.domain;
 
 import eu.ill.visa.core.entity.*;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,7 +51,8 @@ public record ResourceUsageModifier(Date modificationDate, Long cloudId, String 
             .toList();
         long cloudId = flavour.getCloudId() == null ? -1 : flavour.getCloudId();
         Date now = new Date();
-        Date date = now.after(bookingRequest.getStartDate()) ? now : bookingRequest.getStartDate();
+        Date startDate = Date.from(bookingRequest.getStartDate().atZone(ZoneId.systemDefault()).toInstant());
+        Date date = now.after(startDate) ? now : startDate;
         return new ResourceUsageModifier(date, cloudId, null, 1, cpuModifier, memoryModifier, deviceResourceModifiers);
     }
 
@@ -66,7 +68,9 @@ public record ResourceUsageModifier(Date modificationDate, Long cloudId, String 
             })
             .toList();
         long cloudId = flavour.getCloudId() == null ? -1 : flavour.getCloudId();
-        return new ResourceUsageModifier(bookingRequest.getDayAfterEndDate(), cloudId, null, -1, -cpuModifier, -memoryModifier, deviceResourceModifiers);
+        Date endDate = Date.from(bookingRequest.getDayAfterEndDate().atZone(ZoneId.systemDefault()).toInstant());
+
+        return new ResourceUsageModifier(endDate, cloudId, null, -1, -cpuModifier, -memoryModifier, deviceResourceModifiers);
     }
 
     public static ResourceUsageModifier fromInstanceTermination(final Instance instance) {
