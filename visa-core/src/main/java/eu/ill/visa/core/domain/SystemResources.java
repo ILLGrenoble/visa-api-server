@@ -164,15 +164,9 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
                 flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(combinedAvailability), FlavourAvailability.AvailabilityConfidence.CERTAIN);
 
             } else {
-                if (cloudAvailability.available() > 0) {
-                    // Check device availability from
-                    Optional<AvailabilityData> deviceAvailability = this.getDeviceAvailability(flavourResourceRequirement.flavourDevices);
-                    flavourAvailability = this.convertDeviceAvailabilityToFlavourAvailability(flavourResourceRequirement, cloudAvailability, deviceAvailability.orElse(null));
-
-                } else {
-                    logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Units 0", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);
-                    flavourAvailability = new FlavourAvailability(availabilityDate, flavourResourceRequirement.flavour, Optional.of(new AvailabilityData(0L, 0L)), FlavourAvailability.AvailabilityConfidence.CERTAIN);
-                }
+                // Check device availability from
+                Optional<AvailabilityData> deviceAvailability = this.getDeviceAvailability(flavourResourceRequirement.flavourDevices);
+                flavourAvailability = this.convertDeviceAvailabilityToFlavourAvailability(flavourResourceRequirement, cloudAvailability, deviceAvailability.orElse(null));
             }
         }
 

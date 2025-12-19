@@ -4,10 +4,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.cloud.domain.CloudResourceClass;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
-import eu.ill.visa.core.entity.CloudResources;
-import eu.ill.visa.core.entity.Flavour;
-import eu.ill.visa.core.entity.Hypervisor;
-import eu.ill.visa.core.entity.HypervisorAllocation;
+import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -127,7 +124,25 @@ public class FlavourAvailabilityService {
                 flavour -> {
                     Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
 
-                    return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudResourceUsageModifiers.get(cloudId));
+                    return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudResourceUsageModifiers.get(cloudId),  from, to);
+                }
+            ));
+    }
+
+    public Map<Flavour, List<FlavourAvailability>> calculateFutureAvailabilities(final List<Flavour> flavours, final BookingRequest bookingRequest) {
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
+        final Map<Long, List<ResourceUsageModifier>> cloudResourceUsageModifiers = this.getCloudResourceUsageModifiers(bookingRequest);
+
+        final LocalDate from = bookingRequest.getStartDate().toLocalDate();
+        final LocalDate to = bookingRequest.getEndDate().toLocalDate();
+
+        return flavours.stream()
+            .collect(Collectors.toMap(
+                flavour -> flavour,
+                flavour -> {
+                    Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+                    return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudResourceUsageModifiers.get(cloudId), from, to);
                 }
             ));
     }
@@ -177,17 +192,25 @@ public class FlavourAvailabilityService {
 
             // Initialise array with the current availability
             LocalDate referenceDate = LocalDate.now();
+            FlavourAvailability previousAvailability;
+            FlavourAvailability currentAvailability = systemResources.getAvailability(flavour);
             if (!from.isAfter(referenceDate)) {
-                futures.add(systemResources.getAvailability(flavour));
+                futures.add(currentAvailability);
             }
 
             if (resourceUsageModifiers != null) {
                 for (ResourceUsageModifier resourceUsageModifier : resourceUsageModifiers) {
                     systemResources = systemResources.onResourcesModification(resourceUsageModifier);
-                    referenceDate = resourceUsageModifier.modificationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    previousAvailability = currentAvailability;
+                    currentAvailability = systemResources.getAvailability(flavour);
 
+                    referenceDate = resourceUsageModifier.modificationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                     if (!from.isAfter(referenceDate) && !to.isBefore(referenceDate)) {
-                        futures.add(systemResources.getAvailability(flavour));
+                        // Ensure that there is at least one value in the array covering the availability up until the 'from' moment
+                        if (from.isBefore(referenceDate) && futures.isEmpty()) {
+                            futures.add(previousAvailability);
+                        }
+                        futures.add(currentAvailability);
                     }
                 }
             }
@@ -255,8 +278,12 @@ public class FlavourAvailabilityService {
     }
 
     private Map<Long, List<ResourceUsageModifier>> getCloudResourceUsageModifiers() {
+        return this.getCloudResourceUsageModifiers(null);
+    }
+
+    private Map<Long, List<ResourceUsageModifier>> getCloudResourceUsageModifiers(final BookingRequest bookingRequest) {
         final List<ResourceUsageModifier> allModifiers = this.getInstanceTerminationResourceUsageModifiers();
-        allModifiers.addAll(this.getFutureBookingResourceUsageModifiers());
+        allModifiers.addAll(this.getFutureBookingResourceUsageModifiers(bookingRequest));
 //        allModifiers.sort((m1, m2) -> m1.modificationDate().before(m2.modificationDate()) ? -1 : m1.modificationDate().equals(m2.modificationDate()) ? 0 : 1);
         Map<Long, List<ResourceUsageModifier>> resourceUsageModifiers = allModifiers.stream().collect(Collectors.groupingBy(ResourceUsageModifier::cloudId));
 
@@ -292,7 +319,7 @@ public class FlavourAvailabilityService {
             .collect(Collectors.toList());
     }
 
-    private List<ResourceUsageModifier> getFutureBookingResourceUsageModifiers() {
+    private List<ResourceUsageModifier> getFutureBookingResourceUsageModifiers(final BookingRequest bookingRequest) {
         List<ResourceUsageModifier> futureModifiers = this.bookingTokenService.getAllFutureTokens().stream()
             .flatMap(token -> {
                     ResourceUsageModifier startModifier = ResourceUsageModifier.fromBookingTokenStart(token);
@@ -304,8 +331,27 @@ public class FlavourAvailabilityService {
         List <ResourceUsageModifier> currentUnusedModifiers = this.bookingTokenService.getAllActiveUnusedTokens().stream()
             .map(ResourceUsageModifier::fromBookingTokenEnd)
             .toList();
-
         futureModifiers.addAll(currentUnusedModifiers);
+
+        // If a booking request has been passed then create resource usages from the expected tokens too
+        if (bookingRequest != null) {
+            List<ResourceUsageModifier> bookingRequestUsageModifiers = bookingRequest.getFlavours().stream()
+                .flatMap(requestFlavour -> {
+                    List<BookingToken> bookingTokensForFlavour = new ArrayList<>();
+                    for (long i = 0; i < requestFlavour.getQuantity(); i++) {
+                        bookingTokensForFlavour.add(new BookingToken(bookingRequest, requestFlavour.getFlavour(), ""));
+                    }
+                    return bookingTokensForFlavour.stream();
+                })
+                .flatMap(token -> {
+                        ResourceUsageModifier startModifier = ResourceUsageModifier.fromBookingTokenStart(token);
+                        ResourceUsageModifier endModifier = ResourceUsageModifier.fromBookingTokenEnd(token);
+                        return Stream.of(startModifier, endModifier);
+                    }
+                ).toList();
+            futureModifiers.addAll(bookingRequestUsageModifiers);
+        }
+
         return futureModifiers;
     }
 

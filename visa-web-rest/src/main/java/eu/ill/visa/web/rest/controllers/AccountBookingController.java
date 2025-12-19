@@ -59,31 +59,7 @@ public class AccountBookingController extends AbstractController {
     public MetaResponse<BookingRequestDto> create(@Context SecurityContext securityContext, BookingRequestInput input) {
         final User user = this.getUserPrincipal(securityContext);
 
-        // Verify that flavours exist
-        List<Flavour> flavours = new ArrayList<>();
-        input.getFlavourRequests().forEach(flavourRequest -> {
-            Flavour flavour = this.flavourService.getById(flavourRequest.getFlavourId());
-            if (flavour == null) {
-                throw new BadRequestException("Invalid flavour id " + flavourRequest.getFlavourId());
-            }
-            flavours.add(flavour);
-        });
-
-        List<BookingRequestFlavour> flavourRequests = input.getFlavourRequests().stream()
-            .map(flavourInput -> {
-                final Flavour flavour = flavours.stream().filter(aFlavour -> aFlavour.getId().equals(flavourInput.getFlavourId())).findFirst().orElse(null);
-                return new BookingRequestFlavour(flavour, flavourInput.getQuantity());
-            }).toList();
-
-        BookingRequest bookingRequest = BookingRequest.Builder()
-            .uid(this.bookingRequestService.getUID())
-            .name(input.getName())
-            .startDate(input.getStartDate().atStartOfDay())
-            .endDate(input.getEndDate().atStartOfDay())
-            .owner(user)
-            .comments(input.getComments())
-            .flavours(flavourRequests)
-            .build();
+        BookingRequest bookingRequest = this.convertToBookingRequest(input, user);
         final BookingRequestValidation validation = this.bookingService.validateAndCreateBookingRequest(bookingRequest);
 
         if (validation.isValid()) {
@@ -159,6 +135,63 @@ public class AccountBookingController extends AbstractController {
         }).toList();
 
         return createResponse(futureAvailabilities);
+    }
+
+    /**
+     * Calculates the dynamic flavour availabilities during the construction of a BookingRequest, taking into account
+     * the currently requested instances of specific flavours.
+     */
+    @POST
+    @Path("/flavours/availabilities")
+    public MetaResponse<List<FlavourAvailabilitiesFutureDto>> calculateFlavourAvailabilities(@Context SecurityContext securityContext, BookingRequestInput input) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        final BookingUserConfiguration bookingUserConfiguration = this.bookingService.getBookingUserConfiguration(user);
+        if (bookingUserConfiguration.flavourConfigurations().isEmpty()) {
+            throw new NotAuthorizedException("You are not allowed to get flavour availabilities");
+        }
+
+        final List<Flavour> flavours = bookingUserConfiguration.flavourConfigurations().stream()
+            .map(BookingFlavourConfiguration::flavour)
+            .toList();
+
+        BookingRequest bookingRequest = this.convertToBookingRequest(input, user);
+
+
+        final Map<Flavour, List<FlavourAvailability>> flavourAvailabilities = this.flavourAvailabilityService.calculateFutureAvailabilities(flavours, bookingRequest);
+        List<FlavourAvailabilitiesFutureDto> futureAvailabilities = flavourAvailabilities.entrySet().stream().map(entry -> {
+            return new FlavourAvailabilitiesFutureDto(entry.getKey(), entry.getValue());
+        }).toList();
+
+        return createResponse(futureAvailabilities);
+    }
+
+    private BookingRequest convertToBookingRequest(BookingRequestInput input, User user) {
+        // Verify that flavours exist
+        List<Flavour> flavours = new ArrayList<>();
+        input.getFlavourRequests().forEach(flavourRequest -> {
+            Flavour flavour = this.flavourService.getById(flavourRequest.getFlavourId());
+            if (flavour == null) {
+                throw new BadRequestException("Invalid flavour id " + flavourRequest.getFlavourId());
+            }
+            flavours.add(flavour);
+        });
+
+        List<BookingRequestFlavour> flavourRequests = input.getFlavourRequests().stream()
+            .map(flavourInput -> {
+                final Flavour flavour = flavours.stream().filter(aFlavour -> aFlavour.getId().equals(flavourInput.getFlavourId())).findFirst().orElse(null);
+                return new BookingRequestFlavour(flavour, flavourInput.getQuantity());
+            }).toList();
+
+        return BookingRequest.Builder()
+            .uid(this.bookingRequestService.getUID())
+            .name(input.getName())
+            .startDate(input.getStartDate().atStartOfDay())
+            .endDate(input.getEndDate().atStartOfDay())
+            .owner(user)
+            .comments(input.getComments())
+            .flavours(flavourRequests)
+            .build();
     }
 
     public static final class AvailabilitiesFilter {
