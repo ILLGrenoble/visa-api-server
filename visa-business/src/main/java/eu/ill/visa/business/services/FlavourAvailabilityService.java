@@ -256,6 +256,9 @@ public class FlavourAvailabilityService {
                         futures.add(currentAvailability);
                     }
                 }
+            } else {
+                // No resource usage modifiers, so put currentAvailability into the list
+                futures.add(currentAvailability);
             }
             return futures;
         }
