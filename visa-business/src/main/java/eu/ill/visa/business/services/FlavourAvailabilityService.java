@@ -167,6 +167,17 @@ public class FlavourAvailabilityService {
             ));
     }
 
+    public List<FlavourAvailability> calculateFutureAvailabilities(final Flavour flavour, final BookingRequest bookingRequest) {
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
+        final Map<Long, List<ResourceUsageModifier>> cloudResourceUsageModifiers = this.getCloudResourceUsageModifiers(bookingRequest);
+
+        final LocalDate from = bookingRequest.getStartDate().toLocalDate();
+        final LocalDate to = bookingRequest.getEndDate().toLocalDate();
+
+        Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+        return this.getFutureAvailabilities(flavour, allSystemResource.get(cloudId), cloudResourceUsageModifiers.get(cloudId), from, to);
+    }
+
     private FlavourAvailability getAvailability(final Flavour flavour, final SystemResources systemResources) {
         if (systemResources == null) {
             // We don't know anything so return unknown response

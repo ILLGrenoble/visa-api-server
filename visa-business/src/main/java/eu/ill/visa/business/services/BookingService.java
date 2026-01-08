@@ -82,6 +82,12 @@ public class BookingService {
         final List<Flavour> flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavour::getFlavour).toList();
         final Map<Flavour, List<FlavourAvailability>> flavoursAvailabilities = this.flavourAvailabilityService.getFutureAvailabilities(flavours, startDate, endDate);
 
+        BookingRequest partialBookingRequest = BookingRequest.Builder()
+            .startDate(bookingRequest.getStartDate())
+            .endDate(bookingRequest.getEndDate())
+            .flavours(new ArrayList<>())
+            .build();
+
         // Verify flavour
         for (BookingRequestFlavour requestFlavour : bookingRequest.getFlavours()) {
             final Flavour requestedFlavour = requestFlavour.getFlavour();
@@ -92,11 +98,9 @@ public class BookingService {
                 .filter(configuration -> configuration.flavour().equals(requestedFlavour))
                 .findFirst().orElse(null);
 
-            boolean flavourOk = true;
-
             if (flavourConfiguration == null) {
-                flavourOk = false;
                 logger.warn("User ({}) has requested a flavour ({}) that is not available to them for reservation", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName());
+                errors.add(format("The requested flavour (%s) is not available for the reservation request", requestedFlavour.getName()));
 
             } else {
                 final Long maxDaysInAdvance = flavourConfiguration.maxDaysInAdvance();
@@ -105,45 +109,46 @@ public class BookingService {
 
                 // Ensure days in advance is valid
                 if (maxDaysInAdvance != null && daysToReservation > maxDaysInAdvance) {
-                    flavourOk = false;
                     logger.warn("User ({}) has requested a flavour ({}) after the max allowed days in the future ({} > {})", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName(), daysToReservation, flavourConfiguration.maxDaysInAdvance());
+                    errors.add(format("The requested flavour (%s) can not be reserved more than %d days in advance", requestedFlavour.getName(), daysToReservation));
                 }
 
                 // Ensure days reservation is valid
                 if (maxReservationDays != null && reservationDays > maxReservationDays) {
-                    flavourOk = false;
                     logger.warn("User ({}) has requested a flavour ({}) for an unacceptable duration ({} > {})", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName(), reservationDays, flavourConfiguration.maxReservationDays());
+                    errors.add(format("The requested flavour (%s) can not be reserved for more than %d days", requestedFlavour.getName(), reservationDays));
                 }
 
                 // Ensure quantity of instances is valid
                 if (maxInstances != null && requestFlavour.getQuantity() > maxInstances) {
-                    flavourOk = false;
                     logger.warn("User ({}) has requested too many instances of a flavour ({}) ({} > {})", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName(), requestFlavour.getQuantity(), flavourConfiguration.maxInstances());
+                    errors.add(format("No more than %d instances can be reserved for the requested flavour (%s)", flavourConfiguration.maxInstances(), requestedFlavour.getName()));
                 }
 
                 // Ensure availability of flavour for the dates
                 final List<FlavourAvailability> flavourAvailabilities = flavoursAvailabilities.get(requestedFlavour);
                 if (flavourAvailabilities == null) {
-                    flavourOk = false;
                     logger.warn("Unable to obtain flavour availabilities for flavour \"{}\"",  requestedFlavour.getName());
+                    errors.add(format("Failed to obtain availability information for the requested flavour (%s)", requestedFlavour.getName()));
 
                 } else {
                     // determine if any of the availabilities returned have insufficient available quantities
-                    boolean availabilityOk = flavourAvailabilities.stream()
-                        .noneMatch(aFlavourAvailability -> {
-                            final FlavourAvailability.AvailabilityData availability = aFlavourAvailability.availability().orElse(null);
-                            return availability == null || availability.available() < requestedQuantity;
-                        });
-
-                    if (!availabilityOk) {
-                        flavourOk = false;
+                    if (!this.availabilitiesOk(flavourAvailabilities, requestedQuantity)) {
                         logger.info("The flavour \"{}\" is unavailable in sufficient quantities (or cannot be determined) during the reservation dates ({} to {})",  requestedFlavour.getName(), startDate, endDate);
+                        errors.add(format("Insufficient resources are available to reserve the requested flavour (%s) during the reservation period", requestedFlavour.getName()));
+
+                    } else {
+                        // Ensure availability of flavour for the dates also taking into account also other flavours reserved in the booking
+                        final List<FlavourAvailability> dynamicFlavoursAvailabilities = this.flavourAvailabilityService.calculateFutureAvailabilities(requestedFlavour, partialBookingRequest);
+                        if (!this.availabilitiesOk(dynamicFlavoursAvailabilities, requestedQuantity)) {
+                            logger.info("The flavour \"{}\" is unavailable in sufficient quantities when combined with the other requested flavours during the reservation dates ({} to {})",  requestedFlavour.getName(), startDate, endDate);
+                            errors.add(format("Insufficient resources are available to reserve the flavour (%s) when combined with the other requested flavours during the reservation period", requestedFlavour.getName()));
+                        }
                     }
                 }
 
-                if (!flavourOk) {
-                    errors.add(format("The requested flavour (%s) is not available for the reservation request", requestedFlavour.getName()));
-                }
+                // Update partial booking request with the validated flavour (subsequent flavours will hence have reduced availabilities)
+                partialBookingRequest.getFlavours().add(requestFlavour);
             }
         }
 
@@ -154,6 +159,14 @@ public class BookingService {
         }
 
         return new BookingRequestValidation(bookingRequest, isValid, errors);
+    }
+
+    private boolean availabilitiesOk(List<FlavourAvailability> flavourAvailabilities, long requestedQuantity) {
+        return flavourAvailabilities.stream()
+            .noneMatch(aFlavourAvailability -> {
+                final FlavourAvailability.AvailabilityData availability = aFlavourAvailability.availability().orElse(null);
+                return availability == null || availability.available() < requestedQuantity;
+            });
     }
 
     private BookingFlavourConfiguration getBookingFlavourConfiguration(final User user, final Flavour flavour, BookingConfiguration bookingConfiguration) {
