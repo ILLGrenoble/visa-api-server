@@ -80,11 +80,31 @@ public class FlavourAvailabilityService {
             .toList();
     }
 
+    public List<FlavourAvailability> getAllFirstUnavailabilities() {
+        final List<Flavour> flavours = this.flavourService.getAllForAdmin();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
+
+        return flavours.stream()
+            .map(flavour -> {
+                Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+                return this.getFirstUnavailability(flavour, allSystemResource.get(cloudId));
+            })
+            .toList();
+    }
+
     public FlavourAvailability getFirstAvailability(final Flavour flavour) {
         Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
 
         SystemResources systemResources = this.getAllAvailableSystemResources().get(cloudId);
         return this.getFirstAvailability(flavour, systemResources);
+    }
+
+    public FlavourAvailability getFirstUnavailability(final Flavour flavour) {
+        Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+
+        SystemResources systemResources = this.getAllAvailableSystemResources().get(cloudId);
+        return this.getFirstUnavailability(flavour, systemResources);
     }
 
     public List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour) {
@@ -176,6 +196,29 @@ public class FlavourAvailabilityService {
 
         return availability;
 
+    }
+
+    private FlavourAvailability getFirstUnavailability(final Flavour flavour, final SystemResources systemResources) {
+        // Check for immediate unavailability
+        FlavourAvailability availability = this.getAvailability(flavour, systemResources);
+        if (availability.isAvailable().equals(FlavourAvailability.AvailabilityState.NO)) {
+            return availability;
+        }
+
+        Long cloudId = flavour.getCloudId() == null ? -1L : flavour.getCloudId();
+        SystemResources futureSystemResources = systemResources;
+
+        final List<ResourceUsageModifier> resourceUsageModifiers = this.getCloudResourceUsageModifiers().get(cloudId);
+        while (resourceUsageModifiers != null && !resourceUsageModifiers.isEmpty() && !availability.hasUnits().equals(FlavourAvailability.AvailabilityState.NO)) {
+            final ResourceUsageModifier resourceUsageModifier = resourceUsageModifiers.removeFirst();
+            futureSystemResources = futureSystemResources.onResourcesModification(resourceUsageModifier);
+            availability = this.getAvailability(flavour, futureSystemResources);
+        }
+
+        if (!availability.hasUnits().equals(FlavourAvailability.AvailabilityState.NO)) {
+            return new FlavourAvailability(new Date(Long.MAX_VALUE), availability.flavour(), availability.availability(), availability.confidence());
+        }
+        return availability;
     }
 
     private List<FlavourAvailability> getFutureAvailabilities(final Flavour flavour, SystemResources systemResources, final List<ResourceUsageModifier> resourceUsageModifiers) {

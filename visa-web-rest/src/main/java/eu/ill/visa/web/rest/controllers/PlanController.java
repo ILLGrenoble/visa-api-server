@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -81,7 +82,8 @@ public class PlanController extends AbstractController {
             }
         }
 
-        final List<FlavourAvailability> flavourAvailabilities = this.flavourAvailabilityService.getAllFirstAvailabilities();
+        final List<FlavourAvailability> flavourFirstAvailabilities = this.flavourAvailabilityService.getAllFirstAvailabilities();
+        final List<FlavourAvailability> flavourFirstUnavailabilities = this.flavourAvailabilityService.getAllFirstUnavailabilities();
         List<PlanDto> planDtos = plans.stream()
             .sorted((p1, p2) -> {
                 Flavour f1 = p1.getFlavour();
@@ -93,11 +95,15 @@ public class PlanController extends AbstractController {
                 } else return f1.getMemory().compareTo(f2.getMemory());
             })
             .map(plan -> {
-                final FlavourAvailability flavourAvailability = flavourAvailabilities.stream()
+                final FlavourAvailability flavourAvailability = flavourFirstAvailabilities.stream()
                     .filter(availability -> availability.flavour().equals(plan.getFlavour()))
                     .findFirst()
                     .orElse(null);
-                return this.toDto(plan, flavourAvailability, this.instanceService.getMaxInstanceDuration(user, plan.getFlavour()));
+                final FlavourAvailability flavourUnavailability = flavourFirstUnavailabilities.stream()
+                    .filter(availability -> availability.flavour().equals(plan.getFlavour()))
+                    .findFirst()
+                    .orElse(null);
+                return this.toDto(plan, flavourAvailability, flavourUnavailability, this.instanceService.getMaxInstanceDuration(user, plan.getFlavour()));
             })
             .toList();
         return createResponse(planDtos);
@@ -108,12 +114,16 @@ public class PlanController extends AbstractController {
     public MetaResponse<PlanDto> get(@Context final SecurityContext securityContext, @PathParam("plan") final Plan plan) {
         final User user = this.getUserPrincipal(securityContext);
 
-        return createResponse(this.toDto(plan, this.flavourAvailabilityService.getFirstAvailability(plan.getFlavour()),  this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())));
+        return createResponse(this.toDto(plan, this.flavourAvailabilityService.getFirstAvailability(plan.getFlavour()), this.flavourAvailabilityService.getFirstUnavailability(plan.getFlavour()), this.instanceService.getMaxInstanceDuration(user, plan.getFlavour())));
     }
 
-    private PlanDto toDto(final Plan plan, final FlavourAvailability flavourAvailability, final Duration lifetimeDuration) {
+    private PlanDto toDto(final Plan plan, final FlavourAvailability flavourAvailability, final FlavourAvailability flavourUnavailability, final Duration lifetimeDuration) {
         final Image image = plan.getImage();
         image.setDefaultVdiProtocol(imageService.getDefaultVdiProtocolForImage(image));
-        return new PlanDto(plan, flavourAvailability, lifetimeDuration);
+        final long maxAvailabilityDurationHours = Duration.between(Instant.now(), flavourUnavailability.date().toInstant()).toHours();
+        final Duration maxAvailabilityDuration = maxAvailabilityDurationHours < 48 ? Duration.ofHours(maxAvailabilityDurationHours) : Duration.ofDays(maxAvailabilityDurationHours / 24);
+        final Duration maxDuration = lifetimeDuration.compareTo(maxAvailabilityDuration) <= 0 ? lifetimeDuration : maxAvailabilityDuration;
+
+        return new PlanDto(plan, flavourAvailability, maxDuration);
     }
 }
