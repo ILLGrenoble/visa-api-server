@@ -45,7 +45,6 @@ public class BookingRequestService {
         return this.repository.getAll();
     }
 
-
     public List<BookingRequest> getAllForOwner(final User owner) {
         return this.repository.getAllForOwnerId(owner.getId());
     }
