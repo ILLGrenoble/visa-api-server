@@ -9,7 +9,6 @@ import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -21,8 +20,8 @@ public class BookingRequestType {
     private final @NotNull String uid;
     private final @NotNull String name;
     private final @NotNull Date createdAt;
-    private final @NotNull Date startDate;
-    private final @NotNull Date endDate;
+    private final @NotNull String startDate;
+    private final @NotNull String endDate;
     private final @NotNull UserType owner;
     private final @NotNull BookingRequestState state;
     private final @NotNull List<BookingRequestFlavourType> flavours;
@@ -33,8 +32,8 @@ public class BookingRequestType {
         this.uid = bookingRequest.getUid();
         this.name = bookingRequest.getName();
         this.createdAt = bookingRequest.getCreatedAt();
-        this.startDate = Date.from(bookingRequest.getStartDate().atZone(ZoneId.systemDefault()).toInstant());
-        this.endDate = Date.from(bookingRequest.getEndDate().atZone(ZoneId.systemDefault()).toInstant());
+        this.startDate = bookingRequest.getStartDate().toString();
+        this.endDate = bookingRequest.getEndDate().toString();
         this.owner = new UserType(bookingRequest.getOwner());
         this.state = bookingRequest.getState();
         this.flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavourType::new).toList();
@@ -57,11 +56,11 @@ public class BookingRequestType {
         return createdAt;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public Date getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
 

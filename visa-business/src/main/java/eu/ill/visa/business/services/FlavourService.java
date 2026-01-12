@@ -58,6 +58,10 @@ public class FlavourService {
         return this.repository.getById(id);
     }
 
+    public List<Flavour> getByIds(List<Long> ids) {
+        return this.repository.getByIds(ids);
+    }
+
     public void save(@NotNull Flavour flavour) {
         this.repository.save(flavour);
     }

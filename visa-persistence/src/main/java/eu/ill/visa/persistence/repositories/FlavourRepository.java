@@ -43,6 +43,12 @@ public class FlavourRepository extends AbstractRepository<Flavour> {
         }
     }
 
+    public List<Flavour> getByIds(List<Long> ids) {
+        TypedQuery<Flavour> query = getEntityManager().createNamedQuery("flavour.getByIds", Flavour.class);
+        query.setParameter("ids", ids);
+        return query.getResultList();
+    }
+
     public void save(final Flavour flavour) {
         if (flavour.getId() == null) {
             persist(flavour);

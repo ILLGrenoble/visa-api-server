@@ -18,6 +18,14 @@ import java.util.List;
             AND f.deleted = false
             AND cpc.deletedAt IS NULL
     """),
+    @NamedQuery(name = "flavour.getByIds", query = """
+            SELECT f
+            FROM Flavour f
+            LEFT JOIN f.cloudProviderConfiguration cpc
+            WHERE f.id IN :ids
+            AND f.deleted = false
+            AND cpc.deletedAt IS NULL
+    """),
     @NamedQuery(name = "flavour.getAll", query = """
             SELECT f
             FROM Flavour f

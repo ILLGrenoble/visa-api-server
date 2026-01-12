@@ -1,8 +1,12 @@
 package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.visa.business.services.BookingRequestService;
+import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.types.BookingRequestType;
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
@@ -31,6 +35,16 @@ public class BookingRequestResource {
         return this.bookingRequestService.getAll().stream()
             .map(BookingRequestType::new)
             .toList();
+    }
+
+    @Query
+    public @NotNull BookingRequestType bookingRequest(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException  {
+        BookingRequest bookingRequest = this.bookingRequestService.getById(id);
+        if (bookingRequest == null) {
+            throw new EntityNotFoundException("Booking Request not found for the given id");
+        }
+
+        return new BookingRequestType(bookingRequest);
     }
 
 }
