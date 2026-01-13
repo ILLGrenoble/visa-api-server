@@ -115,7 +115,7 @@ public class BookingRequestType {
         private final String comments;
         private final @NotNull Date date;
 
-        BookingRequestHistoryType(BookingRequestHistory requestHistory) {
+        public BookingRequestHistoryType(BookingRequestHistory requestHistory) {
             this.id = requestHistory.getId();
             this.state = requestHistory.getState();
             this.actor = new UserType(requestHistory.getActor());

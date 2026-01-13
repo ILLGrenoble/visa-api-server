@@ -91,4 +91,26 @@ public class BookingRequestService {
         } while (true);
     }
 
+    public BookingRequestHistory acceptBookingRequest(final BookingRequest bookingRequest, final User actor, final String comments) {
+        bookingRequest.setState(BookingRequestState.ACCEPTED);
+
+        BookingRequestHistory history = new BookingRequestHistory(BookingRequestState.ACCEPTED, comments, actor);
+        bookingRequest.getHistory().add(history);
+
+        this.save(bookingRequest);
+
+        return history;
+    }
+
+    public BookingRequestHistory refuseBookingRequest(final BookingRequest bookingRequest, final User actor, final String comments) {
+        bookingRequest.setState(BookingRequestState.REFUSED);
+
+        BookingRequestHistory history = new BookingRequestHistory(BookingRequestState.REFUSED, comments, actor);
+        bookingRequest.getHistory().add(history);
+
+        this.save(bookingRequest);
+
+        return history;
+    }
+
 }

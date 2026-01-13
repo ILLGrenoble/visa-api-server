@@ -31,6 +31,7 @@ import static java.lang.String.format;
         FROM BookingRequest br
         WHERE br.deletedAt IS NULL
         AND br.endDate >= CURRENT_DATE()
+        AND br.state IN ('CREATED', 'ACCEPTED')
         ORDER BY br.id
     """),
     @NamedQuery(name = "bookingRequest.getAllForOwner", query = """
@@ -38,6 +39,7 @@ import static java.lang.String.format;
         FROM BookingRequest br
         WHERE br.deletedAt IS NULL
         AND br.endDate >= CURRENT_DATE()
+        AND br.state IN ('CREATED', 'ACCEPTED')
         AND br.owner.id = :ownerId
         ORDER BY br.id
     """),
