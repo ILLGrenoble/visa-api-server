@@ -5,10 +5,7 @@ import eu.ill.visa.business.services.BookingService.BookingRequestValidation;
 import eu.ill.visa.core.domain.BookingFlavourConfiguration;
 import eu.ill.visa.core.domain.BookingUserConfiguration;
 import eu.ill.visa.core.domain.FlavourAvailability;
-import eu.ill.visa.core.entity.BookingRequest;
-import eu.ill.visa.core.entity.BookingRequestFlavour;
-import eu.ill.visa.core.entity.Flavour;
-import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.*;
 import eu.ill.visa.web.rest.dtos.*;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.Authenticated;
@@ -22,6 +19,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static java.lang.String.format;
 
 @Path("/account/bookings")
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,18 +34,21 @@ public class AccountBookingController extends AbstractController {
     private final BookingTokenService  bookingTokenService;
     private final FlavourService flavourService;
     private final FlavourAvailabilityService flavourAvailabilityService;
+    private final UserService userService;
 
     @Inject
     public AccountBookingController(final BookingService bookingService,
                                     final BookingRequestService bookingRequestService,
                                     final BookingTokenService  bookingTokenService,
                                     final FlavourService flavourService,
-                                    final FlavourAvailabilityService flavourAvailabilityService) {
+                                    final FlavourAvailabilityService flavourAvailabilityService,
+                                    final UserService userService) {
         this.bookingService = bookingService;
         this.bookingRequestService = bookingRequestService;
         this.bookingTokenService = bookingTokenService;
         this.flavourService = flavourService;
         this.flavourAvailabilityService = flavourAvailabilityService;
+        this.userService = userService;
     }
 
     @GET
@@ -101,6 +104,46 @@ public class AccountBookingController extends AbstractController {
         if (!bookingRequest.getOwner().equals(user)) {
             throw new NotAuthorizedException("You are not allowed to access the booking request");
         }
+
+        return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(BookingTokenDto::new).toList());
+    }
+
+    @PUT
+    @Path("/{bookingRequest}/tokens")
+    public MetaResponse<List<BookingTokenDto>> updateBookingRequestTokens(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest, List<BookingTokenInput> tokenInputs) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingRequest.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to access the booking request");
+        }
+
+        List<String> ownerIds = tokenInputs.stream()
+            .map(BookingTokenInput::getOwnerId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        List<User> owners = new ArrayList<>();
+        for (String ownerId : ownerIds) {
+            final User owner = this.userService.getById(ownerId);
+            if (owner == null) {
+                throw new BadRequestException(format("User not found with id %s", ownerId));
+            }
+
+            owners.add(owner);
+        }
+
+        List<BookingToken> tokens = this.bookingTokenService.getAllForBookingRequest(bookingRequest);
+
+        for (BookingTokenInput tokenInput : tokenInputs) {
+            final BookingToken token = tokens.stream().filter(aToken -> aToken.getId().equals(tokenInput.getId())).findFirst().orElse(null);
+            if (token == null) {
+                throw new BadRequestException(format("User token found with id %s", tokenInput.getId()));
+            }
+
+            final User owner = tokenInput.getOwnerId() == null ? null : owners.stream().filter(anOwner -> anOwner.getId().equals(tokenInput.getOwnerId())).findFirst().orElse(null);
+            token.setOwner(owner);
+        }
+
+        this.bookingTokenService.saveAll(tokens);
 
         return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(BookingTokenDto::new).toList());
     }

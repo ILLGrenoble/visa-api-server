@@ -58,6 +58,12 @@ public class BookingTokenService {
         this.repository.save(bookingToken);
     }
 
+    public void saveAll(final List<BookingToken> bookingTokens) {
+        for (BookingToken bookingToken : bookingTokens) {
+            this.save(bookingToken);
+        }
+    }
+
     public void delete(@NotNull BookingToken bookingToken) {
         bookingToken.setDeletedAt(new Date());
         this.save(bookingToken);
