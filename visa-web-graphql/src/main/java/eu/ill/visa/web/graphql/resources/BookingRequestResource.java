@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.resources;
 
 import eu.ill.visa.business.services.BookingRequestService;
+import eu.ill.visa.business.services.BookingTokenService;
 import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
@@ -10,6 +11,7 @@ import eu.ill.visa.web.graphql.exceptions.EntityNotFoundException;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.inputs.BookingRequestResponseInput;
 import eu.ill.visa.web.graphql.types.BookingRequestType;
+import eu.ill.visa.web.graphql.types.BookingTokenType;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
@@ -31,12 +33,15 @@ public class BookingRequestResource {
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestResource.class);
 
     private final BookingRequestService bookingRequestService;
+    private final BookingTokenService bookingTokenService;
     private final SecurityIdentity securityIdentity;
 
     @Inject
     public BookingRequestResource(final BookingRequestService bookingRequestService,
+                                  final BookingTokenService bookingTokenService,
                                   final SecurityIdentity securityIdentity) {
         this.bookingRequestService = bookingRequestService;
+        this.bookingTokenService = bookingTokenService;
         this.securityIdentity = securityIdentity;
     }
 
@@ -48,13 +53,25 @@ public class BookingRequestResource {
     }
 
     @Query
-    public @NotNull BookingRequestType bookingRequest(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException  {
+    public @NotNull BookingRequestType bookingRequest(@NotNull @AdaptToScalar(Scalar.Int.class) Long id) throws EntityNotFoundException {
         BookingRequest bookingRequest = this.bookingRequestService.getById(id);
         if (bookingRequest == null) {
             throw new EntityNotFoundException("Booking Request not found for the given id");
         }
 
         return new BookingRequestType(bookingRequest);
+    }
+
+    @Query
+    public @NotNull List<BookingTokenType> bookingTokens(@NotNull @AdaptToScalar(Scalar.Int.class) Long bookingRequestId) throws EntityNotFoundException {
+        BookingRequest bookingRequest = this.bookingRequestService.getById(bookingRequestId);
+        if (bookingRequest == null) {
+            throw new EntityNotFoundException("Booking Request not found for the given id");
+        }
+
+        return this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream()
+            .map(BookingTokenType::new)
+            .toList();
     }
 
     @Mutation
