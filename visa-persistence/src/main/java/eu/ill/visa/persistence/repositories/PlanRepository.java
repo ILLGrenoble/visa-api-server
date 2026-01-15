@@ -55,6 +55,12 @@ public class PlanRepository extends AbstractRepository<Plan> {
         return query.getResultList();
     }
 
+    public List<Plan> getAllForFlavourId(Long flavourId) {
+        final TypedQuery<Plan> query = getEntityManager().createNamedQuery("plan.getAllForFlavourId", Plan.class);
+        query.setParameter("flavourId", flavourId);
+        return query.getResultList();
+    }
+
     public List<Plan> getAllForInstruments(final List<Instrument> instruments) {
         if (instruments == null || instruments.size() == 0) {
             return this.getAllForAllInstruments();

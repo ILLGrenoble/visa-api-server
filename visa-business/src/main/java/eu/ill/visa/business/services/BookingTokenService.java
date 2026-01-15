@@ -1,9 +1,6 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.entity.BookingRequest;
-import eu.ill.visa.core.entity.BookingRequestFlavour;
-import eu.ill.visa.core.entity.BookingToken;
-import eu.ill.visa.core.entity.User;
+import eu.ill.visa.core.entity.*;
 import eu.ill.visa.persistence.repositories.BookingTokenRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -106,4 +103,9 @@ public class BookingTokenService {
         } while (true);
     }
 
+    public void updateBookingToken(BookingToken bookingToken, Instance instance, User user) {
+        bookingToken.setInstance(instance);
+        bookingToken.getHistory().add(new BookingTokenHistory(user, instance));
+        this.save(bookingToken);
+    }
 }

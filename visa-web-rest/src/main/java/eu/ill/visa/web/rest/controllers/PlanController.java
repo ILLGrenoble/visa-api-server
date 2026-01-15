@@ -54,33 +54,40 @@ public class PlanController extends AbstractController {
     }
 
     @GET
-    public MetaResponse<List<PlanDto>> getAll(@Context final SecurityContext securityContext, @QueryParam("experiments") String experimentIds) {
+    public MetaResponse<List<PlanDto>> getAll(@Context final SecurityContext securityContext, @QueryParam("experiments") String experimentIds, @QueryParam("flavour") Long flavourId) {
         final User user = this.getUserPrincipal(securityContext);
 
         List<Plan> plans = null;
 
-        if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
-            plans = planService.getAllForAdmin();
+        if (flavourId != null) {
+            plans = planService.getAllForFlavourId(flavourId);
 
         } else {
-            if (experimentIds != null) {
-                List<Experiment> experiments = Stream.of(experimentIds.split(","))
-                    .map(experimentId -> {
-                        Experiment experiment = this.experimentService.getById(experimentId);
-                        if (experiment == null) {
-                            logger.warn("Unable to find experiment with id {}", experimentId);
-                        }
-                        return experiment;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-                plans = planService.getAllForUserAndExperiments(user, experiments);
+            if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
+                plans = planService.getAllForAdmin();
 
             } else {
-                plans = planService.getAllForUserAndAllInstruments(user);
+                if (experimentIds != null) {
+                    List<Experiment> experiments = Stream.of(experimentIds.split(","))
+                        .map(experimentId -> {
+                            Experiment experiment = this.experimentService.getById(experimentId);
+                            if (experiment == null) {
+                                logger.warn("Unable to find experiment with id {}", experimentId);
+                            }
+                            return experiment;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+                    plans = planService.getAllForUserAndExperiments(user, experiments);
+
+                } else {
+                    plans = planService.getAllForUserAndAllInstruments(user);
+                }
             }
         }
+
+
 
         final List<FlavourAvailability> flavourFirstAvailabilities = this.flavourAvailabilityService.getAllFirstAvailabilities();
         final List<FlavourAvailability> flavourFirstUnavailabilities = this.flavourAvailabilityService.getAllFirstUnavailabilities();

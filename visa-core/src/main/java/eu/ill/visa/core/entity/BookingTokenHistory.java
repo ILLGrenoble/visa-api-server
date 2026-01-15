@@ -22,6 +22,14 @@ public class BookingTokenHistory extends Timestampable {
     @JoinColumn(name = "instance_id", foreignKey = @ForeignKey(name = "fk_instance_id"), nullable = false)
     private Instance instance;
 
+    public BookingTokenHistory() {
+    }
+
+    public BookingTokenHistory(User owner, Instance instance) {
+        this.owner = owner;
+        this.instance = instance;
+    }
+
     public Long getId() {
         return id;
     }

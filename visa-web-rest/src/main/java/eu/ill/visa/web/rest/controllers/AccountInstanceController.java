@@ -67,6 +67,7 @@ public class AccountInstanceController extends AbstractController {
     private final ClientConfiguration clientConfiguration;
     private final ImageProtocolService imageProtocolService;
     private final PersonalAccessTokenService personalAccessTokenService;
+    private final BookingTokenService bookingTokenService;
 
     @Inject
     public AccountInstanceController(final UserService userService,
@@ -84,7 +85,8 @@ public class AccountInstanceController extends AbstractController {
                                      final DesktopConfigurationImpl desktopConfiguration,
                                      final ClientConfiguration clientConfiguration,
                                      final ImageProtocolService imageProtocolService,
-                                     final PersonalAccessTokenService personalAccessTokenService) {
+                                     final PersonalAccessTokenService personalAccessTokenService,
+                                     final BookingTokenService bookingTokenService) {
         this.userService = userService;
         this.instanceService = instanceService;
         this.instanceMemberService = instanceMemberService;
@@ -101,6 +103,7 @@ public class AccountInstanceController extends AbstractController {
         this.clientConfiguration = clientConfiguration;
         this.imageProtocolService = imageProtocolService;
         this.personalAccessTokenService = personalAccessTokenService;
+        this.bookingTokenService = bookingTokenService;
     }
 
     @GET
@@ -238,7 +241,24 @@ public class AccountInstanceController extends AbstractController {
     public MetaResponse<InstanceDto> create(@Context final SecurityContext securityContext, @NotNull @Valid final InstanceCreatorDto dto) {
         final User user = this.getUserPrincipal(securityContext);
         final AccountToken accountToken = this.getAccountToken(securityContext);
-        if (user.getInstanceQuota() != -1) {
+
+        final BookingToken bookingToken = dto.getBookingTokenId() == null ? null : this.bookingTokenService.getById(dto.getBookingTokenId());
+        if (bookingToken == null && dto.getBookingTokenId() != null) {
+            throw new BadRequestException("Booking token does not exist");
+        }
+        if (bookingToken != null) {
+            if (!user.equals(bookingToken.getOwner())) {
+                throw new NotAuthorizedException("Not authorized to create an instance: you are not the owner of the booking token");
+
+            } else if (bookingToken.getInstance() != null) {
+                throw new NotAuthorizedException("Not authorized to create an instance: the booking token is already in use");
+
+            } else if (!bookingToken.getBookingRequest().isActive()) {
+                throw new NotAuthorizedException("Not authorized to create an instance: the booking request is not active");
+            }
+        }
+
+        if (bookingToken == null && user.getInstanceQuota() != -1) {
             if (instanceService.countAllForUserAndRole(user, OWNER) >= user.getInstanceQuota()) {
                 logger.info("User {} ({}) has exceeded their quota of {} instances", user.getFullName(), user.getId(), user.getInstanceQuota());
                 throw new BadRequestException("Instance quota exceeded");
@@ -272,30 +292,32 @@ public class AccountInstanceController extends AbstractController {
             }
         });
 
-        if (experiments.size() != dto.getExperiments().size()) {
-            throw new NotAuthorizedException("Not authorized to associate instance to requested experiments");
+        if (bookingToken == null) {
+            if (experiments.size() != dto.getExperiments().size()) {
+                throw new NotAuthorizedException("Not authorized to associate instance to requested experiments");
 
-        } else if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
-            List<Plan> plansForAdmin = this.planService.getAllForAdmin();
-            if (plansForAdmin.stream().noneMatch(aPlan -> aPlan.getId().equals(plan.getId()))) {
-                throw new NotAuthorizedException("Not authorized to create an instance with the selected Plan for the requested experiments");
-            }
+            } else if (user.hasRoleWithName(Role.ADMIN_ROLE)) {
+                List<Plan> plansForAdmin = this.planService.getAllForAdmin();
+                if (plansForAdmin.stream().noneMatch(aPlan -> aPlan.getId().equals(plan.getId()))) {
+                    throw new NotAuthorizedException("Not authorized to create an instance with the selected Plan for the requested experiments");
+                }
 
-        } else if (experiments.isEmpty()) {
-            // Validate no experiments valid for user (only admin and scientific support)
-            if (!user.hasAnyRoleWithName(List.of(Role.ADMIN_ROLE, Role.STAFF_ROLE, Role.GUEST_ROLE))) {
-                throw new NotAuthorizedException("Not authorized to create an instance without any associated experiments");
-            }
-            List<Plan> plansForInstruments = this.planService.getAllForUserAndAllInstruments(user);
-            if (plansForInstruments.stream().noneMatch(aPlan -> aPlan.getId().equals(plan.getId()))) {
-                throw new NotAuthorizedException("Not authorized to create an instance with the selected Plan without any selected experiments");
-            }
+            } else if (experiments.isEmpty()) {
+                // Validate no experiments valid for user (only admin and scientific support)
+                if (!user.hasAnyRoleWithName(List.of(Role.ADMIN_ROLE, Role.STAFF_ROLE, Role.GUEST_ROLE))) {
+                    throw new NotAuthorizedException("Not authorized to create an instance without any associated experiments");
+                }
+                List<Plan> plansForInstruments = this.planService.getAllForUserAndAllInstruments(user);
+                if (plansForInstruments.stream().noneMatch(aPlan -> aPlan.getId().equals(plan.getId()))) {
+                    throw new NotAuthorizedException("Not authorized to create an instance with the selected Plan without any selected experiments");
+                }
 
-        } else {
-            // Validate plan for experiments
-            List<Plan> plansForInstruments = this.planService.getAllForUserAndExperiments(user, experiments);
-            if (plansForInstruments.stream().noneMatch(aPlan -> aPlan.getId().equals(plan.getId()))) {
-                throw new NotAuthorizedException("Not authorized to create an instance with the selected Plan for the requested experiments");
+            } else {
+                // Validate plan for experiments
+                List<Plan> plansForInstruments = this.planService.getAllForUserAndExperiments(user, experiments);
+                if (plansForInstruments.stream().noneMatch(aPlan -> aPlan.getId().equals(plan.getId()))) {
+                    throw new NotAuthorizedException("Not authorized to create an instance with the selected Plan for the requested experiments");
+                }
             }
         }
 
@@ -313,7 +335,8 @@ public class AccountInstanceController extends AbstractController {
             .member(user, OWNER)
             .experiments(experiments)
             .attributes(instanceAttributes)
-            .vdiProtocol(vdiProtocol);
+            .vdiProtocol(vdiProtocol)
+            .bookingTokenId(dto.getBookingTokenId());
 
         Instance instance = instanceService.create(instanceBuilder);
 

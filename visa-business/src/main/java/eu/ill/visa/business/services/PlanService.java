@@ -46,6 +46,10 @@ public class PlanService {
         return repository.getAllForAdmin();
     }
 
+    public List<Plan> getAllForFlavourId(Long flavourId) {
+        return repository.getAllForFlavourId(flavourId);
+    }
+
     public List<Plan> getAllForInstruments(final List<Instrument> instruments) {
         return repository.getAllForInstruments(requireNonNullElseGet(instruments, ArrayList::new));
     }

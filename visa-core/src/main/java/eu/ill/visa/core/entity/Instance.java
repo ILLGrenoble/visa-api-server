@@ -323,6 +323,9 @@ public class Instance extends Timestampable {
     @Column(name = "lifetime_minutes", nullable = true)
     private Long lifetimeMinutes;
 
+    @Column(name = "booking_token_id", nullable = true)
+    private Long bookingTokenId;
+
     public Instance() {
     }
 
@@ -347,6 +350,7 @@ public class Instance extends Timestampable {
         this.experiments.addAll(builder.experiments);
         this.attributes.addAll(builder.attributes);
         this.vdiProtocol = builder.vdiProtocol;
+        this.bookingTokenId = builder.bookingTokenId;
     }
 
     public static Builder builder() {
@@ -735,6 +739,14 @@ public class Instance extends Timestampable {
         this.lifetimeMinutes = lifetimeMinutes;
     }
 
+    public Long getBookingTokenId() {
+        return bookingTokenId;
+    }
+
+    public void setBookingTokenId(Long bookingTokenId) {
+        this.bookingTokenId = bookingTokenId;
+    }
+
     @Transient
     public Long getCloudId() {
         return this.plan.getCloudId();
@@ -811,6 +823,7 @@ public class Instance extends Timestampable {
         private String keyboardLayout;
         private List<InstanceAttribute> attributes = new ArrayList<>();
         private ImageProtocol vdiProtocol;
+        private Long bookingTokenId;
 
         private Builder() {
         }
@@ -912,6 +925,11 @@ public class Instance extends Timestampable {
                 .build();
             this.members.add(instanceMember);
 
+            return this;
+        }
+
+        public Builder bookingTokenId(Long bookingTokenId) {
+            this.bookingTokenId = bookingTokenId;
             return this;
         }
     }

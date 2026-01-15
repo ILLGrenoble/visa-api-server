@@ -36,6 +36,8 @@ public class InstanceCreatorDto {
 
     private Long vdiProtocolId;
 
+    private Long bookingTokenId;
+
     public InstanceCreatorDto() {
     }
 
@@ -117,5 +119,13 @@ public class InstanceCreatorDto {
 
     public void setVdiProtocolId(Long vdiProtocolId) {
         this.vdiProtocolId = vdiProtocolId;
+    }
+
+    public Long getBookingTokenId() {
+        return bookingTokenId;
+    }
+
+    public void setBookingTokenId(Long bookingTokenId) {
+        this.bookingTokenId = bookingTokenId;
     }
 }

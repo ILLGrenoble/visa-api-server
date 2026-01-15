@@ -106,6 +106,17 @@ public class AccountBookingController extends AbstractController {
     }
 
     @GET
+    @Path("/tokens/{bookingToken}")
+    public MetaResponse<BookingTokenDto> getAssignedBookingRequestToken(@Context SecurityContext securityContext, @PathParam("bookingToken") BookingToken bookingToken) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingToken.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to access the booking token");
+        }
+
+        return createResponse(new BookingTokenDto(bookingToken));
+    }
+
+    @GET
     @Path("/{bookingRequest}/tokens")
     public MetaResponse<List<BookingTokenDto>> getBookingRequestTokens(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest) {
         final User user = this.getUserPrincipal(securityContext);

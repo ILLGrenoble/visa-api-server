@@ -11,12 +11,20 @@ import java.util.List;
     @NamedQuery(name = "bookingToken.getById", query = """
         SELECT bt
         FROM BookingToken bt
+        LEFT JOIN BookingRequest br ON bt.bookingRequest = br
         WHERE bt.id = :id
+        AND bt.deletedAt IS NULL
+        AND br.deletedAt IS NULL
+        AND br.state IN ('CREATED', 'ACCEPTED')
     """),
     @NamedQuery(name = "bookingToken.getByUid", query = """
         SELECT bt
         FROM BookingToken bt
+        LEFT JOIN BookingRequest br ON bt.bookingRequest = br
         WHERE bt.uid = :uid
+        AND bt.deletedAt IS NULL
+        AND br.deletedAt IS NULL
+        AND br.state IN ('CREATED', 'ACCEPTED')
     """),
     @NamedQuery(name = "bookingToken.getAllForBookingRequestId", query = """
         SELECT bt

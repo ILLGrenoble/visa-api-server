@@ -56,8 +56,7 @@ public class InstanceStateJob {
         List<Instance> runningInstances = instances.stream()
             .filter(instance -> {
                 if (instance.getState().equals(InstanceState.DELETED)) {
-                    instance.setDeleted(true);
-                    instanceService.save(instance);
+                    instanceService.fullyDeleteInstance(instance);
 
                     return false;
 

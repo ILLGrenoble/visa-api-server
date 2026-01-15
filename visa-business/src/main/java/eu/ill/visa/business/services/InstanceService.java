@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,6 +47,7 @@ public class InstanceService {
     private final InstanceMemberService instanceMemberService;
     private final FlavourRoleLifetimeService flavourRoleLifetimeService;
     private final EventDispatcher eventDispatcher;
+    private final BookingTokenService bookingTokenService;
 
     // Specifies a window in which to look for instances for which an instrument control support user can provider support.
     // Defines a window and looks for experiment schedules that overlap this window
@@ -57,13 +59,15 @@ public class InstanceService {
                            final CloudClientService cloudClientService,
                            final InstanceMemberService instanceMemberService,
                            final FlavourRoleLifetimeService flavourRoleLifetimeService,
-                           final EventDispatcher eventDispatcher) {
+                           final EventDispatcher eventDispatcher,
+                           final BookingTokenService bookingTokenService) {
         this.repository = repository;
         this.configuration = configuration;
         this.cloudClientService = cloudClientService;
         this.instanceMemberService = instanceMemberService;
         this.flavourRoleLifetimeService = flavourRoleLifetimeService;
         this.eventDispatcher = eventDispatcher;
+        this.bookingTokenService = bookingTokenService;
     }
 
     public Long countAll() {
@@ -131,18 +135,39 @@ public class InstanceService {
             .lastSeenAt(new Date())
             .build();
 
-        // Determine from owner the maximum lifetime (staff, user, other roles)
-        final Duration maxInstanceDuration = this.getMaxInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
-        if (instance.getLifetimeMinutes() == null || instance.getLifetimeMinutes() == 0 || instance.getLifetimeMinutes() > maxInstanceDuration.toMinutes()) {
-            instance.setLifetimeMinutes(maxInstanceDuration.toMinutes());
+        BookingToken bookingToken = null;
+        if (instance.getBookingTokenId() != null) {
+            bookingToken = this.bookingTokenService.getById(instance.getBookingTokenId());
         }
 
-        // Set the termination date
-        instance.setTerminationDate(this.calculateTerminationDate(null, Duration.ofMinutes(instance.getLifetimeMinutes())));
+        if (bookingToken != null) {
+            final Duration maxInstanceDuration = this.getMaxInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
+            instance.setLifetimeMinutes(maxInstanceDuration.toMinutes());
+
+            final BookingRequest bookingRequest = bookingToken.getBookingRequest();
+            Date terminationDate = Date.from(bookingRequest.getDayAfterEndDate().atZone(ZoneId.systemDefault()).toInstant());
+
+            // Set the termination date
+            instance.setTerminationDate(terminationDate);
+
+        } else {
+            // Determine from owner the maximum lifetime (staff, user, other roles)
+            final Duration maxInstanceDuration = this.getMaxInstanceDuration(instance.getOwner(), instance.getPlan().getFlavour());
+            if (instance.getLifetimeMinutes() == null || instance.getLifetimeMinutes() == 0 || instance.getLifetimeMinutes() > maxInstanceDuration.toMinutes()) {
+                instance.setLifetimeMinutes(maxInstanceDuration.toMinutes());
+            }
+
+            // Set the termination date
+            instance.setTerminationDate(this.calculateTerminationDate(null, Duration.ofMinutes(instance.getLifetimeMinutes())));
+        }
 
         this.save(instance);
 
         this.sendOwnerInstanceEvent(instance.getId(), UserEvent.INSTANCES_CHANGED_EVENT);
+
+        if (bookingToken != null) {
+            this.bookingTokenService.updateBookingToken(bookingToken, instance, instance.getOwner().getUser());
+        }
 
         return instance;
     }
@@ -158,6 +183,19 @@ public class InstanceService {
 
             } else {
                 this.sendOwnerInstanceEvent(instance.getId(), UserEvent.INSTANCE_STATE_CHANGED_EVENT, new InstanceStateChangedEvent(instance));
+            }
+        }
+    }
+
+    public void fullyDeleteInstance(Instance instance) {
+        instance.setDeleted(true);
+        this.save(instance);
+
+        if (instance.getBookingTokenId() != null) {
+            final BookingToken bookingToken = this.bookingTokenService.getById(instance.getBookingTokenId());
+            if (bookingToken != null) {
+                bookingToken.setInstance(null);
+                this.bookingTokenService.save(bookingToken);
             }
         }
     }

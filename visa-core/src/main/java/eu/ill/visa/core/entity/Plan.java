@@ -55,6 +55,21 @@ import java.util.Date;
             AND p.deletedAt IS null
             AND cpc.deletedAt IS NULL
     """),
+    @NamedQuery(name = "plan.getAllForFlavourId", query = """
+            SELECT DISTINCT p
+            FROM Plan p
+            LEFT JOIN p.image i
+            LEFT JOIN p.flavour f
+            LEFT JOIN i.cloudProviderConfiguration cpc
+            WHERE i.deleted = false
+            AND f.deleted = false
+            AND p.deletedAt IS null
+            AND cpc.deletedAt IS NULL
+            AND i.visible = true
+            AND COALESCE(cpc.visible, true) = true
+            AND f.id = :flavourId
+            ORDER BY p.id
+    """),
     @NamedQuery(name = "plan.getAllForInstrumentIds", query = """
             SELECT DISTINCT p
             FROM Plan p

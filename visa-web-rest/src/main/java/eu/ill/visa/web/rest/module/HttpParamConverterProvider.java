@@ -22,6 +22,7 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
     private final InstanceParamConverter instanceParamConverter;
     private final InstanceMemberParamConverter instanceMemberParamConverter;
     private final BookingRequestParamConverter bookingRequestParamConverter;
+    private final BookingTokenParamConverter bookingTokenParamConverter;
 
     @Inject
     public HttpParamConverterProvider(final InstrumentParamConverter instrumentParamConverter,
@@ -32,7 +33,8 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
                                       final PlanParamConverter planParamConverter,
                                       final InstanceParamConverter instanceParamConverter,
                                       final InstanceMemberParamConverter instanceMemberParamConverter,
-                                      final BookingRequestParamConverter bookingRequestParamConverter) {
+                                      final BookingRequestParamConverter bookingRequestParamConverter,
+                                      final BookingTokenParamConverter bookingTokenParamConverter) {
         this.instrumentParamConverter = instrumentParamConverter;
         this.userParamConverter = userParamConverter;
         this.experimentParamConverter = experimentParamConverter;
@@ -42,6 +44,7 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
         this.instanceParamConverter = instanceParamConverter;
         this.instanceMemberParamConverter = instanceMemberParamConverter;
         this.bookingRequestParamConverter = bookingRequestParamConverter;
+        this.bookingTokenParamConverter = bookingTokenParamConverter;
     }
 
     @Override
@@ -82,6 +85,10 @@ public class HttpParamConverterProvider implements ParamConverterProvider {
 
         if (BookingRequest.class.isAssignableFrom(rawType)) {
             return (ParamConverter<T>) bookingRequestParamConverter;
+        }
+
+        if (BookingToken.class.isAssignableFrom(rawType)) {
+            return (ParamConverter<T>) bookingTokenParamConverter;
         }
 
         return null;

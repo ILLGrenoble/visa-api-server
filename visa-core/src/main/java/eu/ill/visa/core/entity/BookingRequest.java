@@ -187,6 +187,14 @@ public class BookingRequest extends Timestampable {
         this.history = history;
     }
 
+
+    @Transient
+    public boolean isActive() {
+        LocalDateTime now = LocalDateTime.now();
+
+        return this.state.equals(BookingRequestState.ACCEPTED) && !now.isBefore(this.startDate) && !now.isAfter(this.endDate);
+    }
+
     public String toString() {
         final LocalDate startDate = this.startDate.toLocalDate();
         final LocalDate endDate = this.endDate.toLocalDate();

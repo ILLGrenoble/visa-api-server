@@ -103,10 +103,12 @@ public abstract class InstanceAction {
 
             // Soft delete if necessary
             if (instanceState.equals(InstanceState.DELETED)) {
-                instance.setDeleted(true);
+                this.getInstanceService().fullyDeleteInstance(instance);
+
+            } else {
+                this.getInstanceService().save(instance);
             }
 
-            this.getInstanceService().save(instance);
         }
     }
 
