@@ -45,6 +45,12 @@ public class BookingTokenRepository extends AbstractRepository<BookingToken> {
         return query.getResultList();
     }
 
+    public List<BookingToken> getAllAssignedToUserId(String userId) {
+        final TypedQuery<BookingToken> query = getEntityManager().createNamedQuery("bookingToken.getAllAssignedToUserId", BookingToken.class);
+        query.setParameter("userId", userId);
+        return query.getResultList();
+    }
+
     public List<BookingToken> getAllActiveUnusedTokens() {
         final TypedQuery<BookingToken> query = getEntityManager().createNamedQuery("bookingToken.getAllActiveUnusedTokens", BookingToken.class);
         return query.getResultList();

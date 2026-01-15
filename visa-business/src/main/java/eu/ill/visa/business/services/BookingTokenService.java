@@ -3,6 +3,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.BookingRequestFlavour;
 import eu.ill.visa.core.entity.BookingToken;
+import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.BookingTokenRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -41,6 +42,10 @@ public class BookingTokenService {
     public List<BookingToken> getAllForBookingRequest(final BookingRequest bookingRequest) {
         // Ensure that we have all valid tokens (in case they weren't created initially or request has been updated)
         return this.createBookingTokensForBookingRequest(bookingRequest);
+    }
+
+    public List<BookingToken> getAllAssignedToUser(final User user) {
+        return this.repository.getAllAssignedToUserId(user.getId());
     }
 
     /**

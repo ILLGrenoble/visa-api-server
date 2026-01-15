@@ -23,6 +23,20 @@ import java.util.List;
         FROM BookingToken bt
         LEFT JOIN BookingRequest br ON bt.bookingRequest = br
         WHERE br.id = :bookingRequestId
+        AND bt.deletedAt IS NULL
+        AND br.deletedAt IS NULL
+        AND br.state IN ('CREATED', 'ACCEPTED')
+        ORDER By bt.id
+    """),
+    @NamedQuery(name = "bookingToken.getAllAssignedToUserId", query = """
+        SELECT bt
+        FROM BookingToken bt
+        LEFT JOIN BookingRequest br ON bt.bookingRequest = br
+        WHERE bt.owner.id = :userId
+        AND bt.deletedAt IS NULL
+        AND br.endDate >= CURRENT_DATE()
+        AND br.deletedAt IS NULL
+        AND br.state IN ('CREATED', 'ACCEPTED')
         ORDER By bt.id
     """),
     @NamedQuery(name = "bookingToken.getAllActiveUnusedTokens", query = """

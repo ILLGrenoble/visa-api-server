@@ -98,6 +98,14 @@ public class AccountBookingController extends AbstractController {
     }
 
     @GET
+    @Path("/tokens")
+    public MetaResponse<List<BookingTokenDto>> getAssignedBookingRequestTokens(@Context SecurityContext securityContext) {
+        final User user = this.getUserPrincipal(securityContext);
+
+        return createResponse(this.bookingTokenService.getAllAssignedToUser(user).stream().map(BookingTokenDto::new).toList());
+    }
+
+    @GET
     @Path("/{bookingRequest}/tokens")
     public MetaResponse<List<BookingTokenDto>> getBookingRequestTokens(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest) {
         final User user = this.getUserPrincipal(securityContext);

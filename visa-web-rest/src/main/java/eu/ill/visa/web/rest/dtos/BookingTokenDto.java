@@ -6,6 +6,7 @@ public class BookingTokenDto {
 
     private final Long id;
     private final String uid;
+    private final BookingRequestSimpleDto bookingRequest;
     private final FlavourDto flavour;
     private final UserDto owner;
     private final InstanceDto instance;
@@ -13,6 +14,7 @@ public class BookingTokenDto {
     public BookingTokenDto(BookingToken bookingToken) {
         this.id = bookingToken.getId();
         this.uid = bookingToken.getUid();
+        this.bookingRequest = new BookingRequestSimpleDto(bookingToken.getBookingRequest());
         this.flavour = new FlavourDto(bookingToken.getFlavour());
         this.owner = bookingToken.getOwner() == null ? null : new UserDto(bookingToken.getOwner());
         this.instance = bookingToken.getInstance() == null ? null : new InstanceDto(bookingToken.getInstance());
@@ -24,6 +26,10 @@ public class BookingTokenDto {
 
     public String getUid() {
         return uid;
+    }
+
+    public BookingRequestSimpleDto getBookingRequest() {
+        return bookingRequest;
     }
 
     public FlavourDto getFlavour() {
