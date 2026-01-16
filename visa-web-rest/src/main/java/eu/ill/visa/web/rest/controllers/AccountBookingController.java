@@ -155,7 +155,9 @@ public class AccountBookingController extends AbstractController {
         for (BookingTokenInput tokenInput : tokenInputs) {
             final BookingToken token = tokens.stream().filter(aToken -> aToken.getId().equals(tokenInput.getId())).findFirst().orElse(null);
             if (token == null) {
-                throw new BadRequestException(format("User token found with id %s", tokenInput.getId()));
+                throw new BadRequestException(format("User token found with id %d", tokenInput.getId()));
+            } else if (token.getInstance() != null) {
+                throw new NotAuthorizedException(format("Token %d with associated instance cannot change owners", tokenInput.getId()));
             }
 
             final User owner = tokenInput.getOwnerId() == null ? null : owners.stream().filter(anOwner -> anOwner.getId().equals(tokenInput.getOwnerId())).findFirst().orElse(null);
