@@ -26,6 +26,17 @@ import java.util.List;
         AND br.deletedAt IS NULL
         AND br.state IN ('CREATED', 'ACCEPTED')
     """),
+    @NamedQuery(name = "bookingToken.getForInstanceId", query = """
+        SELECT bt
+        FROM Instance i, BookingToken bt
+        LEFT JOIN BookingRequest br ON bt.bookingRequest = br
+        WHERE i.bookingTokenId = bt.id
+        AND i.id = :instanceId
+        AND i.deletedAt IS NULL
+        AND bt.deletedAt IS NULL
+        AND br.deletedAt IS NULL
+        AND br.state IN ('CREATED', 'ACCEPTED')
+    """),
     @NamedQuery(name = "bookingToken.getAllForBookingRequestId", query = """
         SELECT bt
         FROM BookingToken bt

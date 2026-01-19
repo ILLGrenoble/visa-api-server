@@ -108,4 +108,8 @@ public class BookingTokenService {
         bookingToken.getHistory().add(new BookingTokenHistory(user, instance));
         this.save(bookingToken);
     }
+
+    public BookingToken getForInstanceId(Long id) {
+        return this.repository.getForInstanceId(id);
+    }
 }

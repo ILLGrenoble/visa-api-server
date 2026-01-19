@@ -15,6 +15,7 @@ public class BookingTokenType {
     private final @NotNull FlavourType flavour;
     private final UserType owner;
     private final InstanceType instance;
+    private final BookingRequestType bookingRequest;
 
     public BookingTokenType(BookingToken bookingToken) {
         this.id = bookingToken.getId();
@@ -22,6 +23,7 @@ public class BookingTokenType {
         this.flavour = new FlavourType(bookingToken.getFlavour());
         this.owner = bookingToken.getOwner() == null ? null : new UserType(bookingToken.getOwner());
         this.instance = bookingToken.getInstance() == null ? null : new InstanceType(bookingToken.getInstance());
+        this.bookingRequest = new BookingRequestType(bookingToken.getBookingRequest());
     }
 
     public Long getId() {
@@ -42,5 +44,9 @@ public class BookingTokenType {
 
     public InstanceType getInstance() {
         return instance;
+    }
+
+    public BookingRequestType getBookingRequest() {
+        return bookingRequest;
     }
 }

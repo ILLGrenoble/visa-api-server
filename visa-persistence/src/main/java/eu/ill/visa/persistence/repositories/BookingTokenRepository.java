@@ -61,6 +61,17 @@ public class BookingTokenRepository extends AbstractRepository<BookingToken> {
         return query.getResultList();
     }
 
+    public BookingToken getForInstanceId(Long instanceId) {
+        final TypedQuery<BookingToken> query = getEntityManager().createNamedQuery("bookingToken.getForInstanceId", BookingToken.class);
+        query.setParameter("instanceId", instanceId);
+        try {
+            return query.getSingleResult();
+
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
     public void save(final BookingToken bookingToken) {
         if (bookingToken.getId() == null) {
             persist(bookingToken);
@@ -69,5 +80,4 @@ public class BookingTokenRepository extends AbstractRepository<BookingToken> {
             merge(bookingToken);
         }
     }
-
 }

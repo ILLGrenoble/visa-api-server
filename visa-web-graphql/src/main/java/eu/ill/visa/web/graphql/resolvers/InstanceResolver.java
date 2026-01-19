@@ -4,6 +4,7 @@ import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
+import eu.ill.visa.core.entity.BookingToken;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.*;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -31,6 +32,7 @@ public class InstanceResolver {
     private final InstanceAttributeService instanceAttributeService;
     private final PortService portService;
     private final InstanceDeviceAllocationService instanceDeviceAllocationService;
+    private final BookingTokenService bookingTokenService;
 
     @Inject
     public InstanceResolver(final CloudClientService cloudClientService,
@@ -39,7 +41,8 @@ public class InstanceResolver {
                             final ExperimentService experimentService,
                             final InstanceAttributeService instanceAttributeService,
                             final PortService portService,
-                            final InstanceDeviceAllocationService instanceDeviceAllocationService) {
+                            final InstanceDeviceAllocationService instanceDeviceAllocationService,
+                            final BookingTokenService bookingTokenService) {
         this.cloudClientService = cloudClientService;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceMemberService = instanceMemberService;
@@ -47,6 +50,7 @@ public class InstanceResolver {
         this.instanceAttributeService = instanceAttributeService;
         this.portService = portService;
         this.instanceDeviceAllocationService = instanceDeviceAllocationService;
+        this.bookingTokenService = bookingTokenService;
     }
 
     public List<InstanceMemberType> members(@Source InstanceType instance) {
@@ -162,5 +166,9 @@ public class InstanceResolver {
             .toList();
     }
 
+    public BookingTokenType bookingToken(@Source InstanceType instance) {
+        final BookingToken bookingToken = this.bookingTokenService.getForInstanceId(instance.getId());
+        return bookingToken == null ? null : new BookingTokenType(bookingToken);
+    }
 }
 
