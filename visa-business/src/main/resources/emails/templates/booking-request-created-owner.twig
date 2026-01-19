@@ -1,0 +1,18 @@
+{% extends "emails/templates/base.twig" %}
+{% block content %}
+    <p>Hi {{ bookingRequest.owner.firstName }},</p>
+    <p>
+        Your request to reserve VISA resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been registered and will be evaluated by the VISA team.
+    </p>
+    <p>
+        You will be notified by email as soon as the request has been validated.
+        You can review and check the status of your booking request  <a style="color:#3777b0;text-decoration:none;" href="{{ rootURL }}/bookings/{{ bookingRequest.uid }}">here</a>.
+    </p>
+
+    {% if adminEmailAddress %}
+        <p>
+            Please do not hesitate to send an email to <a href="mailto:{{ adminEmailAddress }}" style="color:#3777b0;text-decoration:none;">{{ adminEmailAddress }}</a> if you have any questions.
+        </p>
+    {%  endif %}
+    <p>Thank you for using VISA.</p>
+{% endblock %}

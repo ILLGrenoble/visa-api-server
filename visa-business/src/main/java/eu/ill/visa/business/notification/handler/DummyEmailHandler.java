@@ -1,5 +1,6 @@
 package eu.ill.visa.business.notification.handler;
 
+import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceExpiration;
 import eu.ill.visa.core.entity.InstanceMember;
@@ -41,6 +42,12 @@ public class DummyEmailHandler implements EmailHandler {
     }
 
     public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {
+    }
+
+    public void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest) {
+    }
+
+    public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest) {
     }
 
 }

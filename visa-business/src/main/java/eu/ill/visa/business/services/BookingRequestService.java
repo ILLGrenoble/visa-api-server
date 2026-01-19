@@ -1,5 +1,6 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.BookingRequestHistory;
 import eu.ill.visa.core.entity.User;
@@ -24,13 +25,16 @@ public class BookingRequestService {
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
 
     private final BookingRequestRepository repository;
-    private final BookingTokenService  bookingTokenService;
+    private final BookingTokenService bookingTokenService;
+    private final EmailManager emailManager;
 
     @Inject
     public BookingRequestService(final BookingRequestRepository repository,
-                                 final BookingTokenService  bookingTokenService) {
+                                 final BookingTokenService  bookingTokenService,
+                                 final EmailManager emailManager) {
         this.repository = repository;
         this.bookingTokenService = bookingTokenService;
+        this.emailManager = emailManager;
     }
 
     public BookingRequest getById(Long id) {
@@ -62,6 +66,13 @@ public class BookingRequestService {
 
         // Create the tokens
         this.bookingTokenService.createBookingTokensForBookingRequest(bookingRequest);
+
+        // Email admin
+        this.emailManager.sendBookingRequestCreatedToAdmin(bookingRequest);
+
+        // Email organiser
+        this.emailManager.sendBookingRequestCreatedToOwner(bookingRequest);
+
     }
 
     public void save(@NotNull BookingRequest bookingRequest) {

@@ -1,0 +1,63 @@
+{% extends "emails/templates/base-admin.twig" %}
+{% block title %} [VISA] A reservation request for VISA resources has been made {% endblock %}
+{% block content %}
+    <p>
+        A request to reserve VISA resources has been made with the following details:
+    </p>
+    <table>
+        <tbody>
+        <tr>
+            <td style="padding: 4px 8px"><b>Name / ID / UID</b></td>
+            <td style="padding: 4px 8px">{{ bookingRequest.name }} / {{ bookingRequest.id }} / {{ bookingRequest.uid }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Organiser</b></td>
+            <td style="padding: 4px 8px">{{ bookingRequest.owner.fullName }} ({{ bookingRequest.owner.id}}, <a href="mailto:{{ bookingRequest.owner.email }}">{{ bookingRequest.owner.email }}</a>)</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Employer</b></td>
+            <td style="padding: 4px 8px">{{ bookingRequest.owner.affiliation.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>Start date</b></td>
+            <td style="padding: 4px 8px">{{ bookingRequest.startDate | date("dd MMMM yyyy") }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px"><b>End date</b></td>
+            <td style="padding: 4px 8px">{{ bookingRequest.endDate | date("dd MMMM yyyy") }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 4px 8px; vertical-align: top;"><b>Resources</b></td>
+            <td style="padding: 4px 8px">
+                {% for flavourRequest in bookingRequest.flavours %}
+                <p style="margin: 0 0 4px 0">{{ flavourRequest.quantity }} x {{ flavourRequest.flavour.name }}</p>
+                {% endfor %}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p>
+        The organiser provided the following additional information:
+    </p>
+    <div style="border: solid 1px #ddd; padding: 0 12px; background-color: #fafafa;">
+        <p style="font-weight: 400;">
+            {{ bookingRequest.creationComments | raw }}
+        </p>
+    </div>
+    <p>
+        Full details of the reservation request can be found using the following link: <a style="color:#3777b0;text-decoration:none;"
+                      href="{{ rootURL }}/admin/bookings/requests/{{bookingRequest.id}}">{{ rootURL }}/admin/bookings/requests/{{bookingRequest.id}}</a>
+    </p>
+    <p>
+        Please note that:
+        <ul>
+            <li>
+                 the requested resources have been pre-reserved during the review period and cannot be used until the reservation has been accepted or refused.
+            </li>
+            <li>
+                 the availability of resources cannot be 100% guaranteed and you should leave some margin before accepting reservation requests.
+            </li>
+        </ul>
+    </p>
+
+{% endblock %}

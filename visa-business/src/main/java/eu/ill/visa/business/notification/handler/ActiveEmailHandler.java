@@ -249,5 +249,37 @@ public class ActiveEmailHandler implements EmailHandler {
         }
     }
 
+    @Override
+    public void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest) {
+        try {
+            final String subject = "[VISA] A resource reservation request has been created";
+            final NotificationRenderer renderer = new BookingRequestCreatedAdminRenderer(bookingRequest, emailTemplatesDirectory, rootURL);
+            final Mail email = buildEmail(adminEmailAddress, subject, renderer.render());
+            this.send(email);
+
+        } catch (NotificationRendererException exception) {
+            logger.error("Error rendering email : {}", exception.getMessage());
+        } catch (Exception exception) {
+            logger.error("Error sending email: {}", exception.getMessage());
+        }
+    }
+
+    @Override
+    public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest) {
+        try {
+            final User owner = bookingRequest.getOwner();
+            final String subject = "[VISA] Your request to reserve VISA resources has been registered";
+            final NotificationRenderer renderer = new BookingRequestCreatedOwnerRenderer(bookingRequest, emailTemplatesDirectory, rootURL, adminEmailAddress);
+            final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
+            this.send(email);
+
+
+        } catch (NotificationRendererException exception) {
+            logger.error("Error rendering email : {}", exception.getMessage());
+        } catch (Exception exception) {
+            logger.error("Error sending email: {}", exception.getMessage());
+        }
+    }
+
 
 }

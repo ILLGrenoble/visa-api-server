@@ -187,12 +187,20 @@ public class BookingRequest extends Timestampable {
         this.history = history;
     }
 
-
     @Transient
     public boolean isActive() {
         LocalDateTime now = LocalDateTime.now();
 
         return this.state.equals(BookingRequestState.ACCEPTED) && !now.isBefore(this.startDate) && !now.isAfter(this.endDate);
+    }
+
+    @Transient
+    public String getCreationComments() {
+        return this.history.stream()
+            .filter(element -> element.getState().equals(BookingRequestState.CREATED))
+            .findFirst()
+            .map(BookingRequestHistory::getComments)
+            .orElse(null);
     }
 
     public String toString() {
