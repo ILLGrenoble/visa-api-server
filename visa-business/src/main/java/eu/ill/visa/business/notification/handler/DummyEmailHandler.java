@@ -50,4 +50,7 @@ public class DummyEmailHandler implements EmailHandler {
     public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest) {
     }
 
+    public void sendBookingRequestValidated(BookingRequest bookingRequest) {
+    }
+
 }

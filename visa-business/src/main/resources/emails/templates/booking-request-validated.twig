@@ -1,0 +1,48 @@
+{% extends "emails/templates/base.twig" %}
+{% if accepted %}
+    {% block title %} [VISA] Your request to reserve resources ({{ bookingRequest.name }}) has been accepted {% endblock %}
+{% else %}
+    {% block title %} [VISA] Your request to reserve resources ({{ bookingRequest.name }}) has been refused {% endblock %}
+{% endif %}
+{% block content %}
+    <p>Hi {{ bookingRequest.owner.firstName }},</p>
+
+    {% if accepted %}
+        <p>
+            We are happy to inform you that your request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been accepted!
+        </p>
+        <p>
+            The instance creation tokens associated to this reservation are now visible on the <a style="color:#3777b0;text-decoration:none;" href="{{ rootURL }}/bookings/{{ bookingRequest.uid }}">request details page</a>. You can assign these tokens to other VISA users or use them for your own needs.
+        </p>
+        <p>
+            From the {{ bookingRequest.startDate | date("dd MMMM yyyy") }}, the owners of tokens will be able to create instances using them. All instances associated with this reservation will be deleted at the end of 23 January 2026.
+        </p>
+
+    {% else %}
+        <p>
+            We are sorry to inform you that your request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been refused.
+        </p>
+        <p>
+            Please feel free to submit another reservation request if you would like to modify the desired resources or reservation period.
+        </p>
+    {% endif %}
+
+    {% if bookingRequest.validationComments %}
+        <p>
+            The VISA Team have provided the following message:
+        </p>
+        <div style="border: solid 1px #ddd; padding: 0 12px; background-color: #fafafa;">
+            <p style="font-weight: 400;">
+                {{ bookingRequest.validationComments | raw }}
+            </p>
+        </div>
+
+    {% endif %}
+
+    {% if adminEmailAddress %}
+        <p>
+            Please do not hesitate to send an email to <a href="mailto:{{ adminEmailAddress }}" style="color:#3777b0;text-decoration:none;">{{ adminEmailAddress }}</a> if you have any questions.
+        </p>
+    {%  endif %}
+    <p>Thank you for using VISA.</p>
+{% endblock %}

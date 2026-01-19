@@ -110,6 +110,9 @@ public class BookingRequestService {
 
         this.save(bookingRequest);
 
+        // Email organiser
+        this.emailManager.sendBookingRequestValidated(bookingRequest);
+
         return history;
     }
 
@@ -120,6 +123,9 @@ public class BookingRequestService {
         bookingRequest.getHistory().add(history);
 
         this.save(bookingRequest);
+
+        // Email organiser
+        this.emailManager.sendBookingRequestValidated(bookingRequest);
 
         return history;
     }

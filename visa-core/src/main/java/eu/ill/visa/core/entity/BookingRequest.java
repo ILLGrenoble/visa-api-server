@@ -203,6 +203,15 @@ public class BookingRequest extends Timestampable {
             .orElse(null);
     }
 
+    @Transient
+    public String getValidationComments() {
+        return this.history.stream()
+            .filter(element -> element.getState().equals(BookingRequestState.ACCEPTED) || element.getState().equals(BookingRequestState.REFUSED))
+            .findFirst()
+            .map(BookingRequestHistory::getComments)
+            .orElse(null);
+    }
+
     public String toString() {
         final LocalDate startDate = this.startDate.toLocalDate();
         final LocalDate endDate = this.endDate.toLocalDate();

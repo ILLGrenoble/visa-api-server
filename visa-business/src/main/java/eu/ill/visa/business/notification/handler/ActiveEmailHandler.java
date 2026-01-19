@@ -7,6 +7,7 @@ import eu.ill.visa.business.notification.NotificationRenderer;
 import eu.ill.visa.business.notification.renderers.email.*;
 import eu.ill.visa.business.services.InstanceMemberService;
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.BookingRequestState;
 import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
@@ -249,7 +250,6 @@ public class ActiveEmailHandler implements EmailHandler {
         }
     }
 
-    @Override
     public void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest) {
         try {
             final String subject = "[VISA] A resource reservation request has been created";
@@ -264,12 +264,28 @@ public class ActiveEmailHandler implements EmailHandler {
         }
     }
 
-    @Override
     public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest) {
         try {
             final User owner = bookingRequest.getOwner();
             final String subject = "[VISA] Your request to reserve VISA resources has been registered";
             final NotificationRenderer renderer = new BookingRequestCreatedOwnerRenderer(bookingRequest, emailTemplatesDirectory, rootURL, adminEmailAddress);
+            final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
+            this.send(email);
+
+
+        } catch (NotificationRendererException exception) {
+            logger.error("Error rendering email : {}", exception.getMessage());
+        } catch (Exception exception) {
+            logger.error("Error sending email: {}", exception.getMessage());
+        }
+    }
+
+    public void sendBookingRequestValidated(BookingRequest bookingRequest) {
+        try {
+            final User owner = bookingRequest.getOwner();
+            boolean accepted = bookingRequest.getState().equals(BookingRequestState.ACCEPTED);
+            final String subject = accepted ? "[VISA] Your request to reserve resources has been accepted" : "[VISA]Your request to reserve resources has been refused";
+            final NotificationRenderer renderer = new BookingRequestValidatedRenderer(bookingRequest, emailTemplatesDirectory, rootURL, adminEmailAddress);
             final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
             this.send(email);
 

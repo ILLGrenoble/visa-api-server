@@ -56,4 +56,8 @@ public class EmailManager {
         this.emailHandler.sendBookingRequestCreatedToOwner(bookingRequest);
     }
 
+    public void sendBookingRequestValidated(final BookingRequest bookingRequest) {
+        this.emailHandler.sendBookingRequestValidated(bookingRequest);
+    }
+
 }

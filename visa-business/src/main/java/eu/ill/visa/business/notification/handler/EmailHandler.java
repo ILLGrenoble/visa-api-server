@@ -19,4 +19,5 @@ public interface EmailHandler {
     void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments);
     void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest);
     void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest);
+    void sendBookingRequestValidated(BookingRequest bookingRequest);
 }
