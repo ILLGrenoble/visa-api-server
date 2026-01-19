@@ -1,9 +1,6 @@
 package eu.ill.visa.business.notification.handler;
 
-import eu.ill.visa.core.entity.BookingRequest;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceExpiration;
-import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.*;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -51,6 +48,9 @@ public class DummyEmailHandler implements EmailHandler {
     }
 
     public void sendBookingRequestValidated(BookingRequest bookingRequest) {
+    }
+
+    public void sendBookingRequestTokenNotification(BookingRequest bookingRequest, User tokenOwner) {
     }
 
 }

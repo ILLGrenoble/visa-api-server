@@ -16,10 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.SecurityContext;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static java.lang.String.format;
 
@@ -152,6 +149,7 @@ public class AccountBookingController extends AbstractController {
 
         List<BookingToken> tokens = this.bookingTokenService.getAllForBookingRequest(bookingRequest);
 
+        Map<Long, User> tokenIdOwners = new HashMap<>();
         for (BookingTokenInput tokenInput : tokenInputs) {
             final BookingToken token = tokens.stream().filter(aToken -> aToken.getId().equals(tokenInput.getId())).findFirst().orElse(null);
             if (token == null) {
@@ -161,10 +159,11 @@ public class AccountBookingController extends AbstractController {
             }
 
             final User owner = tokenInput.getOwnerId() == null ? null : owners.stream().filter(anOwner -> anOwner.getId().equals(tokenInput.getOwnerId())).findFirst().orElse(null);
-            token.setOwner(owner);
+
+            tokenIdOwners.put(token.getId(), owner);
         }
 
-        this.bookingTokenService.saveAll(tokens);
+        this.bookingTokenService.updateTokenOwners(bookingRequest, tokenIdOwners);
 
         return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(BookingTokenDto::new).toList());
     }

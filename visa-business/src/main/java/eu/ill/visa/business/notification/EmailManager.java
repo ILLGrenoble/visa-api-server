@@ -1,10 +1,7 @@
 package eu.ill.visa.business.notification;
 
 import eu.ill.visa.business.notification.handler.EmailHandler;
-import eu.ill.visa.core.entity.BookingRequest;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceExpiration;
-import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.*;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -58,6 +55,10 @@ public class EmailManager {
 
     public void sendBookingRequestValidated(final BookingRequest bookingRequest) {
         this.emailHandler.sendBookingRequestValidated(bookingRequest);
+    }
+
+    public void sendBookingRequestTokenNotification(final BookingRequest bookingRequest, final User tokenOwner) {
+        this.emailHandler.sendBookingRequestTokenNotification(bookingRequest, tokenOwner);
     }
 
 }

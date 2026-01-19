@@ -297,5 +297,20 @@ public class ActiveEmailHandler implements EmailHandler {
         }
     }
 
+    public void sendBookingRequestTokenNotification(BookingRequest bookingRequest, User tokenOwner) {
+        try {
+            final String subject = "[VISA] You have been assigned resources to create VISA instances";
+            final NotificationRenderer renderer = new BookingRequestTokenRenderer(bookingRequest, tokenOwner, emailTemplatesDirectory, rootURL, adminEmailAddress);
+            final Mail email = buildEmail(tokenOwner.getEmail(), subject, renderer.render());
+            this.send(email);
+
+
+        } catch (NotificationRendererException exception) {
+            logger.error("Error rendering email : {}", exception.getMessage());
+        } catch (Exception exception) {
+            logger.error("Error sending email: {}", exception.getMessage());
+        }
+    }
+
 
 }

@@ -1,10 +1,7 @@
 package eu.ill.visa.business.notification.handler;
 
 
-import eu.ill.visa.core.entity.BookingRequest;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceExpiration;
-import eu.ill.visa.core.entity.InstanceMember;
+import eu.ill.visa.core.entity.*;
 
 import java.util.Date;
 
@@ -20,4 +17,5 @@ public interface EmailHandler {
     void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest);
     void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest);
     void sendBookingRequestValidated(BookingRequest bookingRequest);
+    void sendBookingRequestTokenNotification(BookingRequest bookingRequest, User tokenOwner);
 }
