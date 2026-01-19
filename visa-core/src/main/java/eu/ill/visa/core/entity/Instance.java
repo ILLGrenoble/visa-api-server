@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
             SELECT DISTINCT i FROM Instance i
             WHERE i.deletedAt IS NULL
             AND i.terminationDate IS NOT NULL
+            AND i.bookingTokenId IS NULL
             AND i.lastSeenAt < :date
     """),
     @NamedQuery(name = "instance.getAllNewInactive", query = """
@@ -67,6 +68,7 @@ import java.util.stream.Collectors;
             LEFT OUTER JOIN InstanceExpiration ie on ie.instance = i
             WHERE i.deletedAt IS NULL
             AND i.terminationDate IS NOT NULL
+            AND i.bookingTokenId IS NULL
             AND i.lastSeenAt < :date
             AND ie IS NULL
     """),
