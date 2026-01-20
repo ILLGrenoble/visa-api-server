@@ -1,3 +1,7 @@
+3.7.1 20/01/2026
+================
+ - Apply patch for multiple openstack address provider UUIDs (comma-separated list).
+
 3.7.0 08/12/2025
 ================
  - Add flavour future availabilities and totals to Admin GraphQL Endpoints 
