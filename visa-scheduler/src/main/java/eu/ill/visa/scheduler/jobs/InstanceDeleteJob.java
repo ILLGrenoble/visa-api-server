@@ -34,8 +34,7 @@ public class InstanceDeleteJob {
 
         List<Instance> instances = this.instanceService.getAllToDelete();
         instances.forEach(instance -> {
-            instance.setState(InstanceState.DELETING);
-            this.instanceService.save(instance);
+            this.instanceService.updateState(instance, InstanceState.DELETING);
 
             InstanceCommand command = instanceCommandService.create(instance.getOwner().getUser(), instance, InstanceCommandType.DELETE);
             instanceCommandService.execute(command);

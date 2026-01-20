@@ -1,8 +1,11 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.broker.EventDispatcher;
+import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.BookingRequestHistory;
+import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.core.entity.enumerations.BookingRequestState;
 import eu.ill.visa.persistence.repositories.BookingRequestRepository;
@@ -27,14 +30,17 @@ public class BookingRequestService {
     private final BookingRequestRepository repository;
     private final BookingTokenService bookingTokenService;
     private final EmailManager emailManager;
+    private final EventDispatcher eventDispatcher;
 
     @Inject
     public BookingRequestService(final BookingRequestRepository repository,
                                  final BookingTokenService  bookingTokenService,
-                                 final EmailManager emailManager) {
+                                 final EmailManager emailManager,
+                                 final EventDispatcher eventDispatcher) {
         this.repository = repository;
         this.bookingTokenService = bookingTokenService;
         this.emailManager = emailManager;
+        this.eventDispatcher = eventDispatcher;
     }
 
     public BookingRequest getById(Long id) {
@@ -62,7 +68,7 @@ public class BookingRequestService {
     }
 
     public void create(final BookingRequest bookingRequest) {
-        this.save(bookingRequest);
+        this.repository.save(bookingRequest);
 
         // Create the tokens
         this.bookingTokenService.createBookingTokensForBookingRequest(bookingRequest);
@@ -73,10 +79,12 @@ public class BookingRequestService {
         // Email organiser
         this.emailManager.sendBookingRequestCreatedToOwner(bookingRequest);
 
+        this.eventDispatcher.sendEventForRole(Role.ADMIN_ROLE, AdminEvent.BOOKING_REQUESTS_CHANGED);
     }
 
     public void save(@NotNull BookingRequest bookingRequest) {
         this.repository.save(bookingRequest);
+        this.eventDispatcher.sendEventForRole(Role.ADMIN_ROLE, AdminEvent.BOOKING_REQUESTS_CHANGED);
     }
 
     public void delete(@NotNull BookingRequest bookingRequest, @NotNull User user) {

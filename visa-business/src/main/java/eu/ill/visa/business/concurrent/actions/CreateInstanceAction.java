@@ -1,6 +1,7 @@
 package eu.ill.visa.business.concurrent.actions;
 
 import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionException;
+import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceMetadata;
 import eu.ill.visa.cloud.exceptions.CloudException;
@@ -78,7 +79,7 @@ public class CreateInstanceAction extends InstanceAction {
             instance.setComputeId(cloudInstance.getId());
             InstanceState instanceState = InstanceState.valueOf(cloudInstance.getState().toString());
 
-            instance.setState(instanceState);
+            this.getInstanceService().updateState(instance, instanceState);
 
             this.getInstanceService().save(instance);
             this.getEmailManager().sendInstanceCreatedNotification(instance);
@@ -86,6 +87,7 @@ public class CreateInstanceAction extends InstanceAction {
         } catch (CloudException exception) {
             this.updateInstanceState(InstanceState.ERROR);
             logger.error("Error creating a new compute instance for instance {}: {}", instance.getId(), exception.getMessage());
+            this.getEventDispatcher().sendEventForRole(Role.ADMIN_ROLE, AdminEvent.INSTANCE_ERRORS_CHANGED);
             throw new InstanceActionException("Error creating a compute instance", exception);
         }
     }

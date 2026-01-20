@@ -30,8 +30,7 @@ public class InstanceActionScheduler {
             default -> throw new IllegalArgumentException("Invalid state provided");
         };
 
-        instance.setState(state);
-        instanceService.save(instance);
+        instanceService.updateState(instance, state);
 
         // Create the command and let the scheduler manage the execution
         instanceCommandService.create(user, instance, instanceCommandType);

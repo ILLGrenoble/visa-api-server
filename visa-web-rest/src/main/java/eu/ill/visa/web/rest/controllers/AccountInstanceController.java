@@ -734,18 +734,20 @@ public class AccountInstanceController extends AbstractController {
     private MetaResponse<InstanceDto> performAction(final Instance instance, final User user, final InstanceCommandType instanceCommandType) {
         if (this.instanceService.isOwnerOrAdmin(user, instance)) {
             if (instanceCommandType.equals(InstanceCommandType.START)) {
-                instance.setState(InstanceState.STARTING);
+                instanceService.updateState(instance, InstanceState.STARTING);
 
             } else if (instanceCommandType.equals(InstanceCommandType.REBOOT)) {
-                instance.setState(InstanceState.REBOOTING);
+                instanceService.updateState(instance, InstanceState.REBOOTING);
 
             } else if (instanceCommandType.equals(InstanceCommandType.SHUTDOWN)) {
-                instance.setState(InstanceState.STOPPING);
+                instanceService.updateState(instance, InstanceState.STOPPING);
 
             } else if (instanceCommandType.equals(InstanceCommandType.DELETE)) {
-                instance.setState(InstanceState.DELETING);
+                instanceService.updateState(instance, InstanceState.DELETING);
+
+            } else {
+                instanceService.save(instance);
             }
-            instanceService.save(instance);
 
             // Create the command and let the scheduler manage the execution
             instanceCommandService.create(user, instance, instanceCommandType);

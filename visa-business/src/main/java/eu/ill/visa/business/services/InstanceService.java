@@ -2,6 +2,7 @@ package eu.ill.visa.business.services;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.InstanceConfiguration;
+import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.business.gateway.UserEvent;
 import eu.ill.visa.business.gateway.events.InstanceStateChangedEvent;
 import eu.ill.visa.business.gateway.events.InstanceThumbnailUpdatedEvent;
@@ -185,6 +186,26 @@ public class InstanceService {
                 this.sendOwnerInstanceEvent(instance.getId(), UserEvent.INSTANCE_STATE_CHANGED_EVENT, new InstanceStateChangedEvent(instance));
             }
         }
+    }
+
+    public Instance updateState(Instance instance, InstanceState state) {
+        boolean errorsChanged =  ((instance.getState().equals(InstanceState.ERROR) && !state.equals(InstanceState.ERROR)) || (!instance.getState().equals(InstanceState.ERROR) && state.equals(InstanceState.ERROR)));
+
+        instance.setState(state);
+
+        // Soft delete if necessary
+        if (state.equals(InstanceState.DELETED)) {
+            this.fullyDeleteInstance(instance);
+
+        } else {
+            this.save(instance);
+        }
+
+        if (errorsChanged) {
+            this.eventDispatcher.sendEventForRole(Role.ADMIN_ROLE, AdminEvent.INSTANCE_ERRORS_CHANGED);
+        }
+
+        return instance;
     }
 
     public void fullyDeleteInstance(Instance instance) {

@@ -3,6 +3,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.business.gateway.GlobalEvent;
 import eu.ill.visa.core.domain.ClientNotification;
+import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceExtensionRequest;
 import eu.ill.visa.core.entity.SystemNotification;
@@ -24,19 +25,23 @@ public class ClientNotificationService {
     private final SystemNotificationRepository systemNotificationRepository;
     private final InstanceService instanceService;
     private final InstanceExtensionRequestService instanceExtensionRequestService;
+    private final BookingRequestService bookingRequestService;
 
     private final static String INSTANCES_IN_ERROR = "instance.errors";
     private final static String INSTANCE_EXTENSION_REQUESTS = "instance.extension.requests";
+    private final static String BOOKING_REQUESTS_PENDING = "booking.requests.pending";
     private final EventDispatcher eventDispatcher;
 
     @Inject
     public ClientNotificationService(final SystemNotificationRepository systemNotificationRepository,
                                      final InstanceService instanceService,
                                      final InstanceExtensionRequestService instanceExtensionRequestService,
+                                     final BookingRequestService bookingRequestService,
                                      final EventDispatcher eventDispatcher) {
         this.systemNotificationRepository = systemNotificationRepository;
         this.instanceService = instanceService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
+        this.bookingRequestService = bookingRequestService;
         this.eventDispatcher = eventDispatcher;
     }
 
@@ -78,6 +83,12 @@ public class ClientNotificationService {
         List<InstanceExtensionRequest> instanceExtensionRequests = this.instanceExtensionRequestService.getAll();
         if (!instanceExtensionRequests.isEmpty()) {
             clientNotifications.add(new ClientNotification(INSTANCE_EXTENSION_REQUESTS, instanceExtensionRequests.size()));
+        }
+
+        // Pending booking requests
+        List<BookingRequest> pendingBookingRequests = this.bookingRequestService.getAllPending();
+        if (!pendingBookingRequests.isEmpty()) {
+            clientNotifications.add(new ClientNotification(BOOKING_REQUESTS_PENDING, pendingBookingRequests.size()));
         }
 
         return clientNotifications;

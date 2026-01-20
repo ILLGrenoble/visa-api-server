@@ -87,8 +87,7 @@ public class InstanceExpirationService {
                 logger.info("Deleting expired instance {}", instance.getId());
                 InstanceState previousState = instance.getState();
 
-                instance.setState(InstanceState.DELETING);
-                this.instanceService.save(instance);
+                this.instanceService.updateState(instance, InstanceState.DELETING);
 
                 try {
                     InstanceCommand command = instanceCommandService.create(null, instance, InstanceCommandType.DELETE);
@@ -104,8 +103,7 @@ public class InstanceExpirationService {
 
                 } catch (Exception e) {
                     logger.error("Caught an exception while deleting instance {}: {}", instance.getId(), e.getMessage());
-                    instance.setState(previousState);
-                    this.instanceService.save(instance);
+                    this.instanceService.updateState(instance, previousState);
                 }
 
             } else {

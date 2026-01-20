@@ -99,16 +99,7 @@ public abstract class InstanceAction {
 
         Instance instance = this.getInstance();
         if (instance != null) {
-            instance.setState(instanceState);
-
-            // Soft delete if necessary
-            if (instanceState.equals(InstanceState.DELETED)) {
-                this.getInstanceService().fullyDeleteInstance(instance);
-
-            } else {
-                this.getInstanceService().save(instance);
-            }
-
+            this.getInstanceService().updateState(instance, instanceState);
         }
     }
 
@@ -119,7 +110,7 @@ public abstract class InstanceAction {
 
         Instance instance = this.getInstance();
         if (instance != null) {
-            instance.setState(instanceState);
+            instance = this.getInstanceService().updateState(instance, instanceState);
             instance.setActiveProtocols(protocolNames);
             this.getInstanceService().save(instance);
         }
