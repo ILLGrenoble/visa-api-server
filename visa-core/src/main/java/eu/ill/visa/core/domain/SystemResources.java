@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public record SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories) {
+public record SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, List<Long> bookedResourcesIds) {
     private static final Logger logger = LoggerFactory.getLogger(SystemResources.class);
 
     private record FlavourResourceRequirement(Long cloudId, Flavour flavour,  Long vcpus, Long memoryMB, List<FlavourDevice> flavourDevices) {
@@ -22,7 +22,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
     }
 
     public SystemResources(Long cloudId, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages,  List<HypervisorInventory> hypervisorInventories) {
-        this(cloudId, new Date(), cloudResources, devicePoolUsages, hypervisorInventories);
+        this(cloudId, new Date(), cloudResources, devicePoolUsages, hypervisorInventories, new ArrayList<>());
     }
 
 
@@ -57,14 +57,28 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
                 }).toList();
 
-            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, hypervisorInventories);
+            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, hypervisorInventories, bookedResourcesIds);
+
+        } else if (resourceModifier.associatedBookingId() != null) {
+            // Compute Id unknown (so hypervisor can't be determined) but bookingId known so we can track when the hypervisor data will again be valid (ie, at the end of the booking)
+            // Maintain hypervisor data, update it whenever possible, put not that the system resources are in an UNCERTAIN state
+
+            // If resource usage increases then add the associatedBookingId (otherwise remove it)
+            if (resourceModifier.instanceModifier() > 0) {
+                this.bookedResourcesIds.add(resourceModifier.associatedBookingId());
+
+            } else {
+                this.bookedResourcesIds.remove(resourceModifier.associatedBookingId());
+            }
+
+            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, hypervisorInventories, bookedResourcesIds);
 
         } else {
             // Compute Id unknown, so hypervisor can't be determined: from here-on we cannot precisely determine the
-            // hypervisor inventories after the modification.
+            // hypervisor inventories after the modification. Don't know anything about booked Resource Ids either.
             // Therefor empty all hypervisor inventories since they can't be used to evaluate the system resources
 
-            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, new ArrayList<>());
+            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, new ArrayList<>(), bookedResourcesIds);
         }
 
     }
@@ -91,7 +105,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
     private FlavourAvailability getAvailabilityForSimpleFlavour(final FlavourResourceRequirement flavourResourceRequirement) {
 
         FlavourAvailability flavourAvailability = null;
-        if (hypervisorInventories != null && !hypervisorInventories.isEmpty()) {
+        if (hypervisorInventories != null && !hypervisorInventories.isEmpty() && bookedResourcesIds.isEmpty()) {
             // Determine total number of units possible
             AvailabilityData availabilityData = hypervisorInventories.stream()
                 .map(hypervisorInventory -> {
@@ -149,7 +163,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
     private FlavourAvailability getAvailabilityForDeviceFlavour(final FlavourResourceRequirement flavourResourceRequirement) {
 
         FlavourAvailability flavourAvailability = null;
-        if (hypervisorInventories != null && !hypervisorInventories.isEmpty()) {
+        if (hypervisorInventories != null && !hypervisorInventories.isEmpty() && bookedResourcesIds.isEmpty()) {
             flavourAvailability = this.getDeviceFlavourAvailabilityWithHypervisor(flavourResourceRequirement);
         }
 
