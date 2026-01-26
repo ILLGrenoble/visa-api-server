@@ -1,17 +1,14 @@
 package eu.ill.visa.cloud.services;
 
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.ApplicationScoped;
 import eu.ill.visa.cloud.CloudConfiguration;
 import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.exceptions.CloudException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ApplicationScoped
 public class CloudClientGateway {
@@ -50,7 +47,10 @@ public class CloudClientGateway {
     }
 
     public List<CloudClient> getAll() {
-        return new ArrayList<>(this.secondaryCloudClients.values());
+        List<CloudClient> cloudClients = new ArrayList<>(this.secondaryCloudClients.values());
+
+        cloudClients.sort(Comparator.comparing(CloudClient::getId));
+        return cloudClients;
     }
 
     public CloudClient addCloudClient(Long providerId, String name, ProviderConfiguration providerConfiguration, String serverNamePrefix, boolean visible) {
