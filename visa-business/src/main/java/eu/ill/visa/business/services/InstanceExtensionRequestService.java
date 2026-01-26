@@ -54,11 +54,11 @@ public class InstanceExtensionRequestService {
         return this.repository.getForInstance(instance);
     }
 
-    public void save(@NotNull InstanceExtensionRequest instanceMember) {
+    public void save(@NotNull InstanceExtensionRequest instanceExtensionRequest) {
+        this.repository.save(instanceExtensionRequest);
+
         // Event notification to admin
         this.eventDispatcher.sendEventForRole(Role.ADMIN_ROLE, AdminEvent.EXTENSION_REQUESTS_CHANGED);
-
-        this.repository.save(instanceMember);
     }
 
     public InstanceExtensionRequest create(Instance instance, String comments) {
