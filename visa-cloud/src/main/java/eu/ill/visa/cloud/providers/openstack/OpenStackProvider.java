@@ -218,7 +218,7 @@ public class OpenStackProvider implements CloudProvider {
             .imageId(imageId)
             .flavorId(flavorId)
             .securityGroups(securityGroupNames)
-            .networks(List.of(openStackConfiguration.getAddressProviderUUID()))
+            .networks(openStackConfiguration.getAddressProviderUUID() == null ? new ArrayList<>() : Arrays.asList(openStackConfiguration.getAddressProviderUUID().split(",")))
             .metadata(metadata)
             .userData(bootCommand)
             .build();
