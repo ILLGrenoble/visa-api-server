@@ -18,6 +18,7 @@ public class OpenStackProvider implements CloudProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenStackProvider.class);
     private static final int FLAVOUR_REFRESH_TIME_MINUTES = 5;
+    private static final int SECURITY_GROUPS_REFRESH_TIME_MINUTES = 10;
     private static final int HYPERVISOR_REFRESH_TIME_MINUTES = 5;
 
     private final OpenStackProviderConfiguration openStackConfiguration;
@@ -29,6 +30,9 @@ public class OpenStackProvider implements CloudProvider {
 
     private Map<CloudFlavour, List<CloudDeviceAllocation>> cloudFlavourDeviceAllocations;
     private Instant flavoursUpdateTime = Instant.MIN;
+
+    private List<String> securityGroups;
+    private Instant securityGroupsUpdateTime = Instant.MIN;
 
     private List<CloudHypervisor> cloudHypervisors;
     private List<CloudResourceProvider> resourceProviders;
@@ -239,7 +243,11 @@ public class OpenStackProvider implements CloudProvider {
 
     @Override
     public List<String> securityGroups() throws CloudException {
-        return this.networkEndpoint.securityGroups();
+        if (Duration.between(this.securityGroupsUpdateTime, Instant.now()).toMinutes() > SECURITY_GROUPS_REFRESH_TIME_MINUTES) {
+            this.securityGroups = this.networkEndpoint.securityGroups();
+            this.securityGroupsUpdateTime = Instant.now();
+        }
+        return this.securityGroups;
     }
 
     @Override
