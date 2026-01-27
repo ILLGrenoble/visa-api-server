@@ -36,10 +36,18 @@ public class LocalMessageBroker implements MessageBroker {
 
     @Override
     public synchronized <T> void broadcast(T message) {
-        MessageSubscriptionList<T> subscriptionList = this.getSubscriptionList(message.getClass().getName());
-        if (subscriptionList != null) {
-            subscriptionList.onMessage(message);
-        }
+        Thread.startVirtualThread(() -> {
+            try {
+                MessageSubscriptionList<T> subscriptionList = this.getSubscriptionList(message.getClass().getName());
+                if (subscriptionList != null) {
+                    subscriptionList.onMessage(message);
+                }
+
+            } catch (Exception error) {
+                logger.error("Failed to publish message with local message broker: {}", error.getMessage());
+            }
+        });
+
     }
 
     @SuppressWarnings("unchecked")
