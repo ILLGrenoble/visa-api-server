@@ -160,6 +160,11 @@ public class CloudClient {
         provider.deleteInstance(id);
     }
 
+    public void migrateInstance(final String id, final String host, boolean blockMigration, boolean diskOverCommit) throws CloudException, CloudUnavailableException {
+        logger.info("Migrating instance with id: {}", id);
+        provider.migrateInstance(id, host, blockMigration, diskOverCommit);
+    }
+
     public CloudLimit limits() throws CloudException {
         return provider.limits();
     }

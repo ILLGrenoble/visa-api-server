@@ -41,7 +41,7 @@ public interface ComputeEndpointClient {
     ExtraSpecsResponse flavorExtraSpecs(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("flavourId") String flavourId);
 
     @GET
-    @Path("/v2/servers")
+    @Path("/v2/servers/detail")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     ServersResponse servers(@HeaderParam(HEADER_X_AUTH_TOKEN) String token);

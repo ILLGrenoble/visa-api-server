@@ -62,7 +62,7 @@ public class StateInstanceAction extends InstanceAction {
 
                 // Update instance state in the database (unless we have requested it to be deleted and provider says it is active)
                 if (!ignoreCloudState) {
-                    if (instanceState.equals(InstanceState.ACTIVE) || instanceState.equals(InstanceState.PARTIALLY_ACTIVE)) {
+                    if (instanceState.isActive()) {
                         logger.trace("Checking ports are open for address: {}", cloudInstance.getAddress());
                         final Plan plan = instance.getPlan();
                         final Image image = plan.getImage();

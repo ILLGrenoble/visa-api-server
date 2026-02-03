@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.cloud.domain.CloudInstance;
+import eu.ill.visa.cloud.domain.CloudInstanceState;
 import org.eclipse.microprofile.graphql.Type;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public class CloudInstanceType {
     private final String address;
     private final CloudInstanceFaultType fault;
     private final List<String> securityGroups;
+    private final CloudInstanceState state;
 
     public CloudInstanceType(final CloudInstance instance) {
         this.id = instance.getId();
@@ -20,6 +22,7 @@ public class CloudInstanceType {
         this.address = instance.getAddress();
         this.fault = instance.getFault() == null ? null : new CloudInstanceFaultType(instance.getFault());
         this.securityGroups = instance.getSecurityGroups();
+        this.state = instance.getState();
     }
 
     public String getId() {
@@ -40,5 +43,9 @@ public class CloudInstanceType {
 
     public List<String> getSecurityGroups() {
         return securityGroups;
+    }
+
+    public CloudInstanceState getState() {
+        return state;
     }
 }

@@ -229,7 +229,7 @@ public class InstanceResource {
             throw new EntityNotFoundException("Instance not found for the given id");
         }
 
-        if (instance.getComputeId() == null || instance.hasAnyState(List.of(InstanceState.STOPPED, InstanceState.ERROR, InstanceState.UNKNOWN, InstanceState.UNAVAILABLE))) {
+        if (instance.getComputeId() == null || instance.hasAnyState(List.of(InstanceState.STOPPED, InstanceState.ERROR, InstanceState.UNKNOWN, InstanceState.MIGRATING, InstanceState.UNAVAILABLE))) {
             this.performInstanceAction(id, InstanceCommandType.DELETE);
         } else {
             instance.setDeleteRequested(true);

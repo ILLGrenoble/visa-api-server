@@ -89,6 +89,12 @@ public class HypervisorService {
         this.repository.delete(hypervisor);
     }
 
+    public synchronized void updateHypervisorData() {
+        this.updateHypervisorInventories();
+        this.updateHypervisorUsages();
+        this.updateHypervisorAllocations();
+    }
+
     public synchronized void updateHypervisorInventories() {
         this.cloudClientService.getAll().forEach(this::updateCloudClientHypervisorInventories);
     }

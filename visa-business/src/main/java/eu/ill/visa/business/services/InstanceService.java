@@ -129,6 +129,10 @@ public class InstanceService {
         return this.getByUID(uid, List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
     }
 
+    public Instance getByComputeId(String computeId) {
+        return this.repository.getByComputeId(computeId);
+    }
+
     public Instance create(Instance.Builder instanceBuilder) {
         Instance instance = instanceBuilder
             .uid(this.getUID())

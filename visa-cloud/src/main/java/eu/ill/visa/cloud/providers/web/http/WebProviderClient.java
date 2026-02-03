@@ -7,6 +7,7 @@ import eu.ill.visa.cloud.exceptions.CloudClientException;
 import eu.ill.visa.cloud.exceptions.CloudNotFoundException;
 import eu.ill.visa.cloud.providers.web.converters.CloudInstanceMixin;
 import eu.ill.visa.cloud.providers.web.converters.CloudLimitMixin;
+import eu.ill.visa.cloud.providers.web.http.requests.InstanceMigrationRequest;
 import eu.ill.visa.cloud.providers.web.http.requests.InstanceSecurityGroupRequest;
 import eu.ill.visa.cloud.providers.web.http.responses.ServerCreationResponse;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
@@ -115,6 +116,12 @@ public interface WebProviderClient {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     void deleteInstance(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("instanceId") String instanceId);
+
+    @POST
+    @Path("/api/instances/{instanceId}/migrate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    void migrateInstance(@HeaderParam(HEADER_X_AUTH_TOKEN) String token, @PathParam("instanceId") String instanceId, InstanceMigrationRequest migrationRequest);
 
     @GET
     @Path("/api/instances/{instanceId}/security_groups")

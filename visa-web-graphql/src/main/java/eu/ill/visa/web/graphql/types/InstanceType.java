@@ -1,6 +1,5 @@
 package eu.ill.visa.web.graphql.types;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import io.smallrye.graphql.api.AdaptToScalar;
@@ -102,12 +101,10 @@ public class InstanceType {
         return keyboardLayout;
     }
 
-    @JsonIgnore
     public Long getCloudId() {
         return cloudId;
     }
 
-    @JsonIgnore
     public String getComputeId() {
         return computeId;
     }

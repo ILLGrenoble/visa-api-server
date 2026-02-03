@@ -76,10 +76,10 @@ public class Server {
                 return CloudInstanceState.REBOOTING;
             case "MIGRATING":
                 if (vmState != null && vmState.equals("active")) {
-                    return CloudInstanceState.ACTIVE;
+                    return CloudInstanceState.ACTIVE_MIGRATING;
 
                 } else {
-                    return CloudInstanceState.UNAVAILABLE;
+                    return CloudInstanceState.MIGRATING;
                 }
             case "RESCUE":
             case "RESIZE":

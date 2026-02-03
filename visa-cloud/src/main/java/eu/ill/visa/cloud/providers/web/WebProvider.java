@@ -5,6 +5,7 @@ import eu.ill.visa.cloud.domain.*;
 import eu.ill.visa.cloud.exceptions.*;
 import eu.ill.visa.cloud.providers.CloudProvider;
 import eu.ill.visa.cloud.providers.web.http.WebProviderClient;
+import eu.ill.visa.cloud.providers.web.http.requests.InstanceMigrationRequest;
 import eu.ill.visa.cloud.providers.web.http.requests.InstanceSecurityGroupRequest;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 import org.slf4j.Logger;
@@ -287,6 +288,19 @@ public class WebProvider implements CloudProvider {
 
         } catch (Exception e) {
             throw new CloudException(format("Could not delete server with id %s and response %s: ", id, e.getMessage()));
+        }
+    }
+
+    @Override
+    public void migrateInstance(String id, String host, boolean blockMigration, boolean diskOverCommit) throws CloudException, CloudUnavailableException {
+        try {
+            this.webProviderClient.migrateInstance(this.configuration.getAuthToken(), id, new InstanceMigrationRequest(host, blockMigration, diskOverCommit));
+
+        } catch (CloudNotFoundException e) {
+            throw new CloudUnavailableException("Server migration is not available from the Web Provider");
+
+        } catch (Exception e) {
+            throw new CloudException(format("Could not migrate server with id %s and response %s: ", id, e.getMessage()));
         }
     }
 

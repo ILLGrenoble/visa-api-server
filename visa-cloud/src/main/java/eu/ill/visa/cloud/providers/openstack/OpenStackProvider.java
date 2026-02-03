@@ -236,6 +236,12 @@ public class OpenStackProvider implements CloudProvider {
         this.computeEndpoint.deleteInstance(id);
     }
 
+
+    @Override
+    public void migrateInstance(String id, String host, boolean blockMigration, boolean diskOverCommit) throws CloudException, CloudUnavailableException {
+        this.computeEndpoint.migrateInstance(id, host, blockMigration, diskOverCommit);
+    }
+
     @Override
     public CloudLimit limits() throws CloudException {
         return this.computeEndpoint.limits();

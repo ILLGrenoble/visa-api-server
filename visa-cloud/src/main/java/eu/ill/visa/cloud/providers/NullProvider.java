@@ -104,6 +104,10 @@ public class NullProvider implements CloudProvider {
     }
 
     @Override
+    public void migrateInstance(String id, String host, boolean blockMigration, boolean diskOverCommit) {
+    }
+
+    @Override
     public CloudLimit limits() throws CloudException {
         return null;
     }

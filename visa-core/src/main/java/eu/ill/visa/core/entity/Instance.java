@@ -49,6 +49,14 @@ import java.util.stream.Collectors;
             WHERE i.uid = :uid
             AND i.deletedAt IS NULL
     """),
+    @NamedQuery(name = "instance.getByComputeId", query = """
+            SELECT i FROM Instance i
+            JOIN FETCH i.plan p
+            JOIN FETCH p.image im
+            JOIN FETCH p.flavour f
+            WHERE i.computeId = :computeId
+            AND i.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instance.getAll", query = """
             SELECT DISTINCT i FROM Instance i
             JOIN FETCH i.plan p

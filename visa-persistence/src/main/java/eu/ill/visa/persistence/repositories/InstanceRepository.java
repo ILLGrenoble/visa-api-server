@@ -112,6 +112,16 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         }
     }
 
+    public Instance getByComputeId(final String computeId) {
+        try {
+            final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getByComputeId", Instance.class);
+            query.setParameter("computeId", computeId);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
     public void save(Instance instance) {
         if (instance.getId() == null) {
             persist(instance);

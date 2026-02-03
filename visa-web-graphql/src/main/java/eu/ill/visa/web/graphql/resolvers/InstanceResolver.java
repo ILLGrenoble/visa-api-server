@@ -14,7 +14,9 @@ import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Source;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNullElseGet;
@@ -110,7 +112,7 @@ public class InstanceResolver {
      *
      * @return a list of cloud images
      */
-    public CloudInstanceType cloudInstance(@Source InstanceType instance) throws DataFetchingException {
+    public CloudInstanceType cloudInstance(InstanceType instance) throws DataFetchingException {
         try {
             CloudClient cloudClient = this.cloudClientService.getAll().stream().filter(aCloudClient -> {
                 return aCloudClient.getId() == -1 ? instance.getCloudId() == null : aCloudClient.getId().equals(instance.getCloudId());
@@ -127,6 +129,37 @@ public class InstanceResolver {
                     return null;
                 }
             }
+
+        } catch (CloudException exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
+    }
+
+    public List<CloudInstanceType> cloudInstance(@Source List<InstanceType> instances) throws DataFetchingException {
+        if (instances.size() < 3) {
+            List<CloudInstanceType> cloudInstances = new ArrayList<>();
+            for (InstanceType instance : instances) {
+                cloudInstances.add(this.cloudInstance(instance));
+            }
+            return cloudInstances;
+        }
+
+        try {
+            Map<Long, List<CloudInstance>> allCloudInstances = new HashMap<>();
+            for (CloudClient cloudClient : this.cloudClientService.getAll()) {
+                List<CloudInstance> cloudInstances = cloudClient.instances();
+                Long cloudClientId = cloudClient.getId() == null ? -1 : cloudClient.getId();
+                allCloudInstances.put(cloudClientId, cloudInstances);
+            }
+
+            return instances.stream()
+                .map(instance -> {
+                    Long cloudClientId = instance.getCloudId() == null ? -1 : instance.getCloudId();
+                    List<CloudInstance> cloudInstances = allCloudInstances.get(cloudClientId);
+                    return cloudInstances.stream().filter(aCloudInstance -> aCloudInstance.getId().equals(instance.getComputeId())).findFirst().orElse(null);
+                })
+                .map(cloudInstance -> cloudInstance == null ? null : new CloudInstanceType(cloudInstance))
+                .toList();
 
         } catch (CloudException exception) {
             throw new DataFetchingException(exception.getMessage());

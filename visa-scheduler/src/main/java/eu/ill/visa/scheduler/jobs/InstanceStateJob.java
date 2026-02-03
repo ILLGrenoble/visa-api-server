@@ -42,10 +42,18 @@ public class InstanceStateJob {
     // Run every 5 seconds
     @Scheduled(cron="0/5 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public void updateNonStableInstancesStates() {
-        String[] statesString = {"BUILDING","STARTING","PARTIALLY_ACTIVE","REBOOTING","STOPPING","DELETED"};
-        List<InstanceState> states = Arrays.stream(statesString).map(InstanceState::valueOf).toList();
+        List<InstanceState> states = Arrays.asList(
+            InstanceState.BUILDING,
+            InstanceState.STARTING,
+            InstanceState.PARTIALLY_ACTIVE,
+            InstanceState.ACTIVE_MIGRATING,
+            InstanceState.REBOOTING,
+            InstanceState.STOPPING,
+            InstanceState.MIGRATING,
+            InstanceState.DELETED
+        );
         List<Instance> instances = this.instanceService.getAllWithStates(states);
-        logger.debug("Job running to update instance states which have states {} ({} instances)", statesString, instances.size());
+        logger.debug("Job running to update instance states which have unstable states ({} instances)", instances.size());
 
         this.updateInstancesStates(instances);
     }

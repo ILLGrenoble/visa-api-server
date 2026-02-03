@@ -171,6 +171,18 @@ public interface CloudProvider {
     void deleteInstance(String id) throws CloudException;
 
     /**
+     * Migrate an instance for a given instance identifier
+     *
+     * @param id the instance identifier
+     * @param host the target hostname
+     * @param blockMigration use block migration
+     * @param diskOverCommit enable disk over commit
+     * @throws CloudException if there was an exception executing the request
+     * @throws CloudUnavailableException if the functionality is unavailable
+     */
+    void migrateInstance(String id, String host, boolean blockMigration, boolean diskOverCommit) throws CloudException, CloudUnavailableException;
+
+    /**
      * Retrieve the limits from the cloud provider (vCPUS used, memory used etc.)
      *
      * @return the cloud limits

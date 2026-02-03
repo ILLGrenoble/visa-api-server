@@ -209,6 +209,10 @@ public class OpenStackComputeEndpoint implements ComputeEndpoint {
         }
     }
 
+    public void migrateInstance(final String id, final String host, boolean blockMigrate, boolean diskOverCommit) throws CloudException {
+        this.runServerAction(id, new InstanceMigrationActionRequest(host, blockMigrate, diskOverCommit), "Could not migrate server");
+    }
+
     public String createInstance(final ServerInput input) throws CloudException {
         try {
             return this.computeEndpointClient.createServer(this.identityProvider.authenticate(), new ServerRequest(input)).server().id();

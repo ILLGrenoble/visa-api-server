@@ -164,7 +164,7 @@ public class CloudInstance {
         private String imageId;
         private String flavorId;
         private Date createdAt;
-        protected CloudInstanceState status;
+        private CloudInstanceState status;
         private CloudInstanceFault fault;
         private List<String> securityGroups;
         private CloudInstanceMetadata metadata;

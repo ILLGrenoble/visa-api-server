@@ -390,7 +390,7 @@ public class AccountInstanceController extends AbstractController {
     @Path("/{instance}")
     public MetaResponse<InstanceDto> delete(@Context final SecurityContext securityContext, @PathParam("instance") final Instance instance) {
         final User user = this.getUserPrincipal(securityContext);
-        if (instance.getComputeId() == null || instance.hasAnyState(List.of(InstanceState.STOPPED, InstanceState.ERROR, InstanceState.UNKNOWN, InstanceState.UNAVAILABLE))) {
+        if (instance.getComputeId() == null || instance.hasAnyState(List.of(InstanceState.STOPPED, InstanceState.ERROR, InstanceState.UNKNOWN, InstanceState.MIGRATING, InstanceState.UNAVAILABLE))) {
             return this.performAction(instance, user, InstanceCommandType.DELETE);
 
         } else {

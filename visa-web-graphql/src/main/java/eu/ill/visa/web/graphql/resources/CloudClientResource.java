@@ -1,15 +1,15 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.visa.business.services.CloudClientService;
-import eu.ill.visa.business.services.DevicePoolService;
-import eu.ill.visa.business.services.HypervisorService;
-import eu.ill.visa.business.services.InstanceService;
+import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.domain.CloudLimit;
 import eu.ill.visa.cloud.exceptions.CloudUnavailableException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientFactory;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
 import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
@@ -41,16 +41,19 @@ public class CloudClientResource {
     private final CloudClientService cloudClientService;
     private final HypervisorService hypervisorService;
     private final InstanceService instanceService;
+    private final InstanceCommandService instanceCommandService;
     private final DevicePoolService devicePoolService;
 
     @Inject
     public CloudClientResource(final CloudClientService cloudClientService,
                                final HypervisorService hypervisorService,
                                final InstanceService instanceService,
+                               final InstanceCommandService instanceCommandService,
                                final DevicePoolService devicePoolService) {
         this.cloudClientService = cloudClientService;
         this.hypervisorService = hypervisorService;
         this.instanceService = instanceService;
+        this.instanceCommandService = instanceCommandService;
         this.devicePoolService = devicePoolService;
     }
 
@@ -281,6 +284,30 @@ public class CloudClientResource {
         this.hypervisorService.onCloudClientDeleted(cloudClient);
 
         return true;
+    }
+
+
+    @Mutation
+    public @NotNull Boolean migrateCloudInstance(@AdaptToScalar(Scalar.Int.class) Long cloudId, @NotNull String computeId, @NotNull String host, @NotNull Boolean blockMigration, @NotNull Boolean diskOverCommit) throws DataFetchingException {
+        try {
+            CloudClient cloudClient = this.getCloudClient(cloudId);
+
+            cloudClient.migrateInstance(computeId, host, blockMigration, diskOverCommit);
+
+            // Update the state of the instance
+            Instance instance = this.instanceService.getByComputeId(computeId);
+            if (instance != null) {
+                InstanceCommand command = this.instanceCommandService.create(instance, InstanceCommandType.STATE);
+                this.instanceCommandService.execute(command);
+            }
+
+            return true;
+
+        } catch (DataFetchingException e) {
+            throw e;
+        } catch (Exception exception) {
+            throw new DataFetchingException(exception.getMessage());
+        }
     }
 
     private void setCloudConfigurationParameters(CloudProviderConfiguration cloudProviderConfiguration, CloudClientInput input) throws InvalidInputException {

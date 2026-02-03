@@ -20,6 +20,7 @@ public interface ComputeEndpoint {
     void addServerSecurityGroup(final String id, final String securityGroup) throws CloudException;
     void removeServerSecurityGroup(final String id, final String securityGroup) throws CloudException;
     void deleteInstance(final String id) throws CloudException;
+    void migrateInstance(final String id, final String host, boolean blockMigrate, boolean diskOverCommit) throws CloudException;
     String createInstance(final ServerInput input) throws CloudException;
     List<String> serverSecurityGroups(final String id) throws CloudException;
     CloudLimit limits() throws CloudException;

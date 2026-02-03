@@ -1,0 +1,17 @@
+-- migrate:up
+
+ALTER TABLE instance
+DROP CONSTRAINT IF EXISTS instance_state_check;
+
+ALTER TABLE instance
+    ADD CONSTRAINT instance_state_check
+        CHECK (state IN ('ACTIVE', 'PARTIALLY_ACTIVE', 'ACTIVE_MIGRATING', 'BUILDING', 'DELETED', 'DELETING','ERROR', 'STARTING', 'STOPPED', 'STOPPING', 'REBOOTING', 'MIGRATING', 'UNAVAILABLE', 'UNKNOWN'));
+
+-- migrate:down
+
+ALTER TABLE instance
+DROP CONSTRAINT IF EXISTS instance_state_check;
+
+ALTER TABLE instance
+    ADD CONSTRAINT instance_state_check
+        CHECK (state IN ('ACTIVE', 'PARTIALLY_ACTIVE', 'BUILDING', 'DELETED', 'DELETING','ERROR', 'STARTING', 'STOPPED', 'STOPPING', 'REBOOTING', 'UNAVAILABLE', 'UNKNOWN'));
