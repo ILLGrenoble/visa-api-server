@@ -1,6 +1,7 @@
 package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import org.slf4j.Logger;
@@ -34,6 +35,22 @@ public class WebXRemoteDesktopEventSubscriber extends RemoteDesktopEventSubscrib
         }
 
         return null;
+    }
+
+    @Override
+    protected boolean isEventAllowed(InstanceMemberRole role, byte[] data) {
+        if (role.equals(InstanceMemberRole.OWNER)) {
+            return true;
+        }
+
+        ByteBuffer instructionWrapper = ByteBuffer.wrap(data, INSTRUCTION_TYPE_OFFSET, 4).order(LITTLE_ENDIAN);
+        int instructionType = instructionWrapper.getInt() & 0x000000ff;
+
+        return switch (instructionType) {
+            case 13 -> false; // Screen Resize
+            case 14 -> false; // Keyboard Layout
+            default -> true;
+        };
     }
 
     @Override

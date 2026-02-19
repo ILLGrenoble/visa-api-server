@@ -37,15 +37,21 @@ public abstract class RemoteDesktopEventSubscriber<T> {
 
             final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
 
+            final InstanceMemberRole role = desktopSessionMember.connectedUser().getRole();
+
             // Get activity type (returns null for anything other than mouse or keyboard activity)
             InstanceActivityType controlActivityType = this.getControlActivityType(data);
+
+            // Filter events from clients that can only be performed by specific users
+            if (!this.isEventAllowed(role, data)) {
+                return;
+            }
 
             // Update the instance activity if mouse/keyboard event has been sent to the server
             if (controlActivityType != null) {
                 remoteDesktopConnection.setInstanceActivity(controlActivityType);
             }
 
-            InstanceMemberRole role = desktopSessionMember.connectedUser().getRole();
             if (controlActivityType == null || role.equals(InstanceMemberRole.OWNER) || role.equals(InstanceMemberRole.SUPPORT) || (role.equals(InstanceMemberRole.USER) && !desktopSession.isLocked())) {
                 this.writeData(remoteDesktopConnection.getConnectionThread(), data);
             }
@@ -83,6 +89,7 @@ public abstract class RemoteDesktopEventSubscriber<T> {
     }
 
     protected abstract InstanceActivityType getControlActivityType(T data);
+    protected abstract boolean isEventAllowed(InstanceMemberRole role, T data);
 
     protected abstract void writeData(ConnectionThread connectionThread, T data);
 }

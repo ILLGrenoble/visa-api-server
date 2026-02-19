@@ -1,6 +1,7 @@
 package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
+import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 
@@ -25,6 +26,11 @@ public class GuacamoleRemoteDesktopEventSubscriber extends RemoteDesktopEventSub
         }
 
         return null;
+    }
+
+    @Override
+    protected boolean isEventAllowed(InstanceMemberRole role, String data) {
+        return true;
     }
 
     @Override
