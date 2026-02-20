@@ -69,34 +69,43 @@ public class RedisPubSubHealthMonitor {
     }
 
     private void pingRedis() {
-        this.redisPingWaitTimer = null;
-        if (this.redisPingTimeout == null) {
-            try {
-                this.redisPingTimeout = Timer.setTimeout(this::onPingTimeout, PING_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                publisher.publish(CHANNEL, new RedisMessageCarrier(PING_MESSAGE));
+        // Publish the message on a virtual thread to avoid blocking the main thread
+        Thread.startVirtualThread(() -> {
+            synchronized (this) {
+                this.redisPingWaitTimer = null;
+                if (this.redisPingTimeout == null) {
+                    try {
+                        this.redisPingTimeout = Timer.setTimeout(this::onPingTimeout, PING_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                        publisher.publish(CHANNEL, new RedisMessageCarrier(PING_MESSAGE));
 
-            } catch (Exception e) {
-                logger.error("Error while pinging Redis pub/sub health monitor");
-                if (this.redisPingTimeout != null) {
-                    this.redisPingTimeout.cancel();
-                    this.redisPingTimeout = null;
+                    } catch (Exception e) {
+                        logger.error("Error while pinging Redis pub/sub health monitor");
+                        if (this.redisPingTimeout != null) {
+                            this.redisPingTimeout.cancel();
+                            this.redisPingTimeout = null;
+                        }
+                        this.startPingOperation();
+                    }
                 }
-                this.startPingOperation();
             }
-        }
+        });
     }
 
-    private synchronized void onPingMessage(RedisMessageCarrier message) {
+    private void onPingMessage(RedisMessageCarrier message) {
         final String data = message.getData();
-        if (PING_MESSAGE.equals(data)) {
-            if (this.redisPingTimeout != null) {
-                this.redisPingTimeout.cancel();
-                this.redisPingTimeout = null;
-            }
+        Thread.startVirtualThread(() -> {
+            synchronized (this) {
+                if (PING_MESSAGE.equals(data)) {
+                    if (this.redisPingTimeout != null) {
+                        this.redisPingTimeout.cancel();
+                        this.redisPingTimeout = null;
+                    }
 
-            // Start the next ping operation
-            this.startPingOperation();
-        }
+                    // Start the next ping operation
+                    this.startPingOperation();
+                }
+            }
+        });
     }
 
     private synchronized void onPingTimeout() {
