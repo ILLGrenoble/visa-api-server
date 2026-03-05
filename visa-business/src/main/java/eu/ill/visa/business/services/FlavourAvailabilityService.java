@@ -259,11 +259,11 @@ public class FlavourAvailabilityService {
                     currentAvailability = systemResources.getAvailability(flavour);
 
                     referenceDate = resourceUsageModifier.modificationDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    if (!from.isAfter(referenceDate) && futures.isEmpty()) {
+                        futures.add(previousAvailability);
+                    }
                     if (!from.isAfter(referenceDate) && !to.isBefore(referenceDate)) {
                         // Ensure that there is at least one value in the array covering the availability up until the 'from' moment
-                        if (from.isBefore(referenceDate) && futures.isEmpty()) {
-                            futures.add(previousAvailability);
-                        }
                         futures.add(currentAvailability);
                     }
                 }
