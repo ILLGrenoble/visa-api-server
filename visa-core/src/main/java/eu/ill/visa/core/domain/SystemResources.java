@@ -7,12 +7,9 @@ import eu.ill.visa.core.entity.partial.DevicePoolUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-public record SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, List<Long> bookedResourcesIds) {
+public record SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, Set<Long> bookedResourcesIds) {
     private static final Logger logger = LoggerFactory.getLogger(SystemResources.class);
 
     private record FlavourResourceRequirement(Long cloudId, Flavour flavour,  Long vcpus, Long memoryMB, List<FlavourDevice> flavourDevices) {
@@ -21,8 +18,17 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
         }
     }
 
+    public SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, Set<Long> bookedResourcesIds) {
+        this.cloudId = cloudId;
+        this.availabilityDate = availabilityDate;
+        this.cloudResources = cloudResources;
+        this.devicePoolUsages = devicePoolUsages;
+        this.hypervisorInventories = hypervisorInventories;
+        this.bookedResourcesIds = new HashSet<>(bookedResourcesIds); // Ensure we clone the booked Resource Ids as we modify them later
+    }
+
     public SystemResources(Long cloudId, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages,  List<HypervisorInventory> hypervisorInventories) {
-        this(cloudId, new Date(), cloudResources, devicePoolUsages, hypervisorInventories, new ArrayList<>());
+        this(cloudId, new Date(), cloudResources, devicePoolUsages, hypervisorInventories, new HashSet<>());
     }
 
 
