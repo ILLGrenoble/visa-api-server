@@ -42,9 +42,6 @@ public class BookingConfiguration extends Timestampable {
     @Column(name = "max_instances_per_reservation", nullable = true)
     private Long maxInstancesPerReservation;
 
-    @Column(name = "max_days_in_advance", nullable = true)
-    private Long maxDaysInAdvance;
-
     @Column(name = "max_days_reservation", nullable = true)
     private Long maxDaysReservation;
 
@@ -94,14 +91,6 @@ public class BookingConfiguration extends Timestampable {
 
     public void setMaxInstancesPerReservation(Long maxInstancesPerReservation) {
         this.maxInstancesPerReservation = maxInstancesPerReservation;
-    }
-
-    public Long getMaxDaysInAdvance() {
-        return maxDaysInAdvance;
-    }
-
-    public void setMaxDaysInAdvance(Long maxDaysInAdvance) {
-        this.maxDaysInAdvance = maxDaysInAdvance;
     }
 
     public Long getMaxDaysReservation() {
@@ -157,7 +146,6 @@ public class BookingConfiguration extends Timestampable {
         private Long id;
         private boolean enabled;
         private Long maxInstancesPerReservation;
-        private Long maxDaysInAdvance;
         private Long maxDaysReservation;
         private CloudProviderConfiguration cloudProviderConfiguration;
         private List<Flavour> flavours;
@@ -179,11 +167,6 @@ public class BookingConfiguration extends Timestampable {
 
         public Builder maxInstancesPerReservation(Long maxInstancesPerReservation) {
             this.maxInstancesPerReservation = maxInstancesPerReservation;
-            return this;
-        }
-
-        public Builder maxDaysInAdvance(Long maxDaysInAdvance) {
-            this.maxDaysInAdvance = maxDaysInAdvance;
             return this;
         }
 
@@ -217,7 +200,6 @@ public class BookingConfiguration extends Timestampable {
             bookingConfiguration.setId(id);
             bookingConfiguration.setEnabled(enabled);
             bookingConfiguration.setMaxInstancesPerReservation(maxInstancesPerReservation);
-            bookingConfiguration.setMaxDaysInAdvance(maxDaysInAdvance);
             bookingConfiguration.setMaxDaysReservation(maxDaysReservation);
             bookingConfiguration.setCloudProviderConfiguration(cloudProviderConfiguration);
             bookingConfiguration.setFlavours(flavours);

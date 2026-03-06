@@ -81,7 +81,6 @@ public class BookingConfigurationResource {
         bookingConfiguration.setEnabled(input.getEnabled());
         bookingConfiguration.setMaxInstancesPerReservation(input.getMaxInstancesPerReservation());
         bookingConfiguration.setMaxDaysReservation(input.getMaxDaysReservation());
-        bookingConfiguration.setMaxDaysInAdvance(input.getMaxDaysInAdvance());
         bookingConfiguration.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
 
         // Update roles

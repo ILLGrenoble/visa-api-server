@@ -76,7 +76,6 @@ public class BookingService {
         if (!startDate.isAfter(LocalDate.now())) {
             errors.add(format("The reservation start date (%s) is too early", startDate));
         }
-        long daysToReservation = ChronoUnit.DAYS.between(LocalDate.now(), startDate);
         long reservationDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
 
         final List<Flavour> flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavour::getFlavour).toList();
@@ -103,15 +102,8 @@ public class BookingService {
                 errors.add(format("The requested flavour (%s) is not available for the reservation request", requestedFlavour.getName()));
 
             } else {
-                final Long maxDaysInAdvance = flavourConfiguration.maxDaysInAdvance();
                 final Long maxReservationDays = flavourConfiguration.maxReservationDays();
                 final Long maxInstances =  flavourConfiguration.maxInstances();
-
-                // Ensure days in advance is valid
-                if (maxDaysInAdvance != null && daysToReservation > maxDaysInAdvance) {
-                    logger.warn("User ({}) has requested a flavour ({}) after the max allowed days in the future ({} > {})", bookingRequest.getOwner().getFullNameAndId(), requestedFlavour.getName(), daysToReservation, flavourConfiguration.maxDaysInAdvance());
-                    errors.add(format("The requested flavour (%s) can not be reserved more than %d days in advance", requestedFlavour.getName(), daysToReservation));
-                }
 
                 // Ensure days reservation is valid
                 if (maxReservationDays != null && reservationDays > maxReservationDays) {
@@ -178,12 +170,12 @@ public class BookingService {
         // See if specific rules apply to the flavour
         if (flavourRoleConfigurations.isEmpty()) {
             // Apply the general configuration to the flavour
-            return new BookingFlavourConfiguration(flavour, bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation(), bookingConfiguration.getMaxDaysInAdvance());
+            return new BookingFlavourConfiguration(flavour, bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation());
 
         } else {
             // Only use the specific rules: if User Role is not included then they can't reserve this flavour
             BookingFlavourConfiguration specificConfiguration = this.flavourConfigurationFromSpecificRules(user, flavour, bookingConfiguration.getFlavourRoleConfigurations());
-            return specificConfiguration.withDefaults(bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation(), bookingConfiguration.getMaxDaysInAdvance());
+            return specificConfiguration.withDefaults(bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation());
         }
     }
 

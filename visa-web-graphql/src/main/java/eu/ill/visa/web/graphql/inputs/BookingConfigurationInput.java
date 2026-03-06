@@ -13,7 +13,6 @@ public class BookingConfigurationInput {
 
     private @NotNull Boolean enabled;
     private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxInstancesPerReservation;
-    private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxDaysInAdvance;
     private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxDaysReservation;
     private @AdaptToScalar(Scalar.Int.class) Long cloudId;
     private @AdaptToScalar(Scalar.Int.class) @NotNull List<Long> flavourIds;
@@ -34,14 +33,6 @@ public class BookingConfigurationInput {
 
     public void setMaxInstancesPerReservation(Long maxInstancesPerReservation) {
         this.maxInstancesPerReservation = maxInstancesPerReservation;
-    }
-
-    public Long getMaxDaysInAdvance() {
-        return maxDaysInAdvance;
-    }
-
-    public void setMaxDaysInAdvance(Long maxDaysInAdvance) {
-        this.maxDaysInAdvance = maxDaysInAdvance;
     }
 
     public Long getMaxDaysReservation() {

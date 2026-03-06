@@ -15,8 +15,6 @@ public class BookingConfigurationType {
     @AdaptToScalar(Scalar.Int.class)
     private final Long maxInstancesPerReservation;
     @AdaptToScalar(Scalar.Int.class)
-    private final Long maxDaysInAdvance;
-    @AdaptToScalar(Scalar.Int.class)
     private final Long maxDaysReservation;
     private final Long cloudId;
     private final @NotNull List<FlavourType> flavours;
@@ -26,7 +24,6 @@ public class BookingConfigurationType {
     public BookingConfigurationType(final BookingConfiguration bookingConfiguration) {
         this.enabled = bookingConfiguration.isEnabled();
         this.maxInstancesPerReservation = bookingConfiguration.getMaxInstancesPerReservation();
-        this.maxDaysInAdvance = bookingConfiguration.getMaxDaysInAdvance();
         this.maxDaysReservation = bookingConfiguration.getMaxDaysReservation();
         this.cloudId = bookingConfiguration.getCloudId();
         this.flavours = bookingConfiguration.getFlavours().stream().map(FlavourType::new).toList();
@@ -40,10 +37,6 @@ public class BookingConfigurationType {
 
     public Long getMaxInstancesPerReservation() {
         return maxInstancesPerReservation;
-    }
-
-    public Long getMaxDaysInAdvance() {
-        return maxDaysInAdvance;
     }
 
     public Long getMaxDaysReservation() {
