@@ -199,8 +199,8 @@ public class BookingService {
                 if (acc == null) {
                     return next;
                 } else {
-                    Long maxInstances = acc.maxInstances() == null ? next.maxInstances() : next.maxInstances() == null ? acc.maxInstances() : Math.max(next.maxInstances(),  acc.maxInstances());
-                    Long maxReservationDays = acc.maxReservationDays() == null ? next.maxReservationDays() : next.maxReservationDays() == null ? acc.maxReservationDays() : Math.max(next.maxReservationDays(),  acc.maxReservationDays());
+                    Long maxInstances = acc.maxInstances() == null ? next.maxInstances() : next.maxInstances() == null ? acc.maxInstances() : Long.valueOf(Math.max(next.maxInstances(),  acc.maxInstances()));
+                    Long maxReservationDays = acc.maxReservationDays() == null ? next.maxReservationDays() : next.maxReservationDays() == null ? acc.maxReservationDays() : Long.valueOf(Math.max(next.maxReservationDays(),  acc.maxReservationDays()));
                     return new BookingFlavourConfiguration(flavour, maxInstances, maxReservationDays);
                 }
             });
