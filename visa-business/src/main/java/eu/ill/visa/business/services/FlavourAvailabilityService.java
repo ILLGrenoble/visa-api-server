@@ -395,7 +395,8 @@ public class FlavourAvailabilityService {
             List<ResourceUsageModifier> bookingRequestUsageModifiers = bookingRequest.getFlavours().stream()
                 .flatMap(requestFlavour -> {
                     List<BookingToken> bookingTokensForFlavour = new ArrayList<>();
-                    for (long i = 0; i < requestFlavour.getQuantity(); i++) {
+                    long quantity = requestFlavour.getQuantity() == null ? 0 : requestFlavour.getQuantity();
+                    for (long i = 0; i < quantity; i++) {
                         bookingTokensForFlavour.add(new BookingToken(bookingRequest, requestFlavour.getFlavour(), ""));
                     }
                     return bookingTokensForFlavour.stream();
