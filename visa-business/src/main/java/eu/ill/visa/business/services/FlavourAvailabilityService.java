@@ -150,7 +150,7 @@ public class FlavourAvailabilityService {
     }
 
     public Map<Flavour, List<FlavourAvailability>> calculateFutureAvailabilities(final List<Flavour> flavours, final BookingRequest bookingRequest) {
-        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources(bookingRequest);
         final Map<Long, List<ResourceUsageModifier>> cloudResourceUsageModifiers = this.getCloudResourceUsageModifiers(bookingRequest);
 
         final LocalDate from = bookingRequest.getStartDate().toLocalDate();
@@ -168,7 +168,7 @@ public class FlavourAvailabilityService {
     }
 
     public List<FlavourAvailability> calculateFutureAvailabilities(final Flavour flavour, final BookingRequest bookingRequest) {
-        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources();
+        final Map<Long, SystemResources> allSystemResource = this.getAllAvailableSystemResources(bookingRequest);
         final Map<Long, List<ResourceUsageModifier>> cloudResourceUsageModifiers = this.getCloudResourceUsageModifiers(bookingRequest);
 
         final LocalDate from = bookingRequest.getStartDate().toLocalDate();
@@ -276,15 +276,23 @@ public class FlavourAvailabilityService {
     }
 
     private Map<Long, SystemResources> getAllAvailableSystemResources() {
+        return this.getAllAvailableSystemResources(null);
+    }
 
+    private Map<Long, SystemResources> getAllAvailableSystemResources(BookingRequest bookingRequestInProcess) {
+
+        long bookingRequestInProcessId = bookingRequestInProcess == null ? 0L : bookingRequestInProcess.getId() == null ? 0L : bookingRequestInProcess.getId();
         Map<Long, SystemResources> allSystemResources = this.getAllSystemResources();
 
         // Remove all resources that are from active bookings but haven't got associated instances yet
         this.bookingTokenService.getAllActiveUnusedTokens().forEach(token -> {
-            final ResourceUsageModifier modifier = ResourceUsageModifier.fromBookingTokenStart(token);
-            Long cloudId = modifier.cloudId();
-            SystemResources systemResources = allSystemResources.get(cloudId).onResourcesModification(modifier);
-            allSystemResources.put(cloudId, systemResources);
+            long bookingRequestId = token.getBookingRequest().getId();
+            if (bookingRequestId != bookingRequestInProcessId) {
+                final ResourceUsageModifier modifier = ResourceUsageModifier.fromBookingTokenStart(token);
+                Long cloudId = modifier.cloudId();
+                SystemResources systemResources = allSystemResources.get(cloudId).onResourcesModification(modifier);
+                allSystemResources.put(cloudId, systemResources);
+            }
         });
 
         return allSystemResources;
@@ -376,14 +384,17 @@ public class FlavourAvailabilityService {
             .collect(Collectors.toList());
     }
 
-    private List<ResourceUsageModifier> getFutureBookingResourceUsageModifiers(final BookingRequest bookingRequest) {
+    private List<ResourceUsageModifier> getFutureBookingResourceUsageModifiers(final BookingRequest bookingRequestInProcess) {
+        long bookingRequestInProcessId = bookingRequestInProcess == null ? 0L : bookingRequestInProcess.getId() == null ? 0L : bookingRequestInProcess.getId();
+
         List<ResourceUsageModifier> futureModifiers = this.bookingTokenService.getAllFutureTokens().stream()
+            .filter(token -> token.getBookingRequest().getId() != bookingRequestInProcessId)
             .flatMap(token -> {
-                    ResourceUsageModifier startModifier = ResourceUsageModifier.fromBookingTokenStart(token);
-                    ResourceUsageModifier endModifier = ResourceUsageModifier.fromBookingTokenEnd(token);
-                    return Stream.of(startModifier, endModifier);
-                }
-            ).collect(Collectors.toList());
+                ResourceUsageModifier startModifier = ResourceUsageModifier.fromBookingTokenStart(token);
+                ResourceUsageModifier endModifier = ResourceUsageModifier.fromBookingTokenEnd(token);
+                return Stream.of(startModifier, endModifier);
+            })
+            .collect(Collectors.toList());
 
         List <ResourceUsageModifier> currentUnusedModifiers = this.bookingTokenService.getAllActiveUnusedTokens().stream()
             .map(ResourceUsageModifier::fromBookingTokenEnd)
@@ -391,13 +402,13 @@ public class FlavourAvailabilityService {
         futureModifiers.addAll(currentUnusedModifiers);
 
         // If a booking request has been passed then create resource usages from the expected tokens too
-        if (bookingRequest != null) {
-            List<ResourceUsageModifier> bookingRequestUsageModifiers = bookingRequest.getFlavours().stream()
+        if (bookingRequestInProcess != null) {
+            List<ResourceUsageModifier> bookingRequestUsageModifiers = bookingRequestInProcess.getFlavours().stream()
                 .flatMap(requestFlavour -> {
                     List<BookingToken> bookingTokensForFlavour = new ArrayList<>();
                     long quantity = requestFlavour.getQuantity() == null ? 0 : requestFlavour.getQuantity();
                     for (long i = 0; i < quantity; i++) {
-                        bookingTokensForFlavour.add(new BookingToken(bookingRequest, requestFlavour.getFlavour(), ""));
+                        bookingTokensForFlavour.add(new BookingToken(bookingRequestInProcess, requestFlavour.getFlavour(), ""));
                     }
                     return bookingTokensForFlavour.stream();
                 })

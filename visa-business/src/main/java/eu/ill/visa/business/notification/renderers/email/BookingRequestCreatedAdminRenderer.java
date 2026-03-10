@@ -16,13 +16,16 @@ import static java.lang.String.format;
 public class BookingRequestCreatedAdminRenderer extends BaseRenderer implements NotificationRenderer {
 
     private final BookingRequest bookingRequest;
+    private final boolean isUpdate;
     private final String rootURL;
     private final String emailTemplatesDirectory;
 
     public BookingRequestCreatedAdminRenderer(final BookingRequest bookingRequest,
+                                              final boolean isUpdate,
                                               final String emailTemplatesDirectory,
                                               final String rootURL) {
         this.bookingRequest = bookingRequest;
+        this.isUpdate = isUpdate;
         this.rootURL = rootURL;
         this.emailTemplatesDirectory = emailTemplatesDirectory;
     }
@@ -35,6 +38,7 @@ public class BookingRequestCreatedAdminRenderer extends BaseRenderer implements 
             final Map<String, Object> variables = new HashMap<>();
 
             variables.put("bookingRequest", bookingRequest);
+            variables.put("isUpdate", isUpdate);
             variables.put("rootURL", rootURL);
             compiledTemplate.evaluate(writer, variables);
             return writer.toString();

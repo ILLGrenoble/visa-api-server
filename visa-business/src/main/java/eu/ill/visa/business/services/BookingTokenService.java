@@ -41,7 +41,7 @@ public class BookingTokenService {
 
     public List<BookingToken> getAllForBookingRequest(final BookingRequest bookingRequest) {
         // Ensure that we have all valid tokens (in case they weren't created initially or request has been updated)
-        return this.createBookingTokensForBookingRequest(bookingRequest);
+        return this.createOrUpdateBookingTokensForBookingRequest(bookingRequest);
     }
 
     public List<BookingToken> getAllAssignedToUser(final User user) {
@@ -104,16 +104,35 @@ public class BookingTokenService {
         this.save(bookingToken);
     }
 
-    public List<BookingToken> createBookingTokensForBookingRequest(BookingRequest bookingRequest) {
+    public List<BookingToken> createOrUpdateBookingTokensForBookingRequest(BookingRequest bookingRequest) {
         List<BookingToken> bookingTokens = this.repository.getAllForBookingRequestId(bookingRequest.getId());
 
+        List<Long> validFlavourIds = bookingRequest.getFlavours().stream().map(bookingRequestFlavour -> bookingRequestFlavour.getFlavour().getId()).toList();
+
+        // Delete ones that are no longer valid
+        for (BookingToken bookingToken : bookingTokens) {
+            if (!validFlavourIds.contains(bookingToken.getFlavour().getId())) {
+                this.delete(bookingToken);
+            }
+        }
+
+        // Update number of required flavour tokens
         for (BookingRequestFlavour requestFlavour : bookingRequest.getFlavours()) {
             List<BookingToken> bookingTokensForFlavour = bookingTokens.stream().filter(bookingToken -> bookingToken.getFlavour().equals(requestFlavour.getFlavour())).collect(Collectors.toList());
 
-            while (bookingTokensForFlavour.size() < requestFlavour.getQuantity()) {
-                BookingToken bookingToken = new BookingToken(bookingRequest, requestFlavour.getFlavour(), this.getUID());
-                this.save(bookingToken);
-                bookingTokensForFlavour.add(bookingToken);
+            if (bookingTokensForFlavour.size() > requestFlavour.getQuantity()) {
+                while (bookingTokensForFlavour.size() > requestFlavour.getQuantity()) {
+                    BookingToken bookingToken = bookingTokensForFlavour.removeLast();
+                    this.delete(bookingToken);
+                }
+
+            } else {
+                while (bookingTokensForFlavour.size() < requestFlavour.getQuantity()) {
+                    BookingToken bookingToken = new BookingToken(bookingRequest, requestFlavour.getFlavour(), this.getUID());
+                    this.save(bookingToken);
+                    bookingTokensForFlavour.add(bookingToken);
+                }
+
             }
         }
 

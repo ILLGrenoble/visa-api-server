@@ -41,10 +41,10 @@ public class DummyEmailHandler implements EmailHandler {
     public void sendInstanceExtensionNotification(final Instance instance, boolean extensionGranted, final String handlerComments) {
     }
 
-    public void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest) {
+    public void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest, boolean isUpdate) {
     }
 
-    public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest) {
+    public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest, boolean isUpdate) {
     }
 
     public void sendBookingRequestValidated(BookingRequest bookingRequest) {

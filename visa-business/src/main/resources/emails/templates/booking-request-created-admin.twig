@@ -2,7 +2,7 @@
 {% block title %} [VISA] A reservation request for VISA resources has been made {% endblock %}
 {% block content %}
     <p>
-        A request to reserve VISA resources has been made with the following details:
+        A request to reserve VISA resources has been {% if isUpdate %}updated{% else %}made{% endif %} with the following details:
     </p>
     <table>
         <tbody>
@@ -37,11 +37,11 @@
         </tbody>
     </table>
     <p>
-        The organiser provided the following additional information:
+        The organiser {% if isUpdate %}added{% else %}provided{% endif %} the following {% if isUpdate %}comment{% else %}additional information{% endif %}:
     </p>
     <div style="border: solid 1px #ddd; padding: 0 12px; background-color: #fafafa;">
         <p style="font-weight: 400;">
-            {{ bookingRequest.creationComments | raw }}
+            {{ bookingRequest.latestCreationComments | raw }}
         </p>
     </div>
     <p>

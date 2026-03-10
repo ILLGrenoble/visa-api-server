@@ -65,7 +65,7 @@ public class BookingService {
         return new BookingUserConfiguration(enabled, flavourConfigurations);
     }
 
-    public BookingRequestValidation validateAndCreateBookingRequest(final BookingRequest bookingRequest) {
+    public BookingRequestValidation validateAndSaveBookingRequest(final BookingRequest bookingRequest) {
         List<String> errors = new ArrayList<>();
         // Verify user access to flavours in the request
         final BookingUserConfiguration bookingUserConfiguration = this.getBookingUserConfiguration(bookingRequest.getOwner());
@@ -79,13 +79,7 @@ public class BookingService {
         long reservationDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
 
         final List<Flavour> flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavour::getFlavour).toList();
-        final Map<Flavour, List<FlavourAvailability>> flavoursAvailabilities = this.flavourAvailabilityService.getFutureAvailabilities(flavours, startDate, endDate);
-
-        BookingRequest partialBookingRequest = BookingRequest.Builder()
-            .startDate(bookingRequest.getStartDate())
-            .endDate(bookingRequest.getEndDate())
-            .flavours(new ArrayList<>())
-            .build();
+        final Map<Flavour, List<FlavourAvailability>> flavoursAvailabilities = this.flavourAvailabilityService.calculateFutureAvailabilities(flavours, bookingRequest);
 
         // Verify flavour
         for (BookingRequestFlavour requestFlavour : bookingRequest.getFlavours()) {
@@ -125,39 +119,28 @@ public class BookingService {
 
                 } else {
                     // determine if any of the availabilities returned have insufficient available quantities
-                    if (!this.availabilitiesOk(flavourAvailabilities, requestedQuantity)) {
+                    if (!this.availabilitiesOk(flavourAvailabilities)) {
                         logger.info("The flavour \"{}\" is unavailable in sufficient quantities (or cannot be determined) during the reservation dates ({} to {})",  requestedFlavour.getName(), startDate, endDate);
                         errors.add(format("Insufficient resources are available to reserve the requested flavour (%s) during the reservation period", requestedFlavour.getName()));
-
-                    } else {
-                        // Ensure availability of flavour for the dates also taking into account also other flavours reserved in the booking
-                        final List<FlavourAvailability> dynamicFlavoursAvailabilities = this.flavourAvailabilityService.calculateFutureAvailabilities(requestedFlavour, partialBookingRequest);
-                        if (!this.availabilitiesOk(dynamicFlavoursAvailabilities, requestedQuantity)) {
-                            logger.info("The flavour \"{}\" is unavailable in sufficient quantities when combined with the other requested flavours during the reservation dates ({} to {})",  requestedFlavour.getName(), startDate, endDate);
-                            errors.add(format("Insufficient resources are available to reserve the flavour (%s) when combined with the other requested flavours during the reservation period", requestedFlavour.getName()));
-                        }
                     }
                 }
-
-                // Update partial booking request with the validated flavour (subsequent flavours will hence have reduced availabilities)
-                partialBookingRequest.getFlavours().add(requestFlavour);
             }
         }
 
         boolean isValid = errors.isEmpty();
         if (isValid) {
-            this.bookingRequestService.create(bookingRequest);
+            this.bookingRequestService.createOrUpdate(bookingRequest);
             logger.info("Booking request has been successfully validated and created: {}", bookingRequest);
         }
 
         return new BookingRequestValidation(bookingRequest, isValid, errors);
     }
 
-    private boolean availabilitiesOk(List<FlavourAvailability> flavourAvailabilities, long requestedQuantity) {
+    private boolean availabilitiesOk(List<FlavourAvailability> flavourAvailabilities) {
         return flavourAvailabilities.stream()
             .noneMatch(aFlavourAvailability -> {
                 final FlavourAvailability.AvailabilityData availability = aFlavourAvailability.availability().orElse(null);
-                return availability == null || availability.available() < requestedQuantity;
+                return availability == null || availability.available() < 0;
             });
     }
 

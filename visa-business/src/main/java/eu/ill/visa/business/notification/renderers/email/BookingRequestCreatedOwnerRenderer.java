@@ -16,15 +16,18 @@ import static java.lang.String.format;
 public class BookingRequestCreatedOwnerRenderer extends BaseRenderer implements NotificationRenderer {
 
     private final BookingRequest bookingRequest;
+    private final boolean isUpdate;
     private final String rootURL;
     private final String adminEmailAddress;
     private final String emailTemplatesDirectory;
 
     public BookingRequestCreatedOwnerRenderer(final BookingRequest bookingRequest,
+                                              final boolean isUpdate,
                                               final String emailTemplatesDirectory,
                                               final String rootURL,
                                               final String adminEmailAddress) {
         this.bookingRequest = bookingRequest;
+        this.isUpdate = isUpdate;
         this.rootURL = rootURL;
         this.adminEmailAddress = adminEmailAddress;
         this.emailTemplatesDirectory = emailTemplatesDirectory;
@@ -40,6 +43,7 @@ public class BookingRequestCreatedOwnerRenderer extends BaseRenderer implements 
             variables.put("bookingRequest", bookingRequest);
             variables.put("rootURL", rootURL);
             variables.put("adminEmailAddress", adminEmailAddress);
+            variables.put("isUpdate", isUpdate);
             compiledTemplate.evaluate(writer, variables);
             return writer.toString();
         } catch (IOException exception) {

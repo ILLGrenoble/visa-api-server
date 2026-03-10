@@ -204,6 +204,16 @@ public class BookingRequest extends Timestampable {
     }
 
     @Transient
+    public String getLatestCreationComments() {
+        return this.history.stream()
+            .filter(element -> element.getState().equals(BookingRequestState.CREATED))
+            .sorted((h1, h2) -> h1.getId() == null ? 1 : h2.getId() == null ? -1 : h1.getId().compareTo(h2.getId()))
+            .map(BookingRequestHistory::getComments)
+            .toList()
+            .getLast();
+    }
+
+    @Transient
     public String getValidationComments() {
         return this.history.stream()
             .filter(element -> element.getState().equals(BookingRequestState.ACCEPTED) || element.getState().equals(BookingRequestState.REFUSED))

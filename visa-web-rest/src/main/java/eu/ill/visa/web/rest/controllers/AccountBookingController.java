@@ -6,6 +6,7 @@ import eu.ill.visa.core.domain.BookingFlavourConfiguration;
 import eu.ill.visa.core.domain.BookingUserConfiguration;
 import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.enumerations.BookingRequestState;
 import eu.ill.visa.web.rest.dtos.*;
 import eu.ill.visa.web.rest.module.MetaResponse;
 import io.quarkus.security.Authenticated;
@@ -59,8 +60,50 @@ public class AccountBookingController extends AbstractController {
     public MetaResponse<BookingRequestDto> create(@Context SecurityContext securityContext, BookingRequestInput input) {
         final User user = this.getUserPrincipal(securityContext);
 
-        BookingRequest bookingRequest = this.convertToBookingRequest(input, user);
-        final BookingRequestValidation validation = this.bookingService.validateAndCreateBookingRequest(bookingRequest);
+        final BookingUserConfiguration bookingUserConfiguration = this.bookingService.getBookingUserConfiguration(user);
+        if (bookingUserConfiguration.flavourConfigurations().isEmpty()) {
+            throw new NotAuthorizedException("You are not allowed to create instance reservations");
+        }
+
+        final List<Flavour> flavours = bookingUserConfiguration.flavourConfigurations().stream()
+            .map(BookingFlavourConfiguration::flavour)
+            .toList();
+
+
+        BookingRequest bookingRequest = this.convertToBookingRequest(input, user, flavours);
+        final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest);
+
+        if (validation.isValid()) {
+            return createResponse(new BookingRequestDto(validation.bookingRequest()));
+
+        } else {
+            return createResponse(null, validation.errors());
+        }
+    }
+
+    @PUT
+    @Path("/{bookingRequest}")
+    public MetaResponse<BookingRequestDto> update(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest, BookingRequestInput input) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingRequest.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to update the booking request");
+        }
+
+        final BookingUserConfiguration bookingUserConfiguration = this.bookingService.getBookingUserConfiguration(user);
+        if (bookingUserConfiguration.flavourConfigurations().isEmpty()) {
+            throw new NotAuthorizedException("You are not allowed to create instance reservations");
+        }
+
+        if (!input.getUid().equals(bookingRequest.getUid())) {
+            throw new BadRequestException("The booking request id does not match the URL for the booking request");
+        }
+
+        final List<Flavour> flavours = bookingUserConfiguration.flavourConfigurations().stream()
+            .map(BookingFlavourConfiguration::flavour)
+            .toList();
+
+        this.updateBookingRequest(bookingRequest, input, flavours);
+        final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest);
 
         if (validation.isValid()) {
             return createResponse(new BookingRequestDto(validation.bookingRequest()));
@@ -218,7 +261,22 @@ public class AccountBookingController extends AbstractController {
             .map(BookingFlavourConfiguration::flavour)
             .toList();
 
-        BookingRequest bookingRequest = this.convertToBookingRequest(input, user);
+        BookingRequest bookingRequest = null;
+        if (input.getUid() != null) {
+            bookingRequest = this.bookingRequestService.getByUid(input.getUid());
+            if (bookingRequest == null) {
+                throw new BadRequestException(format("Booking request not found with uid %s", input.getUid()));
+            }
+
+            if (!bookingRequest.getOwner().equals(user)) {
+                throw new NotAuthorizedException("You are not the owner of this booking request");
+            }
+
+            this.updateBookingRequest(bookingRequest, input, flavours);
+
+        } else {
+            bookingRequest = this.convertToBookingRequest(input, user, flavours);
+        }
 
 
         final Map<Flavour, List<FlavourAvailability>> flavourAvailabilities = this.flavourAvailabilityService.calculateFutureAvailabilities(flavours, bookingRequest);
@@ -229,17 +287,7 @@ public class AccountBookingController extends AbstractController {
         return createResponse(futureAvailabilities);
     }
 
-    private BookingRequest convertToBookingRequest(BookingRequestInput input, User user) {
-        // Verify that flavours exist
-        List<Flavour> flavours = new ArrayList<>();
-        input.getFlavourRequests().forEach(flavourRequest -> {
-            Flavour flavour = this.flavourService.getById(flavourRequest.getFlavourId());
-            if (flavour == null) {
-                throw new BadRequestException("Invalid flavour id " + flavourRequest.getFlavourId());
-            }
-            flavours.add(flavour);
-        });
-
+    private BookingRequest convertToBookingRequest(BookingRequestInput input, User user, List<Flavour> flavours) {
         List<BookingRequestFlavour> flavourRequests = input.getFlavourRequests().stream()
             .map(flavourInput -> {
                 final Flavour flavour = flavours.stream().filter(aFlavour -> aFlavour.getId().equals(flavourInput.getFlavourId())).findFirst().orElse(null);
@@ -255,6 +303,36 @@ public class AccountBookingController extends AbstractController {
             .comments(input.getComments())
             .flavours(flavourRequests)
             .build();
+    }
+
+    private void updateBookingRequest(BookingRequest bookingRequest, BookingRequestInput input, List<Flavour> flavours) {
+        bookingRequest.setName(input.getName());
+        bookingRequest.setStartDate(input.getStartDate().atStartOfDay());
+        bookingRequest.setEndDate(input.getEndDate().atStartOfDay());
+        bookingRequest.getHistory().add(new BookingRequestHistory(BookingRequestState.CREATED, input.getComments(), bookingRequest.getOwner()));
+
+        List<Long> inputFlavourIds = input.getFlavourRequests().stream().map(BookingRequestInput.BookingRequestFlavourInput::getFlavourId).toList();
+
+        List<BookingRequestFlavour> oldFlavourRequests = bookingRequest.getFlavours().stream()
+            .filter(bookingRequestFlavour -> inputFlavourIds.contains(bookingRequestFlavour.getFlavour().getId()))
+            .toList();
+
+        List<BookingRequestFlavour> flavourRequests = input.getFlavourRequests().stream()
+            .map(flavourInput -> {
+                BookingRequestFlavour oldFlavourRequest = oldFlavourRequests.stream().filter(aFlavourRequest -> aFlavourRequest.getFlavour().getId().equals(flavourInput.getFlavourId())).findFirst().orElse(null);
+                if (oldFlavourRequest == null) {
+                    final Flavour flavour = flavours.stream().filter(aFlavour -> aFlavour.getId().equals(flavourInput.getFlavourId())).findFirst().orElse(null);
+                    return new BookingRequestFlavour(flavour, flavourInput.getQuantity());
+
+                } else {
+                    oldFlavourRequest.setQuantity(flavourInput.getQuantity());
+                }
+
+                final Flavour flavour = flavours.stream().filter(aFlavour -> aFlavour.getId().equals(flavourInput.getFlavourId())).findFirst().orElse(null);
+                return new BookingRequestFlavour(flavour, flavourInput.getQuantity());
+            }).toList();
+
+        bookingRequest.setFlavours(flavourRequests);
     }
 
     public static final class AvailabilitiesFilter {

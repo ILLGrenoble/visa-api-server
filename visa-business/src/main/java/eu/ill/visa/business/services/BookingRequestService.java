@@ -67,17 +67,19 @@ public class BookingRequestService {
         return this.repository.getAllPending();
     }
 
-    public void create(final BookingRequest bookingRequest) {
+    public void createOrUpdate(final BookingRequest bookingRequest) {
+        boolean isUpdate = bookingRequest.getId() != null;
+
         this.repository.save(bookingRequest);
 
         // Create the tokens
-        this.bookingTokenService.createBookingTokensForBookingRequest(bookingRequest);
+        this.bookingTokenService.createOrUpdateBookingTokensForBookingRequest(bookingRequest);
 
         // Email admin
-        this.emailManager.sendBookingRequestCreatedToAdmin(bookingRequest);
+        this.emailManager.sendBookingRequestCreatedToAdmin(bookingRequest, isUpdate);
 
         // Email organiser
-        this.emailManager.sendBookingRequestCreatedToOwner(bookingRequest);
+        this.emailManager.sendBookingRequestCreatedToOwner(bookingRequest, isUpdate);
 
         this.eventDispatcher.sendEventForRole(Role.ADMIN_ROLE, AdminEvent.BOOKING_REQUESTS_CHANGED);
     }

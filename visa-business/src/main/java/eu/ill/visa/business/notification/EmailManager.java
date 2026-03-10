@@ -45,12 +45,12 @@ public class EmailManager {
         this.emailHandler.sendInstanceExtensionNotification(instance, extensionGranted, handlerComments);
     }
 
-    public void sendBookingRequestCreatedToAdmin(final BookingRequest bookingRequest) {
-        this.emailHandler.sendBookingRequestCreatedToAdmin(bookingRequest);
+    public void sendBookingRequestCreatedToAdmin(final BookingRequest bookingRequest, boolean isUpdate) {
+        this.emailHandler.sendBookingRequestCreatedToAdmin(bookingRequest, isUpdate);
     }
 
-    public void sendBookingRequestCreatedToOwner(final BookingRequest bookingRequest) {
-        this.emailHandler.sendBookingRequestCreatedToOwner(bookingRequest);
+    public void sendBookingRequestCreatedToOwner(final BookingRequest bookingRequest, boolean isUpdate) {
+        this.emailHandler.sendBookingRequestCreatedToOwner(bookingRequest, isUpdate);
     }
 
     public void sendBookingRequestValidated(final BookingRequest bookingRequest) {

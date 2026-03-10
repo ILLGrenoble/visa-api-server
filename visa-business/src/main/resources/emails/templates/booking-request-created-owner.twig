@@ -2,7 +2,7 @@
 {% block content %}
     <p>Hi {{ bookingRequest.owner.firstName }},</p>
     <p>
-        Your request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been registered and will be evaluated by the VISA team.
+        Your request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been {% if isUpdate %}updated{% else %}registered{% endif %} and will be evaluated by the VISA team.
     </p>
     <p>
         You will be notified by email as soon as the request has been validated.

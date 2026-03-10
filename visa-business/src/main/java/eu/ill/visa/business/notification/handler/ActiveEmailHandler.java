@@ -250,10 +250,10 @@ public class ActiveEmailHandler implements EmailHandler {
         }
     }
 
-    public void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest) {
+    public void sendBookingRequestCreatedToAdmin(BookingRequest bookingRequest, boolean isUpdate) {
         try {
-            final String subject = "[VISA] A resource reservation request has been created";
-            final NotificationRenderer renderer = new BookingRequestCreatedAdminRenderer(bookingRequest, emailTemplatesDirectory, rootURL);
+            final String subject = format("[VISA] A resource reservation request has been %s", isUpdate ? "updated" : "created");
+            final NotificationRenderer renderer = new BookingRequestCreatedAdminRenderer(bookingRequest, isUpdate, emailTemplatesDirectory, rootURL);
             final Mail email = buildEmail(adminEmailAddress, subject, renderer.render());
             this.send(email);
 
@@ -264,11 +264,11 @@ public class ActiveEmailHandler implements EmailHandler {
         }
     }
 
-    public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest) {
+    public void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest, boolean isUpdate) {
         try {
             final User owner = bookingRequest.getOwner();
-            final String subject = "[VISA] Your request to reserve VISA resources has been registered";
-            final NotificationRenderer renderer = new BookingRequestCreatedOwnerRenderer(bookingRequest, emailTemplatesDirectory, rootURL, adminEmailAddress);
+            final String subject = format("[VISA] Your request to reserve VISA resources has been %s",  isUpdate ? "updated" : "registered");
+            final NotificationRenderer renderer = new BookingRequestCreatedOwnerRenderer(bookingRequest, isUpdate, emailTemplatesDirectory, rootURL, adminEmailAddress);
             final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
             this.send(email);
 

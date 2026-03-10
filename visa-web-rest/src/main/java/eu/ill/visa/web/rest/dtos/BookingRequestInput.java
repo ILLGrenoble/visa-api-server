@@ -11,6 +11,8 @@ import java.util.List;
 
 public class BookingRequestInput {
 
+    private String uid;
+
     @NotNull
     @Size(max = 250)
     private String name;
@@ -29,6 +31,14 @@ public class BookingRequestInput {
     private String comments;
 
     public BookingRequestInput() {
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getName() {
