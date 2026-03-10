@@ -158,6 +158,9 @@ public class BookingService {
         } else {
             // Only use the specific rules: if User Role is not included then they can't reserve this flavour
             BookingFlavourConfiguration specificConfiguration = this.flavourConfigurationFromSpecificRules(user, flavour, bookingConfiguration.getFlavourRoleConfigurations());
+            if (specificConfiguration == null) {
+                return null;
+            }
             return specificConfiguration.withDefaults(bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation());
         }
     }
