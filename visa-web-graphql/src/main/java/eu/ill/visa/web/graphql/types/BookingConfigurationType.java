@@ -18,7 +18,7 @@ public class BookingConfigurationType {
     private final Long maxDaysReservation;
     private final Long cloudId;
     private final @NotNull List<FlavourType> flavours;
-    private final @NotNull List<RoleType> roles;
+    private final @NotNull List<BookingRoleConfigurationType> roleConfigurations;
     private final @NotNull List<BookingFlavourRoleConfigurationType> flavourRoleConfigurations;
 
     public BookingConfigurationType(final BookingConfiguration bookingConfiguration) {
@@ -27,7 +27,7 @@ public class BookingConfigurationType {
         this.maxDaysReservation = bookingConfiguration.getMaxDaysReservation();
         this.cloudId = bookingConfiguration.getCloudId();
         this.flavours = bookingConfiguration.getFlavours().stream().map(FlavourType::new).toList();
-        this.roles = bookingConfiguration.getRoles().stream().map(RoleType::new).toList();
+        this.roleConfigurations = bookingConfiguration.getRoleConfigurations().stream().map(BookingRoleConfigurationType::new).toList();
         this.flavourRoleConfigurations = bookingConfiguration.getFlavourRoleConfigurations().stream().map(BookingFlavourRoleConfigurationType::new).toList();
     }
 
@@ -51,8 +51,8 @@ public class BookingConfigurationType {
         return flavours;
     }
 
-    public List<RoleType> getRoles() {
-        return roles;
+    public List<BookingRoleConfigurationType> getRoleConfigurations() {
+        return roleConfigurations;
     }
 
     public List<BookingFlavourRoleConfigurationType> getFlavourRoleConfigurations() {

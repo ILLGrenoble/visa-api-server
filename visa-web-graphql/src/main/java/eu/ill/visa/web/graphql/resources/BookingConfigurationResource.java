@@ -6,6 +6,7 @@ import eu.ill.visa.core.entity.*;
 import eu.ill.visa.web.graphql.exceptions.InvalidInputException;
 import eu.ill.visa.web.graphql.inputs.BookingConfigurationInput;
 import eu.ill.visa.web.graphql.inputs.BookingConfigurationInput.BookingFlavourRoleConfigurationInput;
+import eu.ill.visa.web.graphql.inputs.BookingConfigurationInput.BookingRoleConfigurationInput;
 import eu.ill.visa.web.graphql.types.BookingConfigurationType;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
@@ -83,14 +84,30 @@ public class BookingConfigurationResource {
         bookingConfiguration.setMaxDaysReservation(input.getMaxDaysReservation());
         bookingConfiguration.setCloudProviderConfiguration(this.getCloudProviderConfiguration(input.getCloudId()));
 
-        // Update roles
-        bookingConfiguration.getRoles().removeIf(role -> !input.getRoleIds().contains(role.getId()));
-        final List<Long> roleIds = bookingConfiguration.getRoles().stream().map(Role::getId).toList();
-        input.getRoleIds().forEach(roleId -> {
-            if (!roleIds.contains(roleId)) {
-                bookingConfiguration.getRoles().add(roleService.getById(roleId));
+        List<Long> inputRoleIds = input.getRoleConfigurations().stream().map(BookingRoleConfigurationInput::getRoleId).toList();
+
+        // Sort out role configuration: remove ones that don't exist any more
+        final List<BookingRoleConfiguration> roleConfigurations = bookingConfiguration.getRoleConfigurations();
+        roleConfigurations.removeIf(roleConfiguration -> !inputRoleIds.contains(roleConfiguration.getRole().getId()));
+
+        // Sort out role configuration: add or modify the rest
+        for (BookingRoleConfigurationInput roleConfigurationInput : input.getRoleConfigurations()) {
+            BookingRoleConfiguration bookingRoleConfiguration = roleConfigurations.stream()
+                .filter(roleConfiguration -> roleConfiguration.getRole().getId().equals(roleConfigurationInput.getRoleId()))
+                .findFirst()
+                .orElse(null);
+
+            if (bookingRoleConfiguration == null) {
+                roleConfigurations.add(
+                    BookingRoleConfiguration.Builder()
+                        .role(roleService.getById(roleConfigurationInput.getRoleId()))
+                        .autoAccept(roleConfigurationInput.getAutoAccept())
+                        .build()
+                );
+            } else {
+                bookingRoleConfiguration.setAutoAccept(roleConfigurationInput.getAutoAccept());
             }
-        });
+        }
 
         // Update flavours
         bookingConfiguration.getFlavours().removeIf(flavour -> !input.getFlavourIds().contains(flavour.getId()));
@@ -161,7 +178,8 @@ public class BookingConfigurationResource {
         }).map(Flavour::getId).toList();
 
         // Roles Ids
-        for (Long roleId : bookingConfigurationInput.getRoleIds()) {
+        List<Long> inputRoleIds = bookingConfigurationInput.getRoleConfigurations().stream().map(BookingRoleConfigurationInput::getRoleId).toList();
+        for (Long roleId : inputRoleIds) {
             if (!roleIds.contains(roleId)) {
                 throw new InvalidInputException("Invalid role Id");
             }
@@ -175,7 +193,7 @@ public class BookingConfigurationResource {
         }
 
         // Check flavourRole configurations
-        final List<Long> roleIdsForFlavourRoleConfigurations = bookingConfigurationInput.getRoleIds().isEmpty() ? roleIds : bookingConfigurationInput.getRoleIds();
+        final List<Long> roleIdsForFlavourRoleConfigurations = inputRoleIds.isEmpty() ? roleIds : inputRoleIds;
         final List<Long> flavourIdsForFlavourRoleConfiguration = bookingConfigurationInput.getFlavourIds().isEmpty() ? flavourIds : bookingConfigurationInput.getFlavourIds();
         for (final BookingFlavourRoleConfigurationInput flavourRoleConfigurationInput : bookingConfigurationInput.getFlavourRoleConfigurations()) {
             final Long roleId = flavourRoleConfigurationInput.getRoleId();
@@ -183,17 +201,13 @@ public class BookingConfigurationResource {
             if (!flavourIdsForFlavourRoleConfiguration.contains(flavourId)) {
                 throw new InvalidInputException("Invalid flavour Id in flavour-role configuration");
             }
-            if (roleId == null && !bookingConfigurationInput.getRoleIds().isEmpty()) {
+            if (roleId == null && !inputRoleIds.isEmpty()) {
                 throw new InvalidInputException("Cannot have 'all users' role in flavour-role configuration when booking configuration has specific roles");
 
             } else if (roleId != null && !roleIdsForFlavourRoleConfigurations.contains(roleId)) {
                 throw new InvalidInputException("Invalid role Id in flavour-role configuration");
             }
         }
-
-
-
-
     }
 
     private CloudProviderConfiguration getCloudProviderConfiguration(Long cloudId) {

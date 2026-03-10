@@ -16,7 +16,7 @@ public class BookingConfigurationInput {
     private @AdaptToScalar(Scalar.Int.class) @Min(1) Long maxDaysReservation;
     private @AdaptToScalar(Scalar.Int.class) Long cloudId;
     private @AdaptToScalar(Scalar.Int.class) @NotNull List<Long> flavourIds;
-    private @AdaptToScalar(Scalar.Int.class) @NotNull List<Long> roleIds;
+    private @NotNull List<BookingRoleConfigurationInput> roleConfigurations;
     private @NotNull List<BookingFlavourRoleConfigurationInput> flavourRoleConfigurations;
 
     public Boolean getEnabled() {
@@ -59,12 +59,12 @@ public class BookingConfigurationInput {
         this.flavourIds = flavourIds;
     }
 
-    public List<Long> getRoleIds() {
-        return roleIds;
+    public List<BookingRoleConfigurationInput> getRoleConfigurations() {
+        return roleConfigurations;
     }
 
-    public void setRoleIds(List<Long> roleIds) {
-        this.roleIds = roleIds;
+    public void setRoleConfigurations(List<BookingRoleConfigurationInput> roleConfigurations) {
+        this.roleConfigurations = roleConfigurations;
     }
 
     public List<BookingFlavourRoleConfigurationInput> getFlavourRoleConfigurations() {
@@ -111,6 +111,27 @@ public class BookingConfigurationInput {
 
         public void setMaxDaysReservation(Long maxDaysReservation) {
             this.maxDaysReservation = maxDaysReservation;
+        }
+    }
+
+    public static final class BookingRoleConfigurationInput {
+        private @AdaptToScalar(Scalar.Int.class) @NotNull Long roleId;
+        private @NotNull Boolean autoAccept;
+
+        public Long getRoleId() {
+            return roleId;
+        }
+
+        public void setRoleId(Long roleId) {
+            this.roleId = roleId;
+        }
+
+        public Boolean getAutoAccept() {
+            return autoAccept;
+        }
+
+        public void setAutoAccept(Boolean autoAccept) {
+            this.autoAccept = autoAccept;
         }
     }
 

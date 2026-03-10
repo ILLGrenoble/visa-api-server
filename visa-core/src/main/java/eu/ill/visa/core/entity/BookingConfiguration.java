@@ -57,13 +57,9 @@ public class BookingConfiguration extends Timestampable {
     )
     private List<Flavour> flavours = new ArrayList<>();
 
-    @ManyToMany(fetch =  FetchType.EAGER)
-    @JoinTable(
-        name = "booking_configuration_role",
-        joinColumns = @JoinColumn(name = "booking_configuration_id", foreignKey = @ForeignKey(name = "fk_booking_configuration_id")),
-        inverseJoinColumns = @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role_id"))
-    )
-    private List<Role> roles = new ArrayList<>();
+    @OneToMany(orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "booking_configuration_id", foreignKey = @ForeignKey(name = "fk_booking_configuration_id"), nullable = false)
+    private List<BookingRoleConfiguration> roleConfigurations = new ArrayList<>();
 
     @OneToMany(orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinColumn(name = "booking_configuration_id", foreignKey = @ForeignKey(name = "fk_booking_configuration_id"), nullable = false)
@@ -117,12 +113,12 @@ public class BookingConfiguration extends Timestampable {
         this.flavours = flavours;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public List<BookingRoleConfiguration> getRoleConfigurations() {
+        return roleConfigurations;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public void setRoleConfigurations(List<BookingRoleConfiguration> roleConfigurations) {
+        this.roleConfigurations = roleConfigurations;
     }
 
     public List<BookingFlavourRoleConfiguration> getFlavourRoleConfigurations() {
@@ -149,7 +145,7 @@ public class BookingConfiguration extends Timestampable {
         private Long maxDaysReservation;
         private CloudProviderConfiguration cloudProviderConfiguration;
         private List<Flavour> flavours;
-        private List<Role> roles;
+        private List<BookingRoleConfiguration> roleConfigurations;
         private List<BookingFlavourRoleConfiguration> flavourRoleConfigurations;
 
         public Builder() {
@@ -185,8 +181,8 @@ public class BookingConfiguration extends Timestampable {
             return this;
         }
 
-        public Builder roles(List<Role> roles) {
-            this.roles = roles;
+        public Builder roleConfigurations(List<BookingRoleConfiguration> roleConfigurations) {
+            this.roleConfigurations = roleConfigurations;
             return this;
         }
 
@@ -203,7 +199,7 @@ public class BookingConfiguration extends Timestampable {
             bookingConfiguration.setMaxDaysReservation(maxDaysReservation);
             bookingConfiguration.setCloudProviderConfiguration(cloudProviderConfiguration);
             bookingConfiguration.setFlavours(flavours);
-            bookingConfiguration.setRoles(roles);
+            bookingConfiguration.setRoleConfigurations(roleConfigurations);
             bookingConfiguration.setFlavourRoleConfigurations(flavourRoleConfigurations);
             return bookingConfiguration;
         }
