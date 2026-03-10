@@ -51,6 +51,10 @@ public class BookingRequestService {
         return this.repository.getByUid(uid);
     }
 
+    public BookingRequest getByBookingTokenId(Long bookingTokenId) {
+        return this.repository.getByBookingTokenId(bookingTokenId);
+    }
+
     public List<BookingRequest> getAll() {
         return this.repository.getAll();
     }

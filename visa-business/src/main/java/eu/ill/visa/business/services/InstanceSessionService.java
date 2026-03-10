@@ -26,18 +26,21 @@ public class InstanceSessionService {
     private final InstanceJupyterSessionService instanceJupyterSessionService;
     private final InstanceService instanceService;
     private final UserService userService;
+    private final BookingRequestService bookingRequestService;
 
     @Inject
     public InstanceSessionService(final InstanceSessionRepository repository,
                                   final InstanceSessionMemberService instanceSessionMemberService,
                                   final InstanceJupyterSessionService instanceJupyterSessionService,
                                   final InstanceService instanceService,
-                                  final UserService userService) {
+                                  final UserService userService,
+                                  final BookingRequestService bookingRequestService) {
         this.repository = repository;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceJupyterSessionService = instanceJupyterSessionService;
         this.instanceService = instanceService;
         this.userService = userService;
+        this.bookingRequestService = bookingRequestService;
     }
 
     public List<InstanceSession> getAll() {
@@ -184,6 +187,12 @@ public class InstanceSessionService {
         if (member == null) {
             if (user.hasAnyRoleWithName(List.of(Role.ADMIN_ROLE, Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
                 return InstanceMemberRole.SUPPORT;
+
+            } else if (instance.getBookingTokenId() != null) {
+                BookingRequest bookingRequest = this.bookingRequestService.getByBookingTokenId(instance.getBookingTokenId());
+                if (bookingRequest.getOwner().equals(user)) {
+                    return InstanceMemberRole.SUPPORT;
+                }
             }
 
             return InstanceMemberRole.NONE;

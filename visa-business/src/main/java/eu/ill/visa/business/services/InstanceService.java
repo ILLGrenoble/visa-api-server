@@ -49,6 +49,7 @@ public class InstanceService {
     private final FlavourRoleLifetimeService flavourRoleLifetimeService;
     private final EventDispatcher eventDispatcher;
     private final BookingTokenService bookingTokenService;
+    private final BookingRequestService bookingRequestService;
 
     // Specifies a window in which to look for instances for which an instrument control support user can provider support.
     // Defines a window and looks for experiment schedules that overlap this window
@@ -61,7 +62,8 @@ public class InstanceService {
                            final InstanceMemberService instanceMemberService,
                            final FlavourRoleLifetimeService flavourRoleLifetimeService,
                            final EventDispatcher eventDispatcher,
-                           final BookingTokenService bookingTokenService) {
+                           final BookingTokenService bookingTokenService,
+                           final BookingRequestService bookingRequestService) {
         this.repository = repository;
         this.configuration = configuration;
         this.cloudClientService = cloudClientService;
@@ -69,6 +71,7 @@ public class InstanceService {
         this.flavourRoleLifetimeService = flavourRoleLifetimeService;
         this.eventDispatcher = eventDispatcher;
         this.bookingTokenService = bookingTokenService;
+        this.bookingRequestService = bookingRequestService;
     }
 
     public Long countAll() {
@@ -434,6 +437,13 @@ public class InstanceService {
         } else if (user.hasRoleWithName(Role.INSTRUMENT_SCIENTIST_ROLE)) {
             Instance instanceForInstrumentScientist = this.getByIdForInstrumentScientist(user, instance.getId());
             return (instanceForInstrumentScientist != null);
+
+        } else {
+            // Check for booking request and see if request owner is the connected person
+            if (instance.getBookingTokenId() != null) {
+                BookingRequest bookingRequest = this.bookingRequestService.getByBookingTokenId(instance.getBookingTokenId());
+                return bookingRequest.getOwner().equals(user);
+            }
         }
 
         return false;

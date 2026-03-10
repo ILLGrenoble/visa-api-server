@@ -26,6 +26,15 @@ import static java.lang.String.format;
         WHERE br.uid = :uid
         AND br.deletedAt IS NULL
     """),
+    @NamedQuery(name = "bookingRequest.getByBookingTokenId", query = """
+        SELECT br
+        FROM BookingRequest br
+        LEFT JOIN BookingToken bt ON bt.bookingRequest = br
+        WHERE bt.id = :bookingTokenId
+        AND bt.deletedAt IS NULL
+        AND br.deletedAt IS NULL
+        AND br.state IN ('CREATED', 'ACCEPTED')
+    """),
     @NamedQuery(name = "bookingRequest.getAll", query = """
         SELECT br
         FROM BookingRequest br

@@ -68,6 +68,7 @@ public class AccountInstanceController extends AbstractController {
     private final ImageProtocolService imageProtocolService;
     private final PersonalAccessTokenService personalAccessTokenService;
     private final BookingTokenService bookingTokenService;
+    private final BookingRequestService bookingRequestService;
 
     @Inject
     public AccountInstanceController(final UserService userService,
@@ -86,7 +87,8 @@ public class AccountInstanceController extends AbstractController {
                                      final ClientConfiguration clientConfiguration,
                                      final ImageProtocolService imageProtocolService,
                                      final PersonalAccessTokenService personalAccessTokenService,
-                                     final BookingTokenService bookingTokenService) {
+                                     final BookingTokenService bookingTokenService,
+                                     final BookingRequestService bookingRequestService) {
         this.userService = userService;
         this.instanceService = instanceService;
         this.instanceMemberService = instanceMemberService;
@@ -104,6 +106,7 @@ public class AccountInstanceController extends AbstractController {
         this.imageProtocolService = imageProtocolService;
         this.personalAccessTokenService = personalAccessTokenService;
         this.bookingTokenService = bookingTokenService;
+        this.bookingRequestService = bookingRequestService;
     }
 
     @GET
@@ -785,6 +788,14 @@ public class AccountInstanceController extends AbstractController {
 
         } else if (user.hasAnyRoleWithName(List.of(Role.IT_SUPPORT_ROLE, Role.INSTRUMENT_CONTROL_ROLE, Role.INSTRUMENT_SCIENTIST_ROLE))) {
             instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
+        } else {
+            // Check for booking request and see if request owner is the connected person
+            if (instance.getBookingTokenId() != null) {
+                BookingRequest bookingRequest = this.bookingRequestService.getByBookingTokenId(instance.getBookingTokenId());
+                if (bookingRequest.getOwner().equals(user)) {
+                    instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
+                }
+            }
         }
         instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));
         instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));

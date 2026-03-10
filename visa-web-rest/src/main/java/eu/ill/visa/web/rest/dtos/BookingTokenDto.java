@@ -15,13 +15,13 @@ public class BookingTokenDto {
     private final UserDto owner;
     private final BookingTokenInstanceDto instance;
 
-    public BookingTokenDto(BookingToken bookingToken) {
+    public BookingTokenDto(BookingToken bookingToken, BookingTokenInstanceDto instance) {
         this.id = bookingToken.getId();
         this.uid = bookingToken.getUid();
         this.bookingRequest = new BookingRequestSimpleDto(bookingToken.getBookingRequest());
         this.flavour = new FlavourDto(bookingToken.getFlavour());
         this.owner = bookingToken.getOwner() == null ? null : new UserDto(bookingToken.getOwner());
-        this.instance = bookingToken.getInstance() == null ? null : new BookingTokenInstanceDto(bookingToken.getInstance());
+        this.instance = instance;
     }
 
     public Long getId() {
@@ -55,6 +55,9 @@ public class BookingTokenDto {
         private final PlanDto plan;
         private final InstanceState state;
         private final Date createdAt;
+        private InstanceMemberDto membership;
+        private boolean canConnectWhileOwnerAway;
+        private boolean unrestrictedAccess;
 
         public BookingTokenInstanceDto(Instance instance) {
             this.id = instance.getId();
@@ -87,6 +90,30 @@ public class BookingTokenDto {
 
         public Date getCreatedAt() {
             return createdAt;
+        }
+
+        public InstanceMemberDto getMembership() {
+            return membership;
+        }
+
+        public void setMembership(InstanceMemberDto membership) {
+            this.membership = membership;
+        }
+
+        public boolean isCanConnectWhileOwnerAway() {
+            return canConnectWhileOwnerAway;
+        }
+
+        public void setCanConnectWhileOwnerAway(boolean canConnectWhileOwnerAway) {
+            this.canConnectWhileOwnerAway = canConnectWhileOwnerAway;
+        }
+
+        public boolean isUnrestrictedAccess() {
+            return unrestrictedAccess;
+        }
+
+        public void setUnrestrictedAccess(boolean unrestrictedAccess) {
+            this.unrestrictedAccess = unrestrictedAccess;
         }
     }
 }

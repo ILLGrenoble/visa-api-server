@@ -19,6 +19,8 @@ import jakarta.ws.rs.core.SecurityContext;
 import java.time.LocalDate;
 import java.util.*;
 
+import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
+import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.SUPPORT;
 import static java.lang.String.format;
 
 @Path("/account/bookings")
@@ -30,7 +32,6 @@ public class AccountBookingController extends AbstractController {
     private final BookingService bookingService;
     private final BookingRequestService bookingRequestService;
     private final BookingTokenService  bookingTokenService;
-    private final FlavourService flavourService;
     private final FlavourAvailabilityService flavourAvailabilityService;
     private final UserService userService;
 
@@ -38,13 +39,11 @@ public class AccountBookingController extends AbstractController {
     public AccountBookingController(final BookingService bookingService,
                                     final BookingRequestService bookingRequestService,
                                     final BookingTokenService  bookingTokenService,
-                                    final FlavourService flavourService,
                                     final FlavourAvailabilityService flavourAvailabilityService,
                                     final UserService userService) {
         this.bookingService = bookingService;
         this.bookingRequestService = bookingRequestService;
         this.bookingTokenService = bookingTokenService;
-        this.flavourService = flavourService;
         this.flavourAvailabilityService = flavourAvailabilityService;
         this.userService = userService;
     }
@@ -142,7 +141,7 @@ public class AccountBookingController extends AbstractController {
     public MetaResponse<List<BookingTokenDto>> getAssignedBookingRequestTokens(@Context SecurityContext securityContext) {
         final User user = this.getUserPrincipal(securityContext);
 
-        return createResponse(this.bookingTokenService.getAllAssignedToUser(user).stream().map(BookingTokenDto::new).toList());
+        return createResponse(this.bookingTokenService.getAllAssignedToUser(user).stream().map(token ->  this.convertToBookingTokenDto(token, user)).toList());
     }
 
     @GET
@@ -153,7 +152,7 @@ public class AccountBookingController extends AbstractController {
             throw new NotAuthorizedException("You are not allowed to access the booking token");
         }
 
-        return createResponse(new BookingTokenDto(bookingToken));
+        return createResponse(this.convertToBookingTokenDto(bookingToken, user));
     }
 
     @GET
@@ -164,7 +163,7 @@ public class AccountBookingController extends AbstractController {
             throw new NotAuthorizedException("You are not allowed to access the booking request");
         }
 
-        return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(BookingTokenDto::new).toList());
+        return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(token ->  this.convertToBookingTokenDto(token, user)).toList());
     }
 
     @PUT
@@ -208,7 +207,7 @@ public class AccountBookingController extends AbstractController {
 
         this.bookingTokenService.updateTokenOwners(bookingRequest, tokenIdOwners);
 
-        return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(BookingTokenDto::new).toList());
+        return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(token ->  this.convertToBookingTokenDto(token, user)).toList());
     }
 
     @GET
@@ -333,6 +332,29 @@ public class AccountBookingController extends AbstractController {
             }).toList();
 
         bookingRequest.setFlavours(flavourRequests);
+    }
+
+    private BookingTokenDto convertToBookingTokenDto(BookingToken token, User user) {
+
+        final Instance instance = token.getInstance();
+        BookingTokenDto.BookingTokenInstanceDto instanceDto = null;
+        if (instance != null) {
+            instanceDto = new BookingTokenDto.BookingTokenInstanceDto(instance);
+
+            if (token.getOwner().equals(user)) {
+                instanceDto.setMembership(new InstanceMemberDto(new UserDto(user), OWNER));
+                instanceDto.setCanConnectWhileOwnerAway(true);
+                instanceDto.setUnrestrictedAccess(true);
+
+            } else {
+                instanceDto.setMembership(new InstanceMemberDto(new UserDto(user), SUPPORT));
+                boolean canConnectWhenOwnerAway = instance.canAccessWhenOwnerAway() || !token.getOwner().hasRoleWithName(Role.STAFF_ROLE);
+                instanceDto.setCanConnectWhileOwnerAway(canConnectWhenOwnerAway);
+                instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
+            }
+        }
+
+        return new BookingTokenDto(token, instanceDto);
     }
 
     public static final class AvailabilitiesFilter {
