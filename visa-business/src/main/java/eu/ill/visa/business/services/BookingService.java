@@ -47,6 +47,12 @@ public class BookingService {
 
         List<BookingFlavourConfiguration> flavourConfigurations = new ArrayList<>();
         for (BookingConfiguration bookingConfiguration : bookingConfigurations) {
+            // Find auto accept roles
+            boolean hasAutoAccept = bookingConfiguration.getRoleConfigurations().stream()
+                .filter(BookingRoleConfiguration::getAutoAccept)
+                .map(BookingRoleConfiguration::getRole)
+                .anyMatch(role -> user.hasRoleOrGroupWithName(role.getName()));
+
             List<Role> bookingConfigurationRoles = bookingConfiguration.getRoleConfigurations().stream().map(BookingRoleConfiguration::getRole).toList();
             // Check if user has a valid role
             if (bookingConfigurationRoles.isEmpty() || user.hasAnyRole(bookingConfigurationRoles) || user.hasRoleWithName(Role.ADMIN_ROLE)) {
@@ -55,7 +61,7 @@ public class BookingService {
 
                 // Get the best possible booking configuration for each flavour (remove any flavour that the user can't access)
                 flavours.stream()
-                    .map(flavour -> this.getBookingFlavourConfiguration(user, flavour, bookingConfiguration))
+                    .map(flavour -> this.getBookingFlavourConfiguration(user, flavour, bookingConfiguration, hasAutoAccept))
                     .filter(Objects::nonNull)
                     .forEach(flavourConfigurations::add);
             }
@@ -132,6 +138,18 @@ public class BookingService {
         if (isValid) {
             this.bookingRequestService.createOrUpdate(bookingRequest);
             logger.info("Booking request has been successfully validated and created: {}", bookingRequest);
+
+            // Check for auto accept
+            List<BookingFlavourConfiguration> notAutoAcceptedFlavourConfigurations = bookingUserConfiguration.flavourConfigurations().stream()
+                .filter(flavourConfiguration -> flavours.stream().anyMatch(flavour -> flavour.getId().equals(flavourConfiguration.flavour().getId())))
+                .filter(flavourConfiguration -> !flavourConfiguration.autoAccept())
+                .toList();
+
+            boolean autoAccepted = notAutoAcceptedFlavourConfigurations.isEmpty();
+            if (autoAccepted) {
+                this.bookingRequestService.acceptBookingRequest(bookingRequest, bookingRequest.getOwner(), "Auto accepted");
+                logger.info("Booking request has been automatically accepted: {}", bookingRequest);
+            }
         }
 
         return new BookingRequestValidation(bookingRequest, isValid, errors);
@@ -145,7 +163,7 @@ public class BookingService {
             });
     }
 
-    private BookingFlavourConfiguration getBookingFlavourConfiguration(final User user, final Flavour flavour, BookingConfiguration bookingConfiguration) {
+    private BookingFlavourConfiguration getBookingFlavourConfiguration(final User user, final Flavour flavour, BookingConfiguration bookingConfiguration, boolean autoAccept) {
         // Find specific rules applying to this flavour
         List<BookingFlavourRoleConfiguration> flavourRoleConfigurations = bookingConfiguration.getFlavourRoleConfigurations().stream()
             .filter(config -> config.getFlavour().equals(flavour))
@@ -154,11 +172,11 @@ public class BookingService {
         // See if specific rules apply to the flavour
         if (flavourRoleConfigurations.isEmpty()) {
             // Apply the general configuration to the flavour
-            return new BookingFlavourConfiguration(flavour, bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation());
+            return new BookingFlavourConfiguration(flavour, autoAccept, bookingConfiguration.getMaxInstancesPerReservation(), bookingConfiguration.getMaxDaysReservation());
 
         } else {
             // Only use the specific rules: if User Role is not included then they can't reserve this flavour
-            BookingFlavourConfiguration specificConfiguration = this.flavourConfigurationFromSpecificRules(user, flavour, bookingConfiguration.getFlavourRoleConfigurations());
+            BookingFlavourConfiguration specificConfiguration = this.flavourConfigurationFromSpecificRules(user, flavour, bookingConfiguration.getFlavourRoleConfigurations(), autoAccept);
             if (specificConfiguration == null) {
                 return null;
             }
@@ -166,13 +184,13 @@ public class BookingService {
         }
     }
 
-    private BookingFlavourConfiguration flavourConfigurationFromSpecificRules(final User user, final Flavour flavour, List<BookingFlavourRoleConfiguration> flavourRoleConfigurations) {
+    private BookingFlavourConfiguration flavourConfigurationFromSpecificRules(final User user, final Flavour flavour, List<BookingFlavourRoleConfiguration> flavourRoleConfigurations, boolean autoAccept) {
         // Ensure that the user has the right Roles applying to the flavour rules and find the best conditions for them
         return flavourRoleConfigurations.stream()
             .filter(config -> config.getFlavour().equals(flavour))
-            .filter(config -> config.getRole() == null || user.hasRole(config.getRole()) || user.hasRoleWithName(Role.ADMIN_ROLE))
+            .filter(config -> config.getRole() == null || user.hasRoleOrGroup(config.getRole()) || user.hasRoleWithName(Role.ADMIN_ROLE))
             .map(config -> {
-                return new BookingFlavourConfiguration(flavour, config.getMaxInstancesPerReservation(), config.getMaxDaysReservation());
+                return new BookingFlavourConfiguration(flavour, autoAccept, config.getMaxInstancesPerReservation(), config.getMaxDaysReservation());
             })
             .reduce(null, (acc, next) -> {
                 if (acc == null) {
@@ -180,7 +198,7 @@ public class BookingService {
                 } else {
                     Long maxInstances = acc.maxInstances() == null ? next.maxInstances() : next.maxInstances() == null ? acc.maxInstances() : Long.valueOf(Math.max(next.maxInstances(),  acc.maxInstances()));
                     Long maxReservationDays = acc.maxReservationDays() == null ? next.maxReservationDays() : next.maxReservationDays() == null ? acc.maxReservationDays() : Long.valueOf(Math.max(next.maxReservationDays(),  acc.maxReservationDays()));
-                    return new BookingFlavourConfiguration(flavour, maxInstances, maxReservationDays);
+                    return new BookingFlavourConfiguration(flavour, autoAccept, maxInstances, maxReservationDays);
                 }
             });
     }

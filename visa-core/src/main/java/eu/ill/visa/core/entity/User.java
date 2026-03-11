@@ -220,8 +220,22 @@ public class User {
     }
 
     @Transient
+    public List<UserRole> getActiveUserRolesAndGroups() {
+        long currentTime = new Date().getTime();
+        return this.userRoles.stream()
+            .filter(userRole -> userRole.getRole().getGroupDeletedAt() == null)
+            .filter(userRole -> userRole.getExpiresAt() == null || userRole.getExpiresAt().getTime() > currentTime)
+            .collect(Collectors.toList());
+    }
+
+    @Transient
     public List<Role> getRoles() {
         return this.getActiveUserRoles().stream().map(UserRole::getRole).collect(Collectors.toList());
+    }
+
+    @Transient
+    public List<Role> getRolesAndGroups() {
+        return this.getActiveUserRolesAndGroups().stream().map(UserRole::getRole).collect(Collectors.toList());
     }
 
     @Transient
@@ -271,8 +285,26 @@ public class User {
         return false;
     }
 
+    public boolean hasRoleOrGroupWithName(String targetRole) {
+        for (final Role role : this.getRolesAndGroups()) {
+            if (role.getName().equals(targetRole)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean hasRole(final Role targetRole) {
         for (final Role role : this.getRoles()) {
+            if (role.equals(targetRole)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasRoleOrGroup(final Role targetRole) {
+        for (final Role role : this.getRolesAndGroups()) {
             if (role.equals(targetRole)) {
                 return true;
             }
@@ -292,6 +324,15 @@ public class User {
     public boolean hasAnyRoleWithName(List<String> targetRoles) {
         for (final String targetRole : targetRoles) {
             if (this.hasRoleWithName(targetRole)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasAnyRoleOrGroupWithName(List<String> targetRoles) {
+        for (final String targetRole : targetRoles) {
+            if (this.hasRoleOrGroupWithName(targetRole)) {
                 return true;
             }
         }
