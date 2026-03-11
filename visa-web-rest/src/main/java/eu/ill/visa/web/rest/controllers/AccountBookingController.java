@@ -70,7 +70,7 @@ public class AccountBookingController extends AbstractController {
 
 
         BookingRequest bookingRequest = this.convertToBookingRequest(input, user, flavours);
-        final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest);
+        final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest, input.isRequestValidation());
 
         if (validation.isValid()) {
             return createResponse(new BookingRequestDto(validation.bookingRequest()));
@@ -102,7 +102,7 @@ public class AccountBookingController extends AbstractController {
             .toList();
 
         this.updateBookingRequest(bookingRequest, input, flavours);
-        final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest);
+        final BookingRequestValidation validation = this.bookingService.validateAndSaveBookingRequest(bookingRequest, input.isRequestValidation());
 
         if (validation.isValid()) {
             return createResponse(new BookingRequestDto(validation.bookingRequest()));

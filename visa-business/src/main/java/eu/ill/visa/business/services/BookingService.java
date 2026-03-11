@@ -72,7 +72,7 @@ public class BookingService {
         return new BookingUserConfiguration(enabled, flavourConfigurations);
     }
 
-    public BookingRequestValidation validateAndSaveBookingRequest(final BookingRequest bookingRequest) {
+    public BookingRequestValidation validateAndSaveBookingRequest(final BookingRequest bookingRequest, boolean requestValidation) {
         List<String> errors = new ArrayList<>();
         // Verify user access to flavours in the request
         final BookingUserConfiguration bookingUserConfiguration = this.getBookingUserConfiguration(bookingRequest.getOwner());
@@ -146,8 +146,8 @@ public class BookingService {
                 .toList();
 
             boolean autoAccepted = notAutoAcceptedFlavourConfigurations.isEmpty();
-            if (autoAccepted) {
-                this.bookingRequestService.acceptBookingRequest(bookingRequest, bookingRequest.getOwner(), "Auto accepted");
+            if (autoAccepted && !requestValidation) {
+                this.bookingRequestService.acceptBookingRequest(bookingRequest, bookingRequest.getOwner(), "The reservation request has been automatically accepted");
                 logger.info("Booking request has been automatically accepted: {}", bookingRequest);
             }
         }

@@ -30,6 +30,9 @@ public class BookingRequestInput {
     @Size(max = 2500)
     private String comments;
 
+    private boolean requestValidation;
+
+
     public BookingRequestInput() {
     }
 
@@ -79,6 +82,14 @@ public class BookingRequestInput {
 
     public void setComments(String comments) {
         this.comments = comments;
+    }
+
+    public boolean isRequestValidation() {
+        return requestValidation;
+    }
+
+    public void setRequestValidation(boolean requestValidation) {
+        this.requestValidation = requestValidation;
     }
 
     public static final class BookingRequestFlavourInput {

@@ -286,7 +286,7 @@ public class ActiveEmailHandler implements EmailHandler {
             boolean accepted = bookingRequest.getState().equals(BookingRequestState.ACCEPTED);
             final String subject = accepted ? "[VISA] Your request to reserve resources has been accepted" : "[VISA]Your request to reserve resources has been refused";
             final NotificationRenderer renderer = new BookingRequestValidatedRenderer(bookingRequest, emailTemplatesDirectory, rootURL, adminEmailAddress);
-            final Mail email = buildEmail(owner.getEmail(), subject, renderer.render());
+            final Mail email = buildEmail(owner.getEmail(), adminEmailAddress, subject, renderer.render());
             this.send(email);
 
 
