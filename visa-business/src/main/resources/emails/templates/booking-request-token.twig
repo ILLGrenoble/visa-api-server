@@ -5,10 +5,10 @@
         You have been associated to a reservation of <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}), organised by {{ bookingRequest.owner.fullName }}.
     </p>
     <p>
-        You will find one or more <em>instance creation tokens</em> available on your <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA home page</a>. During the reservation period these tokens can be used to create instances using the assigned resources.
+        You will find one or more <em>instance creation vouchers</em> available on your <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA home page</a>. During the reservation period these vouchers can be used to create instances using the assigned resources.
     </p>
     <p>
-        Instances created with these tokens are automatically deleted at the end of the reservation period (for this reservation this is the end of the day on {{ bookingRequest.endDate | date("dd MMMM yyyy") }}). You can also delete and recreate an instance using the same token any time during the reservation period.
+        Instances created with these vouchers are automatically deleted at the end of the reservation period (for this reservation this is the end of the day on {{ bookingRequest.endDate | date("dd MMMM yyyy") }}). You can also delete and recreate an instance using the same voucher any time during the reservation period.
     </p>
 
     {% if adminEmailAddress %}

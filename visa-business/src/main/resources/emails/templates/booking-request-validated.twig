@@ -12,10 +12,10 @@
             We are happy to inform you that your request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been accepted!
         </p>
         <p>
-            The instance creation tokens associated to this reservation are now visible on the <a style="color:#3777b0;text-decoration:none;" href="{{ rootURL }}/bookings/{{ bookingRequest.uid }}">request details page</a>. You can assign these tokens to other VISA users or use them for your own needs.
+            The instance creation vouchers associated to this reservation are now visible on the <a style="color:#3777b0;text-decoration:none;" href="{{ rootURL }}/bookings/{{ bookingRequest.uid }}">request details page</a>. You can assign these vouchers to other VISA users or use them for your own needs.
         </p>
         <p>
-            From the {{ bookingRequest.startDate | date("dd MMMM yyyy") }}, the owners of tokens will be able to create instances using them. All instances associated with this reservation will be deleted at the end of 23 January 2026.
+            From the {{ bookingRequest.startDate | date("dd MMMM yyyy") }}, the owners of vouchers will be able to create instances using them. All instances associated with this reservation will be deleted at the end of 23 January 2026.
         </p>
 
     {% else %}
