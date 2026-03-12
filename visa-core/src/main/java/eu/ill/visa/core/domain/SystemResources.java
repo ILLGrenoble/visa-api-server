@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public record SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, List<FlavourUsage> flavourUsages, Set<Long> bookedResourcesIds) {
+public record SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, FlavourUsages flavourUsages, Set<Long> bookedResourcesIds) {
     private static final Logger logger = LoggerFactory.getLogger(SystemResources.class);
 
     private record FlavourResourceRequirement(Long cloudId, Flavour flavour,  Long vcpus, Long memoryMB, List<FlavourDevice> flavourDevices) {
@@ -18,7 +18,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
         }
     }
 
-    public SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, List<FlavourUsage> flavourUsages, Set<Long> bookedResourcesIds) {
+    public SystemResources(Long cloudId, Date availabilityDate, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, FlavourUsages flavourUsages, Set<Long> bookedResourcesIds) {
         this.cloudId = cloudId;
         this.availabilityDate = availabilityDate;
         this.cloudResources = cloudResources;
@@ -28,7 +28,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
         this.bookedResourcesIds = new HashSet<>(bookedResourcesIds); // Ensure we clone the booked Resource Ids as we modify them later
     }
 
-    public SystemResources(Long cloudId, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, List<FlavourUsage> flavourUsages) {
+    public SystemResources(Long cloudId, CloudResources cloudResources, List<DevicePoolUsage> devicePoolUsages, List<HypervisorInventory> hypervisorInventories, FlavourUsages flavourUsages) {
         this(cloudId, new Date(), cloudResources, devicePoolUsages, hypervisorInventories, flavourUsages, new HashSet<>());
     }
 
@@ -38,7 +38,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
         CloudResources cloudResources = this.cloudResources.onResourcesModification(resourceModifier);
 
-        List<FlavourUsage> modifiedFlavourUsages = FlavourUsage.combine(this.flavourUsages, resourceModifier.flavourUsages());
+        FlavourUsages modifiedFlavourUsages = this.flavourUsages.combine(resourceModifier.flavourUsages());
 
         List<DevicePoolUsage> devicePoolUsages = this.devicePoolUsages.stream()
             .map(devicePoolUsage -> {
@@ -113,7 +113,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
     private FlavourAvailability getAvailabilityForSimpleFlavour(final FlavourResourceRequirement flavourResourceRequirement) {
 
-        final Long flavourUsage = FlavourUsage.getFlavourUsage(this.flavourUsages, flavourResourceRequirement.flavour);
+        final Long flavourUsage = this.flavourUsages.getFlavourUsage(flavourResourceRequirement.flavour);
 
         FlavourAvailability flavourAvailability = null;
         if (hypervisorInventories != null && !hypervisorInventories.isEmpty() && bookedResourcesIds.isEmpty()) {
@@ -173,7 +173,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
     private FlavourAvailability getAvailabilityForDeviceFlavour(final FlavourResourceRequirement flavourResourceRequirement) {
 
-        final Long flavourUsage = FlavourUsage.getFlavourUsage(this.flavourUsages, flavourResourceRequirement.flavour);
+        final Long flavourUsage = this.flavourUsages.getFlavourUsage(flavourResourceRequirement.flavour);
 
         FlavourAvailability flavourAvailability = null;
         if (hypervisorInventories != null && !hypervisorInventories.isEmpty() && bookedResourcesIds.isEmpty()) {
@@ -207,7 +207,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
 
     private AvailabilityData getAvailableUnitsFromCloudResources(final FlavourResourceRequirement flavourResourceRequirement) {
-        final Long flavourUsage = FlavourUsage.getFlavourUsage(this.flavourUsages, flavourResourceRequirement.flavour);
+        final Long flavourUsage = this.flavourUsages.getFlavourUsage(flavourResourceRequirement.flavour);
 
         long cloudVCPUsAvailable = cloudResources.getVcpuAvailable();
         long cloudMemoryMBAvailable = cloudResources.getMemoryMBAvailable();
@@ -229,7 +229,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
 
 
     private FlavourAvailability getDeviceFlavourAvailabilityWithHypervisor(final FlavourResourceRequirement flavourResourceRequirement) {
-        final Long flavourUsage = FlavourUsage.getFlavourUsage(this.flavourUsages, flavourResourceRequirement.flavour);
+        final Long flavourUsage = this.flavourUsages.getFlavourUsage(flavourResourceRequirement.flavour);
 
         List<FlavourDevice> managedDevices = flavourResourceRequirement.flavourDevices.stream()
             .filter(flavourDevice -> flavourDevice.getDevicePool().getResourceClass() != null)
@@ -360,7 +360,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
     }
 
     private FlavourAvailability convertDeviceAvailabilityToFlavourAvailability(final FlavourResourceRequirement flavourResourceRequirement, final AvailabilityData knownFlavourAvailability, final AvailabilityData deviceAvailability) {
-        final Long flavourUsage = FlavourUsage.getFlavourUsage(this.flavourUsages, flavourResourceRequirement.flavour);
+        final Long flavourUsage = this.flavourUsages.getFlavourUsage(flavourResourceRequirement.flavour);
         if (deviceAvailability == null) {
             // If we have no knowledge of whether all the devices are available
             logger.debug("Flavour {} (RAM_MB {} vCPUs {}), available Device Units Unknown", flavourResourceRequirement.flavour.getName(), flavourResourceRequirement.memoryMB, flavourResourceRequirement.vcpus);

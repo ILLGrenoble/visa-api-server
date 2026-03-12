@@ -1,6 +1,7 @@
 package eu.ill.visa.core.domain;
 
 
+import eu.ill.visa.core.domain.FlavourUsages.FlavourUsage;
 import eu.ill.visa.core.entity.*;
 
 import java.time.ZoneId;
@@ -9,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record ResourceUsageModifier(Date modificationDate, Long cloudId, String computeId, long instanceModifier, long cpuModifier, long memoryModifier, List<DeviceResourceUsageModifier> deviceResourceModifiers, List<FlavourUsage> flavourUsages, Long associatedBookingId) {
+public record ResourceUsageModifier(Date modificationDate, Long cloudId, String computeId, long instanceModifier, long cpuModifier, long memoryModifier, List<DeviceResourceUsageModifier> deviceResourceModifiers, FlavourUsages flavourUsages, Long associatedBookingId) {
     public record DeviceResourceUsageModifier(long devicePoolId, String resourceClass, long modifier) {
     }
 
@@ -33,7 +34,7 @@ public record ResourceUsageModifier(Date modificationDate, Long cloudId, String 
             .collect(Collectors.toList());
         combinedModifiers.addAll(others);
 
-        List<FlavourUsage> combinedFlavourUsages = FlavourUsage.combine(this.flavourUsages, other.flavourUsages);
+        FlavourUsages combinedFlavourUsages = this.flavourUsages.combine(other.flavourUsages);
 
         return new ResourceUsageModifier(modificationDate, cloudId, null, this.instanceModifier + other.instanceModifier, this.cpuModifier + other.cpuModifier, this.memoryModifier + other.memoryModifier, combinedModifiers, combinedFlavourUsages, associatedBookingId);
     }
@@ -53,7 +54,7 @@ public record ResourceUsageModifier(Date modificationDate, Long cloudId, String 
         Date now = new Date();
         Date startDate = Date.from(bookingRequest.getStartDate().atZone(ZoneId.systemDefault()).toInstant());
         Date date = now.after(startDate) ? now : startDate;
-        return new ResourceUsageModifier(date, cloudId, null, 1, cpuModifier, memoryModifier, deviceResourceModifiers, List.of(new FlavourUsage(bookingToken.getFlavour(), 1L)), bookingRequest.getId());
+        return new ResourceUsageModifier(date, cloudId, null, 1, cpuModifier, memoryModifier, deviceResourceModifiers, new FlavourUsages(new FlavourUsage(bookingToken.getFlavour(), 1L)), bookingRequest.getId());
     }
 
     public static ResourceUsageModifier fromBookingTokenEnd(final BookingToken bookingToken) {
@@ -70,7 +71,7 @@ public record ResourceUsageModifier(Date modificationDate, Long cloudId, String 
         long cloudId = flavour.getCloudId() == null ? -1 : flavour.getCloudId();
         Date endDate = Date.from(bookingRequest.getDayAfterEndDate().atZone(ZoneId.systemDefault()).toInstant());
 
-        return new ResourceUsageModifier(endDate, cloudId, null, -1, -cpuModifier, -memoryModifier, deviceResourceModifiers, List.of(new FlavourUsage(bookingToken.getFlavour(), -1L)), bookingRequest.getId());
+        return new ResourceUsageModifier(endDate, cloudId, null, -1, -cpuModifier, -memoryModifier, deviceResourceModifiers, new FlavourUsages(new FlavourUsage(bookingToken.getFlavour(), -1L)), bookingRequest.getId());
     }
 
     public static ResourceUsageModifier fromInstanceTermination(final Instance instance) {
@@ -85,6 +86,6 @@ public record ResourceUsageModifier(Date modificationDate, Long cloudId, String 
             .toList();
         long cloudId = flavour.getCloudId() == null ? -1 : flavour.getCloudId();
 
-        return new ResourceUsageModifier(instance.getTerminationDate(), cloudId, instance.getComputeId(), -1, cpuModifier, memoryModifier, deviceResourceModifiers, List.of(new FlavourUsage(instance.getPlan().getFlavour(), -1L)), null);
+        return new ResourceUsageModifier(instance.getTerminationDate(), cloudId, instance.getComputeId(), -1, cpuModifier, memoryModifier, deviceResourceModifiers, new FlavourUsages(new FlavourUsage(instance.getPlan().getFlavour(), -1L)), null);
     }
 }
