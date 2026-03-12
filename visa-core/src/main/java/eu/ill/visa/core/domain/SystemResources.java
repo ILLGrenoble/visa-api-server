@@ -73,14 +73,15 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
             // Maintain hypervisor data, update it whenever possible, put not that the system resources are in an UNCERTAIN state
 
             // If resource usage increases then add the associatedBookingId (otherwise remove it)
+            Set<Long> modifiedBookedResourcesIds = new HashSet<>(this.bookedResourcesIds);
             if (resourceModifier.instanceModifier() > 0) {
-                this.bookedResourcesIds.add(resourceModifier.associatedBookingId());
+                modifiedBookedResourcesIds.add(resourceModifier.associatedBookingId());
 
             } else {
-                this.bookedResourcesIds.remove(resourceModifier.associatedBookingId());
+                modifiedBookedResourcesIds.remove(resourceModifier.associatedBookingId());
             }
 
-            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, hypervisorInventories, modifiedFlavourUsages, bookedResourcesIds);
+            return new SystemResources(cloudId, date, cloudResources, devicePoolUsages, hypervisorInventories, modifiedFlavourUsages, modifiedBookedResourcesIds);
 
         } else {
             // Compute Id unknown, so hypervisor can't be determined: from here-on we cannot precisely determine the
