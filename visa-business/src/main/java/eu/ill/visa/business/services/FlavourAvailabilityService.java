@@ -301,6 +301,7 @@ public class FlavourAvailabilityService {
     private Map<Long, SystemResources> getAllSystemResources() {
         final Map<Long, CloudResources> allCloudResources = this.getCloudResources();
         final Map<Long, List<Hypervisor>> cloudHypervisors = this.getCloudHypervisors();
+        final Map<Long, List<FlavourUsage>> cloudFlavourUsages = this.getCloudFlavourUsages();
         List<DevicePoolUsage> devicePoolUsages = devicePoolService.getDevicePoolUsage();
 
         Set<Long> allCloudClientIds = new HashSet<>(allCloudResources.keySet());
@@ -312,6 +313,7 @@ public class FlavourAvailabilityService {
                 cloudClientId -> {
                     final CloudResources cloudResources = allCloudResources.get(cloudClientId);
                     final List<Hypervisor> hypervisors = cloudHypervisors.get(cloudClientId);
+                    final List<FlavourUsage> flavourUsages = cloudFlavourUsages.get(cloudClientId);
                     final List<HypervisorInventory> hypervisorInventories = hypervisors == null ? new ArrayList<>() : hypervisors.stream()
                         .map(hypervisor -> {
                             long cpusAvailable = hypervisor.getAvailableResource(CloudResourceClass.VCPU_RESOURCE_CLASS);
@@ -323,7 +325,7 @@ public class FlavourAvailabilityService {
                         })
                         .toList();
 
-                    return new SystemResources(cloudClientId, cloudResources, devicePoolUsages, hypervisorInventories);
+                    return new SystemResources(cloudClientId, cloudResources, devicePoolUsages, hypervisorInventories, flavourUsages);
                 }
             ));
     }
@@ -331,7 +333,7 @@ public class FlavourAvailabilityService {
     private Map<Long, CloudResources> getCloudResources() {
         return this.cloudResourcesService.getAll().stream()
             .collect(Collectors.toMap(
-                cloudResources -> cloudResources.getCloudId() == null ? - 1 : cloudResources.getCloudId(),
+                cloudResources -> cloudResources.getCloudId() == null ? -1 : cloudResources.getCloudId(),
                 cloudResources -> cloudResources
             ));
     }
@@ -340,6 +342,21 @@ public class FlavourAvailabilityService {
         final List<Hypervisor> hypervisors = this.hypervisorService.getAllAvailable();
         return hypervisors.stream()
             .collect(Collectors.groupingBy(hypervisor -> hypervisor.getCloudId() == null ? -1 : hypervisor.getCloudId()));
+    }
+
+    private Map<Long, List<FlavourUsage>> getCloudFlavourUsages() {
+        final List<Flavour> flavours = this.flavourService.getAllForAdmin();
+        return this.instanceService.countByFlavour().stream()
+            .map(countByFlavour -> {
+                final Flavour flavour = flavours.stream().filter(aFlavour -> aFlavour.getId().equals(countByFlavour.getId())).findFirst().orElse(null);
+                if (flavour == null) {
+                    return null;
+                } else {
+                    return new FlavourUsage(flavour, countByFlavour.getTotal());
+                }
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.groupingBy(flavourUsage -> flavourUsage.flavour().getCloudId() == null ? -1 : flavourUsage.flavour().getCloudId()));
     }
 
     private Map<Long, List<ResourceUsageModifier>> getCloudResourceUsageModifiers() {

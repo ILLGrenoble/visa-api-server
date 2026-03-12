@@ -19,6 +19,7 @@ public class FlavourAvailabilityType {
     @AdaptToScalar(Scalar.Int.class)
     private final Long availableUnits;
     private final Long totalUnits;
+    private final Long usedUnits;
 
     public FlavourAvailabilityType(final FlavourAvailability flavourAvailability) {
         this.date = flavourAvailability.date().toInstant().atOffset(ZoneOffset.UTC);;
@@ -26,6 +27,7 @@ public class FlavourAvailabilityType {
         final AvailabilityData availabilityData = flavourAvailability.availability().orElse(null);
         this.availableUnits = availabilityData == null ? null : availabilityData.available();
         this.totalUnits = availabilityData == null ? null : availabilityData.total();
+        this.usedUnits = availabilityData == null ? null : availabilityData.usage();
     }
 
     public OffsetDateTime getDate() {
@@ -42,5 +44,9 @@ public class FlavourAvailabilityType {
 
     public Long getTotalUnits() {
         return totalUnits;
+    }
+
+    public Long getUsedUnits() {
+        return usedUnits;
     }
 }

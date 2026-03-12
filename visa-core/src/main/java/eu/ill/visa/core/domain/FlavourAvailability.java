@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public record FlavourAvailability(Date date, Flavour flavour, Optional<AvailabilityData> availability, AvailabilityConfidence confidence) {
 
-    public record AvailabilityData(Long available, Long total) {}
+    public record AvailabilityData(Long available, Long total, Long usage) {}
 
     public AvailabilityState isAvailable() {
         if (date.after(new Date())) {
