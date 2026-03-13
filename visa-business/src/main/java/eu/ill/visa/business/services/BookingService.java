@@ -55,7 +55,7 @@ public class BookingService {
 
             List<Role> bookingConfigurationRoles = bookingConfiguration.getRoleConfigurations().stream().map(BookingRoleConfiguration::getRole).toList();
             // Check if user has a valid role
-            if (bookingConfigurationRoles.isEmpty() || user.hasAnyRole(bookingConfigurationRoles) || user.hasRoleWithName(Role.ADMIN_ROLE)) {
+            if (bookingConfigurationRoles.isEmpty() || user.hasAnyRoleOrGroup(bookingConfigurationRoles) || user.hasRoleWithName(Role.ADMIN_ROLE)) {
                 // Find all flavours which the user potentially has access to
                 List<Flavour> flavours = bookingConfiguration.getFlavours().isEmpty() ? flavourService.getAllForCloudClient(bookingConfiguration.getCloudId()) : bookingConfiguration.getFlavours();
 

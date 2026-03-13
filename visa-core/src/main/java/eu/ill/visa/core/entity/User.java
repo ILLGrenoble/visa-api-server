@@ -348,6 +348,15 @@ public class User {
         return false;
     }
 
+    public boolean hasAnyRoleOrGroup(List<Role> targetRoles) {
+        for (final Role targetRole : targetRoles) {
+            if (this.hasRoleOrGroup(targetRole)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object instanceof User) {
