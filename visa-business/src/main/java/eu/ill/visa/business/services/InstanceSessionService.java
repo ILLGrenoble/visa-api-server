@@ -173,7 +173,7 @@ public class InstanceSessionService {
         InstanceMember owner = instance.getOwner();
         boolean ownerIsExternalUser = !owner.getUser().hasRoleWithName(Role.STAFF_ROLE);
         if (userIsSupport) {
-            return instance.canAccessWhenOwnerAway() || ownerIsExternalUser;
+            return instance.canAccessWhenOwnerAway() || (instance.getBookingTokenId() == null && ownerIsExternalUser);
         }
 
         return false;

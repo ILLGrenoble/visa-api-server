@@ -351,8 +351,7 @@ public class AccountBookingController extends AbstractController {
 
             } else {
                 instanceDto.setMembership(new InstanceMemberDto(new UserDto(user), SUPPORT));
-                boolean canConnectWhenOwnerAway = instance.canAccessWhenOwnerAway() || !token.getOwner().hasRoleWithName(Role.STAFF_ROLE);
-                instanceDto.setCanConnectWhileOwnerAway(canConnectWhenOwnerAway);
+                instanceDto.setCanConnectWhileOwnerAway(instance.canAccessWhenOwnerAway());
                 instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
             }
         }
