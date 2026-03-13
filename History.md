@@ -1,3 +1,25 @@
+3.8.0 13/03/2026
+================
+ - Implement Instance Reservation System
+   - Booking configuration to provide rules on reservation (available flavours, entitled roles/groups, max days, max instances, etc)
+   - Calculate booking configuration for logged in user (reduced rules depending on user roles/groups)
+   - Create, update, get and delete booking requests
+   - Booking request validation: ensure availabilities are satisfied and booking rules respected
+   - Update future availabilities taking into account booking requests
+   - GraphQL API for booking requests for admin management
+   - Email templates for booking request submission and validation
+   - Booking Voucher/Token generation
+   - Instance creation from Booking Vouchers with coherent lifetimes
+   - Email templates for token assignation 
+ - Improve Redis Health Monitor and enable it by default
+ - Filter forbidden remote desktop events from clients (eg resize screen from non-owner)
+ - Live migration of servers on OpenStack
+   - Add ACTIVE_MIGRATING and MIGRATING states to instances
+   - Increase refresh rate of hypervisor allocations during migration
+   - ** Note: Database migration script must be run to update check constraint on instance.state. **
+ - Local thread when broadcasting messages (avoid thread locks)
+ - Caching of OpenStack security groups for increased performance (slow API to OpenStack) 
+
 3.7.1 20/01/2026
 ================
  - Apply patch for multiple openstack address provider UUIDs (comma-separated list).
