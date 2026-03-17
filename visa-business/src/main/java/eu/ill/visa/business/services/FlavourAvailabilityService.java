@@ -388,16 +388,24 @@ public class FlavourAvailabilityService {
     }
 
     private List<ResourceUsageModifier> reduceResourceUsageModifiers(final List<ResourceUsageModifier> resourceUsageModifiers) {
-        return new ArrayList<>(resourceUsageModifiers.stream()
-            .collect(Collectors.groupingBy(
+        // dont' group ResourceUsageModifiers if they have a compute Id (linked to an existing instance)
+        List<ResourceUsageModifier> keepSeparate = resourceUsageModifiers.stream()
+            .filter(m -> m.computeId() != null)
+            .toList();
+
+        // Group others by modification date
+        Map<Date, ResourceUsageModifier> groupedByDate = resourceUsageModifiers.stream()
+            .filter(m -> m.computeId() == null)
+            .collect(Collectors.toMap(
                 ResourceUsageModifier::modificationDate,
-                Collectors.reducing(
-                    null,
-                    m -> m,
-                    (a, b) -> b.combine(a)
-                )
-            ))
-            .values());
+                m -> m,
+                (a, b) -> b.combine(a) // combine duplicates
+            ));
+
+        List<ResourceUsageModifier> result = new ArrayList<>(keepSeparate);
+        result.addAll(groupedByDate.values());
+
+        return result;
     }
 
     private List<ResourceUsageModifier> getInstanceTerminationResourceUsageModifiers() {
