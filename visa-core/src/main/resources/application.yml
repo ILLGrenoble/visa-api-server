@@ -60,7 +60,7 @@ quarkus:
         max-file-size: ${VISA_LOGGING_FILE_MAX_FILE_SIZE:100M}
         max-backup-index: ${VISA_LOGGING_FILE_ARCHIVED_FILE_COUNT:0}
     syslog:
-      enable: ${VISA_LOGGING_SYSLOG_ENABLED:true}
+      enable: ${VISA_LOGGING_SYSLOG_ENABLED:false}
       syslog-type: ${VISA_LOGGING_SYSLOG_TYPE:rfc3164}
       endpoint: ${VISA_LOGGING_SYSLOG_ENDPOINT:change.logs.com:514}
       format: ${VISA_LOGGING_SYSLOG_FORMAT:[%-5p] [%c{3.}] (%t) %s%e%n}
