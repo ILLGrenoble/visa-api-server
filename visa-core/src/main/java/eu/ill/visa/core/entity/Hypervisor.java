@@ -14,7 +14,6 @@ import java.util.Map;
         FROM Hypervisor h
         LEFT JOIN h.cloudProviderConfiguration cpc
         WHERE cpc.deletedAt IS NULL
-        AND COALESCE(cpc.visible, true) = true
         ORDER BY h.id
     """),
     @NamedQuery(name = "hypervisor.getById", query = """
@@ -22,7 +21,6 @@ import java.util.Map;
         FROM Hypervisor h
         LEFT JOIN h.cloudProviderConfiguration cpc
         WHERE cpc.deletedAt IS NULL
-        AND COALESCE(cpc.visible, true) = true
         AND h.id = :id
         ORDER BY h.id
     """),
@@ -31,14 +29,12 @@ import java.util.Map;
         FROM Hypervisor h
         LEFT JOIN h.cloudProviderConfiguration cpc
         WHERE cpc.deletedAt IS NULL
-        AND COALESCE(cpc.visible, true) = true
     """),
     @NamedQuery(name = "hypervisor.getAllAvailable", query = """
         SELECT h
         FROM Hypervisor h
         LEFT JOIN h.cloudProviderConfiguration cpc
         WHERE cpc.deletedAt IS NULL
-        AND COALESCE(cpc.visible, true) = true
         AND h.state = 'up'
         AND h.status = 'enabled'
         ORDER BY h.id

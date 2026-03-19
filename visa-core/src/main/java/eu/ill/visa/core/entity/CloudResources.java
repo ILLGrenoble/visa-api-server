@@ -11,7 +11,6 @@ import jakarta.persistence.*;
         FROM CloudResources cr
         LEFT JOIN cr.cloudProviderConfiguration cpc
         WHERE cpc.deletedAt IS NULL
-        AND COALESCE(cpc.visible, true) = true
         ORDER BY cr.id
     """),
 })
