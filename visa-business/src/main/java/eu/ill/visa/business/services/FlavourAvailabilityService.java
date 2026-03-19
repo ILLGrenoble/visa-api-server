@@ -7,6 +7,7 @@ import eu.ill.visa.core.domain.FlavourUsages.FlavourUsage;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.partial.DevicePoolUsage;
+import eu.ill.visa.core.entity.partial.NumberInstancesByFlavour;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
@@ -347,18 +348,16 @@ public class FlavourAvailabilityService {
 
     private Map<Long, FlavourUsages> getCloudFlavourUsages() {
         final List<Flavour> flavours = this.flavourService.getAllForAdmin();
-        return this.instanceService.countByFlavour().stream()
-            .map(countByFlavour -> {
-                final Flavour flavour = flavours.stream().filter(aFlavour -> aFlavour.getId().equals(countByFlavour.getId())).findFirst().orElse(null);
-                if (flavour == null) {
-                    return null;
-                } else {
-                    return new FlavourUsage(flavour, countByFlavour.getTotal());
-                }
-            })
-            .filter(Objects::nonNull)
-            .collect(Collectors.groupingBy(flavourUsage -> flavourUsage.flavour().getCloudId() == null ? -1 : flavourUsage.flavour().getCloudId()))
-            .entrySet().stream()
+        final List<NumberInstancesByFlavour> numberOfInstancesByFlavours = this.instanceService.countByFlavour();
+        Map<Long, List<FlavourUsage>> cloudFlavourUsages = new HashMap<>();
+        for (final Flavour flavour : flavours) {
+            NumberInstancesByFlavour numberInstancesByFlavour = numberOfInstancesByFlavours.stream().filter(number -> number.getId().equals(flavour.getId())).findFirst().orElse(null);
+            Long cloudId = flavour.getCloudId() == null ? -1 : flavour.getCloudId();
+            FlavourUsage flavourUsage = new FlavourUsage(flavour, numberInstancesByFlavour == null ? 0 : numberInstancesByFlavour.getTotal());
+            cloudFlavourUsages.computeIfAbsent(cloudId, k ->new ArrayList<>()).add(flavourUsage);
+        }
+
+        return cloudFlavourUsages.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> new FlavourUsages(entry.getValue())
