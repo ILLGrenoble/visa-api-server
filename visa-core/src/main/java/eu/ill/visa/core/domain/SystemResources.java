@@ -36,7 +36,7 @@ public record SystemResources(Long cloudId, Date availabilityDate, CloudResource
     public SystemResources onResourcesModification(final ResourceUsageModifier resourceModifier) {
         Date date = resourceModifier.modificationDate();
 
-        CloudResources cloudResources = this.cloudResources.onResourcesModification(resourceModifier);
+        CloudResources cloudResources = this.cloudResources == null ? null : this.cloudResources.onResourcesModification(resourceModifier);
 
         FlavourUsages modifiedFlavourUsages = this.flavourUsages.combine(resourceModifier.flavourUsages());
 

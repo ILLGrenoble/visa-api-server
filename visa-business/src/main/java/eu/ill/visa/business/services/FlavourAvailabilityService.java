@@ -2,6 +2,7 @@ package eu.ill.visa.business.services;
 
 
 import eu.ill.visa.cloud.domain.CloudResourceClass;
+import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.FlavourUsages.FlavourUsage;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
@@ -32,6 +33,7 @@ public class FlavourAvailabilityService {
     private final DevicePoolService devicePoolService;
     private final InstanceService instanceService;
     private final BookingTokenService bookingTokenService;
+    private final CloudClientService cloudClientService;
 
     @Inject
     public FlavourAvailabilityService(final FlavourService flavourService,
@@ -39,13 +41,15 @@ public class FlavourAvailabilityService {
                                       final CloudResourcesService cloudResourcesService,
                                       final DevicePoolService devicePoolService,
                                       final InstanceService instanceService,
-                                      final BookingTokenService bookingTokenService) {
+                                      final BookingTokenService bookingTokenService,
+                                      final CloudClientService cloudClientService) {
         this.flavourService = flavourService;
         this.hypervisorService = hypervisorService;
         this.cloudResourcesService = cloudResourcesService;
         this.devicePoolService = devicePoolService;
         this.instanceService = instanceService;
         this.bookingTokenService = bookingTokenService;
+        this.cloudClientService = cloudClientService;
     }
 
     public List<FlavourAvailability> getAllCurrentAvailabilities() {
@@ -306,8 +310,7 @@ public class FlavourAvailabilityService {
         final Map<Long, FlavourUsages> cloudFlavourUsages = this.getCloudFlavourUsages();
         List<DevicePoolUsage> devicePoolUsages = devicePoolService.getDevicePoolUsage();
 
-        Set<Long> allCloudClientIds = new HashSet<>(allCloudResources.keySet());
-        allCloudClientIds.addAll(cloudHypervisors.keySet());
+        List<Long> allCloudClientIds = this.cloudClientService.getAll().stream().map(CloudClient::getId).toList();
 
         return allCloudClientIds.stream()
             .collect(Collectors.toMap(
