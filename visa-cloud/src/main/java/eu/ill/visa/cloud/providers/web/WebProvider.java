@@ -134,7 +134,12 @@ public class WebProvider implements CloudProvider {
 
         try {
             final String id = this.webProviderClient.createInstance(this.configuration.getAuthToken(), cloudInstance).id();
-            return this.instance(id);
+            CloudInstance instance = this.instance(id);
+            // Force the state to not be active immediately if already running
+            if (instance.getState().equals(CloudInstanceState.ACTIVE)) {
+                instance.setState(CloudInstanceState.STARTING);
+            }
+            return instance;
 
         } catch (Exception e) {
             throw new CloudException(format("Could not create server with name %s and response %s ", name, e.getMessage()));
