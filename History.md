@@ -1,3 +1,13 @@
+3.8.1 20/03/2026
+================
+ - Web provider: avoid initial ACTIVE state being returned on creation: wait for port testing before setting to ACTIVE
+ - Bug fix: cloud resources not obtained systematically in flavour availability calculation and test for null cloud resources
+ - Bug fix: cloud resources (usage of each cloud) not updated if cloud wasn't visible to standard users
+ - Bug fix: null pointer for flavour usages in flavour availability calculation when no instances were running
+ - Config change: remove syslog enabled by default
+ - Minor bug fix: remove "optional" column from protocols fixtures 
+ - Bug fix: don't group resource modifiers in flavour availability calculation if they have compute Ids
+
 3.8.0 13/03/2026
 ================
  - Implement Instance Reservation System
