@@ -57,7 +57,7 @@ public class StateInstanceAction extends InstanceAction {
 
                 // Check if we have requested it to be deleted and provider says it is active, or requested to restart and provider says it is still stopped
                 InstanceCommand lastUserCommand = this.getInstanceCommandService().getLastUserCommandForInstance(instance);
-                boolean ignoreCloudState = lastUserCommand.getActionType().equals(InstanceCommandType.DELETE) ||
+                boolean ignoreCloudState = (lastUserCommand.getActionType().equals(InstanceCommandType.DELETE) && cloudInstanceState.equals(CloudInstanceState.ACTIVE)) ||
                     (lastUserCommand.getActionType().equals(InstanceCommandType.REBOOT) && cloudInstanceState.equals(CloudInstanceState.STOPPED));
 
                 // Update instance state in the database (unless we have requested it to be deleted and provider says it is active)
