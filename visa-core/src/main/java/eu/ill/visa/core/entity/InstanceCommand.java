@@ -36,6 +36,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
             WHERE a.instance = :instance
             ORDER BY a.id
     """),
+    @NamedQuery(name = "instanceCommand.getAllUserCommandsForInstance", query = """
+            SELECT a FROM InstanceCommand a
+            WHERE a.instance = :instance
+            AND a.user IS NOT NULL
+            ORDER BY a.id
+    """),
 })
 @Table(name = "instance_command")
 public class InstanceCommand extends Timestampable {

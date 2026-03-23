@@ -56,6 +56,10 @@ public class InstanceCommandService {
         return this.repository.getAllForInstance(instance);
     }
 
+    public InstanceCommand getLastUserCommandForInstance(Instance instance) {
+        return this.repository.getLastUserCommandForInstance(instance);
+    }
+
     public InstanceCommand create(Instance instance, InstanceCommandType action) {
         InstanceCommand instanceCommand = new InstanceCommand(null, instance, action);
         this.save(instanceCommand);

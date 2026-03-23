@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Singleton
 public class InstanceCommandRepository extends AbstractRepository<InstanceCommand> {
@@ -53,6 +54,16 @@ public class InstanceCommandRepository extends AbstractRepository<InstanceComman
         TypedQuery<InstanceCommand> query = getEntityManager().createNamedQuery("instanceCommand.getAllForInstance", InstanceCommand.class);
         query.setParameter("instance", instance);
         return query.getResultList();
+    }
+
+    public InstanceCommand getLastUserCommandForInstance(Instance instance) {
+        TypedQuery<InstanceCommand> query = getEntityManager().createNamedQuery("instanceCommand.getAllUserCommandsForInstance", InstanceCommand.class);
+        query.setParameter("instance", instance);
+        try {
+            return query.getResultList().getLast();
+        } catch (NoSuchElementException exception) {
+            return null;
+        }
     }
 
     public void save(InstanceCommand instanceCommand) {

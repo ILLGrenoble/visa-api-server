@@ -5,18 +5,22 @@ import eu.ill.visa.business.concurrent.actions.exceptions.InstanceActionExceptio
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.entity.ImageProtocol;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.InstanceCommandState;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class InstanceAction {
+
+    private final static Logger logger = LoggerFactory.getLogger(InstanceAction.class);
 
     private final InstanceActionServiceProvider serviceProvider;
     private final InstanceCommand command;
@@ -154,5 +158,42 @@ public abstract class InstanceAction {
         return new HashCodeBuilder(17, 37)
             .append(command)
             .toHashCode();
+    }
+
+    protected InstanceState verifyActiveInstance(Instance instance, String address) {
+        InstanceState instanceState = InstanceState.ACTIVE;
+        logger.trace("Checking ports are open for address: {}", address);
+        final Plan plan = instance.getPlan();
+        final Image image = plan.getImage();
+        final List<ImageProtocol> protocols = image.getProtocols();
+
+        // Get the VDI protocols
+        final ImageProtocol vdiProtocol = instance.getVdiProtocol() != null ? instance.getVdiProtocol() : getImageService().getDefaultVdiProtocolForImage(image);
+        final List<ImageProtocol> vdiProtocols = new ArrayList<>(Collections.singletonList(vdiProtocol));
+        // If using Guacamole then ensure that the main remote desktop protocol is also running
+        if (vdiProtocol.getName().equals("GUACD")) {
+            ImageProtocol secondaryVdiProtocol = instance.getPlan().getImage().getSecondaryVdiProtocol();
+            if (secondaryVdiProtocol == null) {
+                // Legacy get RDP protocol
+                secondaryVdiProtocol = this.getImageProtocolService().getByName("RDP");
+            }
+            if (secondaryVdiProtocol != null) {
+                vdiProtocols.add(secondaryVdiProtocol);
+            }
+        }
+
+        boolean instanceIsUpAndRunning = this.getPortService().areVdiPortsOpen(address, vdiProtocols);
+        if (!instanceIsUpAndRunning) {
+            instanceState = InstanceState.STARTING;
+
+        } else {
+            List<ImageProtocol> activeProtocols = this.getPortService().getActiveProtocols(address, protocols);
+            if (activeProtocols.size() < protocols.size()) {
+                instanceState = InstanceState.PARTIALLY_ACTIVE;
+            }
+            this.updateInstanceProtocols(instanceState, activeProtocols);
+        }
+
+        return instanceState;
     }
 }

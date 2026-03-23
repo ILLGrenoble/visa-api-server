@@ -79,6 +79,14 @@ public class CreateInstanceAction extends InstanceAction {
             instance.setComputeId(cloudInstance.getId());
             InstanceState instanceState = InstanceState.valueOf(cloudInstance.getState().toString());
 
+            if (instanceState == InstanceState.ACTIVE) {
+                String address = cloudInstance.getAddress();
+                if (address != null) {
+                    this.updateInstanceIpAddress(address);
+                    instanceState = this.verifyActiveInstance(instance, address);
+                }
+            }
+
             this.getInstanceService().updateState(instance, instanceState);
 
             this.getInstanceService().save(instance);

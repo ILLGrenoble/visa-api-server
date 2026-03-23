@@ -5,14 +5,13 @@ import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.domain.CloudInstanceState;
 import eu.ill.visa.cloud.services.CloudClient;
-import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.Instance;
+import eu.ill.visa.core.entity.InstanceCommand;
+import eu.ill.visa.core.entity.Role;
+import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class StateInstanceAction extends InstanceAction {
 
@@ -57,43 +56,14 @@ public class StateInstanceAction extends InstanceAction {
                 instanceState = InstanceState.valueOf(cloudInstanceState.toString());
 
                 // Check if we have requested it to be deleted and provider says it is active, or requested to restart and provider says it is still stopped
-                boolean ignoreCloudState = (instance.getState().equals(InstanceState.DELETING) && cloudInstanceState.equals(CloudInstanceState.ACTIVE)) ||
-                    (instance.getState().equals(InstanceState.STARTING) && cloudInstanceState.equals(CloudInstanceState.STOPPED));
+                InstanceCommand lastUserCommand = this.getInstanceCommandService().getLastUserCommandForInstance(instance);
+                boolean ignoreCloudState = lastUserCommand.getActionType().equals(InstanceCommandType.DELETE) ||
+                    (lastUserCommand.getActionType().equals(InstanceCommandType.REBOOT) && cloudInstanceState.equals(CloudInstanceState.STOPPED));
 
                 // Update instance state in the database (unless we have requested it to be deleted and provider says it is active)
                 if (!ignoreCloudState) {
                     if (instanceState.isActive()) {
-                        logger.trace("Checking ports are open for address: {}", cloudInstance.getAddress());
-                        final Plan plan = instance.getPlan();
-                        final Image image = plan.getImage();
-                        final List<ImageProtocol> protocols = image.getProtocols();
-
-                        // Get the VDI protocols
-                        final ImageProtocol vdiProtocol = instance.getVdiProtocol() != null ? instance.getVdiProtocol() : getImageService().getDefaultVdiProtocolForImage(image);
-                        final List<ImageProtocol> vdiProtocols = new ArrayList<>(Collections.singletonList(vdiProtocol));
-                        // If using Guacamole then ensure that the main remote desktop protocol is also running
-                        if (vdiProtocol.getName().equals("GUACD")) {
-                            ImageProtocol secondaryVdiProtocol = instance.getPlan().getImage().getSecondaryVdiProtocol();
-                            if (secondaryVdiProtocol == null) {
-                                // Legacy get RDP protocol
-                                secondaryVdiProtocol = this.getImageProtocolService().getByName("RDP");
-                            }
-                            if (secondaryVdiProtocol != null) {
-                                vdiProtocols.add(secondaryVdiProtocol);
-                            }
-                        }
-
-                        boolean instanceIsUpAndRunning = this.getPortService().areVdiPortsOpen(cloudInstance.getAddress(), vdiProtocols);
-                        if (!instanceIsUpAndRunning) {
-                            instanceState = InstanceState.STARTING;
-
-                        } else {
-                            List<ImageProtocol> activeProtocols = this.getPortService().getActiveProtocols(cloudInstance.getAddress(), protocols);
-                            if (activeProtocols.size() < protocols.size()) {
-                                instanceState = InstanceState.PARTIALLY_ACTIVE;
-                            }
-                            this.updateInstanceProtocols(instanceState, activeProtocols);
-                        }
+                        instanceState = this.verifyActiveInstance(instance, cloudInstance.getAddress());
                     }
                     this.updateInstanceState(instanceState);
                 }
