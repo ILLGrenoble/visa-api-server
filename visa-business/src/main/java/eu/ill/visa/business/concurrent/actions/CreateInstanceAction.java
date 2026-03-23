@@ -82,6 +82,7 @@ public class CreateInstanceAction extends InstanceAction {
             if (instanceState == InstanceState.ACTIVE) {
                 String address = cloudInstance.getAddress();
                 if (address != null) {
+                    instance.setIpAddress(address);
                     this.updateInstanceIpAddress(address);
                     instanceState = this.verifyActiveInstance(instance, address);
                 }
