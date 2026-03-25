@@ -276,6 +276,9 @@ public class Instance extends Timestampable {
     @Column(name = "expiration_date", nullable = true)
     private Date expirationDate;
 
+    @Column(name = "active_at", nullable = true)
+    private Date activeAt;
+
     @Column(name = "deleted_at", nullable = true)
     private Date deletedAt;
 
@@ -493,6 +496,14 @@ public class Instance extends Timestampable {
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public Date getActiveAt() {
+        return activeAt;
+    }
+
+    public void setActiveAt(Date activeAt) {
+        this.activeAt = activeAt;
     }
 
     @Transient

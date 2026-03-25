@@ -198,6 +198,12 @@ public class InstanceService {
     public Instance updateState(Instance instance, InstanceState state) {
         boolean errorsChanged =  ((instance.getState().equals(InstanceState.ERROR) && !state.equals(InstanceState.ERROR)) || (!instance.getState().equals(InstanceState.ERROR) && state.equals(InstanceState.ERROR)));
 
+        if ((instance.getState().equals(InstanceState.BUILDING) || instance.getState().equals(InstanceState.STARTING)) &&
+            (state.equals(InstanceState.ACTIVE) || state.equals(InstanceState.PARTIALLY_ACTIVE)) &&
+            instance.getActiveAt() == null) {
+            instance.setActiveAt(new Date());
+        }
+
         instance.setState(state);
 
         // Soft delete if necessary
