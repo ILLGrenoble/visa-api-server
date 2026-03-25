@@ -1,3 +1,10 @@
+3.8.2 25/03/2026
+================
+ - Store the time at which the instance first become active or partially active (for stats on creation time).
+ - Set the ip address correctly on instance creation.
+ - Modify instance creation: if cloud state is active then check immediately if the ports are open (making the instance active too).
+ - Improve handling of conversion of cloud state to instance state, taking into account last instance command.
+
 3.8.1 20/03/2026
 ================
  - Web provider: avoid initial ACTIVE state being returned on creation: wait for port testing before setting to ACTIVE
