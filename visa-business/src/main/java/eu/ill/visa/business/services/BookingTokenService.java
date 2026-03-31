@@ -82,7 +82,7 @@ public class BookingTokenService {
                 if ((token.getOwner() != null && !token.getOwner().equals(owner)) || (owner != null && !owner.equals(token.getOwner()))) {
                     token.setOwner(owner);
                     updatedTokens.add(token);
-                    if (owner != null && !originalOwners.contains(owner)) {
+                    if (owner != null && !originalOwners.contains(owner) && !owner.equals(bookingRequest.getOwner())) {
                         newOwners.add(owner);
                     }
                 }
