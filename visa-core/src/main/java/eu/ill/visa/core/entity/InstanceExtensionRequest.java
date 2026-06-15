@@ -24,7 +24,7 @@ import java.util.Date;
     @NamedQuery(name = "instanceExtensionRequest.getForInstance", query = """
             SELECT r
             FROM InstanceExtensionRequest r
-            WHERE r.state = 'PENDING'
+            WHERE r.state != 'ACCEPTED'
             AND r.instance = :instance
     """),
 })
