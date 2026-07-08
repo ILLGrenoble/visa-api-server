@@ -273,6 +273,10 @@ public class FlavourAvailabilityService {
                         futures.add(currentAvailability);
                     }
                 }
+                if (futures.isEmpty()) {
+                    // ensure that at least the latest availability is returned (occurs when a booking is after all active instances should have been deleted, eg > 2 months in advance)
+                    futures.add(currentAvailability);
+                }
             } else {
                 // No resource usage modifiers, so put currentAvailability into the list
                 futures.add(currentAvailability);
