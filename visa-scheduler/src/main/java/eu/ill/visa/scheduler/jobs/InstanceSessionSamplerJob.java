@@ -22,10 +22,10 @@ public class InstanceSessionSamplerJob {
     // Run every minute
     @Scheduled(cron="0 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public void execute() {
-        logger.info("Executing instance session sample job...");
+        logger.debug("Executing instance session sample job...");
 
         long count = this.desktopSessionService.storeDesktopSessionConnectionStats();
 
-        logger.info("... stored {} samples", count);
+        logger.debug("... stored {} samples", count);
     }
 }
