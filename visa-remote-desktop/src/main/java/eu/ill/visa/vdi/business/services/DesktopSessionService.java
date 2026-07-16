@@ -278,7 +278,7 @@ public class DesktopSessionService {
                         .clientRttSampleCount(clientStats.sampleSize())
                         .instanceMeanRttMs(instanceStats.mean())
                         .instanceSdRttMs(instanceStats.standardDeviation())
-                        .instanceRttSampleCount(clientStats.sampleSize())
+                        .instanceRttSampleCount(instanceStats.sampleSize())
                         .build();
 
                     samples.add(desktopSessionRttSample);
