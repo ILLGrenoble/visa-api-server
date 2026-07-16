@@ -2,6 +2,7 @@ package eu.ill.visa.vdi.business.concurrency;
 
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.PingResponseHandler;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.apache.guacamole.GuacamoleClientException;
 import org.apache.guacamole.GuacamoleConnectionClosedException;
@@ -39,6 +40,11 @@ public class GuacamoleConnectionThread extends ConnectionThread {
     public void run() {
         sendIdentifierInstruction();
         read();
+    }
+
+    @Override
+    public void setPingResponseHandler(PingResponseHandler pingResponseHandler) {
+        // Not implemented
     }
 
     @Override

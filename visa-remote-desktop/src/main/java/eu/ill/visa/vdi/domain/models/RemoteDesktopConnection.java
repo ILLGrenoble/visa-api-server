@@ -2,10 +2,14 @@ package eu.ill.visa.vdi.domain.models;
 
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
 public class RemoteDesktopConnection {
+    private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopConnection.class);
 
     private final SocketClient client;
     private final ConnectionThread connectionThread;
@@ -13,6 +17,8 @@ public class RemoteDesktopConnection {
     private Date lastInstanceUpdateTime;
     private Date lastInteractionAt = new Date();
     private InstanceActivityType instanceActivityType;
+
+    private final RttSampler connectionRttSampler = new RttSampler();
 
     public RemoteDesktopConnection(SocketClient client, ConnectionThread connectionThread) {
         this.client = client;
@@ -67,5 +73,25 @@ public class RemoteDesktopConnection {
 
     public void disconnect() {
         this.client.disconnect();
+    }
+
+    public void addClientRttSample(long clientRttSample) {
+        this.connectionRttSampler.addClientRttSample(clientRttSample);
+    }
+
+    public void addRemoteDesktopRttMsSample(long remoteDesktopRttMsSample) {
+        this.connectionRttSampler.addInstanceRttSample(remoteDesktopRttMsSample);
+    }
+
+    public Pair<RttSampler.SampleStats, RttSampler.SampleStats> calculateRttSampleStats() {
+        return this.connectionRttSampler.calculateRttSampleStats();
+    }
+
+    public void resetRttSamples() {
+        this.connectionRttSampler.reset();
+    }
+
+    public void setPingResponseHandler(final PingResponseHandler handler) {
+        this.connectionThread.setPingResponseHandler(handler);
     }
 }

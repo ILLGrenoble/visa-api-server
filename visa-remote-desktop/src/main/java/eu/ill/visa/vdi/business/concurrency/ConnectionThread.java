@@ -2,6 +2,7 @@ package eu.ill.visa.vdi.business.concurrency;
 
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.PingResponseHandler;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 
 public abstract class ConnectionThread implements Runnable {
@@ -19,6 +20,7 @@ public abstract class ConnectionThread implements Runnable {
     public abstract void closeTunnel();
 
     public abstract void run();
+    public abstract void setPingResponseHandler(PingResponseHandler pingResponseHandler);
 
     public abstract void writeCharData(char[] data);
     public abstract void writeByteData(byte[] data);

@@ -2,6 +2,8 @@ package eu.ill.visa.vdi.business.concurrency;
 
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.vdi.domain.models.PingResponseData;
+import eu.ill.visa.vdi.domain.models.PingResponseHandler;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.webx.WebXTunnel;
 import eu.ill.webx.exceptions.WebXClientException;
@@ -23,6 +25,11 @@ public class WebXConnectionThread extends ConnectionThread {
     @Override
     public void closeTunnel() {
         this.tunnel.disconnect();
+    }
+
+    @Override
+    public void setPingResponseHandler(PingResponseHandler pingResponseHandler) {
+        this.tunnel.setPingResponseHandler(pingResponseHandler != null ? data -> pingResponseHandler.onPingResponse(new PingResponseData(data.rttMs())) : null);
     }
 
     @Override

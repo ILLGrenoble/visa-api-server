@@ -8,6 +8,14 @@ public record GatewayClient(Session session, String token, String clientId) {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayClient.class);
 
+    public GatewayClient(Session session, String token, String clientId) {
+        this.session = session;
+        this.token = token;
+        this.clientId = clientId;
+
+        logger.info("Gateway Client Id = {}", clientId);
+    }
+
     public void sendEvent(Object data) {
         if (session.isOpen()) {
             this.session.getAsyncRemote().sendObject(data, result -> {

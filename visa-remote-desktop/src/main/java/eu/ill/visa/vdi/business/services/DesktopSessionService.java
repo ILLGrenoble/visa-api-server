@@ -4,6 +4,7 @@ import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.core.domain.fetches.InstanceFetch;
+import eu.ill.visa.core.entity.DesktopSessionRttSample;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
@@ -17,6 +18,7 @@ import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.*;
+import eu.ill.visa.vdi.gateway.events.PingEvent;
 import eu.ill.visa.vdi.gateway.events.UserConnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UserDisconnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UsersConnectedEvent;
@@ -24,6 +26,7 @@ import io.quarkus.runtime.Shutdown;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +51,7 @@ public class DesktopSessionService {
     private final VirtualDesktopConfiguration virtualDesktopConfiguration;
     private final EventDispatcher eventDispatcher;
     private final ConnectionThreadExecutor connectionThreadExecutor;
+    private final DesktopSessionRttSampleService desktopSessionRttSampleService;
 
     private final MessageBroker messageBroker;
 
@@ -66,7 +70,8 @@ public class DesktopSessionService {
                                  final VirtualDesktopConfiguration virtualDesktopConfiguration,
                                  final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
                                  final EventDispatcher eventDispatcher,
-                                 final ConnectionThreadExecutor connectionThreadExecutor) {
+                                 final ConnectionThreadExecutor connectionThreadExecutor,
+                                 final DesktopSessionRttSampleService desktopSessionRttSampleService) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceSessionMemberService = instanceSessionMemberService;
@@ -79,6 +84,7 @@ public class DesktopSessionService {
         this.messageBroker = messageBrokerInstance.get();
         this.eventDispatcher = eventDispatcher;
         this.connectionThreadExecutor = connectionThreadExecutor;
+        this.desktopSessionRttSampleService = desktopSessionRttSampleService;
 
         this.messageBroker.subscribe(UserConnectedMessage.class)
             .next((message) -> this.onUserConnected(message.sessionId(), message.clientId(), message.user()));
@@ -121,9 +127,14 @@ public class DesktopSessionService {
         final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, client.protocol());
         DesktopSession desktopSession = this.getOrCreateDesktopSession(instanceSession.getId(), instance.getId(), client.protocol());
 
-        // Create session member: Add a NOP timer to keep the connection alive
-        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession, nopSender);
+        // Create session member: Add a NOP timer to keep the connection alive and Ping timer to get connection RTTs
+        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession, nopSender, () -> {
+            this.eventDispatcher.sendEventToClient(client.clientId(), PING_EVENT, new PingEvent(client.clientId()));
+        });
         this.addDesktopSessionMember(desktopSession, desktopSessionMember);
+
+        // Set up ping response handler for remote desktop
+        remoteDesktopConnection.setPingResponseHandler(data -> this.onPongReceivedFromRemoteDesktop(desktopSessionMember, data.rttMs()));
 
         // Activate idle session timer
         desktopSessionMember.idleSessionHandler().start(() -> this.onDesktopMemberIdle(desktopSessionMember));
@@ -161,6 +172,7 @@ public class DesktopSessionService {
         // Stop the idle handler
         desktopSessionMember.idleSessionHandler().stop();
         desktopSessionMember.nopTimer().cancel();
+        desktopSessionMember.pingTimer().cancel();
 
         desktopSessionMember.remoteDesktopConnection().getConnectionThread().closeTunnel();
 
@@ -224,6 +236,63 @@ public class DesktopSessionService {
             // Forward reply to broker once we've verified that the revoke command comes from the owner
             this.messageBroker.broadcast(new AccessRevokedMessage(ownerSessionMember.session().getSessionId(), userId));
         }
+    }
+
+    public void onPongReceivedFromClient(final DesktopSessionMember desktopSessionMember, long clientRttMs) {
+        desktopSessionMember.remoteDesktopConnection().addClientRttSample(clientRttMs);
+//        logger.info("DesktopSessionMember {} client RTT is {}ms", desktopSessionMember.clientId(), clientRttMs);
+    }
+
+    public void onPongReceivedFromRemoteDesktop(final DesktopSessionMember desktopSessionMember, long remoteDesktopRttMs) {
+        desktopSessionMember.remoteDesktopConnection().addRemoteDesktopRttMsSample(remoteDesktopRttMs);
+//        logger.info("DesktopSessionMember {} remote desktop RTT is {}ms", desktopSessionMember.clientId(), remoteDesktopRttMs);
+    }
+
+
+    public long storeDesktopSessionConnectionStats() {
+        List<DesktopSessionRttSample> samples = new ArrayList<>();
+        synchronized (this.desktopSessionMembers) {
+            this.desktopSessionMembers.values().forEach(desktopSessionMember -> {
+                final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
+                final Pair<RttSampler.SampleStats, RttSampler.SampleStats> sampleStatsSampleStatsPair = remoteDesktopConnection.calculateRttSampleStats();
+
+                final RttSampler.SampleStats clientStats = sampleStatsSampleStatsPair.getLeft();
+                final RttSampler.SampleStats instanceStats = sampleStatsSampleStatsPair.getRight();
+
+                Date now = new Date();
+                Date firstSampleDate = Collections.min(Arrays.asList(clientStats.firstSampleDate(), instanceStats.firstSampleDate()));
+                long seconds = (now.getTime() - firstSampleDate.getTime()) / 1000;
+                long minutes = Math.round(seconds / 60.0);
+
+                final DesktopSession desktopSession = desktopSessionMember.session();
+                final Long instanceSessionId = desktopSession.getSessionId();
+                final String clientId = desktopSessionMember.clientId();
+
+                final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
+                if (instanceSessionMember != null) {
+                    DesktopSessionRttSample desktopSessionRttSample = DesktopSessionRttSample.Builder()
+                        .instanceSessionMemberId(instanceSessionMember.getId())
+                        .samplePeriodMinutes(minutes)
+                        .clientMeanRttMs(clientStats.mean())
+                        .clientSdRttMs(clientStats.standardDeviation())
+                        .clientRttSampleCount(clientStats.sampleSize())
+                        .instanceMeanRttMs(instanceStats.mean())
+                        .instanceSdRttMs(instanceStats.standardDeviation())
+                        .instanceRttSampleCount(clientStats.sampleSize())
+                        .build();
+
+                    samples.add(desktopSessionRttSample);
+                }
+
+                remoteDesktopConnection.resetRttSamples();
+            });
+        }
+
+        for (DesktopSessionRttSample desktopSessionRttSample : samples) {
+            this.desktopSessionRttSampleService.save(desktopSessionRttSample);
+        }
+
+        return samples.size();
     }
 
     private void closeSession(final Long sessionId) {
