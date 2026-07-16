@@ -46,7 +46,12 @@ public class HypervisorRepository extends AbstractRepository<Hypervisor> {
     public Hypervisor getByServerId(String serverId) {
         final TypedQuery<Hypervisor> query = getEntityManager().createNamedQuery("hypervisor.getByServerId", Hypervisor.class);
         query.setParameter("serverId", serverId);
-        return query.setMaxResults(1).getResultList().getFirst();
+        try {
+            return query.getSingleResult();
+
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
     public void save(final Hypervisor hypervisor) {
