@@ -55,6 +55,10 @@ public class HypervisorService {
         return this.repository.getAllAvailable();
     }
 
+    public Hypervisor getByServerId(String serverId) {
+        return this.repository.getByServerId(serverId);
+    }
+
     public List<Resource> getTotalResources() {
         return this.getAll().stream()
             .flatMap(hypervisor -> hypervisor.getResources().stream())

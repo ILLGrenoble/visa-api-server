@@ -29,6 +29,7 @@ public class InstanceActionServiceProvider {
     private final ImageService imageService;
     private final ImageProtocolService imageProtocolService;
     private final EventDispatcher eventDispatcher;
+    private final HypervisorService hypervisorService;
 
 
     @Inject
@@ -44,7 +45,8 @@ public class InstanceActionServiceProvider {
                                          final PortService portService,
                                          final ImageService imageService,
                                          final ImageProtocolService imageProtocolService,
-                                         final EventDispatcher eventDispatcher) {
+                                         final EventDispatcher eventDispatcher,
+                                         final HypervisorService hypervisorService) {
         this.instanceService = instanceService;
         this.instanceSessionService = instanceSessionService;
         this.instanceSessionMemberService = instanceSessionMemberService;
@@ -58,6 +60,7 @@ public class InstanceActionServiceProvider {
         this.imageService = imageService;
         this.imageProtocolService = imageProtocolService;
         this.eventDispatcher = eventDispatcher;
+        this.hypervisorService = hypervisorService;
     }
 
     /**
@@ -120,5 +123,9 @@ public class InstanceActionServiceProvider {
 
     public EventDispatcher getEventDispatcher() {
         return eventDispatcher;
+    }
+
+    public HypervisorService getHypervisorService() {
+        return hypervisorService;
     }
 }

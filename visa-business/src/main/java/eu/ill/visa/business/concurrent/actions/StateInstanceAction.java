@@ -55,6 +55,9 @@ public class StateInstanceAction extends InstanceAction {
                 }
                 instanceState = InstanceState.valueOf(cloudInstanceState.toString());
 
+                // Get hypervisor if available
+                this.updateInstanceHypervisor(this.getHypervisorService().getByServerId(instance.getComputeId()));
+
                 // Check if we have requested it to be deleted and provider says it is active, or requested to restart and provider says it is still stopped
                 InstanceCommand lastUserCommand = this.getInstanceCommandService().getLastUserCommandForInstance(instance);
                 boolean ignoreCloudState = (lastUserCommand.getActionType().equals(InstanceCommandType.DELETE) && cloudInstanceState.equals(CloudInstanceState.ACTIVE)) ||

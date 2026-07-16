@@ -43,6 +43,12 @@ public class HypervisorRepository extends AbstractRepository<Hypervisor> {
         return query.getResultList();
     }
 
+    public Hypervisor getByServerId(String serverId) {
+        final TypedQuery<Hypervisor> query = getEntityManager().createNamedQuery("hypervisor.getByServerId", Hypervisor.class);
+        query.setParameter("serverId", serverId);
+        return query.setMaxResults(1).getResultList().getFirst();
+    }
+
     public void save(final Hypervisor hypervisor) {
         if (hypervisor.getId() == null) {
             persist(hypervisor);
@@ -55,5 +61,4 @@ public class HypervisorRepository extends AbstractRepository<Hypervisor> {
     public void delete(final Hypervisor hypervisor) {
         this.remove(hypervisor);
     }
-
 }

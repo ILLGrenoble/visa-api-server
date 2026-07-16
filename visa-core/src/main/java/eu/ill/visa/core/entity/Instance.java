@@ -238,6 +238,9 @@ public class Instance extends Timestampable {
     @Column(name = "compute_id", length = 250, nullable = true)
     private String computeId;
 
+    @Column(name = "hypervisor_id", nullable = true)
+    private Long hypervisorId;
+
     @Column(name = "name", length = 250, nullable = false)
     private String name;
 
@@ -392,6 +395,14 @@ public class Instance extends Timestampable {
 
     public void setComputeId(String computeId) {
         this.computeId = computeId;
+    }
+
+    public Long getHypervisorId() {
+        return hypervisorId;
+    }
+
+    public void setHypervisorId(Long hypervisorId) {
+        this.hypervisorId = hypervisorId;
     }
 
     public String getName() {

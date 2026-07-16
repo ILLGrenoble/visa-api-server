@@ -24,6 +24,14 @@ import java.util.Map;
         AND h.id = :id
         ORDER BY h.id
     """),
+    @NamedQuery(name = "hypervisor.getByServerId", query = """
+        SELECT h
+        FROM Hypervisor h
+        LEFT JOIN h.cloudProviderConfiguration cpc
+        LEFT JOIN h.allocations a
+        WHERE cpc.deletedAt IS NULL
+        AND a.serverComputeId = :serverId
+    """),
     @NamedQuery(name = "hypervisor.countAll", query = """
         SELECT COUNT(h)
         FROM Hypervisor h

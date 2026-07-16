@@ -74,6 +74,10 @@ public abstract class InstanceAction {
         return this.serviceProvider.getEventDispatcher();
     }
 
+    public HypervisorService getHypervisorService() {
+        return this.serviceProvider.getHypervisorService();
+    }
+
     public InstanceCommand getCommand() {
         return command;
     }
@@ -128,6 +132,19 @@ public abstract class InstanceAction {
         if (instance != null) {
             instance.setIpAddress(ipAddress);
             this.getInstanceService().save(instance);
+        }
+    }
+
+    public void updateInstanceHypervisor(Hypervisor hypervisor) {
+        if (hypervisor != null) {
+            Instance commandInstance = this.command.getInstance();
+            commandInstance.setHypervisorId(hypervisor.getId());
+
+            final Instance instance = this.getInstance();
+            if (instance != null) {
+                instance.setHypervisorId(hypervisor.getId());
+                this.getInstanceService().save(instance);
+            }
         }
     }
 
