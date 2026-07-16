@@ -5,6 +5,7 @@ import eu.ill.visa.cloud.domain.CloudInstance;
 import eu.ill.visa.cloud.exceptions.CloudException;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.BookingToken;
+import eu.ill.visa.core.entity.Hypervisor;
 import eu.ill.visa.web.graphql.exceptions.DataFetchingException;
 import eu.ill.visa.web.graphql.types.*;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -35,6 +36,7 @@ public class InstanceResolver {
     private final PortService portService;
     private final InstanceDeviceAllocationService instanceDeviceAllocationService;
     private final BookingTokenService bookingTokenService;
+    private final HypervisorService hypervisorService;
 
     @Inject
     public InstanceResolver(final CloudClientService cloudClientService,
@@ -44,7 +46,8 @@ public class InstanceResolver {
                             final InstanceAttributeService instanceAttributeService,
                             final PortService portService,
                             final InstanceDeviceAllocationService instanceDeviceAllocationService,
-                            final BookingTokenService bookingTokenService) {
+                            final BookingTokenService bookingTokenService,
+                            final HypervisorService hypervisorService) {
         this.cloudClientService = cloudClientService;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceMemberService = instanceMemberService;
@@ -53,6 +56,7 @@ public class InstanceResolver {
         this.portService = portService;
         this.instanceDeviceAllocationService = instanceDeviceAllocationService;
         this.bookingTokenService = bookingTokenService;
+        this.hypervisorService = hypervisorService;
     }
 
     public List<InstanceMemberType> members(@Source InstanceType instance) {
@@ -202,6 +206,11 @@ public class InstanceResolver {
     public BookingTokenType bookingToken(@Source InstanceType instance) {
         final BookingToken bookingToken = this.bookingTokenService.getForInstanceId(instance.getId());
         return bookingToken == null ? null : new BookingTokenType(bookingToken);
+    }
+
+    public HypervisorType hypervisor(@Source InstanceType instance) {
+        final Hypervisor hypervisor = this.hypervisorService.getByServerId(instance.getComputeId());
+        return hypervisor == null ? null : new HypervisorType(hypervisor);
     }
 }
 
