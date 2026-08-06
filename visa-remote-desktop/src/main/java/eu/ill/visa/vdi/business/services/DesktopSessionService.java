@@ -269,7 +269,7 @@ public class DesktopSessionService {
                 final String clientId = desktopSessionMember.clientId();
 
                 final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
-                if (instanceSessionMember != null) {
+                if (instanceSessionMember != null && minutes > 0) {
                     DesktopSessionRttSample desktopSessionRttSample = DesktopSessionRttSample.Builder()
                         .instanceSessionMemberId(instanceSessionMember.getId())
                         .samplePeriodMinutes(minutes)
