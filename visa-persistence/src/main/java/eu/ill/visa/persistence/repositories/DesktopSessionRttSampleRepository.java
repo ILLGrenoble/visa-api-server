@@ -22,6 +22,12 @@ public class DesktopSessionRttSampleRepository extends AbstractRepository<Deskto
         return query.getResultList();
     }
 
+    public List<DesktopSessionRttSample> getByInstanceSessionMemberIds(List<Long> instanceSessionMemberIds) {
+        final TypedQuery<DesktopSessionRttSample> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getByInstanceSessionMemberIds", DesktopSessionRttSample.class);
+        query.setParameter("instanceSessionMemberIds", instanceSessionMemberIds);
+        return query.getResultList();
+    }
+
     public void save(final DesktopSessionRttSample sample) {
         if (sample.getId() == null) {
             persist(sample);

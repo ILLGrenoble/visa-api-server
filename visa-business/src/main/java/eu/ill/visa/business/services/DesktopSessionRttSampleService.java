@@ -27,6 +27,14 @@ public class DesktopSessionRttSampleService {
         return this.repository.getByInstanceSessionMemberId(instanceSessionMemberId);
     }
 
+    public List<List<DesktopSessionRttSample>> getByInstanceSessionMemberIds(List<Long> instanceSessionMemberIds) {
+        List<DesktopSessionRttSample> samples = this.repository.getByInstanceSessionMemberIds(instanceSessionMemberIds);
+        return instanceSessionMemberIds.stream().map(id -> {
+            return samples.stream().filter(sample -> sample.getInstanceSessionMemberId().equals(id)).toList();
+        }).toList();
+
+    }
+
     public void save(DesktopSessionRttSample desktopSessionRttSample) {
         this.repository.save(desktopSessionRttSample);
     }

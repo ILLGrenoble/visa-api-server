@@ -12,6 +12,11 @@ import java.util.Date;
         WHERE s.instanceSessionMemberId = :instanceSessionMemberId
         ORDER BY s.id
     """),
+    @NamedQuery(name = "desktopSessionRttSample.getByInstanceSessionMemberIds", query = """
+        SELECT s FROM DesktopSessionRttSample s
+        WHERE s.instanceSessionMemberId IN :instanceSessionMemberIds
+        ORDER BY s.id
+    """),
 })
 @Table(name = "desktop_session_rtt_sample")
 public class DesktopSessionRttSample {
