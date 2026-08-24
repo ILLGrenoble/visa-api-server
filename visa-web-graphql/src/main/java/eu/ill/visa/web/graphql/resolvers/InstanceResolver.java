@@ -37,6 +37,7 @@ public class InstanceResolver {
     private final InstanceDeviceAllocationService instanceDeviceAllocationService;
     private final BookingTokenService bookingTokenService;
     private final HypervisorService hypervisorService;
+    private final DesktopSessionRttSampleService desktopSessionRttSampleService;
 
     @Inject
     public InstanceResolver(final CloudClientService cloudClientService,
@@ -47,7 +48,8 @@ public class InstanceResolver {
                             final PortService portService,
                             final InstanceDeviceAllocationService instanceDeviceAllocationService,
                             final BookingTokenService bookingTokenService,
-                            final HypervisorService hypervisorService) {
+                            final HypervisorService hypervisorService,
+                            final DesktopSessionRttSampleService desktopSessionRttSampleService) {
         this.cloudClientService = cloudClientService;
         this.instanceSessionMemberService = instanceSessionMemberService;
         this.instanceMemberService = instanceMemberService;
@@ -57,6 +59,7 @@ public class InstanceResolver {
         this.instanceDeviceAllocationService = instanceDeviceAllocationService;
         this.bookingTokenService = bookingTokenService;
         this.hypervisorService = hypervisorService;
+        this.desktopSessionRttSampleService = desktopSessionRttSampleService;
     }
 
     public List<InstanceMemberType> members(@Source InstanceType instance) {
@@ -212,5 +215,12 @@ public class InstanceResolver {
         final Hypervisor hypervisor = this.hypervisorService.getByServerId(instance.getComputeId());
         return hypervisor == null ? null : new HypervisorType(hypervisor);
     }
+
+    public @NotNull List<DesktopSessionRttSampleType> rttSamples(@Source InstanceType instance) {
+        return this.desktopSessionRttSampleService.getByInstanceId(instance.getId()).stream()
+            .map(DesktopSessionRttSampleType::new)
+            .toList();
+    }
+
 }
 

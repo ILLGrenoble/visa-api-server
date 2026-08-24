@@ -32,7 +32,10 @@ public class DesktopSessionRttSampleService {
         return instanceSessionMemberIds.stream().map(id -> {
             return samples.stream().filter(sample -> sample.getInstanceSessionMemberId().equals(id)).toList();
         }).toList();
+    }
 
+    public List<DesktopSessionRttSample> getByInstanceId(Long instanceId) {
+        return this.repository.getByInstanceId(instanceId);
     }
 
     public void save(DesktopSessionRttSample desktopSessionRttSample) {
