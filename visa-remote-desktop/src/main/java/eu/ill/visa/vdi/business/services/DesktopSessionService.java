@@ -18,7 +18,6 @@ import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.*;
-import eu.ill.visa.vdi.gateway.events.PingEvent;
 import eu.ill.visa.vdi.gateway.events.UserConnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UserDisconnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UsersConnectedEvent;
@@ -127,14 +126,12 @@ public class DesktopSessionService {
         final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, client.protocol());
         DesktopSession desktopSession = this.getOrCreateDesktopSession(instanceSession.getId(), instance.getId(), client.protocol());
 
-        // Create session member: Add a NOP timer to keep the connection alive and Ping timer to get connection RTTs
-        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession, nopSender, () -> {
-            this.eventDispatcher.sendEventToClient(client.clientId(), PING_EVENT, new PingEvent(client.clientId()));
-        });
+        // Create session member: Add a NOP timer to keep the connection alive
+        DesktopSessionMember desktopSessionMember = new DesktopSessionMember(client.clientId(), user, remoteDesktopConnection, desktopSession, nopSender);
         this.addDesktopSessionMember(desktopSession, desktopSessionMember);
 
         // Set up ping response handler for remote desktop
-        remoteDesktopConnection.setPingResponseHandler(data -> this.onPongReceivedFromRemoteDesktop(desktopSessionMember, data.rttMs()));
+        remoteDesktopConnection.setPingResponseHandler(data -> this.onPongReceived(desktopSessionMember, data.source(), data.rttMs()));
 
         // Activate idle session timer
         desktopSessionMember.idleSessionHandler().start(() -> this.onDesktopMemberIdle(desktopSessionMember));
@@ -172,7 +169,6 @@ public class DesktopSessionService {
         // Stop the idle handler
         desktopSessionMember.idleSessionHandler().stop();
         desktopSessionMember.nopTimer().cancel();
-        desktopSessionMember.pingTimer().cancel();
 
         desktopSessionMember.remoteDesktopConnection().getConnectionThread().closeTunnel();
 
@@ -238,14 +234,15 @@ public class DesktopSessionService {
         }
     }
 
-    public void onPongReceivedFromClient(final DesktopSessionMember desktopSessionMember, long clientRttMs) {
-        desktopSessionMember.remoteDesktopConnection().addClientRttSample(clientRttMs);
-//        logger.info("DesktopSessionMember {} client RTT is {}ms", desktopSessionMember.clientId(), clientRttMs);
-    }
+    public void onPongReceived(final DesktopSessionMember desktopSessionMember, PingResponseData.PingSource source, long rttMs) {
+        if (source.equals(PingResponseData.PingSource.SERVER)) {
+            desktopSessionMember.remoteDesktopConnection().addRemoteDesktopRttMsSample(rttMs);
+//            logger.info("DesktopSessionMember {} remote desktop RTT is {}ms", desktopSessionMember.clientId(), rttMs);
 
-    public void onPongReceivedFromRemoteDesktop(final DesktopSessionMember desktopSessionMember, long remoteDesktopRttMs) {
-        desktopSessionMember.remoteDesktopConnection().addRemoteDesktopRttMsSample(remoteDesktopRttMs);
-//        logger.info("DesktopSessionMember {} remote desktop RTT is {}ms", desktopSessionMember.clientId(), remoteDesktopRttMs);
+        } else {
+            desktopSessionMember.remoteDesktopConnection().addClientRttSample(rttMs);
+//            logger.info("DesktopSessionMember {} client RTT is {}ms", desktopSessionMember.clientId(), rttMs);
+        }
     }
 
 

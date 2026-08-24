@@ -29,7 +29,9 @@ public class WebXConnectionThread extends ConnectionThread {
 
     @Override
     public void setPingResponseHandler(PingResponseHandler pingResponseHandler) {
-        this.tunnel.setPingResponseHandler(pingResponseHandler != null ? data -> pingResponseHandler.onPingResponse(new PingResponseData(data.rttMs())) : null);
+        this.tunnel.setPingResponseHandler(pingResponseHandler != null ? data -> {
+            pingResponseHandler.onPingResponse(new PingResponseData(data.source().equals(eu.ill.webx.model.PingResponseData.Source.SERVER) ? PingResponseData.PingSource.SERVER : PingResponseData.PingSource.CLIENT, data.rttMs()));
+        } : null);
     }
 
     @Override

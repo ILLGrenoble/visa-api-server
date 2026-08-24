@@ -10,18 +10,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleHandler idleSessionHandler, Cancellable nopTimer, Cancellable pingTimer) {
-
-    public interface PingSender {
-        void sendPing();
-    }
+public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleHandler idleSessionHandler, Cancellable nopTimer) {
 
     private static final Logger logger = LoggerFactory.getLogger(DesktopSessionMember.class);
     private static final int IDLE_TIMEOUT_SECONDS = 60;
     private static final int NOP_INTERVAL_TIME_SECONDS = 5;
-    private static final int PING_INTERVAL_TIME_SECONDS = 15;
 
-    public DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, NopSender nopSender, PingSender pingSender) {
+    public DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, NopSender nopSender) {
         this(clientId,
             connectedUser,
             remoteDesktopConnection,
@@ -29,8 +24,7 @@ public record DesktopSessionMember(String clientId, ConnectedUser connectedUser,
             new IdleHandler(IDLE_TIMEOUT_SECONDS),
             Timer.setInterval(() -> {
                 nopSender.sendNop(remoteDesktopConnection.getClient());
-            }, NOP_INTERVAL_TIME_SECONDS, TimeUnit.SECONDS),
-            Timer.setInterval(pingSender::sendPing, PING_INTERVAL_TIME_SECONDS, TimeUnit.SECONDS)
+            }, NOP_INTERVAL_TIME_SECONDS, TimeUnit.SECONDS)
         );
     }
 

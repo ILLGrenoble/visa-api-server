@@ -15,6 +15,4 @@ public interface SessionEvent {
     String ACCESS_GRANTED_EVENT = "vdi:access_granted";
     String ACCESS_CANCELLATION_EVENT = "vdi:access_cancel";
     String ACCESS_REVOKED_EVENT = "vdi:access_revoked";
-    String PING_EVENT = "vdi:ping";
-    String PONG_EVENT = "vdi:pong";
 }

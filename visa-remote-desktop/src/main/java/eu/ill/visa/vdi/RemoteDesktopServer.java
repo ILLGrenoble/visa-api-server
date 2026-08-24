@@ -16,10 +16,8 @@ import eu.ill.visa.vdi.display.subscribers.WebXRemoteDesktopEventSubscriber;
 import eu.ill.visa.vdi.domain.models.SessionEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
-import eu.ill.visa.vdi.gateway.events.PongEvent;
 import eu.ill.visa.vdi.gateway.subscribers.AccessRevokedSubscriber;
 import eu.ill.visa.vdi.gateway.subscribers.EventChannelAccessRequestResponseSubscriber;
-import eu.ill.visa.vdi.gateway.subscribers.PongSubscriber;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -86,8 +84,6 @@ public class RemoteDesktopServer {
             .next(new EventChannelAccessRequestResponseSubscriber(this.desktopAccessService, this.desktopConnectionService));
         this.clientEventsGateway.subscribe(SessionEvent.ACCESS_REVOKED_EVENT, AccessRevokedEvent.class)
             .next(new AccessRevokedSubscriber(this.desktopConnectionService));
-        this.clientEventsGateway.subscribe(SessionEvent.PONG_EVENT, PongEvent.class)
-            .next(new PongSubscriber(this.desktopConnectionService));
 
         // Set up guacamole display listeners
         this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.instanceSessionService, this.instanceSessionMemberService, this.authenticator, this.eventDispatcher));
