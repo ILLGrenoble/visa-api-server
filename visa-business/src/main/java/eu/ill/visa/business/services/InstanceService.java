@@ -301,10 +301,6 @@ public class InstanceService {
         return this.repository.getAllNewTerminations(terminationInHours);
     }
 
-    public List<Instance> getAllToDelete() {
-        return this.handleFetches(this.repository.getAllToDelete(), List.of(InstanceFetch.members, InstanceFetch.experiments, InstanceFetch.attributes));
-    }
-
     public Long countAllForInstrumentScientist(User user, InstanceFilter filter) {
         return this.repository.countAllForInstrumentScientist(user, filter);
     }

@@ -69,6 +69,8 @@ public class InstanceActionServiceProvider {
      * @param instance the instance
      */
     public void clearSessionsForInstance(Instance instance) {
+        this.instanceSessionService.cleanupForInstance(instance);
+
         final List<InstanceSession> sessions = this.instanceSessionService.getAllByInstance(instance);
         for (InstanceSession session : sessions) {
             session.setCurrent(false);

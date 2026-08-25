@@ -151,12 +151,6 @@ import java.util.stream.Collectors;
             WHERE i.computeId in :computeIds
             AND i.deletedAt IS NULL
     """),
-    @NamedQuery(name = "instance.getAllToDelete", query = """
-            SELECT i FROM Instance i
-            WHERE i.state = 'STOPPED'
-            AND i.deleteRequested = true
-            AND i.deletedAt IS NULL
-    """),
     @NamedQuery(name = "instance.getByIdForInstrumentScientist", query = """
             SELECT DISTINCT i FROM Instance i
             LEFT JOIN i.experiments e

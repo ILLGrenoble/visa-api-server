@@ -219,18 +219,12 @@ public class AccountInstanceController extends AbstractController {
     @POST
     @Path("/{instance}/actions/reboot")
     public MetaResponse<InstanceDto> rebootAction(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
-        // Cleanup any existing sessions for the instance
-        this.instanceSessionService.cleanupForInstance(instance);
-
         return this.performAction(instance, this.getUserPrincipal(securityContext), InstanceCommandType.REBOOT);
     }
 
     @POST
     @Path("/{instance}/actions/shutdown")
     public MetaResponse<InstanceDto> shutdownAction(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
-        // Cleanup any existing sessions for the instance
-        this.instanceSessionService.cleanupForInstance(instance);
-
         return this.performAction(instance, this.getUserPrincipal(securityContext), InstanceCommandType.SHUTDOWN);
     }
 
@@ -392,22 +386,7 @@ public class AccountInstanceController extends AbstractController {
     @DELETE
     @Path("/{instance}")
     public MetaResponse<InstanceDto> delete(@Context final SecurityContext securityContext, @PathParam("instance") final Instance instance) {
-        final User user = this.getUserPrincipal(securityContext);
-        if (instance.getComputeId() == null || instance.hasAnyState(List.of(InstanceState.STOPPED, InstanceState.ERROR, InstanceState.UNKNOWN, InstanceState.MIGRATING, InstanceState.UNAVAILABLE))) {
-            return this.performAction(instance, user, InstanceCommandType.DELETE);
-
-        } else {
-            this.instanceSessionService.cleanupForInstance(instance);
-
-            instance.setDeleteRequested(true);
-            this.instanceService.save(instance);
-            if (instance.getState().equals(InstanceState.STOPPING)) {
-                return createResponse(mapInstance(instance, user));
-
-            } else {
-                return this.performAction(instance, user, InstanceCommandType.SHUTDOWN);
-            }
-        }
+        return this.performAction(instance, this.getUserPrincipal(securityContext), InstanceCommandType.DELETE);
     }
 
     @GET
@@ -746,6 +725,8 @@ public class AccountInstanceController extends AbstractController {
                 instanceService.updateState(instance, InstanceState.STOPPING);
 
             } else if (instanceCommandType.equals(InstanceCommandType.DELETE)) {
+                instance.setDeleteRequested(true);
+                this.instanceService.save(instance);
                 instanceService.updateState(instance, InstanceState.DELETING);
 
             } else {

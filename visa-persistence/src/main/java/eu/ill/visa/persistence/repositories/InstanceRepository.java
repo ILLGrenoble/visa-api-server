@@ -312,11 +312,6 @@ public class InstanceRepository extends AbstractRepository<Instance> {
         return query.getResultList();
     }
 
-    public List<Instance> getAllToDelete() {
-        final TypedQuery<Instance> query = getEntityManager().createNamedQuery("instance.getAllToDelete", Instance.class);
-        return query.getResultList();
-    }
-
     /**
      * Count all instances that are visible for an instrument scientist (instrument match)
      */
