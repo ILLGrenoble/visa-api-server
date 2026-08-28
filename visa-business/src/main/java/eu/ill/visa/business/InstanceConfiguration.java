@@ -11,5 +11,6 @@ public interface InstanceConfiguration {
     Integer portCheckTimeoutMs();
     String defaultVdiProtocol();
     Boolean publicAccessTokenEnabled();
+    Integer rttSampleRetentionPeriodDays();
 
 }

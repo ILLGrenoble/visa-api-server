@@ -6,6 +6,10 @@ import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Singleton
@@ -32,6 +36,25 @@ public class DesktopSessionRttSampleRepository extends AbstractRepository<Deskto
         final TypedQuery<DesktopSessionRttSample> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getByInstanceId", DesktopSessionRttSample.class);
         query.setParameter("instanceId", instanceId);
         return query.getResultList();
+    }
+
+    public List<DesktopSessionRttSample> getAllRequiringResampling(int daysOld) {
+        final TypedQuery<DesktopSessionRttSample> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getAllRequiringResampling", DesktopSessionRttSample.class);
+        Date cutoff = Date.from(Instant.now().minus(daysOld, ChronoUnit.DAYS).truncatedTo(ChronoUnit.HOURS));
+        query.setParameter("date", cutoff);
+        return query.getResultList();
+    }
+
+    public void deleteAll(Collection<DesktopSessionRttSample> samples) {
+        if (samples.isEmpty()) {
+            return;
+        }
+
+        List<Long> ids = samples.stream().map(DesktopSessionRttSample::getId).toList();
+
+        getEntityManager().createNamedQuery("desktopSessionRttSample.deleteByIds")
+            .setParameter("ids", ids)
+            .executeUpdate();
     }
 
     public void save(final DesktopSessionRttSample sample) {

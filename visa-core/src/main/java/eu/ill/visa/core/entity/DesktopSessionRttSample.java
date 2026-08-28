@@ -25,6 +25,16 @@ import java.util.Date;
         WHERE i.id IN :instanceId
         ORDER BY s.id
     """),
+    @NamedQuery(name = "desktopSessionRttSample.getAllRequiringResampling", query = """
+        SELECT s FROM DesktopSessionRttSample s
+        WHERE s.date < :date
+        AND s.samplePeriodMinutes < 60
+        ORDER BY s.id
+    """),
+    @NamedQuery(name = "desktopSessionRttSample.deleteByIds", query = """
+        DELETE FROM DesktopSessionRttSample s
+        WHERE s.id IN :ids
+    """)
 })
 @Table(name = "desktop_session_rtt_sample")
 public class DesktopSessionRttSample {
@@ -148,6 +158,7 @@ public class DesktopSessionRttSample {
 
     public static class Builder {
         private Long instanceSessionMemberId;
+        private Date date;
         private Long samplePeriodMinutes;
         private Double clientMeanRttMs;
         private Double clientSdRttMs;
@@ -158,6 +169,11 @@ public class DesktopSessionRttSample {
 
         public Builder instanceSessionMemberId(Long instanceSessionMemberId) {
             this.instanceSessionMemberId = instanceSessionMemberId;
+            return this;
+        }
+
+        public Builder date(Date date) {
+            this.date = date;
             return this;
         }
 
@@ -199,7 +215,7 @@ public class DesktopSessionRttSample {
         public DesktopSessionRttSample build() {
             DesktopSessionRttSample sample = new DesktopSessionRttSample();
             sample.setInstanceSessionMemberId(instanceSessionMemberId);
-            sample.setDate(new Date());
+            sample.setDate(date);
             sample.setSamplePeriodMinutes(samplePeriodMinutes);
             sample.setClientMeanRttMs(clientMeanRttMs);
             sample.setClientSdRttMs(clientSdRttMs);

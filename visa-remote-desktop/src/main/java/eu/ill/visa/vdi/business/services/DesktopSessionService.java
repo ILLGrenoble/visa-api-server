@@ -3,6 +3,7 @@ package eu.ill.visa.vdi.business.services;
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.business.services.*;
+import eu.ill.visa.core.domain.SampleStats;
 import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import eu.ill.visa.core.entity.DesktopSessionRttSample;
 import eu.ill.visa.core.entity.Instance;
@@ -251,10 +252,10 @@ public class DesktopSessionService {
         synchronized (this.desktopSessionMembers) {
             this.desktopSessionMembers.values().forEach(desktopSessionMember -> {
                 final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
-                final Pair<RttSampler.SampleStats, RttSampler.SampleStats> sampleStatsSampleStatsPair = remoteDesktopConnection.calculateRttSampleStats();
+                final Pair<SampleStats, SampleStats> sampleStatsSampleStatsPair = remoteDesktopConnection.calculateRttSampleStats();
 
-                final RttSampler.SampleStats clientStats = sampleStatsSampleStatsPair.getLeft();
-                final RttSampler.SampleStats instanceStats = sampleStatsSampleStatsPair.getRight();
+                final SampleStats clientStats = sampleStatsSampleStatsPair.getLeft();
+                final SampleStats instanceStats = sampleStatsSampleStatsPair.getRight();
 
                 Date now = new Date();
                 Date firstSampleDate = Collections.min(Arrays.asList(clientStats.firstSampleDate(), instanceStats.firstSampleDate()));
@@ -269,13 +270,14 @@ public class DesktopSessionService {
                 if (instanceSessionMember != null && minutes > 0) {
                     DesktopSessionRttSample desktopSessionRttSample = DesktopSessionRttSample.Builder()
                         .instanceSessionMemberId(instanceSessionMember.getId())
+                        .date(firstSampleDate)
                         .samplePeriodMinutes(minutes)
                         .clientMeanRttMs(clientStats.mean())
                         .clientSdRttMs(clientStats.standardDeviation())
-                        .clientRttSampleCount(clientStats.sampleSize())
+                        .clientRttSampleCount(clientStats.sampleCount())
                         .instanceMeanRttMs(instanceStats.mean())
                         .instanceSdRttMs(instanceStats.standardDeviation())
-                        .instanceRttSampleCount(instanceStats.sampleSize())
+                        .instanceRttSampleCount(instanceStats.sampleCount())
                         .build();
 
                     samples.add(desktopSessionRttSample);

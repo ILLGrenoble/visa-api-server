@@ -1,6 +1,7 @@
 package eu.ill.visa.vdi.domain.models;
 
 
+import eu.ill.visa.core.domain.SampleStats;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -9,8 +10,6 @@ import java.util.Date;
 import java.util.List;
 
 public class RttSampler {
-
-    public record SampleStats(Double mean, Double standardDeviation, long sampleSize, Date firstSampleDate) {}
 
     private final SampleCalculator clientRttSampler = new SampleCalculator();
     private final SampleCalculator instanceRttSampler = new SampleCalculator();

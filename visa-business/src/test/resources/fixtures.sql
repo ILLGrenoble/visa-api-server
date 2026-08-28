@@ -259,3 +259,78 @@ INSERT INTO security_group_filter (id, security_group_id, object_id, object_type
 INSERT INTO security_group_filter (id, security_group_id, object_id, object_type) VALUES (1004, 1004, 4, 'INSTRUMENT');
 INSERT INTO security_group_filter (id, security_group_id, object_id, object_type) VALUES (1005, 1005, 1000, 'ROLE');
 INSERT INTO security_group_filter (id, security_group_id, object_id, object_type) VALUES (1006, 1006, 1001, 'ROLE');
+
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1001, null, 0, null, '2026-08-20 08:12:00', 2.33, 3, 0.5, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1002, null, 0, null, '2026-08-20 08:13:00', 2.5, 4, 1, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1003, null, 0, null, '2026-08-20 08:14:00', 1.75, 4, 0.5, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1004, 3.5, 2, 1.1, '2026-08-20 08:15:00', 1.75, 4, 0.5, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1005, 4.5, 3, 1.5, '2026-08-20 08:16:00', 1.5, 4, 0.5, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1006, 4.5, 3, 1.5, '2026-08-20 09:00:00', 1.5, 3, 0.2, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1007, 3.5, 5, 1.0, '2026-08-20 09:01:00', 1.6, 5, 1.5, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1008, 5.5, 3, 2.5, '2026-08-20 09:02:00', 1.75, 8, 0.5, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1009, 3.5, 4, 0.5, '2026-08-20 09:03:00', 2.0, 3, 0.6, 11700, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1010, 6.5, 6, 1.2, '2026-08-20 09:04:00', 2.5, 6, 1.0, 11700, 1);
+
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1011, 14.5, 3, 0.5, '2026-08-20 09:00:00', 2.5, 3, 0.7, 11701, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1012, 13.5, 5, 2.0, '2026-08-20 09:01:00', 2.6, 5, 1.8, 11701, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1013, 15.5, 3, 2.5, '2026-08-20 09:02:00', 1.75, 8, 0.9, 11701, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1014, 13.5, 4, 1.5, '2026-08-20 09:03:00', 1.0, 3, 0.1, 11701, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1015, 16.5, 6, 2.2, '2026-08-20 09:04:00', 0.5, 6, 1.5, 11701, 1);
+
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1021, 14.5, 3, 0.5, '2026-08-20 09:00:00', 2.5, 3, 0.7, 11702, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1022, 13.5, 5, 2.0, '2026-08-20 09:01:00', 2.6, 5, 1.8, 11702, 1);
+
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1031, null, 0, null, '2026-08-20 09:00:00', 2.5, 3, 0.7, 11703, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1032, 13.5, 5, 2.0, '2026-08-20 09:01:00', 2.6, 5, 1.8, 11703, 1);
+
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1101, null, 0, null, CURRENT_TIMESTAMP - INTERVAL '6 days 5 minutes', 2.33, 3, 0.5, 11800, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1102, null, 0, null, CURRENT_TIMESTAMP - INTERVAL '6 days 4 minutes', 2.5, 4, 1, 11800, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1103, null, 0, null, CURRENT_TIMESTAMP - INTERVAL '6 days 3 minutes', 1.75, 4, 0.5, 11800, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1104, 3.5, 2, 1.1, CURRENT_TIMESTAMP - INTERVAL '6 days 2 minutes', 1.75, 4, 0.5, 11800, 1);
+INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+VALUES (1105, 4.5, 3, 1.5, CURRENT_TIMESTAMP - INTERVAL '6 days 1 minutes', 1.5, 4, 0.5, 11800, 1);
+
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1101, 61.5, 4, 22.64950330581225, '2026-07-16 15:17:01.004000', 1.5, 4, 0.5773502691896257, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1102, 73.75, 4, 54.56112779870543, '2026-07-16 15:18:01.003000', 1.5, 4, 0.5773502691896257, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1103, 89.25, 4, 53.38148867663147, '2026-07-16 15:19:01.003000', 1.25, 4, 0.5, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1104, 59.75, 4, 18.997806890972093, '2026-07-16 15:20:01.018000', 1.25, 4, 0.5, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1105, 119.5, 4, 70.8072500995955, '2026-07-16 15:21:01.003000', 1, 4, 0, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1106, 88.25, 4, 66.90976510694584, '2026-07-16 15:22:01.002000', 1.5, 4, 0.5773502691896257, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1107, 63, 4, 19.165942015286735, '2026-07-16 15:23:01.003000', 1.25, 4, 0.5, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1108, 52, 4, 22.135943621178654, '2026-07-16 15:24:01.003000', 1.25, 4, 0.5, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1109, 75.75, 4, 47.800801945853024, '2026-07-16 15:25:01.004000', 1.25, 4, 0.5, 11703, 1);
+-- INSERT INTO desktop_session_rtt_sample (id, client_mean_rtt_ms, client_rtt_sample_count, client_sd_rtt_ms, date, instance_mean_rtt_ms, instance_rtt_sample_count, instance_sd_rtt_ms, instance_session_member_id, sample_period_minutes)
+-- VALUES (1110, 58.666666666666664, 3, 26.102362600602522, '2026-07-16 15:16:01.004000', 1, 2, 0, 11703, 1);
+

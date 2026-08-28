@@ -409,6 +409,10 @@ public class InstanceService {
         }
     }
 
+    public Integer getRTTSampleRetentionPeriodDays() {
+        return this.configuration.rttSampleRetentionPeriodDays();
+    }
+
     public boolean isOwnerOrAdmin(User user, Instance instance) {
         return instance.isOwner(user) || user.hasRoleWithName(Role.ADMIN_ROLE);
     }

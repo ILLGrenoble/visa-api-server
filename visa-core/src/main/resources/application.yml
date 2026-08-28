@@ -118,6 +118,7 @@ business:
     portCheckTimeoutMs: ${VISA_INSTANCE_PORT_CHECK_TIMEOUT_MS:5000}
     defaultVdiProtocol: ${VISA_INSTANCE_DEFAULT_PROTOCOL:GUACD}
     publicAccessTokenEnabled: ${VISA_INSTANCE_PUBLIC_ACCESS_TOKEN_ENABLED:true}
+    rttSampleRetentionPeriodDays: ${VISA_INSTANCE_RTT_SAMPLE_RETENTION_PERIOD_DAYS:7}
   mailer:
     rootURL: ${VISA_ROOT_URL}
     enabled: ${VISA_NOTIFICATION_EMAIL_ADAPTER_ENABLED:false}

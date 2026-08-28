@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.domain.models;
 
+import eu.ill.visa.core.domain.SampleStats;
 import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import org.apache.commons.lang3.tuple.Pair;
@@ -83,7 +84,7 @@ public class RemoteDesktopConnection {
         this.connectionRttSampler.addInstanceRttSample(remoteDesktopRttMsSample);
     }
 
-    public Pair<RttSampler.SampleStats, RttSampler.SampleStats> calculateRttSampleStats() {
+    public Pair<SampleStats, SampleStats> calculateRttSampleStats() {
         return this.connectionRttSampler.calculateRttSampleStats();
     }
 
