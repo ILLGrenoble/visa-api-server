@@ -76,12 +76,12 @@ public class RemoteDesktopConnection {
         this.client.disconnect();
     }
 
-    public void addClientRttSample(long clientRttSample) {
-        this.connectionRttSampler.addClientRttSample(clientRttSample);
+    public void addClientRttSample(long clientRttSample, Date date) {
+        this.connectionRttSampler.addClientRttSample(clientRttSample, date);
     }
 
-    public void addRemoteDesktopRttMsSample(long remoteDesktopRttMsSample) {
-        this.connectionRttSampler.addInstanceRttSample(remoteDesktopRttMsSample);
+    public void addRemoteDesktopRttMsSample(long remoteDesktopRttMsSample, Date date) {
+        this.connectionRttSampler.addInstanceRttSample(remoteDesktopRttMsSample, date);
     }
 
     public Pair<SampleStats, SampleStats> calculateRttSampleStats() {

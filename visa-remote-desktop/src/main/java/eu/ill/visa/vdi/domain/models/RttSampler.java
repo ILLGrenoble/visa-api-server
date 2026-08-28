@@ -14,12 +14,12 @@ public class RttSampler {
     private final SampleCalculator clientRttSampler = new SampleCalculator();
     private final SampleCalculator instanceRttSampler = new SampleCalculator();
 
-    public synchronized void addClientRttSample(long rttMs) {
-        this.clientRttSampler.addValue(rttMs);
+    public synchronized void addClientRttSample(long rttMs, Date date) {
+        this.clientRttSampler.addValue(rttMs, date);
     }
 
-    public synchronized void addInstanceRttSample(long rttMs) {
-        this.instanceRttSampler.addValue(rttMs);
+    public synchronized void addInstanceRttSample(long rttMs, Date date) {
+        this.instanceRttSampler.addValue(rttMs, date);
     }
 
     public synchronized Pair<SampleStats, SampleStats> calculateRttSampleStats() {
@@ -35,9 +35,9 @@ public class RttSampler {
         private final List<Long> values = new ArrayList<>();
         private Date firstSampleDate;
 
-        public void addValue(long value) {
+        public void addValue(long value, Date date) {
             if (this.firstSampleDate == null) {
-                this.firstSampleDate = new Date();
+                this.firstSampleDate = date;
             }
             values.add(value);
         }

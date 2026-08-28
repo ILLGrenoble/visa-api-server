@@ -1,7 +1,9 @@
 package eu.ill.visa.vdi.domain.models;
 
 
-public record PingResponseData(PingSource source, long rttMs) {
+import java.util.Date;
+
+public record PingResponseData(PingSource source, long rttMs, Date date) {
     public enum PingSource {
         SERVER,
         CLIENT,

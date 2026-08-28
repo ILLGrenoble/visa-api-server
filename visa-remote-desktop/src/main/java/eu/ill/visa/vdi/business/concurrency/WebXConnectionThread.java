@@ -1,5 +1,6 @@
 package eu.ill.visa.vdi.business.concurrency;
 
+import eu.ill.visa.core.domain.Timer;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.PingResponseData;
@@ -9,13 +10,17 @@ import eu.ill.webx.WebXTunnel;
 import eu.ill.webx.exceptions.WebXClientException;
 import eu.ill.webx.exceptions.WebXConnectionInterruptException;
 import eu.ill.webx.exceptions.WebXDisconnectedException;
+import io.smallrye.mutiny.subscription.Cancellable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 public class WebXConnectionThread extends ConnectionThread {
 
     private static final Logger logger = LoggerFactory.getLogger(WebXConnectionThread.class);
     private final WebXTunnel tunnel;
+    private Cancellable pingResponseTimer;
 
     public WebXConnectionThread(final SocketClient client, final WebXTunnel tunnel, final Instance instance, final ConnectedUser user) {
         super(client, instance, user);
@@ -25,13 +30,24 @@ public class WebXConnectionThread extends ConnectionThread {
     @Override
     public void closeTunnel() {
         this.tunnel.disconnect();
+        this.stopPingResponseTimer();
     }
 
     @Override
     public void setPingResponseHandler(PingResponseHandler pingResponseHandler) {
-        this.tunnel.setPingResponseHandler(pingResponseHandler != null ? data -> {
-            pingResponseHandler.onPingResponse(new PingResponseData(data.source().equals(eu.ill.webx.model.PingResponseData.Source.SERVER) ? PingResponseData.PingSource.SERVER : PingResponseData.PingSource.CLIENT, data.rttMs()));
-        } : null);
+        this.stopPingResponseTimer();
+        this.pingResponseTimer = Timer.setInterval(() -> {
+            if (this.tunnel.isConnected()) {
+                eu.ill.webx.model.PingResponseData data = this.tunnel.takePingResponseData();
+                if (data != null) {
+//                    logger.info("{}: Ping RTT from {} in {}ms ", data.date(), data.source(), data.rttMs());
+                    pingResponseHandler.onPingResponse(new PingResponseData(data.source().equals(eu.ill.webx.model.PingResponseData.Source.SERVER) ? PingResponseData.PingSource.SERVER : PingResponseData.PingSource.CLIENT, data.rttMs(), data.date()));
+                }
+
+            } else {
+                this.stopPingResponseTimer();
+            }
+        }, 200, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -73,6 +89,14 @@ public class WebXConnectionThread extends ConnectionThread {
         }
 
         client.disconnect();
+        this.stopPingResponseTimer();
+    }
+
+    private void stopPingResponseTimer() {
+        if (this.pingResponseTimer != null) {
+            this.pingResponseTimer.cancel();
+            this.pingResponseTimer = null;
+        }
     }
 }
 

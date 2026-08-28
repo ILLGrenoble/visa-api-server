@@ -132,7 +132,7 @@ public class DesktopSessionService {
         this.addDesktopSessionMember(desktopSession, desktopSessionMember);
 
         // Set up ping response handler for remote desktop
-        remoteDesktopConnection.setPingResponseHandler(data -> this.onPongReceived(desktopSessionMember, data.source(), data.rttMs()));
+        remoteDesktopConnection.setPingResponseHandler(data -> this.onPongReceived(desktopSessionMember, data.source(), data.rttMs(), data.date()));
 
         // Activate idle session timer
         desktopSessionMember.idleSessionHandler().start(() -> this.onDesktopMemberIdle(desktopSessionMember));
@@ -235,13 +235,13 @@ public class DesktopSessionService {
         }
     }
 
-    public void onPongReceived(final DesktopSessionMember desktopSessionMember, PingResponseData.PingSource source, long rttMs) {
+    public void onPongReceived(final DesktopSessionMember desktopSessionMember, PingResponseData.PingSource source, long rttMs, Date date) {
         if (source.equals(PingResponseData.PingSource.SERVER)) {
-            desktopSessionMember.remoteDesktopConnection().addRemoteDesktopRttMsSample(rttMs);
+            desktopSessionMember.remoteDesktopConnection().addRemoteDesktopRttMsSample(rttMs, date);
 //            logger.info("DesktopSessionMember {} remote desktop RTT is {}ms", desktopSessionMember.clientId(), rttMs);
 
         } else {
-            desktopSessionMember.remoteDesktopConnection().addClientRttSample(rttMs);
+            desktopSessionMember.remoteDesktopConnection().addClientRttSample(rttMs, date);
 //            logger.info("DesktopSessionMember {} client RTT is {}ms", desktopSessionMember.clientId(), rttMs);
         }
     }
