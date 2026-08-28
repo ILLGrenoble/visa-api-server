@@ -10,12 +10,12 @@ import java.util.Date;
     @NamedQuery(name = "desktopSessionRttSample.getByInstanceSessionMemberId", query = """
         SELECT s FROM DesktopSessionRttSample s
         WHERE s.instanceSessionMemberId = :instanceSessionMemberId
-        ORDER BY s.id
+        ORDER BY s.date
     """),
     @NamedQuery(name = "desktopSessionRttSample.getByInstanceSessionMemberIds", query = """
         SELECT s FROM DesktopSessionRttSample s
         WHERE s.instanceSessionMemberId IN :instanceSessionMemberIds
-        ORDER BY s.id
+        ORDER BY s.date
     """),
     @NamedQuery(name = "desktopSessionRttSample.getByInstanceId", query = """
         SELECT s
@@ -23,13 +23,13 @@ import java.util.Date;
         LEFT JOIN InstanceSessionMember ism ON s.instanceSessionMemberId = ism.id
         LEFT JOIN Instance i ON ism.instanceSession.instanceId = i.id
         WHERE i.id IN :instanceId
-        ORDER BY s.id
+        ORDER BY s.date
     """),
     @NamedQuery(name = "desktopSessionRttSample.getAllRequiringResampling", query = """
         SELECT s FROM DesktopSessionRttSample s
         WHERE s.date < :date
         AND s.samplePeriodMinutes < 60
-        ORDER BY s.id
+        ORDER BY s.date
     """),
     @NamedQuery(name = "desktopSessionRttSample.deleteByIds", query = """
         DELETE FROM DesktopSessionRttSample s
