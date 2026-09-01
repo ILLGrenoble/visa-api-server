@@ -34,7 +34,17 @@ import java.util.Date;
     @NamedQuery(name = "desktopSessionRttSample.deleteByIds", query = """
         DELETE FROM DesktopSessionRttSample s
         WHERE s.id IN :ids
-    """)
+    """),
+    @NamedQuery(name = "desktopSessionRttSample.getByHypervisorSamplesSinceDate", query = """
+        SELECT h, s
+        FROM DesktopSessionRttSample s
+        LEFT JOIN InstanceSessionMember ism ON s.instanceSessionMemberId = ism.id
+        LEFT JOIN InstanceSession isess ON ism.instanceSession.id = isess.id
+        LEFT JOIN Instance i ON isess.instanceId = i.id
+        LEFT JOIN Hypervisor h ON i.hypervisorId = h.id
+        WHERE s.date >= :date
+        ORDER BY s.date
+    """),
 })
 @Table(name = "desktop_session_rtt_sample")
 public class DesktopSessionRttSample {

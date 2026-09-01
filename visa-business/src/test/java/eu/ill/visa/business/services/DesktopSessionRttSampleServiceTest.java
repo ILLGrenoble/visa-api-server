@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class DesktopSessionRttSampleServiceTest {
     void testGroupingOfSamples() {
         List<DesktopSessionRttSample> samples = this.desktopSessionRttSampleService.getAllRequiringResampling(7);
 
-        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamples(samples);
+        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamplesByHoursAndSession(samples);
         assertEquals(5, grouped.size());
 
         for (List<DesktopSessionRttSample> samplesList : grouped.values()) {
@@ -62,7 +63,7 @@ public class DesktopSessionRttSampleServiceTest {
     void testReductionOfClientSamples() {
         List<DesktopSessionRttSample> samples = this.desktopSessionRttSampleService.getAllRequiringResampling(7);
 
-        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamples(samples);
+        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamplesByHoursAndSession(samples);
         Map.Entry<HourlySampleKey, List<DesktopSessionRttSample>> testSamplesEntry = grouped.entrySet().stream()
             .filter(entry -> entry.getKey().instanceSessionMemberId().equals(11702L))
             .findFirst()
@@ -73,7 +74,7 @@ public class DesktopSessionRttSampleServiceTest {
         List<DesktopSessionRttSample> testSamples = testSamplesEntry.getValue();
 
         assertEquals(2, testSamples.size());
-        SampleStats clientStats = this.desktopSessionRttSampleService.mergeClientStats(testSamples, key.hour());
+        SampleStats clientStats = this.desktopSessionRttSampleService.mergeClientStats(testSamples, Date.from(key.hour()));
 
         assertEquals(8, clientStats.sampleCount());
         assertEquals(13.875, clientStats.mean());
@@ -85,7 +86,7 @@ public class DesktopSessionRttSampleServiceTest {
     void testReductionOfInstanceSamples() {
         List<DesktopSessionRttSample> samples = this.desktopSessionRttSampleService.getAllRequiringResampling(7);
 
-        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamples(samples);
+        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamplesByHoursAndSession(samples);
         Map.Entry<HourlySampleKey, List<DesktopSessionRttSample>> testSamplesEntry = grouped.entrySet().stream()
             .filter(entry -> entry.getKey().instanceSessionMemberId().equals(11702L))
             .findFirst()
@@ -96,7 +97,7 @@ public class DesktopSessionRttSampleServiceTest {
         List<DesktopSessionRttSample> testSamples = testSamplesEntry.getValue();
 
         assertEquals(2, testSamples.size());
-        SampleStats instanceStats = this.desktopSessionRttSampleService.mergeInstanceStats(testSamples, key.hour());
+        SampleStats instanceStats = this.desktopSessionRttSampleService.mergeInstanceStats(testSamples, Date.from(key.hour()));
 
         assertEquals(8, instanceStats.sampleCount());
         assertEquals(2.5625, instanceStats.mean());
@@ -108,7 +109,7 @@ public class DesktopSessionRttSampleServiceTest {
     void testReductionOfNullSamples() {
         List<DesktopSessionRttSample> samples = this.desktopSessionRttSampleService.getAllRequiringResampling(7);
 
-        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamples(samples);
+        Map<HourlySampleKey, List<DesktopSessionRttSample>> grouped = this.desktopSessionRttSampleService.groupSamplesByHoursAndSession(samples);
         Map.Entry<HourlySampleKey, List<DesktopSessionRttSample>> testSamplesEntry = grouped.entrySet().stream()
             .filter(entry -> entry.getKey().instanceSessionMemberId().equals(11703L))
             .findFirst()
@@ -119,7 +120,7 @@ public class DesktopSessionRttSampleServiceTest {
         List<DesktopSessionRttSample> testSamples = testSamplesEntry.getValue();
 
         assertEquals(2, testSamples.size());
-        SampleStats clientStats = this.desktopSessionRttSampleService.mergeClientStats(testSamples, key.hour());
+        SampleStats clientStats = this.desktopSessionRttSampleService.mergeClientStats(testSamples, Date.from(key.hour()));
 
         assertEquals(5, clientStats.sampleCount());
         assertEquals(13.5, clientStats.mean());

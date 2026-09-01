@@ -1,6 +1,7 @@
 package eu.ill.visa.persistence.repositories;
 
 import eu.ill.visa.core.entity.DesktopSessionRttSample;
+import eu.ill.visa.core.entity.Hypervisor;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
@@ -14,6 +15,8 @@ import java.util.List;
 
 @Singleton
 public class DesktopSessionRttSampleRepository extends AbstractRepository<DesktopSessionRttSample> {
+
+    public record HypervisorSample(Hypervisor hypervisor, DesktopSessionRttSample sample) {}
 
     @Inject
     DesktopSessionRttSampleRepository(final EntityManager entityManager) {
@@ -43,6 +46,18 @@ public class DesktopSessionRttSampleRepository extends AbstractRepository<Deskto
         Date cutoff = Date.from(Instant.now().minus(daysOld, ChronoUnit.DAYS).truncatedTo(ChronoUnit.HOURS));
         query.setParameter("date", cutoff);
         return query.getResultList();
+    }
+
+    public List<HypervisorSample> getByRecentHypervisorSamples(int minutesOld) {
+        final TypedQuery<Object[]> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getByHypervisorSamplesSinceDate", Object[].class);
+        Date cutoff = Date.from(Instant.now().minus(minutesOld, ChronoUnit.MINUTES));
+
+        query.setParameter("date", cutoff);
+        return query.getResultList().stream().map(array -> {
+            Hypervisor hypervisor = (Hypervisor) array[0];
+            DesktopSessionRttSample sample = (DesktopSessionRttSample) array[1];
+            return new HypervisorSample(hypervisor, sample);
+        }).toList();
     }
 
     public void deleteAll(Collection<DesktopSessionRttSample> samples) {
