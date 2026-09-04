@@ -1,6 +1,6 @@
 package eu.ill.visa.web.graphql.inputs;
 
-import eu.ill.visa.core.entity.Image;
+import eu.ill.visa.core.entity.Image.ExtensionRequestPolicy;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
@@ -28,7 +28,7 @@ public class ImageInput {
     private String autologin;
     private @NotNull @AdaptToScalar(Scalar.Int.class) Long defaultVdiProtocolId;
     private @AdaptToScalar(Scalar.Int.class) Long secondaryVdiProtocolId;
-    private Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest;
+    private ExtensionRequestPolicy extensionRequestPolicy;
     private @AdaptToScalar(Scalar.Int.class) Long clonePlansFromImageId;
 
     public String getName() {
@@ -127,12 +127,12 @@ public class ImageInput {
         this.secondaryVdiProtocolId = secondaryVdiProtocolId;
     }
 
-    public Image.AutoAcceptExtensionRequest getAutoAcceptExtensionRequest() {
-        return autoAcceptExtensionRequest;
+    public ExtensionRequestPolicy getExtensionRequestPolicy() {
+        return extensionRequestPolicy;
     }
 
-    public void setAutoAcceptExtensionRequest(Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest) {
-        this.autoAcceptExtensionRequest = autoAcceptExtensionRequest;
+    public void setExtensionRequestPolicy(ExtensionRequestPolicy extensionRequestPolicy) {
+        this.extensionRequestPolicy = extensionRequestPolicy;
     }
 
     public Long getClonePlansFromImageId() {

@@ -5,6 +5,7 @@ import eu.ill.visa.business.gateway.AdminEvent;
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.core.domain.SimpleDuration;
 import eu.ill.visa.core.entity.*;
+import eu.ill.visa.core.entity.Image.ExtensionRequestPolicy;
 import eu.ill.visa.core.entity.enumerations.InstanceExtensionRequestState;
 import eu.ill.visa.persistence.repositories.InstanceExtensionRequestRepository;
 import jakarta.inject.Inject;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Singleton
@@ -62,13 +64,16 @@ public class InstanceExtensionRequestService {
     }
 
     public InstanceExtensionRequest create(Instance instance, String comments) {
+        ExtensionRequestPolicy policy = Optional.of(instance.getPlan().getImage().getExtensionRequestPolicy()).orElse(ExtensionRequestPolicy.AVAILABLE);
+        if (policy.equals(ExtensionRequestPolicy.UNAVAILABLE)) {
+            logger.info("Instance extension request has been made for instance {} but it is not allowed by the image", instance.getId());
+            return null;
+        }
+
         InstanceExtensionRequest request = new InstanceExtensionRequest(instance, comments);
         this.save(request);
 
-        final Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest = instance.getPlan().getImage().getAutoAcceptExtensionRequest();
-        final boolean autoAccept = autoAcceptExtensionRequest != null &&
-            (autoAcceptExtensionRequest.equals(Image.AutoAcceptExtensionRequest.ALL) ||
-                autoAcceptExtensionRequest.equals(Image.AutoAcceptExtensionRequest.STAFF) && instance.getOwner().getUser().hasRoleWithName(Role.STAFF_ROLE));
+        final boolean autoAccept = policy.equals(ExtensionRequestPolicy.AUTO_ALL) || (policy.equals(ExtensionRequestPolicy.AUTO_STAFF) && instance.getOwner().getUser().hasRoleWithName(Role.STAFF_ROLE));
 
         if (autoAccept) {
             // Automatically grant the extension if the auto-accept policy is set to ALL

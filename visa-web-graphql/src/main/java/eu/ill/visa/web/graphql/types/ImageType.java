@@ -1,6 +1,7 @@
 package eu.ill.visa.web.graphql.types;
 
 import eu.ill.visa.core.entity.Image;
+import eu.ill.visa.core.entity.Image.ExtensionRequestPolicy;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +27,7 @@ public class ImageType {
     private final String autologin;
     @AdaptToScalar(Scalar.Int.class)
     private final Long cloudId;
-    private final Image.AutoAcceptExtensionRequest autoAcceptExtensionRequest;
+    private final ExtensionRequestPolicy extensionRequestPolicy;
 
     public ImageType(final Image image) {
         this.id = image.getId();
@@ -42,7 +43,7 @@ public class ImageType {
         this.bootCommand = image.getBootCommand();
         this.autologin = image.getAutologin();
         this.cloudId = image.getCloudId();
-        this.autoAcceptExtensionRequest = image.getAutoAcceptExtensionRequest();
+        this.extensionRequestPolicy = image.getExtensionRequestPolicy();
     }
 
     public Long getId() {
@@ -93,8 +94,8 @@ public class ImageType {
         return autologin;
     }
 
-    public Image.AutoAcceptExtensionRequest getAutoAcceptExtensionRequest() {
-        return autoAcceptExtensionRequest;
+    public ExtensionRequestPolicy getExtensionRequestPolicy() {
+        return extensionRequestPolicy;
     }
 
     public Long getCloudId() {

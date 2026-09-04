@@ -46,10 +46,17 @@ import java.util.List;
 @Table(name = "image")
 public class Image extends Timestampable {
 
-    public enum AutoAcceptExtensionRequest {
+    private enum AutoAcceptExtensionRequest {
         ALL,
         STAFF,
         NONE,
+    }
+
+    public enum ExtensionRequestPolicy {
+        AUTO_ALL,
+        AUTO_STAFF,
+        AVAILABLE,
+        UNAVAILABLE,
     }
 
     @Id
@@ -106,7 +113,11 @@ public class Image extends Timestampable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "auto_accept_extension_request", length = 50, nullable = true)
-    private AutoAcceptExtensionRequest autoAcceptExtensionRequest;
+    private AutoAcceptExtensionRequest autoAcceptExtensionRequest; // kept temporarily to maintain compatibility with older versions
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "extension_request_policy", length = 50, nullable = true)
+    private ExtensionRequestPolicy extensionRequestPolicy;
 
     public Image() {
     }
@@ -266,12 +277,25 @@ public class Image extends Timestampable {
         return this.protocols.stream().filter(protocol -> protocol.getName().equals(protocolName)).findFirst().orElse(null);
     }
 
-    public AutoAcceptExtensionRequest getAutoAcceptExtensionRequest() {
-        return autoAcceptExtensionRequest;
+    public ExtensionRequestPolicy getExtensionRequestPolicy() {
+        return extensionRequestPolicy != null ? this.extensionRequestPolicy : this.convertToExtensionRequestPolicy(this.autoAcceptExtensionRequest);
     }
 
-    public void setAutoAcceptExtensionRequest(AutoAcceptExtensionRequest autoAcceptExtensionRequest) {
-        this.autoAcceptExtensionRequest = autoAcceptExtensionRequest;
+    public void setExtensionRequestPolicy(ExtensionRequestPolicy extensionRequestPolicy) {
+        this.extensionRequestPolicy = extensionRequestPolicy;
+    }
+
+    private ExtensionRequestPolicy convertToExtensionRequestPolicy(AutoAcceptExtensionRequest autoAcceptExtensionRequest) {
+        if (autoAcceptExtensionRequest == null) {
+            return null;
+
+        } else {
+            return switch (autoAcceptExtensionRequest) {
+                case ALL -> ExtensionRequestPolicy.AUTO_ALL;
+                case STAFF -> ExtensionRequestPolicy.AUTO_STAFF;
+                case NONE -> ExtensionRequestPolicy.AVAILABLE;
+            };
+        }
     }
 
     public static final class Builder {
@@ -284,7 +308,7 @@ public class Image extends Timestampable {
         private boolean visible = false;
         private String bootCommand;
         private String autologin;
-        private AutoAcceptExtensionRequest autoAcceptExtensionRequest = AutoAcceptExtensionRequest.NONE;
+        private ExtensionRequestPolicy extensionRequestPolicy = ExtensionRequestPolicy.AVAILABLE;
 
         public Builder() {
         }
@@ -338,8 +362,8 @@ public class Image extends Timestampable {
             return this;
         }
 
-        public Builder autoAcceptExtensionRequest(AutoAcceptExtensionRequest autoAcceptExtensionRequest) {
-            this.autoAcceptExtensionRequest = autoAcceptExtensionRequest;
+        public Builder extensionRequestPolicy(ExtensionRequestPolicy extensionRequestPolicy) {
+            this.extensionRequestPolicy = extensionRequestPolicy;
             return this;
         }
 
@@ -352,8 +376,9 @@ public class Image extends Timestampable {
             image.setComputeId(computeId);
             image.setVersion(version);
             image.setVisible(visible);
+            image.setBootCommand(bootCommand);
             image.setAutologin(autologin);
-            image.setAutoAcceptExtensionRequest(autoAcceptExtensionRequest);
+            image.setExtensionRequestPolicy(extensionRequestPolicy);
             return image;
         }
     }

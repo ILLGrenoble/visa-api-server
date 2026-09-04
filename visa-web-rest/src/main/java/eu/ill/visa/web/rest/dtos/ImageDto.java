@@ -1,6 +1,7 @@
 package eu.ill.visa.web.rest.dtos;
 
 import eu.ill.visa.core.entity.Image;
+import eu.ill.visa.core.entity.Image.ExtensionRequestPolicy;
 import eu.ill.visa.core.entity.ImageProtocol;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class ImageDto {
     private final List<ImageProtocol> protocols;
     private final ImageProtocol defaultVdiProtocol;
     private final ImageProtocol secondaryVdiProtocol;
+    private final ExtensionRequestPolicy extensionRequestPolicy;
 
     public ImageDto(final Image image) {
         this.id = image.getId();
@@ -25,6 +27,7 @@ public class ImageDto {
         this.protocols = image.getProtocols();
         this.defaultVdiProtocol = image.getDefaultVdiProtocol();
         this.secondaryVdiProtocol = image.getDefaultVdiProtocol();
+        this.extensionRequestPolicy = image.getExtensionRequestPolicy();
     }
 
     public Long getId() {
@@ -57,5 +60,9 @@ public class ImageDto {
 
     public ImageProtocol getSecondaryVdiProtocol() {
         return secondaryVdiProtocol;
+    }
+
+    public ExtensionRequestPolicy getExtensionRequestPolicy() {
+        return extensionRequestPolicy;
     }
 }

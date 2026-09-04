@@ -893,8 +893,13 @@ public class AccountInstanceController extends AbstractController {
             if (request == null) {
                 request = this.instanceExtensionRequestService.create(instance, instanceExtensionRequestInput.getComments());
             }
-            InstanceExtensionRequestDto requestDto = new InstanceExtensionRequestDto(request);
-            return createResponse(requestDto);
+
+            if (request != null) {
+                InstanceExtensionRequestDto requestDto = new InstanceExtensionRequestDto(request);
+                return createResponse(requestDto);
+            } else {
+                throw new ForbiddenException("Extension request not allowed for this instance");
+            }
 
         } else{
             throw new NotAuthorizedException("Not authorized to perform this action");
