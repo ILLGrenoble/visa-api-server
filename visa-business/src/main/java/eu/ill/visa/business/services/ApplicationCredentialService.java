@@ -63,8 +63,8 @@ public class ApplicationCredentialService {
 
     public ApplicationCredential create(String name) {
         String applicationId = this.createApplicationId();
-        String applicationSecret = RandomStringUtils.randomAlphanumeric(72);
-        String salt = RandomStringUtils.randomAlphanumeric(16);
+        String applicationSecret = RandomStringUtils.secure().nextAlphanumeric(72);
+        String salt = RandomStringUtils.secure().nextAlphanumeric(16);
 
         String applicationSecretHash = this.hashText(applicationSecret, salt);
         ApplicationCredential applicationCredential = new ApplicationCredential(name, applicationId, applicationSecret);

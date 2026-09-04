@@ -144,7 +144,7 @@ public class BookingTokenService {
         Pattern pattern = Pattern.compile(regex);
 
         do {
-            String uid = RandomStringUtils.randomAlphanumeric(8);
+            String uid = RandomStringUtils.secure().nextAlphanumeric(8);
 
             // Ensure UID has at least one character to make it distinguishable from a valid ID
             Matcher matcher = pattern.matcher(uid);
