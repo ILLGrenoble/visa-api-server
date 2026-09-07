@@ -3,7 +3,6 @@ package eu.ill.visa.web.rest.controllers;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.business.services.BookingService.BookingRequestValidation;
 import eu.ill.visa.core.domain.BookingFlavourConfiguration;
-import eu.ill.visa.core.domain.BookingUserConfiguration;
 import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.enumerations.BookingRequestState;
@@ -49,22 +48,22 @@ public class AccountBookingController extends AbstractController {
     }
 
     @GET
-    public MetaResponse<List<BookingRequestDto>> getBookings(@Context SecurityContext securityContext) {
+    public MetaResponse<AccountBookingRequestsDto> getBookings(@Context SecurityContext securityContext) {
         final User user = this.getUserPrincipal(securityContext);
 
-        return createResponse(this.bookingRequestService.getAllForOwner(user).stream().map(BookingRequestDto::new).toList());
+        return createResponse(new AccountBookingRequestsDto(this.bookingRequestService.getAllForOwner(user), this.bookingRequestService.getAllForOrganiser(user)));
     }
 
     @POST
     public MetaResponse<BookingRequestDto> create(@Context SecurityContext securityContext, BookingRequestInput input) {
         final User user = this.getUserPrincipal(securityContext);
 
-        final BookingUserConfiguration bookingUserConfiguration = this.bookingService.getBookingUserConfiguration(user);
-        if (bookingUserConfiguration.flavourConfigurations().isEmpty()) {
+        final List<BookingFlavourConfiguration> bookingFlavourConfigurationsForUser = this.bookingService.getBookingFlavourConfigurationsForUser(user);
+        if (bookingFlavourConfigurationsForUser.isEmpty()) {
             throw new NotAuthorizedException("You are not allowed to create instance reservations");
         }
 
-        final List<Flavour> flavours = bookingUserConfiguration.flavourConfigurations().stream()
+        final List<Flavour> flavours = bookingFlavourConfigurationsForUser.stream()
             .map(BookingFlavourConfiguration::flavour)
             .toList();
 
@@ -88,8 +87,8 @@ public class AccountBookingController extends AbstractController {
             throw new NotAuthorizedException("You are not allowed to update the booking request");
         }
 
-        final BookingUserConfiguration bookingUserConfiguration = this.bookingService.getBookingUserConfiguration(user);
-        if (bookingUserConfiguration.flavourConfigurations().isEmpty()) {
+        final List<BookingFlavourConfiguration> bookingFlavourConfigurationsForUser = this.bookingService.getBookingFlavourConfigurationsForUser(user);
+        if (bookingFlavourConfigurationsForUser.isEmpty()) {
             throw new NotAuthorizedException("You are not allowed to create instance reservations");
         }
 
@@ -97,7 +96,7 @@ public class AccountBookingController extends AbstractController {
             throw new BadRequestException("The booking request id does not match the URL for the booking request");
         }
 
-        final List<Flavour> flavours = bookingUserConfiguration.flavourConfigurations().stream()
+        final List<Flavour> flavours = bookingFlavourConfigurationsForUser.stream()
             .map(BookingFlavourConfiguration::flavour)
             .toList();
 
@@ -214,10 +213,22 @@ public class AccountBookingController extends AbstractController {
     }
 
     @GET
-    @Path("/config")
-    public MetaResponse<BookingUserConfigurationDto> get(@Context SecurityContext securityContext) {
+    @Path("/access")
+    public MetaResponse<AccountBookingAccessDto> getAccess(@Context SecurityContext securityContext) {
         final User user = this.getUserPrincipal(securityContext);
-        return createResponse(new BookingUserConfigurationDto(this.bookingService.getBookingUserConfiguration(user)));
+        final List<BookingFlavourConfiguration> bookingFlavourConfigurationsForUser = this.bookingService.getBookingFlavourConfigurationsForUser(user);
+        final List<BookingRequest> organiserRequests =  this.bookingRequestService.getAllForOrganiser(user);
+
+        return createResponse(new AccountBookingAccessDto(!bookingFlavourConfigurationsForUser.isEmpty(), !organiserRequests.isEmpty()));
+    }
+
+    @GET
+    @Path("/flavour-configurations")
+    public MetaResponse<List<BookingFlavourConfigurationDto>> getFlavourConfigurations(@Context SecurityContext securityContext) {
+        final User user = this.getUserPrincipal(securityContext);
+        final List<BookingFlavourConfiguration> bookingFlavourConfigurationsForUser = this.bookingService.getBookingFlavourConfigurationsForUser(user);
+
+        return createResponse(bookingFlavourConfigurationsForUser.stream().map(BookingFlavourConfigurationDto::new).toList());
     }
 
     @GET
@@ -225,12 +236,12 @@ public class AccountBookingController extends AbstractController {
     public MetaResponse<List<FlavourAvailabilitiesFutureDto>> getFlavourAvailabilities(@Context SecurityContext securityContext, @BeanParam AvailabilitiesFilter params) {
         final User user = this.getUserPrincipal(securityContext);
 
-        final BookingUserConfiguration bookingUserConfiguration = this.bookingService.getBookingUserConfiguration(user);
-        if (bookingUserConfiguration.flavourConfigurations().isEmpty()) {
+        final List<BookingFlavourConfiguration> bookingFlavourConfigurationsForUser = this.bookingService.getBookingFlavourConfigurationsForUser(user);
+        if (bookingFlavourConfigurationsForUser.isEmpty()) {
             throw new NotAuthorizedException("You are not allowed to get flavour availabilities");
         }
 
-        final List<Flavour> flavours = bookingUserConfiguration.flavourConfigurations().stream()
+        final List<Flavour> flavours = bookingFlavourConfigurationsForUser.stream()
             .map(BookingFlavourConfiguration::flavour)
             .toList();
 
@@ -254,12 +265,12 @@ public class AccountBookingController extends AbstractController {
     public MetaResponse<List<FlavourAvailabilitiesFutureDto>> calculateFlavourAvailabilities(@Context SecurityContext securityContext, BookingRequestInput input) {
         final User user = this.getUserPrincipal(securityContext);
 
-        final BookingUserConfiguration bookingUserConfiguration = this.bookingService.getBookingUserConfiguration(user);
-        if (bookingUserConfiguration.flavourConfigurations().isEmpty()) {
+        final List<BookingFlavourConfiguration> bookingFlavourConfigurationsForUser = this.bookingService.getBookingFlavourConfigurationsForUser(user);
+        if (bookingFlavourConfigurationsForUser.isEmpty()) {
             throw new NotAuthorizedException("You are not allowed to get flavour availabilities");
         }
 
-        final List<Flavour> flavours = bookingUserConfiguration.flavourConfigurations().stream()
+        final List<Flavour> flavours = bookingFlavourConfigurationsForUser.stream()
             .map(BookingFlavourConfiguration::flavour)
             .toList();
 

@@ -2,7 +2,6 @@ package eu.ill.visa.business.services;
 
 
 import eu.ill.visa.core.domain.BookingFlavourConfiguration;
-import eu.ill.visa.core.domain.BookingUserConfiguration;
 import eu.ill.visa.core.domain.FlavourAvailability;
 import eu.ill.visa.core.entity.*;
 import jakarta.inject.Inject;
@@ -40,7 +39,7 @@ public class BookingService {
         this.flavourService = flavourService;
     }
 
-    public BookingUserConfiguration getBookingUserConfiguration(final User user) {
+    public List<BookingFlavourConfiguration> getBookingFlavourConfigurationsForUser(User user) {
         List<BookingConfiguration> bookingConfigurations = this.bookingConfigurationService.getAll().stream()
             .filter(BookingConfiguration::isEnabled)
             .toList();
@@ -67,15 +66,13 @@ public class BookingService {
             }
         }
 
-        boolean enabled = !flavourConfigurations.isEmpty();
-
-        return new BookingUserConfiguration(enabled, flavourConfigurations);
+        return flavourConfigurations;
     }
 
     public BookingRequestValidation validateAndSaveBookingRequest(final BookingRequest bookingRequest, boolean requestValidation) {
         List<String> errors = new ArrayList<>();
         // Verify user access to flavours in the request
-        final BookingUserConfiguration bookingUserConfiguration = this.getBookingUserConfiguration(bookingRequest.getOwner());
+        final List<BookingFlavourConfiguration> bookingFlavourConfigurationsForUser = this.getBookingFlavourConfigurationsForUser(bookingRequest.getOwner());
 
         // Verify dates of request
         final LocalDate startDate = bookingRequest.getStartDate().toLocalDate();
@@ -94,7 +91,7 @@ public class BookingService {
             final Long requestedQuantity = requestFlavour.getQuantity();
 
             // Ensure flavour is available to user
-            final BookingFlavourConfiguration flavourConfiguration = bookingUserConfiguration.flavourConfigurations().stream()
+            final BookingFlavourConfiguration flavourConfiguration = bookingFlavourConfigurationsForUser.stream()
                 .filter(configuration -> configuration.flavour().equals(requestedFlavour))
                 .findFirst().orElse(null);
 
@@ -140,7 +137,7 @@ public class BookingService {
             logger.info("Booking request has been successfully validated and created: {}", bookingRequest);
 
             // Check for auto accept
-            List<BookingFlavourConfiguration> notAutoAcceptedFlavourConfigurations = bookingUserConfiguration.flavourConfigurations().stream()
+            List<BookingFlavourConfiguration> notAutoAcceptedFlavourConfigurations = bookingFlavourConfigurationsForUser.stream()
                 .filter(flavourConfiguration -> flavours.stream().anyMatch(flavour -> flavour.getId().equals(flavourConfiguration.flavour().getId())))
                 .filter(flavourConfiguration -> !flavourConfiguration.autoAccept())
                 .toList();

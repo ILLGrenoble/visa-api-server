@@ -18,6 +18,7 @@ public class BookingRequestDto {
     private final Date startDate;
     private final Date endDate;
     private final UserDto owner;
+    private final List<UserDto> organisers;
     private final BookingRequestState state;
     private final List<BookingRequestFlavourDto> flavours;
     private final List<BookingRequestHistoryDto> history;
@@ -29,6 +30,7 @@ public class BookingRequestDto {
         this.createdAt = bookingRequest.getCreatedAt();
         this.startDate = Date.from(bookingRequest.getStartDate().atZone(ZoneId.systemDefault()).toInstant());
         this.endDate = Date.from(bookingRequest.getEndDate().atZone(ZoneId.systemDefault()).toInstant());
+        this.organisers = bookingRequest.getOrganisers().stream().map(UserDto::new).toList();
         this.owner = new UserDto(bookingRequest.getOwner());
         this.state = bookingRequest.getState();
         this.flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavourDto::new).toList();
@@ -61,6 +63,10 @@ public class BookingRequestDto {
 
     public UserDto getOwner() {
         return owner;
+    }
+
+    public List<UserDto> getOrganisers() {
+        return organisers;
     }
 
     public BookingRequestState getState() {

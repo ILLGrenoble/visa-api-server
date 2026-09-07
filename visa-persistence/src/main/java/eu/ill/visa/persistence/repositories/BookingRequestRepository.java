@@ -62,6 +62,13 @@ public class BookingRequestRepository extends AbstractRepository<BookingRequest>
         return query.getResultList();
     }
 
+    public List<BookingRequest> getAllForOrganiserId(final String userId) {
+        final TypedQuery<BookingRequest> query = getEntityManager().createNamedQuery("bookingRequest.getAllForOrganiser", BookingRequest.class);
+        query.setParameter("userId", userId);
+
+        return query.getResultList();
+    }
+
     public List<BookingRequest> getAllHistoricForOwnerId(final String ownerId) {
         final TypedQuery<BookingRequest> query = getEntityManager().createNamedQuery("bookingRequest.getAllHistoricForOwner", BookingRequest.class);
         query.setParameter("ownerId", ownerId);

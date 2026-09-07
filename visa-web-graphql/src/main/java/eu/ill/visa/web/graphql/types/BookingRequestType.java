@@ -23,6 +23,7 @@ public class BookingRequestType {
     private final @NotNull String startDate;
     private final @NotNull String endDate;
     private final @NotNull UserType owner;
+    private final @NotNull List<UserType> organisers;
     private final @NotNull BookingRequestState state;
     private final @NotNull List<BookingRequestFlavourType> flavours;
     private final @NotNull List<BookingRequestHistoryType> history;
@@ -35,6 +36,7 @@ public class BookingRequestType {
         this.startDate = bookingRequest.getStartDate().toString();
         this.endDate = bookingRequest.getEndDate().toString();
         this.owner = new UserType(bookingRequest.getOwner());
+        this.organisers = bookingRequest.getOrganisers().stream().map(UserType::new).toList();
         this.state = bookingRequest.getState();
         this.flavours = bookingRequest.getFlavours().stream().map(BookingRequestFlavourType::new).toList();
         this.history = bookingRequest.getHistory().stream().map(BookingRequestHistoryType::new).toList();
@@ -66,6 +68,10 @@ public class BookingRequestType {
 
     public UserType getOwner() {
         return owner;
+    }
+
+    public List<UserType> getOrganisers() {
+        return organisers;
     }
 
     public BookingRequestState getState() {

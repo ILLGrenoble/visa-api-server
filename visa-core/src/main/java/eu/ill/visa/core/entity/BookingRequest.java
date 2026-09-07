@@ -52,6 +52,16 @@ import static java.lang.String.format;
         AND br.owner.id = :ownerId
         ORDER BY br.id
     """),
+    @NamedQuery(name = "bookingRequest.getAllForOrganiser", query = """
+        SELECT br
+        FROM BookingRequest br
+        LEFT JOIN br.organisers u
+        WHERE br.deletedAt IS NULL
+        AND br.endDate >= CURRENT_DATE()
+        AND br.state IN ('CREATED', 'ACCEPTED')
+        AND u.id = :userId
+        ORDER BY br.startDate
+    """),
     @NamedQuery(name = "bookingRequest.getAllHistoricForOwner", query = """
         SELECT br
         FROM BookingRequest br
@@ -91,6 +101,14 @@ public class BookingRequest extends Timestampable {
     @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id", foreignKey = @ForeignKey(name = "fk_users_id"), nullable = false)
     private User owner;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "booking_request_organisers",
+        joinColumns = @JoinColumn(name = "booking_requsest_id", foreignKey = @ForeignKey(name = "fk_booking_request_id")),
+        inverseJoinColumns = @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_user_id"))
+    )
+    private List<User> organisers = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state", length = 50, nullable = false)
@@ -162,6 +180,14 @@ public class BookingRequest extends Timestampable {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public List<User> getOrganisers() {
+        return organisers;
+    }
+
+    public void setOrganisers(List<User> organisers) {
+        this.organisers = organisers;
     }
 
     public BookingRequestState getState() {

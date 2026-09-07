@@ -63,6 +63,10 @@ public class BookingRequestService {
         return this.repository.getAllForOwnerId(owner.getId());
     }
 
+    public List<BookingRequest> getAllForOrganiser(final User user) {
+        return this.repository.getAllForOrganiserId(user.getId());
+    }
+
     public List<BookingRequest> getAllHistoricForOwnerId(final User owner) {
         return this.repository.getAllHistoricForOwnerId(owner.getId());
     }
