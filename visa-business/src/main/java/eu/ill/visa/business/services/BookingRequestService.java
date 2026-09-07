@@ -148,4 +148,31 @@ public class BookingRequestService {
         return history;
     }
 
+    public BookingRequest addOrganiser(BookingRequest bookingRequest, User organiser) {
+        final User existingOrganiser = bookingRequest.getOrganisers().stream().filter(anOrganiser -> anOrganiser.getId().equals(organiser.getId())).findFirst().orElse(null);
+        if (existingOrganiser != null) {
+            logger.info("Organiser with id {} already exists for booking request {}", existingOrganiser.getId(), bookingRequest.getId());
+            return bookingRequest;
+        }
+
+        bookingRequest.getOrganisers().add(organiser);
+
+        this.save(bookingRequest);
+
+        return bookingRequest;
+    }
+
+    public BookingRequest removeOrganiser(BookingRequest bookingRequest, User organiser) {
+        final User existingOrganiser = bookingRequest.getOrganisers().stream().filter(anOrganiser -> anOrganiser.getId().equals(organiser.getId())).findFirst().orElse(null);
+        if (existingOrganiser == null) {
+            logger.info("Organiser with id {} doesn't not exist for for booking request {}", organiser.getId(), bookingRequest.getId());
+            return bookingRequest;
+        }
+
+        bookingRequest.getOrganisers().remove(existingOrganiser);
+
+        this.save(bookingRequest);
+
+        return bookingRequest;
+    }
 }

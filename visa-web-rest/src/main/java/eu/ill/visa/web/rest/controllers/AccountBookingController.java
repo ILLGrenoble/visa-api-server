@@ -300,6 +300,33 @@ public class AccountBookingController extends AbstractController {
         return createResponse(futureAvailabilities);
     }
 
+    @POST
+    @Path("/{bookingRequest}/organisers")
+    public MetaResponse<BookingRequestDto> addBookingRequestOrganiser(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest, BookingOrganiserInput organiserInput) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingRequest.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to modify organisers of the booking request");
+        }
+
+        final User organiser = this.userService.getById(organiserInput.getUserId());
+        if (organiser == null) {
+            throw new NotFoundException(format("User with id %s not found", organiserInput.getUserId()));
+        }
+
+        return createResponse(new BookingRequestDto(this.bookingRequestService.addOrganiser(bookingRequest, organiser)));
+    }
+
+    @DELETE
+    @Path("/{bookingRequest}/organisers/{user}")
+    public MetaResponse<BookingRequestDto> deleteBookingRequestOrganiser(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest, @PathParam("user") User organiser) {
+        final User user = this.getUserPrincipal(securityContext);
+        if (!bookingRequest.getOwner().equals(user)) {
+            throw new NotAuthorizedException("You are not allowed to modify organisers of the booking request");
+        }
+
+        return createResponse(new BookingRequestDto(this.bookingRequestService.removeOrganiser(bookingRequest, organiser)));
+    }
+
     private BookingRequest convertToBookingRequest(BookingRequestInput input, User user, List<Flavour> flavours) {
         List<BookingRequestFlavour> flavourRequests = input.getFlavourRequests().stream()
             .map(flavourInput -> {
