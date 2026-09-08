@@ -190,7 +190,7 @@ public class InstanceSessionService {
 
             } else if (instance.getBookingTokenId() != null) {
                 BookingRequest bookingRequest = this.bookingRequestService.getByBookingTokenId(instance.getBookingTokenId());
-                if (bookingRequest.getOwner().equals(user)) {
+                if (bookingRequest.isOwnerOrOrganiser(user)) {
                     return InstanceMemberRole.SUPPORT;
                 }
             }

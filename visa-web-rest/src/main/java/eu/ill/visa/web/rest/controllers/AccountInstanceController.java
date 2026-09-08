@@ -773,7 +773,7 @@ public class AccountInstanceController extends AbstractController {
             // Check for booking request and see if request owner is the connected person
             if (instance.getBookingTokenId() != null) {
                 BookingRequest bookingRequest = this.bookingRequestService.getByBookingTokenId(instance.getBookingTokenId());
-                if (bookingRequest.getOwner().equals(user)) {
+                if (bookingRequest.isOwnerOrOrganiser(user)) {
                     instanceDto.setMembership(new InstanceMemberDto(this.mapUser(user), SUPPORT));
                 }
             }

@@ -211,7 +211,7 @@ public class AccountBookingController extends AbstractController {
             tokenIdOwners.put(token.getId(), owner);
         }
 
-        this.bookingTokenService.updateTokenOwners(bookingRequest, tokenIdOwners);
+        this.bookingTokenService.updateTokenOwners(bookingRequest, tokenIdOwners, user);
 
         return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(token ->  this.convertToBookingTokenDto(token, user)).toList());
     }

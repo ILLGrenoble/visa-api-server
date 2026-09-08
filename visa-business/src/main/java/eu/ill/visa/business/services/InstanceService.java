@@ -454,7 +454,7 @@ public class InstanceService {
             // Check for booking request and see if request owner is the connected person
             if (instance.getBookingTokenId() != null) {
                 BookingRequest bookingRequest = this.bookingRequestService.getByBookingTokenId(instance.getBookingTokenId());
-                return bookingRequest.getOwner().equals(user);
+                return bookingRequest.isOwnerOrOrganiser(user);
             }
         }
 

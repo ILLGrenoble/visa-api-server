@@ -63,7 +63,7 @@ public class BookingTokenService {
         this.repository.save(bookingToken);
     }
 
-    public void updateTokenOwners(final BookingRequest bookingRequest, final Map<Long, User> tokenIdOwners) {
+    public void updateTokenOwners(final BookingRequest bookingRequest, final Map<Long, User> tokenIdOwners, final User activeUser) {
         final List<BookingToken> allTokens = this.getAllForBookingRequest(bookingRequest);
 
         final Set<User> originalOwners = allTokens.stream()
@@ -82,7 +82,9 @@ public class BookingTokenService {
                 if ((token.getOwner() != null && !token.getOwner().equals(owner)) || (owner != null && !owner.equals(token.getOwner()))) {
                     token.setOwner(owner);
                     updatedTokens.add(token);
-                    if (owner != null && !originalOwners.contains(owner) && !owner.equals(bookingRequest.getOwner())) {
+                    logger.info("{} has updated the booking token owner to {} for token {} ", activeUser.getFullNameAndId(), owner == null ? "null" : owner.getFullNameAndId(), token.getUid());
+                    // Don't email the owner if they already have tokens of if the person doing the update has assigned themselves to a token
+                    if (owner != null && !originalOwners.contains(owner) && !owner.equals(activeUser)) {
                         newOwners.add(owner);
                     }
                 }
