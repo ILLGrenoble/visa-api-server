@@ -4,6 +4,7 @@ public class BookingTokenInput {
 
     private Long id;
     private String ownerId;
+    private String checkId;
 
     public Long getId() {
         return id;
@@ -19,5 +20,13 @@ public class BookingTokenInput {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getCheckId() {
+        return checkId;
+    }
+
+    public void setCheckId(String checkId) {
+        this.checkId = checkId;
     }
 }

@@ -257,6 +257,10 @@ public class BookingRequest extends Timestampable {
             .orElse(null);
     }
 
+    public boolean isOwnerOrOrganiser(User user) {
+        return (this.owner.equals(user) || this.organisers.contains(user));
+    }
+
     public String toString() {
         final LocalDate startDate = this.startDate.toLocalDate();
         final LocalDate endDate = this.endDate.toLocalDate();

@@ -115,7 +115,7 @@ public class AccountBookingController extends AbstractController {
     @Path("/{bookingRequest}")
     public MetaResponse<BookingRequestDto> getBookingRequest(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest) {
         final User user = this.getUserPrincipal(securityContext);
-        if (!bookingRequest.getOwner().equals(user)) {
+        if (!bookingRequest.isOwnerOrOrganiser(user)) {
             throw new NotAuthorizedException("You are not allowed to access the booking request");
         }
 
@@ -158,8 +158,8 @@ public class AccountBookingController extends AbstractController {
     @Path("/{bookingRequest}/tokens")
     public MetaResponse<List<BookingTokenDto>> getBookingRequestTokens(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest) {
         final User user = this.getUserPrincipal(securityContext);
-        if (!bookingRequest.getOwner().equals(user)) {
-            throw new NotAuthorizedException("You are not allowed to access the booking request");
+        if (!bookingRequest.isOwnerOrOrganiser(user)) {
+            throw new NotAuthorizedException("You are not allowed to access the booking request tokens");
         }
 
         return createResponse(this.bookingTokenService.getAllForBookingRequest(bookingRequest).stream().map(token ->  this.convertToBookingTokenDto(token, user)).toList());
@@ -169,8 +169,8 @@ public class AccountBookingController extends AbstractController {
     @Path("/{bookingRequest}/tokens")
     public MetaResponse<List<BookingTokenDto>> updateBookingRequestTokens(@Context SecurityContext securityContext, @PathParam("bookingRequest") BookingRequest bookingRequest, List<BookingTokenInput> tokenInputs) {
         final User user = this.getUserPrincipal(securityContext);
-        if (!bookingRequest.getOwner().equals(user)) {
-            throw new NotAuthorizedException("You are not allowed to access the booking request");
+        if (!bookingRequest.isOwnerOrOrganiser(user)) {
+            throw new NotAuthorizedException("You are not allowed to access the booking request tokens");
         }
 
         List<String> ownerIds = tokenInputs.stream()
@@ -195,6 +195,10 @@ public class AccountBookingController extends AbstractController {
             final BookingToken token = tokens.stream().filter(aToken -> aToken.getId().equals(tokenInput.getId())).findFirst().orElse(null);
             if (token == null) {
                 throw new BadRequestException(format("User token found with id %d", tokenInput.getId()));
+            }
+
+            if (token.getOwner() != null && !token.getOwner().getId().equals(tokenInput.getCheckId())) {
+                throw new BadRequestException(format("Token with id %d fails check (modified already)", tokenInput.getId()));
             }
 
             final User owner = tokenInput.getOwnerId() == null ? null : owners.stream().filter(anOwner -> anOwner.getId().equals(tokenInput.getOwnerId())).findFirst().orElse(null);
