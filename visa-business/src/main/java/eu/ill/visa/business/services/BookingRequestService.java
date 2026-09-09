@@ -159,6 +159,9 @@ public class BookingRequestService {
 
         this.save(bookingRequest);
 
+        // Email organiser
+        this.emailManager.sendOrganiserAddedToBookingRequest(bookingRequest, organiser);
+
         return bookingRequest;
     }
 

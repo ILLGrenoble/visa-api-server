@@ -17,7 +17,7 @@ import static java.lang.String.format;
 public class BookingRequestTokenRenderer extends BaseRenderer implements NotificationRenderer {
 
     private final BookingRequest bookingRequest;
-    final User tokenOwner;
+    private final User tokenOwner;
     private final String rootURL;
     private final String adminEmailAddress;
     private final String emailTemplatesDirectory;

@@ -61,4 +61,8 @@ public class EmailManager {
         this.emailHandler.sendBookingRequestTokenNotification(bookingRequest, tokenOwner);
     }
 
+    public void sendOrganiserAddedToBookingRequest(final BookingRequest bookingRequest, final User organiser) {
+        this.emailHandler.sendOrganiserAddedToBookingRequest(bookingRequest, organiser);
+    }
+
 }

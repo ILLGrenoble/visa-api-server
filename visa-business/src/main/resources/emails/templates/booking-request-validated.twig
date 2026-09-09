@@ -1,30 +1,32 @@
 {% extends "emails/templates/base.twig" %}
 {% if accepted %}
-    {% block title %} [VISA] Your request to reserve resources ({{ bookingRequest.name }}) has been accepted {% endblock %}
+    {% block title %} [VISA] The request to reserve resources ({{ bookingRequest.name }}) has been accepted {% endblock %}
 {% else %}
-    {% block title %} [VISA] Your request to reserve resources ({{ bookingRequest.name }}) has been refused {% endblock %}
+    {% block title %} [VISA] The request to reserve resources ({{ bookingRequest.name }}) has been refused {% endblock %}
 {% endif %}
 {% block content %}
-    <p>Hi {{ bookingRequest.owner.firstName }},</p>
+    <p>Hi {{ coorganiser.firstName }},</p>
 
     {% if accepted %}
         <p>
-            We are happy to inform you that your request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been accepted!
+            We are happy to inform you that the request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been accepted!
         </p>
         <p>
             The instance creation vouchers associated to this reservation are now visible on the <a style="color:#3777b0;text-decoration:none;" href="{{ rootURL }}/bookings/{{ bookingRequest.uid }}">request details page</a>. You can assign these vouchers to other VISA users or use them for your own needs.
         </p>
         <p>
-            From the {{ bookingRequest.startDate | date("dd MMMM yyyy") }}, the owners of vouchers will be able to create instances using them. All instances associated with this reservation will be deleted at the end of 23 January 2026.
+            From the {{ bookingRequest.startDate | date("dd MMMM yyyy") }}, the owners of vouchers will be able to create instances using them. All instances associated with this reservation will be deleted at the end of {{ bookingRequest.endDate | date("dd MMMM yyyy") }}.
         </p>
 
     {% else %}
         <p>
-            We are sorry to inform you that your request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been refused.
+            We are sorry to inform you that the request to reserve <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }} ({{ bookingRequest.name }}) has been refused.
         </p>
-        <p>
-            Please feel free to submit another reservation request if you would like to modify the desired resources or reservation period.
-        </p>
+        {% if coorganiser.id == bookingRequest.owner.id %}
+            <p>
+                Please feel free to submit another reservation request if you would like to modify the desired resources or reservation period.
+            </p>
+        {% endif %}
     {% endif %}
 
     {% if bookingRequest.validationComments %}

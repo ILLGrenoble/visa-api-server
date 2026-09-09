@@ -18,4 +18,5 @@ public interface EmailHandler {
     void sendBookingRequestCreatedToOwner(BookingRequest bookingRequest, boolean isUpdate);
     void sendBookingRequestValidated(BookingRequest bookingRequest);
     void sendBookingRequestTokenNotification(BookingRequest bookingRequest, User tokenOwner);
+    void sendOrganiserAddedToBookingRequest(BookingRequest bookingRequest, User organiser);
 }

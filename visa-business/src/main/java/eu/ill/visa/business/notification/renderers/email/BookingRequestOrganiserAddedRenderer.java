@@ -4,7 +4,6 @@ import eu.ill.visa.business.NotificationRendererException;
 import eu.ill.visa.business.notification.NotificationRenderer;
 import eu.ill.visa.core.entity.BookingRequest;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.core.entity.enumerations.BookingRequestState;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 import java.io.IOException;
@@ -15,21 +14,21 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-public class BookingRequestValidatedRenderer extends BaseRenderer implements NotificationRenderer {
+public class BookingRequestOrganiserAddedRenderer extends BaseRenderer implements NotificationRenderer {
 
     private final BookingRequest bookingRequest;
-    private final User coorganiser;
+    private final User organiser;
     private final String rootURL;
     private final String adminEmailAddress;
     private final String emailTemplatesDirectory;
 
-    public BookingRequestValidatedRenderer(final BookingRequest bookingRequest,
-                                           final User coorganiser,
-                                           final String emailTemplatesDirectory,
-                                           final String rootURL,
-                                           final String adminEmailAddress) {
+    public BookingRequestOrganiserAddedRenderer(final BookingRequest bookingRequest,
+                                                final User organiser,
+                                                final String emailTemplatesDirectory,
+                                                final String rootURL,
+                                                final String adminEmailAddress) {
         this.bookingRequest = bookingRequest;
-        this.coorganiser = coorganiser;
+        this.organiser = organiser;
         this.rootURL = rootURL;
         this.adminEmailAddress = adminEmailAddress;
         this.emailTemplatesDirectory = emailTemplatesDirectory;
@@ -38,13 +37,12 @@ public class BookingRequestValidatedRenderer extends BaseRenderer implements Not
     @Override
     public String render() throws NotificationRendererException {
         try {
-            final PebbleTemplate compiledTemplate = this.getTemplate(emailTemplatesDirectory + "booking-request-validated.twig");
+            final PebbleTemplate compiledTemplate = this.getTemplate(emailTemplatesDirectory + "booking-request-organiser-added.twig");
             final Writer writer = new StringWriter();
             final Map<String, Object> variables = new HashMap<>();
 
             variables.put("bookingRequest", bookingRequest);
-            variables.put("coorganiser", coorganiser);
-            variables.put("accepted", bookingRequest.getState().equals(BookingRequestState.ACCEPTED));
+            variables.put("organiser", organiser);
             variables.put("rootURL", rootURL);
             variables.put("adminEmailAddress", adminEmailAddress);
             compiledTemplate.evaluate(writer, variables);

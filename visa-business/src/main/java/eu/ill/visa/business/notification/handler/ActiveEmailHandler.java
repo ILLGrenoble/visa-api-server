@@ -284,11 +284,19 @@ public class ActiveEmailHandler implements EmailHandler {
         try {
             final User owner = bookingRequest.getOwner();
             boolean accepted = bookingRequest.getState().equals(BookingRequestState.ACCEPTED);
-            final String subject = accepted ? "[VISA] Your request to reserve resources has been accepted" : "[VISA]Your request to reserve resources has been refused";
-            final NotificationRenderer renderer = new BookingRequestValidatedRenderer(bookingRequest, emailTemplatesDirectory, rootURL, adminEmailAddress);
+            final String subject = accepted ? "[VISA] The request to reserve resources has been accepted" : "[VISA]The request to reserve resources has been refused";
+
+            // Email owner
+            final NotificationRenderer renderer = new BookingRequestValidatedRenderer(bookingRequest, bookingRequest.getOwner(), emailTemplatesDirectory, rootURL, adminEmailAddress);
             final Mail email = buildEmail(owner.getEmail(), adminEmailAddress, subject, renderer.render());
             this.send(email);
 
+            // Email organisers
+            for (User organiser : bookingRequest.getOrganisers()) {
+                final NotificationRenderer organiserRenderer = new BookingRequestValidatedRenderer(bookingRequest, organiser, emailTemplatesDirectory, rootURL, adminEmailAddress);
+                final Mail organiserEmail = buildEmail(organiser.getEmail(), adminEmailAddress, subject, organiserRenderer.render());
+                this.send(organiserEmail);
+            }
 
         } catch (NotificationRendererException exception) {
             logger.error("Error rendering email : {}", exception.getMessage());
@@ -302,6 +310,21 @@ public class ActiveEmailHandler implements EmailHandler {
             final String subject = "[VISA] You have been assigned resources to create VISA instances";
             final NotificationRenderer renderer = new BookingRequestTokenRenderer(bookingRequest, tokenOwner, emailTemplatesDirectory, rootURL, adminEmailAddress);
             final Mail email = buildEmail(tokenOwner.getEmail(), subject, renderer.render());
+            this.send(email);
+
+
+        } catch (NotificationRendererException exception) {
+            logger.error("Error rendering email : {}", exception.getMessage());
+        } catch (Exception exception) {
+            logger.error("Error sending email: {}", exception.getMessage());
+        }
+    }
+
+    public void sendOrganiserAddedToBookingRequest(BookingRequest bookingRequest, User organiser) {
+        try {
+            final String subject = "[VISA] You have been added as an organiser of a VISA booking request";
+            final NotificationRenderer renderer = new BookingRequestOrganiserAddedRenderer(bookingRequest, organiser, emailTemplatesDirectory, rootURL, adminEmailAddress);
+            final Mail email = buildEmail(organiser.getEmail(), subject, renderer.render());
             this.send(email);
 
 

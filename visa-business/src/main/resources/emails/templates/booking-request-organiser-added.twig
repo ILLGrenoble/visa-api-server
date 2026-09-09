@@ -1,0 +1,23 @@
+{% extends "emails/templates/base.twig" %}
+{% block content %}
+    <p>Hi {{ organiser.firstName }},</p>
+    <p>
+        You have been added by {{ bookingRequest.owner.fullName }} as an organiser of a reservation of <a href="{{ rootURL }}" style="color:#3777b0;text-decoration:none;">VISA</a> resources ({{ bookingRequest.name }}) between {{ bookingRequest.startDate | date("dd MMMM yyyy") }} and {{ bookingRequest.endDate | date("dd MMMM yyyy") }}.
+    </p>
+
+    <p>
+        You can review the status of reservation request at this address: <a style="color:#3777b0;text-decoration:none;" href="{{ rootURL }}/bookings/{{ bookingRequest.uid }}">{{ rootURL }}/bookings/{{ bookingRequest.uid }}</a>
+    </p>
+
+    <p>
+        Vouchers for the reserved resources will be available for accepted requests. You can help assign the vouchers to other VISA users or use them for your own needs. When users create instances from
+        the vouchers and connect to the remote desktop, you can join their sessions and provide support if needed.
+    </p>
+
+    {% if adminEmailAddress %}
+        <p>
+            If you have any questions, please do not hesitate to send an email to <a href="mailto:{{ adminEmailAddress }}" style="color:#3777b0;text-decoration:none;">{{ adminEmailAddress }}</a>.
+        </p>
+    {%  endif %}
+    <p>Thank you for using VISA.</p>
+{% endblock %}

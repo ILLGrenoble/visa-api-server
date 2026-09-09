@@ -53,4 +53,7 @@ public class DummyEmailHandler implements EmailHandler {
     public void sendBookingRequestTokenNotification(BookingRequest bookingRequest, User tokenOwner) {
     }
 
+    public void sendOrganiserAddedToBookingRequest(BookingRequest bookingRequest, User organiser) {
+    }
+
 }
