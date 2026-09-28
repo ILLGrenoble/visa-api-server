@@ -31,20 +31,20 @@ public abstract class RemoteDesktopSocket {
                 Instant eventStartTime = Instant.now().truncatedTo(ChronoUnit.MICROS);
                 double timeToStartEventMs = 0.001 * ChronoUnit.MICROS.between(this.createdAt, eventStartTime);
 
-                if (this.type == WorkerEventType.CONNECT) {
-                    logger.info("Remote Desktop Event (CONNECT) for client {} started in : {}ms", socketClient.clientId(), timeToStartEventMs);
-                }
-                if (timeToStartEventMs > 1000) {
-                    logger.warn("Remote Desktop Event ({}) for client {} slow to start: {}ms", type, socketClient.clientId(), timeToStartEventMs);
-                }
-
                 worker.run();
 
                 Instant eventEndTime = Instant.now().truncatedTo(ChronoUnit.MICROS);
                 double eventDurationMs = 0.001 * ChronoUnit.MICROS.between(eventStartTime, eventEndTime);
+                double totalDurationMs = 0.001 * ChronoUnit.MICROS.between(this.createdAt, eventEndTime);
 
-                if (this.type == WorkerEventType.CONNECT) {
-                    logger.info("Remote Desktop Event (CONNECT) for client {} completed in : {}ms", socketClient.clientId(), eventDurationMs);
+                if (this.type == WorkerEventType.CONNECT || this.type == WorkerEventType.DISCONNECT) {
+                    String message = String.format("Remote Desktop Event (%s) for client %s: total=%.1fms, queue=%.1fms, exec=%.1fms", this.type, socketClient.clientId(), totalDurationMs, timeToStartEventMs, eventDurationMs);
+                    if (totalDurationMs > 2000) {
+                        logger.warn(message);
+
+                    } else {
+                        logger.info(message);
+                    }
 
                 } else if (this.type == WorkerEventType.MESSAGE && eventDurationMs > 1000) {
                     logger.warn("Remote Desktop Event (MESSAGE) for client {} slow to execute: {}ms", socketClient.clientId(), eventDurationMs);

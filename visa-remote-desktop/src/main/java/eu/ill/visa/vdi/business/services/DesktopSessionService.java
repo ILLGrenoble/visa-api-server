@@ -105,7 +105,7 @@ public class DesktopSessionService {
         this.messageBroker.shutdown();
     }
 
-    public DesktopSessionMember createDesktopSessionMember(final SocketClient client, final ConnectedUser user, final Instance instance, final NopSender nopSender) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
+    public void createDesktopSessionMember(final SocketClient client, final ConnectedUser user, final Instance instance, final NopSender nopSender) throws OwnerNotConnectedException, UnauthorizedException, ConnectionException {
 
         final InstanceMemberRole role = user.getRole();
         if (role == InstanceMemberRole.NONE) {
@@ -162,8 +162,6 @@ public class DesktopSessionService {
             this.countSessionMembers(null),
             this.countSessionMembers(DesktopService.GUACAMOLE_PROTOCOL),
             this.countSessionMembers(DesktopService.WEBX_PROTOCOL));
-
-        return desktopSessionMember;
     }
 
     public void onDesktopMemberDisconnect(final DesktopSessionMember desktopSessionMember) {
@@ -497,14 +495,16 @@ public class DesktopSessionService {
 
     private DesktopSession getOrCreateDesktopSession(final Long sessionId, final Long instanceId, final String protocol) {
         synchronized (this.desktopSessions) {
-            return this.desktopSessions.stream()
-                .filter(desktopSession -> desktopSession.getSessionId().equals(sessionId))
+            DesktopSession desktopSession = this.desktopSessions.stream()
+                .filter(aSession -> aSession.getSessionId().equals(sessionId))
                 .findFirst()
-                .orElseGet(() -> {
-                    DesktopSession desktopSession = new DesktopSession(sessionId, instanceId, protocol);
-                    this.desktopSessions.add(desktopSession);
-                    return desktopSession;
-                });
+                .orElse(null);
+
+            if (desktopSession == null) {
+                desktopSession = new DesktopSession(sessionId, instanceId, protocol);
+                this.desktopSessions.add(desktopSession);
+            };
+            return desktopSession;
         }
     }
 

@@ -88,10 +88,12 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
         // Observations show that his can sometimes end in a timeout
         Thread.startVirtualThread(() -> {
             try {
+                logger.trace("Broadcasting message...");
                 this.publisher.publish(CHANNEL, remoteDesktopMessage);
+                logger.trace("... message broadcasted.");
 
             } catch (Exception error) {
-                logger.error("Failed to publish message to Redis: {}", error.getMessage());
+                logger.error("Failed to publish message to Redis", error);
             }
         });
     }

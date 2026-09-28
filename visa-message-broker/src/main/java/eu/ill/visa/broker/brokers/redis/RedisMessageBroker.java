@@ -16,9 +16,10 @@ public class RedisMessageBroker implements MessageBroker {
 
     private final RedisMessageBrokerPubSub redisPubSub;
 
-    public RedisMessageBroker(final RedisDataSource redisDataSource,
+    public RedisMessageBroker(final jakarta.enterprise.inject.Instance<RedisDataSource> redisDataSourceInstance,
                               final MessageBrokerConfiguration configuration) {
-        logger.info("Enabling redis message broker at {}, using db {}", configuration.redisURL().get(), configuration.redisDatabase());
+        logger.info("Enabling redis message broker at {}, using db {}", configuration.redisURL().orElseGet(() -> "<unconfigured redis URL>"), configuration.redisDatabase());
+        final RedisDataSource redisDataSource = redisDataSourceInstance.get();
         this.redisPubSub = new RedisMessageBrokerPubSub(redisDataSource, configuration.redisHealthMonitorEnabled());
     }
 

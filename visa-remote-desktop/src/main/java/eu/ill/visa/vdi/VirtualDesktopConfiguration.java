@@ -8,8 +8,8 @@ import java.util.Map;
 @ConfigMapping(prefix = "vdi", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface VirtualDesktopConfiguration {
 
-    public static String OWNER_DISCONNECTION_POLICY_DISCONNECT_ALL = "DISCONNECT_ALL";
-    public static String OWNER_DISCONNECTION_POLICY_LOCK_ROOM = "LOCK_ROOM";
+    String OWNER_DISCONNECTION_POLICY_DISCONNECT_ALL = "DISCONNECT_ALL";
+    String OWNER_DISCONNECTION_POLICY_LOCK_ROOM = "LOCK_ROOM";
 
     boolean enabled();
 
@@ -18,6 +18,8 @@ public interface VirtualDesktopConfiguration {
     boolean cleanupSessionsOnStartup();
 
     String protocol();
+
+    int numberOfWsThreads();
 
     int maxSessionInactivityTimeMinutes();
 

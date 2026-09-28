@@ -78,8 +78,8 @@ public class RedisPubSubHealthMonitor {
                         this.redisPingTimeout = Timer.setTimeout(this::onPingTimeout, PING_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                         publisher.publish(CHANNEL, new RedisMessageCarrier(PING_MESSAGE));
 
-                    } catch (Exception e) {
-                        logger.error("Error while pinging Redis pub/sub health monitor");
+                    } catch (Exception error) {
+                        logger.error("Error while publishing Redis pub/sub health monitor ping", error);
                         if (this.redisPingTimeout != null) {
                             this.redisPingTimeout.cancel();
                             this.redisPingTimeout = null;

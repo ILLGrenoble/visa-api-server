@@ -14,7 +14,7 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 @ApplicationScoped
 public class ConnectionThreadExecutor {
 
-    private final ExecutorService executorService = newCachedThreadPool(new ConnectionThreadFactory());
+    private final ExecutorService executorService = newCachedThreadPool(Thread.ofPlatform().name("vdi-connection-thread-", 0).factory());
 
     public ConnectionThread createGuacamoleConnectionThread(SocketClient client, GuacamoleTunnel tunnel, Instance instance, ConnectedUser user) {
         return new GuacamoleConnectionThread(client, tunnel, instance, user);
