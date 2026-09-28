@@ -21,7 +21,7 @@ import java.util.Date;
 public class LoggingRequestFilter implements ContainerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingRequestFilter.class);
-    private static SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
 
 
     @Context
@@ -42,7 +42,7 @@ public class LoggingRequestFilter implements ContainerRequestFilter {
         final String address = request.remoteAddress().toString();
         final String forwardedIP = request.getHeader("X-Forwarded-For");
 
-        logger.info("{} - {} [{}] \"{} {}\"", forwardedIP == null ? address : forwardedIP, principal, format.format(new Date()), method, path);
+        logger.info("{} - {} [{}] \"{} {}\"", forwardedIP == null ? address : forwardedIP, principal, dateFormat.format(new Date()), method, path);
     }
 
     private String getPrincipal(SecurityContext securityContext) {
@@ -50,11 +50,11 @@ public class LoggingRequestFilter implements ContainerRequestFilter {
         if (principal instanceof AccountToken accountToken) {
             return principal.getName() + " (" + accountToken.getUser().getId() + ")";
 
-        } else if (principal instanceof InstanceToken instanceToken) {
-            return "Instance " + instanceToken.getInstance().getId();
+        } else if (principal instanceof InstanceToken) {
+            return principal.getName();
 
-        } else if (principal instanceof ApplicationToken applicationToken) {
-            return "Application credential " + applicationToken.getName();
+        } else if (principal instanceof ApplicationToken) {
+            return principal.getName();
         }
         return "-";
     }

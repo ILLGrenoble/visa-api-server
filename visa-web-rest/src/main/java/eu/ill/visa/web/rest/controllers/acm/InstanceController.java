@@ -17,23 +17,21 @@ import java.util.ArrayList;
 @Path("/acm/instances")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed(Role.INSTANCE_CREDENTIAL_ROLE)
+@RolesAllowed(Role.APPLICATION_CREDENTIAL_ROLE)
 public class InstanceController extends AbstractController {
 
     @GET
-    @Path("/{instanceId}")
-    public MetaResponse<InstanceDto> getById(@Context final SecurityContext securityContext, @PathParam("instanceId") Long instanceId) {
-        final InstanceToken instanceToken = this.getInstanceToken(securityContext);
+    @RolesAllowed({Role.INSTANCE_CREDENTIAL_ROLE,Role.APPLICATION_CREDENTIAL_ROLE})
+    @Path("/{instance}")
+    public MetaResponse<InstanceDto> get(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+        if (!securityContext.isUserInRole(Role.APPLICATION_CREDENTIAL_ROLE)) {
+            final InstanceToken instanceToken = this.getInstanceToken(securityContext);
 
-        if (instanceToken.getInstance() == null) {
-            throw new NotFoundException("Instance does not exist");
+            if (!instanceToken.getInstance().equals(instance)) {
+                throw new NotAuthorizedException("Not authorized to retrieve instance");
+            }
         }
-
-        if (!instanceToken.getInstance().getId().equals(instanceId)) {
-            throw new NotAuthorizedException("Not authorized to retrieve instance");
-        }
-
-        return createResponse(this.mapInstance(instanceToken.getInstance()));
+        return createResponse(this.mapInstance(instance));
     }
 
     private InstanceDto mapInstance(final Instance instance) {

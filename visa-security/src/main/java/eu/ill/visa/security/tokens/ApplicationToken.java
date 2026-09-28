@@ -18,7 +18,7 @@ public class ApplicationToken implements Principal {
 
     @Override
     public String getName() {
-        return applicationCredential.getName();
+        return String.format("%s [AC]", applicationCredential.getName());
     }
 
     public ApplicationCredential getApplicationCredential() {

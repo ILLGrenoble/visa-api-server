@@ -18,7 +18,7 @@ public class InstanceToken implements Principal {
 
     @Override
     public String getName() {
-        return instance.getName();
+        return String.format("%s (%d) [IC]", instance.getName(), instance.getId());
     }
 
     public Instance getInstance() {
