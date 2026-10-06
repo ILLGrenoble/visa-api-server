@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.domain.models;
 
 public record DesktopCandidate(SocketClient client,
-                               Long sessionId,
+                               String connectionId,
                                ConnectedUser connectedUser,
                                Long instanceId,
                                NopSender nopSender) {

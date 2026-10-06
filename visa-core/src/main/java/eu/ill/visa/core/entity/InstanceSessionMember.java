@@ -67,7 +67,7 @@ import java.util.Date;
     """),
 
     @NamedQuery(name = "instanceSessionMember.getAllPartials", query = """
-        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.clientId, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
         FROM InstanceSessionMember i
         LEFT JOIN i.user u
         LEFT JOIN i.instanceSession instanceSession
@@ -77,7 +77,7 @@ import java.util.Date;
         ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllPartialsForInstanceId", query = """
-        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.clientId, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
         FROM InstanceSessionMember i
         LEFT JOIN i.user u
         LEFT JOIN i.instanceSession instanceSession
@@ -88,7 +88,7 @@ import java.util.Date;
         ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllPartialsForInstanceIdAndProtocol", query = """
-        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.clientId, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
         FROM InstanceSessionMember i
         LEFT JOIN i.user u
         LEFT JOIN i.instanceSession instanceSession
@@ -101,7 +101,7 @@ import java.util.Date;
         ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getPartialByInstanceSessionIdAndClientId", query = """
-        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.clientId, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
         FROM InstanceSessionMember i
         LEFT JOIN i.user u
         LEFT JOIN i.instanceSession instanceSession
@@ -113,7 +113,7 @@ import java.util.Date;
         ORDER BY i.id DESC
     """),
     @NamedQuery(name = "instanceSessionMember.getAllPartialByInstanceSessionId", query = """
-        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.clientId, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
         FROM InstanceSessionMember i
         LEFT JOIN i.user u
         LEFT JOIN i.instanceSession instanceSession

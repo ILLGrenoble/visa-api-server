@@ -4,5 +4,5 @@ import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
-public record AccessRequestResponseMessage(Long sessionId, String requesterClientId, InstanceMemberRole role) {
+public record AccessRequestResponseMessage(String connectionId, String requesterClientId, InstanceMemberRole role) {
 }

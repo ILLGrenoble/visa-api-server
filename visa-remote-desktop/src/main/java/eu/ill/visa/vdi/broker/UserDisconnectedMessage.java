@@ -4,5 +4,5 @@ import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
-public record UserDisconnectedMessage(Long sessionId, String clientId, ConnectedUser user) {
+public record UserDisconnectedMessage(String connectionId, String clientId, ConnectedUser user) {
 }

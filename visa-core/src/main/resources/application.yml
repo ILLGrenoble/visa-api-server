@@ -75,8 +75,6 @@ quarkus:
         level: DEBUG
       "org.apache.guacamole":
         level: INFO
-#      "org.jboss.resteasy.reactive.client.logging":
-#        level: DEBUG
 
 cloud:
   defaultProviderEnabled: ${VISA_CLOUD_DEFAULT_PROVIDER_ENABLED:true}
@@ -163,6 +161,7 @@ vdi:
   webx:
     runtimeMaxQualityIndex: ${VISA_VDI_WEBX_ENGINE_RUNTIME_MAX_QUALITY_INDEX:10}
     logLevel: ${VISA_VDI_WEBX_ENGINE_LOG_LEVEL:debug}
+
 client:
   login:
     issuer: ${VISA_CLIENT_CONFIG_LOGIN_ISSUER}
@@ -182,6 +181,9 @@ client:
   contactEmail: ${VISA_CLIENT_CONFIG_CONTACT_EMAIL}
   experiments:
     openDataIncluded: ${VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA:false}
+
+security:
+  vdiAuthToken: ${VISA_SECURITY_VDI_AUTH_TOKEN}
 
 "%prod":
   quarkus:

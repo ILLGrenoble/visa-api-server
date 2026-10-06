@@ -83,7 +83,7 @@ public class RemoteDesktopConnectSubscriber {
                     final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, socketClient.protocol());
                     if (instanceSession != null && this.desktopSessionService.isOwnerConnected(instanceSession.getId())) {
                         // Start process of requesting access from the owner
-                        this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), connectedUser, instance.getId(), nopSender);
+                        this.desktopAccessService.requestAccess(socketClient, instanceSession.getConnectionId(), connectedUser, instance.getId(), nopSender);
 
                     } else {
                         throw new OwnerNotConnectedException();

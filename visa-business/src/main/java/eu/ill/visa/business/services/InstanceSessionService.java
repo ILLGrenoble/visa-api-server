@@ -71,6 +71,12 @@ public class InstanceSessionService {
         return this.repository.getAllByInstance(instance);
     }
 
+    public InstanceSession getLatestByConnectionId(String connectionId) {
+        // Fixes bug when 2 requests are made at the same time to create a session (on load-balanced servers)
+        List<InstanceSession>  instanceSessions = this.repository.getAllByConnectionId(connectionId);
+        return this.cleanupLatestSessions(instanceSessions);
+    }
+
     public InstanceSession getLatestByInstanceAndProtocol(@NotNull Instance instance, String protocol) {
         return this.getLatestByInstanceIdAndProtocol(instance.getId(), protocol);
     }
@@ -78,6 +84,11 @@ public class InstanceSessionService {
     public InstanceSession getLatestByInstanceIdAndProtocol(Long instanceId, String protocol) {
         // Fixes bug when 2 requests are made at the same time to create a session (on load-balanced servers)
         List<InstanceSession>  instanceSessions = this.repository.getAllLatestByInstanceIdAndProtocol(instanceId, protocol);
+
+        return this.cleanupLatestSessions(instanceSessions);
+    }
+
+    private InstanceSession cleanupLatestSessions(List<InstanceSession> instanceSessions) {
         if (instanceSessions.isEmpty()) {
             return null;
         }
@@ -87,7 +98,7 @@ public class InstanceSessionService {
 
         // Remove any remaining sessions
         for (InstanceSession instanceSession : instanceSessions) {
-            logger.warn("Multiple instance sessions were available for the instance {} and protocol {}: deleting instance session {}", instanceId, protocol, instanceSession.getId());
+            logger.warn("Multiple instance sessions were available for the instance {} and protocol {}: deleting instance session {}", instanceSession.getInstanceId(), instanceSession.getProtocol(), instanceSession.getId());
             instanceSession.setCurrent(false);
             this.save(instanceSession);
         }

@@ -4,5 +4,5 @@ import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
-public record AccessRequestMessage(Long sessionId, ConnectedUser user, String requesterClientId) {
+public record AccessRequestMessage(String connectionId, ConnectedUser user, String requesterClientId) {
 }

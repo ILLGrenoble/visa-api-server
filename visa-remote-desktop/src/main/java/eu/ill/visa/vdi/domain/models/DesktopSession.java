@@ -9,20 +9,26 @@ import java.util.stream.Stream;
 public class DesktopSession {
 
     private final Long sessionId;
+    private final String connectionId;
     private final Long instanceId;
     private final String protocol;
     private boolean isLocked;
 
     private final List<DesktopSessionMember> members = new ArrayList<>();
 
-    public DesktopSession(final Long sessionId, final Long instanceId, final String protocol) {
+    public DesktopSession(final Long sessionId, final String connectionId, final Long instanceId, final String protocol) {
         this.sessionId = sessionId;
+        this.connectionId = connectionId;
         this.instanceId = instanceId;
         this.protocol = protocol;
     }
 
     public Long getSessionId() {
         return sessionId;
+    }
+
+    public String getConnectionId() {
+        return connectionId;
     }
 
     public Long getInstanceId() {
