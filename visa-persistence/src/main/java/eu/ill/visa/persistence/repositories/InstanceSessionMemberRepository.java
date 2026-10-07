@@ -88,6 +88,19 @@ public class InstanceSessionMemberRepository extends AbstractRepository<Instance
         }
     }
 
+    public InstanceSessionMemberPartial getPartialByConnectionIdAndClientId(final String connectionId, final String clientId) {
+        try {
+            final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getPartialByConnectionIdAndClientId", InstanceSessionMemberPartial.class);
+            query.setParameter("connectionId", connectionId);
+            query.setParameter("clientId", clientId);
+            query.setMaxResults(1); // Limit to the latest result
+            query.setFirstResult(0);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
     public List<InstanceSessionMemberPartial> getAllPartials() {
         final TypedQuery<InstanceSessionMemberPartial> query = getEntityManager().createNamedQuery("instanceSessionMember.getAllPartials", InstanceSessionMemberPartial.class);
         return query.getResultList();

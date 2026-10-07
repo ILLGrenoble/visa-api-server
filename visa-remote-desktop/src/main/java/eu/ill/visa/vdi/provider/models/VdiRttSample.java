@@ -1,9 +1,9 @@
-package eu.ill.visa.web.rest.controllers.vdi.dto;
+package eu.ill.visa.vdi.provider.models;
 
 
 import java.util.Date;
 
-public record VdiRttSample(Long instanceSessionId,
+public record VdiRttSample(String connectionId,
                            String clientId,
                            Date date,
                            Long samplePeriodMinutes,

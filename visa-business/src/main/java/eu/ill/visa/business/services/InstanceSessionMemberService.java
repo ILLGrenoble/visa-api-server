@@ -94,6 +94,10 @@ public class InstanceSessionMemberService {
         return this.repository.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
     }
 
+    public InstanceSessionMemberPartial getPartialByConnectionIdAndClientId(String connectionId, final String clientId) {
+        return this.repository.getPartialByConnectionIdAndClientId(connectionId, clientId);
+    }
+
     public void deactivateSessionMember(final InstanceSessionMemberPartial instanceSessionMember) {
         this.repository.deactivateSessionMember(instanceSessionMember);
     }

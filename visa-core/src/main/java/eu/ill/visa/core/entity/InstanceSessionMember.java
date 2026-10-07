@@ -112,6 +112,18 @@ import java.util.Date;
         AND instance.deletedAt IS NULL
         ORDER BY i.id DESC
     """),
+    @NamedQuery(name = "instanceSessionMember.getPartialByConnectionIdAndClientId", query = """
+        SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.clientId, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
+        FROM InstanceSessionMember i
+        LEFT JOIN i.user u
+        LEFT JOIN i.instanceSession instanceSession
+        LEFT JOIN Instance instance ON instanceSession.instanceId = instance.id
+        WHERE instanceSession.connectionId = :connectionId
+        AND i.clientId = :clientId
+        AND i.active = true
+        AND instance.deletedAt IS NULL
+        ORDER BY i.id DESC
+    """),
     @NamedQuery(name = "instanceSessionMember.getAllPartialByInstanceSessionId", query = """
         SELECT new eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial(i.id, i.role, i.active, i.clientId, i.lastInteractionAt, instance.id, u.id, u.firstName, u.lastName)
         FROM InstanceSessionMember i

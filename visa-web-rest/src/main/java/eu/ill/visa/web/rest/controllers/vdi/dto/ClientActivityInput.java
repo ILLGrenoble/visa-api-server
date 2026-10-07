@@ -7,7 +7,8 @@ import eu.ill.visa.vdi.domain.models.ConnectedUser;
 
 import java.util.Date;
 
-public record ClientActivityInput(String connectionId,
+public record ClientActivityInput(Long instanceId,
+                                  String connectionId,
                                   String clientId,
                                   ConnectedUser user,
                                   Date lastSeenAt,

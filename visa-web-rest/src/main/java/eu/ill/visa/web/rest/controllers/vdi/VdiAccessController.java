@@ -6,6 +6,7 @@ import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.vdi.provider.exceptions.SessionConnectionException;
 import eu.ill.visa.vdi.provider.models.VdiAuthenticationToken;
+import eu.ill.visa.vdi.provider.models.VdiRttSample;
 import eu.ill.visa.vdi.provider.services.VdiProviderService;
 import eu.ill.visa.web.rest.controllers.AbstractController;
 import eu.ill.visa.web.rest.controllers.vdi.dto.*;
@@ -88,13 +89,13 @@ public class VdiAccessController extends AbstractController {
     @POST
     @Path("/session/activity")
     public void sessionActivity(ClientActivityInput input) {
-
+        this.vdiProviderService.onSessionActivity(input.instanceId(), input.connectionId(), input.clientId(), input.user(), input.lastSeenAt(), input.lastInteractionAt(), input.instanceActivityType());
     }
 
     @POST
     @Path("/session/rtt")
-    public void sessionRtt(List<VdiRttSample> input) {
-
+    public void sessionRtt(List<VdiRttSample> samples) {
+        this.vdiProviderService.onSessionRttData(samples);
     }
 
 
