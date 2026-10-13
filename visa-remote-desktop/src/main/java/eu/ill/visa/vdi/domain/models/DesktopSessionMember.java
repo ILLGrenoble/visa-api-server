@@ -1,14 +1,16 @@
 package eu.ill.visa.vdi.domain.models;
 
-import eu.ill.visa.core.domain.IdleHandler;
-import eu.ill.visa.core.domain.Timer;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.utils.domain.IdleHandler;
+import eu.ill.visa.common.utils.domain.Timer;
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import io.smallrye.mutiny.subscription.Cancellable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 public record DesktopSessionMember(String clientId, ConnectedUser connectedUser, RemoteDesktopConnection remoteDesktopConnection, DesktopSession session, IdleHandler idleSessionHandler, Cancellable nopTimer) {
 
@@ -33,12 +35,8 @@ public record DesktopSessionMember(String clientId, ConnectedUser connectedUser,
             this.remoteDesktopConnection.disconnect();
 
         } catch (Exception e) {
-            logger.error("Error while disconnecting the remote desktop for session member {}: {}", this, e.getMessage());
+            logger.error("Error while disconnecting the remote desktop for session member {}: {}", this, formatException(e));
         }
-    }
-
-    public boolean isRole(final InstanceMemberRole role) {
-        return this.connectedUser.isRole(role);
     }
 
     @Override
@@ -58,6 +56,6 @@ public record DesktopSessionMember(String clientId, ConnectedUser connectedUser,
     }
 
     public String toString() {
-        return String.format("User %s (role = %s) on Instance %s with protocol %s (clientId = %s}", connectedUser.getFullName(), connectedUser.getRole(), session.getInstanceId(), session.getProtocol(), clientId);
+        return String.format("User %s (role = %s) on Instance %s with protocol %s (clientId = %s}", connectedUser.fullName(), connectedUser.role(), session.getInstance().id(), session.getProtocol(), clientId);
     }
 }

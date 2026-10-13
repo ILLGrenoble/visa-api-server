@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.entity.*;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import eu.ill.visa.persistence.repositories.InstanceSessionRepository;
 import jakarta.inject.Inject;

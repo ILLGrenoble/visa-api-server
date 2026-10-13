@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.gateway.events;
 
 
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection

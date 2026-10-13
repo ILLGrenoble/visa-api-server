@@ -1,7 +1,7 @@
 package eu.ill.visa.broker.brokers.redis;
 
 
-import eu.ill.visa.core.domain.Timer;
+import eu.ill.visa.common.utils.domain.Timer;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import io.smallrye.mutiny.subscription.Cancellable;
 import org.slf4j.Logger;
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.*;
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 public class RedisPubSubHealthMonitor {
 

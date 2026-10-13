@@ -1,10 +1,10 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceMember;
 import eu.ill.visa.core.entity.PersonalAccessToken;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.persistence.repositories.PersonalAccessTokenRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

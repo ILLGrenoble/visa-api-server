@@ -1,24 +1,19 @@
 package eu.ill.visa.vdi.business.services;
 
-import eu.ill.visa.business.services.ImageProtocolService;
-import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.business.services.SignatureService;
-import eu.ill.visa.core.entity.ImageProtocol;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
+import eu.ill.visa.common.vdi.domain.VdiInstance;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
+import eu.ill.visa.vdi.domain.exceptions.ApiCommunicationException;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
-import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.guacamole.GuacamoleException;
-import org.apache.guacamole.net.GuacamoleSocket;
 import org.apache.guacamole.net.GuacamoleTunnel;
 import org.apache.guacamole.net.InetGuacamoleSocket;
 import org.apache.guacamole.net.SimpleGuacamoleTunnel;
@@ -28,38 +23,31 @@ import org.apache.guacamole.protocol.GuacamoleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNullElse;
 
 @ApplicationScoped
 public class GuacamoleDesktopService extends DesktopService {
 
     private final static Logger logger = LoggerFactory.getLogger(GuacamoleDesktopService.class);
 
-    private final InstanceSessionService instanceSessionService;
-    private final SignatureService signatureService;
-    private final ImageProtocolService imageProtocolService;
+    private final VisaApiService visaApiService;
     private final VirtualDesktopConfiguration configuration;
     private final ConnectionThreadExecutor executorService;
 
     @Inject
-    public GuacamoleDesktopService(final InstanceSessionService instanceSessionService,
-                            final SignatureService signatureService,
-                            final ImageProtocolService imageProtocolService,
-                            final VirtualDesktopConfiguration configuration,
-                            final ConnectionThreadExecutor executorService) {
-        this.instanceSessionService = instanceSessionService;
-        this.signatureService = signatureService;
-        this.imageProtocolService = imageProtocolService;
+    public GuacamoleDesktopService(final VisaApiService visaApiService,
+                                   final VirtualDesktopConfiguration configuration,
+                                   final ConnectionThreadExecutor executorService) {
+        this.visaApiService = visaApiService;
         this.configuration = configuration;
         this.executorService = executorService;
     }
 
-    private GuacamoleClientInformation createClientInformation(final Instance instance) {
-        final Integer height = instance.getScreenHeight();
-        final Integer width = instance.getScreenWidth();
+    private GuacamoleClientInformation createClientInformation(final VdiInstance instance) {
+        final Integer height = instance.screenHeight();
+        final Integer width = instance.screenWidth();
         final GuacamoleClientInformation info = new GuacamoleClientInformation();
         info.setOptimalScreenHeight(height);
         info.setOptimalScreenWidth(width);
@@ -67,62 +55,62 @@ public class GuacamoleDesktopService extends DesktopService {
         return info;
     }
 
-    private GuacamoleConfiguration createConfiguration(InstanceSession session, Instance instance, String ip) {
-        final GuacamoleConfiguration config = new GuacamoleConfiguration();
-        config.setParameter("hostname", ip);
+    private GuacamoleConfiguration createConfiguration(final String connectionId, final VdiInstance instance, final String ip) throws ConnectionException {
+        try {
+            final GuacamoleConfiguration config = new GuacamoleConfiguration();
+            config.setParameter("hostname", ip);
 
-        if (session == null) {
-            // Get the protocol from the instance image or use the default configuration
-            final ImageProtocol protocol = instance.getPlan().getImage().getSecondaryVdiProtocol();
-            if (protocol != null && Arrays.asList("RDP", "VNC").contains(protocol.getName())) {
-                config.setProtocol(protocol.getName().toLowerCase());
+            if (connectionId == null) {
+                // Get the protocol from the instance image or use the default configuration
+                final String secondaryVdiProtocol = instance.secondaryVdiProtocol();
+                if (secondaryVdiProtocol != null && Arrays.asList("RDP", "VNC").contains(secondaryVdiProtocol)) {
+                    config.setProtocol(secondaryVdiProtocol.toLowerCase());
 
+                } else {
+                    // Fallback to the default protocol defined in the configuration
+                    config.setProtocol(configuration.protocol());
+                }
+
+                String username = instance.username();
+                logger.info("Creating new guacamole session on instance {} with username {}", instance.id(), username);
+                String autologin = instance.autoLogin();
+                config.setParameter("username", username);
+                if (autologin != null && autologin.equals("VISA_PAM")) {
+                    config.setParameter("password", this.visaApiService.createVdiConnectionSignature(username));
+                }
+                config.setParameter("server-layout", instance.keyboardLayout());
+                // merge guacamole configuration parameters
+                final Map<String, String> guacamoleParameters = configuration.guacdConfiguration();
+                guacamoleParameters.forEach(config::setParameter);
             } else {
-                // Fallback to the default protocol defined in the configuration
-                config.setProtocol(configuration.protocol());
+                config.setConnectionID(connectionId);
             }
+            return config;
 
-            String username = instance.getUsername();
-            logger.info("Creating new guacamole session ({}) on instance {} with username {}", config.getProtocol(), instance.getId(), username);
-            String autologin = instance.getPlan().getImage().getAutologin();
-            config.setParameter("username", username);
-            if (autologin != null && autologin.equals("VISA_PAM")) {
-                config.setParameter("password", signatureService.createSignature(username));
-            }
-            config.setParameter("server-layout", instance.getKeyboardLayout());
-            // merge guacamole configuration parameters
-            final Map<String, String> guacamoleParameters = configuration.guacdConfiguration();
-            guacamoleParameters.forEach(config::setParameter);
-        } else {
-            config.setConnectionID(session.getConnectionId());
+        } catch (SignatureException e) {
+            throw new ConnectionException(String.format("Failed to obtain a signature for the guacamole session on instance %d with username %s", instance.id(), instance.username()));
         }
-        return config;
     }
 
-    private ConfiguredGuacamoleSocket buildSocket(final Instance instance) throws GuacamoleException {
+    private ConfiguredGuacamoleSocket buildSocket(final VdiInstance instance) throws GuacamoleException, ConnectionException {
         return this.buildSocket(instance, null);
     }
 
-    private ConfiguredGuacamoleSocket buildSocket(final Instance instance,
-                                                  final InstanceSession session) throws GuacamoleException {
-        final ImageProtocol protocol = requireNonNullElse(
-            imageProtocolService.getByName("GUACD"),
-            new ImageProtocol("GUACD", 4822)
-        );
-        final Integer port = protocol.getPort();
-        final String ip = instance.getIpAddress();
-        final GuacamoleConfiguration config = createConfiguration(session, instance, ip);
+    private ConfiguredGuacamoleSocket buildSocket(final VdiInstance instance,
+                                                  final String connectionId) throws GuacamoleException, ConnectionException {
+        int port = instance.port() != null ? instance.port() : 4822;
+        final String ip = instance.ipAddress();
+        final GuacamoleConfiguration config = createConfiguration(connectionId, instance, ip);
         final GuacamoleClientInformation information = createClientInformation(instance);
         final InetGuacamoleSocket socket = new InetGuacamoleSocket(ip, port);
         return new ConfiguredGuacamoleSocket(socket, config, information);
     }
 
-    private ConfiguredGuacamoleSocket createSocketAndSession(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException {
+    private ConfiguredGuacamoleSocket createSocketAndSession(final VdiInstance instance, final ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException, ConnectionException {
         // Create new session if user is owner
-        if (user.getRole().equals(InstanceMemberRole.OWNER) || instanceSessionService.canConnectWhileOwnerAway(instance, user.getId())) {
+        if (user.role().equals(InstanceMemberRole.OWNER) || instance.canConnectWhileOwnerAway()) {
             final ConfiguredGuacamoleSocket socket = buildSocket(instance);
-            InstanceSession session = instanceSessionService.create(instance.getId(), GUACAMOLE_PROTOCOL, socket.getConnectionID());
-            logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
+            logger.info("User {} created guacamole session {}", getInstanceAndUser(instance, user), socket.getConnectionID());
 
             return socket;
 
@@ -132,23 +120,25 @@ public class GuacamoleDesktopService extends DesktopService {
         }
     }
 
-    private ConfiguredGuacamoleSocket getOrCreateSocket(Instance instance, ConnectedUser user) throws OwnerNotConnectedException, GuacamoleException {
-        InstanceSession session = instanceSessionService.getLatestByInstanceAndProtocol(instance, GUACAMOLE_PROTOCOL);
-
-        if (session == null) {
+    private ConfiguredGuacamoleSocket getOrCreateSocket(final SocketClient client, final VdiInstance instance, final ConnectedUser user, final String connectionId) throws OwnerNotConnectedException, GuacamoleException, ConnectionException {
+        if (connectionId == null) {
             return this.createSocketAndSession(instance, user);
 
         } else {
             try {
                 // try to connect to existing sessionId
-                logger.info("{} connecting to existing guacamole session {}", getInstanceAndUser(instance, user), session.getConnectionId());
-                return buildSocket(instance, session);
+                logger.info("{} connecting to existing guacamole session {}", getInstanceAndUser(instance, user), connectionId);
+                return buildSocket(instance, connectionId);
 
             } catch (GuacamoleException exception) {
-                logger.warn("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user), session.getConnectionId());
+                logger.warn("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user), connectionId);
                 // If it fails then invalidate current session
-                session.setCurrent(false);
-                this.instanceSessionService.updatePartial(session);
+                try {
+                    this.visaApiService.onSessionConnectionFailed(instance.id(), GUACAMOLE_PROTOCOL, connectionId, client.clientId(), user);
+
+                } catch (ApiCommunicationException e) {
+                    logger.warn(e.getMessage());
+                }
 
                 // Create a new session
                 return this.createSocketAndSession(instance, user);
@@ -156,10 +146,10 @@ public class GuacamoleDesktopService extends DesktopService {
         }
     }
 
-    private GuacamoleSocket createGuacamoleSocket(final Instance instance, final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
+    private ConfiguredGuacamoleSocket createGuacamoleSocket(final SocketClient client, final VdiInstance instance, final ConnectedUser user, final String connectionId) throws OwnerNotConnectedException, ConnectionException {
         try {
             synchronized (instance) {
-                final GuacamoleSocket socket = getOrCreateSocket(instance, user);
+                final ConfiguredGuacamoleSocket socket = getOrCreateSocket(client, instance, user, connectionId);
 
                 return socket;
             }
@@ -171,12 +161,13 @@ public class GuacamoleDesktopService extends DesktopService {
 
     @Override
     public RemoteDesktopConnection connect(final SocketClient client,
-                                           final Instance instance,
-                                           final ConnectedUser user) throws OwnerNotConnectedException, ConnectionException {
-        final GuacamoleSocket guacamoleSocket = this.createGuacamoleSocket(instance, user);
+                                           final VdiInstance instance,
+                                           final ConnectedUser user,
+                                           final String connectionId) throws OwnerNotConnectedException, ConnectionException {
+        final ConfiguredGuacamoleSocket guacamoleSocket = this.createGuacamoleSocket(client, instance, user, connectionId);
 
         final GuacamoleTunnel guacamoleTunnel = new SimpleGuacamoleTunnel(guacamoleSocket);
         final ConnectionThread connectionThread = executorService.createGuacamoleConnectionThread(client, guacamoleTunnel, instance, user);
-        return new RemoteDesktopConnection(client, connectionThread);
+        return new RemoteDesktopConnection(client, connectionThread, guacamoleSocket.getConnectionID());
     }
 }

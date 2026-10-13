@@ -9,7 +9,7 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.*;
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 @LookupIfProperty(name = "broker.redisEnabled", stringValue = "true")
 @Singleton

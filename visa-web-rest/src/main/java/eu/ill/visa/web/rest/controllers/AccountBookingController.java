@@ -18,8 +18,8 @@ import jakarta.ws.rs.core.SecurityContext;
 import java.time.LocalDate;
 import java.util.*;
 
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.SUPPORT;
+import static eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole.OWNER;
+import static eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole.SUPPORT;
 import static java.lang.String.format;
 
 @Path("/account/bookings")

@@ -2,7 +2,7 @@ package eu.ill.visa.broker.brokers.redis;
 
 import eu.ill.visa.broker.MessageSubscriptionList;
 import eu.ill.visa.broker.domain.exceptions.MessageMarshallingException;
-import eu.ill.visa.core.domain.Timer;
+import eu.ill.visa.common.utils.domain.Timer;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.formatException;
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
 

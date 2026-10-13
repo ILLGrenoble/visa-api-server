@@ -27,7 +27,7 @@ public class RemoteDesktopDisconnectSubscriber {
                 this.desktopSessionService.onDesktopMemberDisconnect(desktopSessionMember);
             }, () -> {
                 this.desktopAccessService.cancelAccessRequest(socketClient);
-        });
+            });
     }
 }
 

@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.business.concurrency;
 
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.common.vdi.domain.VdiInstance;
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.PingResponseHandler;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.apache.guacamole.GuacamoleClientException;
@@ -21,7 +21,7 @@ public class GuacamoleConnectionThread extends ConnectionThread {
     private static final Logger logger = LoggerFactory.getLogger(GuacamoleConnectionThread.class);
     private final GuacamoleTunnel tunnel;
 
-    public GuacamoleConnectionThread(final SocketClient client, final GuacamoleTunnel tunnel, final Instance instance, final ConnectedUser user) {
+    public GuacamoleConnectionThread(final SocketClient client, final GuacamoleTunnel tunnel, final VdiInstance instance, final ConnectedUser user) {
         super(client, instance, user);
         this.tunnel = tunnel;
     }

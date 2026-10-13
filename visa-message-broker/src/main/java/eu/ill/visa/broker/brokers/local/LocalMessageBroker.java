@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.formatException;
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 @LookupIfProperty(name = "broker.redisEnabled", stringValue = "false")
 @Singleton

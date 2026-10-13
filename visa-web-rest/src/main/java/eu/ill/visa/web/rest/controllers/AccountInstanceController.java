@@ -39,8 +39,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.SUPPORT;
+import static eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole.OWNER;
+import static eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole.SUPPORT;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static java.util.stream.Collectors.toList;
 import static org.jboss.resteasy.reactive.RestResponse.Status.CREATED;

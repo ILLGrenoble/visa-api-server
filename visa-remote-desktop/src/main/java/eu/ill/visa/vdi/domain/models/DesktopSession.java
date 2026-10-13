@@ -1,5 +1,7 @@
 package eu.ill.visa.vdi.domain.models;
 
+import eu.ill.visa.common.vdi.domain.VdiInstance;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,31 +10,25 @@ import java.util.stream.Stream;
 
 public class DesktopSession {
 
-    private final Long sessionId;
     private final String connectionId;
-    private final Long instanceId;
+    private final VdiInstance instance;
     private final String protocol;
     private boolean isLocked;
 
     private final List<DesktopSessionMember> members = new ArrayList<>();
 
-    public DesktopSession(final Long sessionId, final String connectionId, final Long instanceId, final String protocol) {
-        this.sessionId = sessionId;
+    public DesktopSession(final String connectionId, final VdiInstance instance, final String protocol) {
         this.connectionId = connectionId;
-        this.instanceId = instanceId;
+        this.instance = instance;
         this.protocol = protocol;
-    }
-
-    public Long getSessionId() {
-        return sessionId;
     }
 
     public String getConnectionId() {
         return connectionId;
     }
 
-    public Long getInstanceId() {
-        return instanceId;
+    public VdiInstance getInstance() {
+        return instance;
     }
 
     public String getProtocol() {
@@ -72,11 +68,11 @@ public class DesktopSession {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DesktopSession that = (DesktopSession) o;
-        return Objects.equals(sessionId, that.sessionId);
+        return Objects.equals(connectionId, that.connectionId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(sessionId);
+        return Objects.hashCode(connectionId);
     }
 }

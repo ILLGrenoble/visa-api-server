@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.*;
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 @ApplicationScoped
 public class ClientEventsGateway {

@@ -1,7 +1,7 @@
 package eu.ill.visa.web.rest.dtos;
 
 import eu.ill.visa.core.entity.InstanceSessionMember;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 
 import java.util.Date;
 
