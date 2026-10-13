@@ -3,11 +3,10 @@ package eu.ill.visa.business.vdi;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
-import eu.ill.visa.business.InvalidTokenException;
 import eu.ill.visa.business.VDIConfiguration;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.business.vdi.events.UsersConnectedEvent;
-import eu.ill.visa.business.vdi.exceptions.SessionConnectionException;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.common.vdi.broker.*;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
@@ -121,7 +120,7 @@ public class VdiProviderService {
         return new VdiAuthenticationToken(vdiInstance, connectedUser, usingPublicAccessToken, activeConnectionId, ownerIsConnected);
     }
 
-    public void onSessionConnect(final Long instanceId, final String protocol, final String connectionId, final String clientId, final ConnectedUser user) throws SessionConnectionException {
+    public void onSessionConnect(final Long instanceId, final String protocol, final String connectionId, final String clientId, final ConnectedUser user) {
         // Get latest session for instance and protocol
         InstanceSession instanceSession = instanceSessionService.getLatestByInstanceIdAndProtocol(instanceId, protocol);
 

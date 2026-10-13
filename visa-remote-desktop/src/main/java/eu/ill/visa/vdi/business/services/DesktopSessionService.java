@@ -5,7 +5,7 @@ import eu.ill.visa.broker.MessageBroker;
 import eu.ill.visa.common.vdi.broker.*;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
-import eu.ill.visa.vdi.domain.exceptions.ApiCommunicationException;
+import eu.ill.visa.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.common.utils.domain.SampleStats;
 import eu.ill.visa.common.utils.domain.Timer;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
@@ -56,13 +56,13 @@ public class DesktopSessionService {
                                  final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
                                  final EventDispatcher eventDispatcher,
                                  final ConnectionThreadExecutor connectionThreadExecutor,
-                                 final VisaApiService visaApiService) {
+                                 final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance) {
         this.guacamoleDesktopService = guacamoleDesktopService;
         this.webXDesktopService = webXDesktopService;
         this.messageBroker = messageBrokerInstance.get();
         this.eventDispatcher = eventDispatcher;
         this.connectionThreadExecutor = connectionThreadExecutor;
-        this.visaApiService = visaApiService;
+        this.visaApiService = visaApiServiceInstance.get();
 
         this.messageBroker.subscribe(UserConnectedMessage.class)
             .next((message) -> this.onUserConnected(message.connectionId(), message.clientId(), message.user()));

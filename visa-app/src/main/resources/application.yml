@@ -20,6 +20,8 @@ quarkus:
     enabled: ${VISA_SCHEDULER_ENABLED:true}
   devservices:
     enabled: true
+  websocket:
+    dispatch-to-worker: true
   mailer:
     mock: ${VISA_NOTIFICATION_EMAIL_ADAPTER_MOCKED:false}
     host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST:change.mail.com}
@@ -154,6 +156,8 @@ vdi:
   protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}
   numberOfWsThreads: ${VISA_VDI_NUMBER_OF_WS_THREADS:8}
   maxSessionInactivityTimeMinutes: ${VISA_VDI_MAX_SESSION_INACTIVITY_TIME_MINUTES:360}
+  isMicroservice: false
+  apiServerAuthToken: ${VISA_VDI_API_SERVER_AUTH_TOKEN}
   guacd:
     ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
     port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}

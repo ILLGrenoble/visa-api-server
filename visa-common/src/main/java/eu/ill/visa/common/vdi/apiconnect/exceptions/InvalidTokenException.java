@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.apiconnect.exceptions;
+package eu.ill.visa.common.vdi.apiconnect.exceptions;
 
 public class InvalidTokenException extends Exception {
     public InvalidTokenException() {

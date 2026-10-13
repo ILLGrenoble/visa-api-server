@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.domain.exceptions;
+package eu.ill.visa.vdi.apiconnect.exceptions;
 
 public class ApiCommunicationException extends Exception {
     public ApiCommunicationException() {

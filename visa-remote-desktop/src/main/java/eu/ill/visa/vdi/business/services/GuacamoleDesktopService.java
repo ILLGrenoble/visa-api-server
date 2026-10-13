@@ -6,7 +6,7 @@ import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
-import eu.ill.visa.vdi.domain.exceptions.ApiCommunicationException;
+import eu.ill.visa.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
@@ -37,10 +37,10 @@ public class GuacamoleDesktopService extends DesktopService {
     private final ConnectionThreadExecutor executorService;
 
     @Inject
-    public GuacamoleDesktopService(final VisaApiService visaApiService,
+    public GuacamoleDesktopService(final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance,
                                    final VirtualDesktopConfiguration configuration,
                                    final ConnectionThreadExecutor executorService) {
-        this.visaApiService = visaApiService;
+        this.visaApiService = visaApiServiceInstance.get();
         this.configuration = configuration;
         this.executorService = executorService;
     }

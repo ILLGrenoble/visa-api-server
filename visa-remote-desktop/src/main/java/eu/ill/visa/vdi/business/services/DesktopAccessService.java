@@ -7,7 +7,7 @@ import eu.ill.visa.common.vdi.broker.*;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiInstance;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
-import eu.ill.visa.vdi.domain.exceptions.ApiCommunicationException;
+import eu.ill.visa.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;

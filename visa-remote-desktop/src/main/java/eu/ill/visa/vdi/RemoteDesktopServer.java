@@ -42,7 +42,7 @@ public class RemoteDesktopServer {
                                final VirtualDesktopConfiguration configuration,
                                final ClientEventsGateway clientEventsGateway,
                                final EventDispatcher eventDispatcher,
-                               final VisaApiService visaApiService,
+                               final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance,
                                final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket,
                                final WebXRemoteDesktopSocket webXRemoteDesktopSocket) {
         this.desktopConnectionService = desktopConnectionService;
@@ -50,7 +50,7 @@ public class RemoteDesktopServer {
         this.configuration = configuration;
         this.clientEventsGateway = clientEventsGateway;
         this.eventDispatcher = eventDispatcher;
-        this.visaApiService = visaApiService;
+        this.visaApiService = visaApiServiceInstance.get();
         this.guacamoleRemoteDesktopSocket = guacamoleRemoteDesktopSocket;
         this.webXRemoteDesktopSocket = webXRemoteDesktopSocket;
     }

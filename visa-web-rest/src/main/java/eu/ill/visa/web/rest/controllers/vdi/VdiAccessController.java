@@ -1,13 +1,12 @@
 package eu.ill.visa.web.rest.controllers.vdi;
 
-import eu.ill.visa.business.InvalidTokenException;
 import eu.ill.visa.business.services.SignatureService;
 import eu.ill.visa.business.vdi.VdiProviderService;
-import eu.ill.visa.business.vdi.exceptions.SessionConnectionException;
 import eu.ill.visa.common.vdi.apiconnect.ClientActivityInput;
 import eu.ill.visa.common.vdi.apiconnect.ClientConnectionInput;
 import eu.ill.visa.common.vdi.apiconnect.ClientDisconnectionInput;
 import eu.ill.visa.common.vdi.apiconnect.VdiConnectionSignature;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
 import eu.ill.visa.core.entity.InstanceSession;
@@ -68,19 +67,13 @@ public class VdiAccessController extends AbstractController {
     @POST
     @Path("/session/connect")
     public void sessionConnect(ClientConnectionInput input) {
-        try {
-            this.vdiProviderService.onSessionConnect(input.instanceId(), input.protocol(), input.connectionId(), input.clientId(), input.user());
-
-        } catch (SessionConnectionException exception) {
-            throw new BadRequestException(exception.getMessage());
-        }
+        this.vdiProviderService.onSessionConnect(input.instanceId(), input.protocol(), input.connectionId(), input.clientId(), input.user());
     }
 
     @POST
     @Path("/session/disconnect")
     public void sessionDisconnect(ClientDisconnectionInput input) {
         this.vdiProviderService.onSessionDisconnect(input.connectionId(), input.clientId(), input.user());
-
     }
 
     @POST

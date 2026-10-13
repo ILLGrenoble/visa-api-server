@@ -1,11 +1,11 @@
 package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.broker.EventDispatcher;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiInstance;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
-import eu.ill.visa.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.business.services.VisaApiService;
@@ -47,7 +47,7 @@ public class RemoteDesktopConnectSubscriber {
         try {
             // Validate the token and get the user and instance
             final String token = socketClient.getPathParameter(TOKEN_PATH_PARAMETER);
-            final VdiAuthenticationToken instanceAuthenticationToken = this.visaApiService.authenticate(token, socketClient.protocol());
+            final VdiAuthenticationToken instanceAuthenticationToken = this.visaApiService.authenticate(socketClient.protocol(), token);
             final ConnectedUser connectedUser = instanceAuthenticationToken.connectedUser();
             final VdiInstance instance = instanceAuthenticationToken.instance();
             final Boolean isPublicAccessToken = instanceAuthenticationToken.isPublicAccessToken();

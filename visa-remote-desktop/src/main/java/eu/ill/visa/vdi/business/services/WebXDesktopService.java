@@ -6,7 +6,7 @@ import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
-import eu.ill.visa.vdi.domain.exceptions.ApiCommunicationException;
+import eu.ill.visa.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
@@ -59,10 +59,10 @@ public class WebXDesktopService extends DesktopService {
     private final VirtualDesktopConfiguration configuration;
 
     @Inject
-    public WebXDesktopService(final VisaApiService visaApiService,
+    public WebXDesktopService(final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance,
                               final ConnectionThreadExecutor executorService,
                               final VirtualDesktopConfiguration configuration) {
-        this.visaApiService = visaApiService;
+        this.visaApiService = visaApiServiceInstance.get();
         this.executorService = executorService;
         this.configuration = configuration;
     }
