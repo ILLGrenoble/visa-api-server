@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.*;
+
 @ApplicationScoped
 public class ClientEventsGateway {
 
@@ -65,7 +67,7 @@ public class ClientEventsGateway {
                         ((ClientEventSubscriptionList<T>)socketEventSubscriptionList).onEvent(clientId, event);
 
                     } catch (Exception e) {
-                        logger.error("Failed to deserialize event of type {} to class {}: {}", clientEventCarrier.type(), socketEventSubscriptionList.getEventClass(), e.getMessage());
+                        logger.error("Failed to deserialize event of type {} to class {}: {}", clientEventCarrier.type(), socketEventSubscriptionList.getEventClass(), formatException(e));
                     }
                 }
             });

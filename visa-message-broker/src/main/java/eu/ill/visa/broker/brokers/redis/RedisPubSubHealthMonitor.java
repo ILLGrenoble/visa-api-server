@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.*;
+
 public class RedisPubSubHealthMonitor {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisPubSubHealthMonitor.class);
@@ -79,7 +81,7 @@ public class RedisPubSubHealthMonitor {
                         publisher.publish(CHANNEL, new RedisMessageCarrier(PING_MESSAGE));
 
                     } catch (Exception error) {
-                        logger.error("Error while publishing Redis pub/sub health monitor ping", error);
+                        logger.error("Error while publishing Redis pub/sub health monitor ping: {}", formatException(error));
                         if (this.redisPingTimeout != null) {
                             this.redisPingTimeout.cancel();
                             this.redisPingTimeout = null;

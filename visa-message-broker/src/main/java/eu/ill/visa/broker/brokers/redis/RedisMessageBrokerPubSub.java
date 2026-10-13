@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.formatException;
+
 public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
 
     private record RedisEventHandler(Runnable runnable) {
@@ -24,7 +26,7 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
                 runnable.run();
 
             } catch (Exception error) {
-                logger.error("Handling of Redis message failed", error);
+                logger.error("Handling of Redis message failed: {}", formatException(error));
             }
         }
     }
@@ -93,7 +95,7 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
                 logger.trace("... message broadcasted.");
 
             } catch (Exception error) {
-                logger.error("Failed to publish message to Redis", error);
+                logger.error("Failed to publish message to Redis: {}", formatException(error));
             }
         });
     }
@@ -131,7 +133,9 @@ public class RedisMessageBrokerPubSub implements Consumer<RedisMessageCarrier> {
         try {
             T data = message.getData();
             MessageSubscriptionList<T> subscriptionList = this.getSubscriptionList(message.getClassName());
-            subscriptionList.onMessage(data);
+            if (subscriptionList != null) {
+                subscriptionList.onMessage(data);
+            }
 
         } catch (MessageMarshallingException e) {
             logger.error("Failed to deserialize remote desktop message payload: e");

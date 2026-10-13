@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static eu.ill.visa.broker.domain.exceptions.BrokerExceptionFormatter.formatException;
+
 @LookupIfProperty(name = "broker.redisEnabled", stringValue = "false")
 @Singleton
 public class LocalMessageBroker implements MessageBroker {
@@ -44,7 +46,7 @@ public class LocalMessageBroker implements MessageBroker {
                 }
 
             } catch (Exception error) {
-                logger.error("Failed to publish message with local message broker: {}", error.getMessage());
+                logger.error("Failed to publish message with local message broker: {}", formatException(error));
             }
         });
 
