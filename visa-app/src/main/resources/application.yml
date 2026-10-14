@@ -8,6 +8,7 @@ quarkus:
     access-log:
       enabled: ${VISA_LOGGING_ACCESS_LOG_ENABLED:true}
       pattern: combined
+      exclude-pattern: /api/vdi/.*
     cors:
       ~: true
       origins:  ${VISA_CORS_ORIGIN:*}
