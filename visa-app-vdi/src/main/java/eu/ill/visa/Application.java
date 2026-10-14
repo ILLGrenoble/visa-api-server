@@ -1,4 +1,4 @@
-package eu.ill.visa.app;
+package eu.ill.visa;
 
 
 import io.quarkus.runtime.Quarkus;

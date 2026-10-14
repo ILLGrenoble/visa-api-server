@@ -1,15 +1,14 @@
-package eu.ill.visa.app.vdi;
+package eu.ill.visa.business.vdi;
 
 
 import eu.ill.visa.business.services.SignatureService;
-import eu.ill.visa.business.vdi.VdiProviderService;
+import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
 import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
-import eu.ill.visa.vdi.apiconnect.exceptions.ApiCommunicationException;
-import eu.ill.visa.vdi.business.services.VisaApiService;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

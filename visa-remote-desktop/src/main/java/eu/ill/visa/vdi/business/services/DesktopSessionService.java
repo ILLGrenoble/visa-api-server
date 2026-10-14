@@ -2,10 +2,11 @@ package eu.ill.visa.vdi.business.services;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
+import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.common.vdi.broker.*;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
-import eu.ill.visa.vdi.apiconnect.exceptions.ApiCommunicationException;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.common.utils.domain.SampleStats;
 import eu.ill.visa.common.utils.domain.Timer;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;

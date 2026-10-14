@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.apiconnect.exceptions;
+package eu.ill.visa.vdi.apiconnect;
 
 public class UnauthorizedRuntimeException  extends RuntimeException {
     public UnauthorizedRuntimeException(String message) {

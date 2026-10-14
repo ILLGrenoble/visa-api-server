@@ -1,10 +1,9 @@
-package eu.ill.visa.vdi.apiconnect.restclient;
+package eu.ill.visa.vdi.apiconnect;
 
 import eu.ill.visa.common.vdi.apiconnect.ClientActivityInput;
 import eu.ill.visa.common.vdi.apiconnect.ClientConnectionInput;
 import eu.ill.visa.common.vdi.apiconnect.ClientDisconnectionInput;
 import eu.ill.visa.common.vdi.apiconnect.VdiConnectionSignature;
-import eu.ill.visa.vdi.apiconnect.exceptions.UnauthorizedRuntimeException;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;

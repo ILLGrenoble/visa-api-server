@@ -4,7 +4,7 @@ import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.gateway.ClientEventsGateway;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.vdi.business.services.VisaApiService;
+import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.vdi.display.sockets.GuacamoleRemoteDesktopSocket;
 import eu.ill.visa.vdi.display.sockets.WebXRemoteDesktopSocket;
 import eu.ill.visa.vdi.display.subscribers.GuacamoleRemoteDesktopEventSubscriber;
