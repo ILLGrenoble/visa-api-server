@@ -18,11 +18,7 @@
             <artifactId>visa-common</artifactId>
             <version>3.8.4</version>
         </dependency>
-        
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-config-yaml</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm</artifactId>

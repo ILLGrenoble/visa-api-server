@@ -154,7 +154,6 @@ broker:
 
 vdi:
   protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}
-  numberOfWsThreads: ${VISA_VDI_NUMBER_OF_WS_THREADS:8}
   maxSessionInactivityTimeMinutes: ${VISA_VDI_MAX_SESSION_INACTIVITY_TIME_MINUTES:360}
   isMicroservice: false
   apiServerAuthToken: ${VISA_VDI_API_SERVER_AUTH_TOKEN}
@@ -187,7 +186,7 @@ client:
     openDataIncluded: ${VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA:false}
 
 security:
-  vdiAuthToken: ${VISA_SECURITY_VDI_AUTH_TOKEN}
+  vdiAuthToken: ${VISA_VDI_API_SERVER_AUTH_TOKEN}
 
 "%prod":
   quarkus:

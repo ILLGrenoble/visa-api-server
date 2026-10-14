@@ -11,8 +11,6 @@ public interface VirtualDesktopConfiguration {
 
     String protocol();
 
-    int numberOfWsThreads();
-
     int maxSessionInactivityTimeMinutes();
 
     Optional<String> apiServerAuthToken();

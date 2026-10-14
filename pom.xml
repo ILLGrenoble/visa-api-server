@@ -7,21 +7,37 @@
     <artifactId>api</artifactId>
     <version>3.8.4</version>
 
-    <modules>
-        <module>visa-common</module>
-        <module>visa-message-broker</module>
-        <module>visa-core</module>
-        <module>visa-persistence</module>
-        <module>visa-cloud</module>
-        <module>visa-business</module>
-        <module>visa-scheduler</module>
-        <module>visa-security</module>
-        <module>visa-remote-desktop</module>
-        <module>visa-web-gateway</module>
-        <module>visa-web-rest</module>
-        <module>visa-web-graphql</module>
-        <module>visa-app</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>visa-api-server</id>
+            <modules>
+                <module>visa-common</module>
+                <module>visa-message-broker</module>
+                <module>visa-core</module>
+                <module>visa-persistence</module>
+                <module>visa-cloud</module>
+                <module>visa-business</module>
+                <module>visa-scheduler</module>
+                <module>visa-security</module>
+                <module>visa-remote-desktop</module>
+                <module>visa-web-gateway</module>
+                <module>visa-web-rest</module>
+                <module>visa-web-graphql</module>
+                <module>visa-app</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>visa-vdi</id>
+            <modules>
+                <module>visa-common</module>
+                <module>visa-message-broker</module>
+                <module>visa-remote-desktop</module>
+                <module>visa-app-vdi</module>
+            </modules>
+        </profile>
+    </profiles>
+
+
 
     <packaging>pom</packaging>
 
