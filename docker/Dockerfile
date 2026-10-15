@@ -17,9 +17,9 @@ RUN mkdir -p /app
 WORKDIR /app
 
 # copy built application
-COPY --from=builder /usr/src/app/visa-app/target/visa-app-runner.jar /app/visa-app.jar
+COPY --from=builder /usr/src/app/visa-app/target/visa-app-runner.jar /app/visa-api-server.jar
 COPY --from=builder /usr/src/app/db /app/db
 
-CMD java -Djava.util.logging.manager=org.jboss.logmanager.LogManager -jar /app/visa-app.jar
+CMD [ "java", "-Djava.util.logging.manager=org.jboss.logmanager.LogManager", "-jar", "/app/visa-api-server.jar" ]
 
-EXPOSE 8086 8087
+EXPOSE 8086

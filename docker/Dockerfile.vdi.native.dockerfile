@@ -26,7 +26,7 @@ COPY . .
 ENV TZ="Europe/Paris"
 
 # Build a native package with the graalVM that can run the code as an executable without the need of a JVM
-RUN ./mvnw package -Pnative -DskipTests=true $MAVEN_OPTS
+RUN ./mvnw package -Pvisa-vdi-native -DskipTests=true $MAVEN_OPTS
 
 #  "quarkus-micro-image" - small container image providing dependencies to run the native application
 FROM quay.io/quarkus/quarkus-micro-image:2.0
@@ -38,11 +38,11 @@ RUN chown 1001 /work \
     && chown 1001:root /work
 
 # Copy application executable from previous image, and makes sure the 1001 user has rights
-COPY --from=builder --chown=1001:root /usr/src/app/visa-app/target/*-runner /work/application
+COPY --from=builder --chown=1001:root /usr/src/app/visa-app-vdi/target/visa-vdi-runner /work/visa-vdi
 
-EXPOSE 8086 8087
+EXPOSE 8086
 
-# Run as user with privalages to run the application
+# Run as user with privileges to run the application
 USER 1001
 
-CMD ["./application"]
+CMD [ "./visa-vdi" ]
