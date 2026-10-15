@@ -21,7 +21,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/visa-vdi
+          images: ghcr.io/illgrenoble/visa-vdi
           tags: |
             type=ref,event=branch
             type=ref,event=pr
