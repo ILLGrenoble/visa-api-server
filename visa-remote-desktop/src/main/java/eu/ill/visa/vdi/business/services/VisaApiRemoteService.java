@@ -9,6 +9,7 @@ import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
 import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
+import eu.ill.visa.vdi.VirtualDesktopConfiguration;
 import eu.ill.visa.vdi.apiconnect.UnauthorizedRuntimeException;
 import eu.ill.visa.vdi.apiconnect.VisaApiClient;
 import eu.ill.visa.common.vdi.apiconnect.exceptions.ApiCommunicationException;
@@ -31,6 +32,12 @@ public class VisaApiRemoteService implements VisaApiService {
 
     @RestClient
     VisaApiClient visaApiClient;
+
+    public VisaApiRemoteService(final VirtualDesktopConfiguration configuration) {
+        if (configuration.apiServerAuthToken().isEmpty()) {
+            logger.error("No VISA API Server Auth Token has been specified in the configuration value vdi.apiServerAuthToken. This must be set using the VISA_VDI_API_SERVER_AUTH_TOKEN environment variable to enable security requests with the VISA API Server: remote desktop services will not be possible without it.");
+        }
+    }
 
     public VdiAuthenticationToken authenticate(final String vdiProtocol, final String token) throws InvalidTokenException {
         // Server will:

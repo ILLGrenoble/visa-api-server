@@ -6,6 +6,7 @@ import eu.ill.visa.common.vdi.apiconnect.ClientDisconnectionInput;
 import eu.ill.visa.common.vdi.apiconnect.VdiConnectionSignature;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
+import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,6 +16,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import java.util.List;
 
+@LookupIfProperty(name = "vdi.apiServerAuthToken", stringValue = "true")
 @ClientHeaderParam(name = "X-VDI-Auth-Token", value = "${vdi.apiServerAuthToken}")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
