@@ -131,15 +131,15 @@ public class DesktopSessionService {
     }
 
     public void onDesktopMemberDisconnect(final DesktopSessionMember desktopSessionMember) {
+        // Remove, before we close the tunnel, the desktop session member (avoids double call when this is called from a Idle Timeout)
+        DesktopSession desktopSession = desktopSessionMember.session();
+        this.removeDesktopSessionMember(desktopSession, desktopSessionMember);
+
         // Stop the idle handler
         desktopSessionMember.idleSessionHandler().stop();
         desktopSessionMember.nopTimer().cancel();
 
         desktopSessionMember.remoteDesktopConnection().getConnectionThread().closeTunnel();
-
-        DesktopSession desktopSession = desktopSessionMember.session();
-
-        this.removeDesktopSessionMember(desktopSession, desktopSessionMember);
 
         // Notify the server of disconnection
         try {
