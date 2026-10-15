@@ -4,24 +4,18 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
 
 import java.util.Map;
+import java.util.Optional;
 
 @ConfigMapping(prefix = "vdi", namingStrategy = ConfigMapping.NamingStrategy.VERBATIM)
 public interface VirtualDesktopConfiguration {
 
-    String OWNER_DISCONNECTION_POLICY_DISCONNECT_ALL = "DISCONNECT_ALL";
-    String OWNER_DISCONNECTION_POLICY_LOCK_ROOM = "LOCK_ROOM";
-
-    boolean enabled();
-
-    String ownerDisconnectionPolicy();
-
-    boolean cleanupSessionsOnStartup();
-
     String protocol();
 
-    int numberOfWsThreads();
-
     int maxSessionInactivityTimeMinutes();
+
+    Optional<String> apiServerAuthToken();
+
+    boolean isMicroservice();
 
     @WithName("guacd")
     Map<String, String> guacdConfiguration();

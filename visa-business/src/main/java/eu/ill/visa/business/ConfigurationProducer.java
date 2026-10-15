@@ -43,6 +43,11 @@ public class ConfigurationProducer {
     }
 
     @Produces
+    public VDIConfiguration vdi() {
+        return this.businessConfiguration.vdi();
+    }
+
+    @Produces
     @Unremovable
     public ErrorReportEmailConfiguration errorReportEmail() {
         return this.businessConfiguration.errorReportEmail();

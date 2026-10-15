@@ -1,8 +1,8 @@
 package eu.ill.visa.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.entity.converter.CommaSeparatedListConverter;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;

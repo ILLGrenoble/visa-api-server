@@ -61,6 +61,12 @@ public class InstanceSessionRepository extends AbstractRepository<InstanceSessio
         return query.getResultList();
     }
 
+    public List<InstanceSession> getAllByConnectionId(String connectionId) {
+        final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getAllByConnectionId", InstanceSession.class);
+        query.setParameter("connectionId", connectionId);
+        return query.getResultList();
+    }
+
     public InstanceSession getById(final Long id) {
         try {
             final TypedQuery<InstanceSession> query = getEntityManager().createNamedQuery("instanceSession.getById", InstanceSession.class);

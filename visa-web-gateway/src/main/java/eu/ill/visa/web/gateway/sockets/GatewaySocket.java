@@ -2,7 +2,7 @@ package eu.ill.visa.web.gateway.sockets;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.domain.models.ClientEventCarrier;
-import eu.ill.visa.business.InvalidTokenException;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.business.services.ClientAuthenticationTokenService;
 import eu.ill.visa.core.entity.ClientAuthenticationToken;
 import eu.ill.visa.core.entity.User;

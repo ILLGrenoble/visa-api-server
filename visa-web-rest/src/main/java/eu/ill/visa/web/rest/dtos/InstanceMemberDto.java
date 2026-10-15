@@ -1,7 +1,7 @@
 package eu.ill.visa.web.rest.dtos;
 
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.entity.InstanceMember;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 
 public class InstanceMemberDto implements Comparable<InstanceMemberDto> {
 

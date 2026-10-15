@@ -1,8 +1,6 @@
 package eu.ill.visa.web.rest.filters;
 
 import eu.ill.visa.security.tokens.AccountToken;
-import eu.ill.visa.security.tokens.ApplicationToken;
-import eu.ill.visa.security.tokens.InstanceToken;
 import io.vertx.core.http.HttpServerRequest;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -16,12 +14,15 @@ import org.slf4j.LoggerFactory;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 @Provider
 public class LoggingRequestFilter implements ContainerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingRequestFilter.class);
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
+
+    private static final String excludeFilter = "/vdi/.*";
 
 
     @Context
@@ -42,7 +43,10 @@ public class LoggingRequestFilter implements ContainerRequestFilter {
         final String address = request.remoteAddress().toString();
         final String forwardedIP = request.getHeader("X-Forwarded-For");
 
-        logger.info("{} - {} [{}] \"{} {}\"", forwardedIP == null ? address : forwardedIP, principal, dateFormat.format(new Date()), method, path);
+        Pattern pattern = Pattern.compile(excludeFilter);
+        if (!pattern.matcher(path).matches()) {
+            logger.info("{} - {} [{}] \"{} {}\"", forwardedIP == null ? address : forwardedIP, principal, dateFormat.format(new Date()), method, path);
+        }
     }
 
     private String getPrincipal(SecurityContext securityContext) {
@@ -50,10 +54,7 @@ public class LoggingRequestFilter implements ContainerRequestFilter {
         if (principal instanceof AccountToken accountToken) {
             return principal.getName() + " (" + accountToken.getUser().getId() + ")";
 
-        } else if (principal instanceof InstanceToken) {
-            return principal.getName();
-
-        } else if (principal instanceof ApplicationToken) {
+        } else if (principal != null) {
             return principal.getName();
         }
         return "-";

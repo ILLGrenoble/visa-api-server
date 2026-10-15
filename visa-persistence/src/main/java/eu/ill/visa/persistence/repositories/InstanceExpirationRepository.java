@@ -47,6 +47,17 @@ public class InstanceExpirationRepository extends AbstractRepository<InstanceExp
         }
     }
 
+    public InstanceExpiration getByInstanceId(final Long instanceId) {
+        try {
+            final TypedQuery<InstanceExpiration> query = getEntityManager()
+                .createNamedQuery("instanceExpiration.getByInstanceId", InstanceExpiration.class);
+            query.setParameter("instanceId", instanceId);
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
     public List<InstanceExpiration> getAllExpired(Date expirationDate) {
         final TypedQuery<InstanceExpiration> query = getEntityManager()
             .createNamedQuery("instanceExpiration.getAllExpired", InstanceExpiration.class);

@@ -1,26 +1,22 @@
 package eu.ill.visa.vdi.display.subscribers;
 
 import eu.ill.visa.broker.EventDispatcher;
-import eu.ill.visa.business.InvalidTokenException;
-import eu.ill.visa.business.services.InstanceAuthenticationTokenService;
-import eu.ill.visa.business.services.InstanceSessionMemberService;
-import eu.ill.visa.business.services.InstanceSessionService;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceAuthenticationToken;
-import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.User;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
+import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
+import eu.ill.visa.common.vdi.domain.VdiInstance;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
+import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
-import eu.ill.visa.vdi.domain.models.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.NopSender;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 import static eu.ill.visa.vdi.domain.models.SessionEvent.*;
 
 public class RemoteDesktopConnectSubscriber {
@@ -31,23 +27,17 @@ public class RemoteDesktopConnectSubscriber {
 
     private final DesktopSessionService desktopSessionService;
     private final DesktopAccessService desktopAccessService;
-    private final InstanceSessionService instanceSessionService;
-    private final InstanceSessionMemberService instanceSessionMemberService;
-    private final InstanceAuthenticationTokenService authenticator;
     private final EventDispatcher eventDispatcher;
+    private final VisaApiService visaApiService;
 
     public RemoteDesktopConnectSubscriber(final DesktopSessionService desktopSessionService,
                                           final DesktopAccessService desktopAccessService,
-                                          final InstanceSessionService instanceSessionService,
-                                          final InstanceSessionMemberService instanceSessionMemberService,
-                                          final InstanceAuthenticationTokenService authenticator,
-                                          final EventDispatcher eventDispatcher) {
+                                          final EventDispatcher eventDispatcher,
+                                          final VisaApiService visaApiService) {
         this.desktopSessionService = desktopSessionService;
         this.desktopAccessService = desktopAccessService;
-        this.instanceSessionService = instanceSessionService;
-        this.instanceSessionMemberService = instanceSessionMemberService;
-        this.authenticator = authenticator;
         this.eventDispatcher = eventDispatcher;
+        this.visaApiService = visaApiService;
     }
 
     public void onConnect(final SocketClient socketClient, final NopSender nopSender) {
@@ -57,50 +47,40 @@ public class RemoteDesktopConnectSubscriber {
         try {
             // Validate the token and get the user and instance
             final String token = socketClient.getPathParameter(TOKEN_PATH_PARAMETER);
-            final InstanceAuthenticationToken instanceAuthenticationToken = authenticator.authenticate(token);
-            final User user = instanceAuthenticationToken.getUser();
-            final Instance instance = instanceAuthenticationToken.getInstance();
-            final String publicAccessToken = instanceAuthenticationToken.getPublicAccessToken();
+            final VdiAuthenticationToken instanceAuthenticationToken = this.visaApiService.authenticate(socketClient.protocol(), token);
+            final ConnectedUser connectedUser = instanceAuthenticationToken.connectedUser();
+            final VdiInstance instance = instanceAuthenticationToken.instance();
+            final Boolean isPublicAccessToken = instanceAuthenticationToken.isPublicAccessToken();
+            final String activeConnectionId = instanceAuthenticationToken.activeConnectionId();
+            final Boolean isOwnerConnected = instanceAuthenticationToken.isOwnerConnected();
 
-            InstanceMemberRole role = instanceSessionService.getUserSessionRole(instance, user);
-            boolean usingPublicAccessToken = false;
 
-            // Check if we should examine the accessToken
-            if (role.equals(InstanceMemberRole.NONE) || role.equals(InstanceMemberRole.SUPPORT) && publicAccessToken != null && publicAccessToken.equals(instance.getPublicAccessToken())) {
-                logger.info("User {} is connecting using a public access token for instance {}", user, instance.getId());
-                role = instance.getPublicAccessRole();
-                usingPublicAccessToken = true;
-            }
-
-            ConnectedUser connectedUser = new ConnectedUser(user.getId(), user.getFullName(), role);
-
-            if (connectedUser.getRole().equals(InstanceMemberRole.SUPPORT)) {
+            if (connectedUser.role().equals(InstanceMemberRole.SUPPORT)) {
                 // See if user can connect even if owner is away
-                if (this.instanceSessionService.canConnectWhileOwnerAway(instance, user)) {
-                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
+                if (instance.canConnectWhileOwnerAway()) {
+                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, activeConnectionId, nopSender);
 
                 } else {
-                    final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, socketClient.protocol());
-                    if (instanceSession != null && this.desktopSessionService.isOwnerConnected(instanceSession.getId())) {
+                    if (activeConnectionId != null && isOwnerConnected) {
                         // Start process of requesting access from the owner
-                        this.desktopAccessService.requestAccess(socketClient, instanceSession.getId(), connectedUser, instance.getId(), nopSender);
+                        this.desktopAccessService.requestAccess(socketClient, activeConnectionId, connectedUser, instance, nopSender);
 
                     } else {
                         throw new OwnerNotConnectedException();
                     }
                 }
 
-            } else if (usingPublicAccessToken) {
+            } else if (isPublicAccessToken) {
                 // If using a public access token then the owner must be connected
-                if (this.instanceSessionMemberService.isOwnerConnected(instance, socketClient.protocol())) {
-                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
+                if (isOwnerConnected) {
+                    this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, activeConnectionId, nopSender);
 
                 } else {
                     throw new OwnerNotConnectedException();
                 }
 
             } else {
-                this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, nopSender);
+                this.desktopSessionService.createDesktopSessionMember(socketClient, connectedUser, instance, activeConnectionId, nopSender);
             }
 
 
@@ -118,8 +98,8 @@ public class RemoteDesktopConnectSubscriber {
             this.eventDispatcher.sendEventToClient(socketClient.clientId(), ACCESS_DENIED);
             socketClient.disconnect();
 
-        } catch (ConnectionException exception) {
-            logger.error(exception.getMessage());
+        } catch (Exception exception) {
+            logger.error(formatException(exception));
             this.eventDispatcher.sendEventToClient(socketClient.clientId(), USER_DISCONNECTED_EVENT);
             socketClient.disconnect();
         }

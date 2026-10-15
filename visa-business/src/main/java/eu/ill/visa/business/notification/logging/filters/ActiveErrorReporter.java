@@ -1,7 +1,7 @@
 package eu.ill.visa.business.notification.logging.filters;
 
 import eu.ill.visa.business.ErrorReportEmailConfiguration;
-import eu.ill.visa.core.domain.Timer;
+import eu.ill.visa.common.utils.domain.Timer;
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;

@@ -1,9 +1,9 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;

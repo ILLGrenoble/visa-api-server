@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.domain.models;
 
 
-import eu.ill.visa.core.domain.SampleStats;
+import eu.ill.visa.common.utils.domain.SampleStats;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 

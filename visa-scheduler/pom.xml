@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>eu.ill.visa</groupId>
-            <artifactId>visa-remote-desktop</artifactId>
+            <artifactId>visa-business</artifactId>
             <version>3.8.4</version>
         </dependency>
         <dependency>
