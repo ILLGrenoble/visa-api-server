@@ -3,10 +3,12 @@ package eu.ill.visa.core.domain.filters;
 
 import jakarta.ws.rs.QueryParam;
 
+import java.util.List;
+
 public class UserFilter {
 
     @QueryParam("id")
-    private String id;
+    private List<String> ids;
 
     @QueryParam("role")
     private String role;
@@ -14,12 +16,12 @@ public class UserFilter {
     @QueryParam("activated")
     private Boolean activated;
 
-    public String getId() {
-        return id;
+    public List<String> getIds() {
+        return ids;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setIds(List<String> ids) {
+        this.ids = ids;
     }
 
     public String getRole() {

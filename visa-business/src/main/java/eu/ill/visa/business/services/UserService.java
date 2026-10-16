@@ -4,6 +4,7 @@ package eu.ill.visa.business.services;
 import eu.ill.visa.business.InstanceConfiguration;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.domain.filters.UserFilter;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.User;
@@ -33,6 +34,10 @@ public class UserService {
 
     public User getById(final String id) {
         return repository.getById(id);
+    }
+
+    public List<User> getAll(final UserFilter filter) {
+        return this.getAll(filter, null, null);
     }
 
     public List<User> getAll(OrderBy orderBy, Pagination pagination) {

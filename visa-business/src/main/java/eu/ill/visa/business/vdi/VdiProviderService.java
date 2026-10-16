@@ -17,6 +17,7 @@ import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
+import eu.ill.visa.persistence.models.Tuple2;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -40,8 +41,7 @@ public class VdiProviderService {
     private final UserService userService;
     private final InstanceService instanceService;
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
-    private final InstanceSessionService instanceSessionService;
-    private final InstanceSessionMemberService instanceSessionMemberService;
+    private final InstanceDesktopSessionService instanceDesktopSessionService;
     private final ImageProtocolService imageProtocolService;
     private final InstanceExpirationService instanceExpirationService;
     private final InstanceActivityService instanceActivityService;
@@ -55,8 +55,7 @@ public class VdiProviderService {
     public VdiProviderService(final UserService userService,
                               final InstanceService instanceService,
                               final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
-                              final InstanceSessionService instanceSessionService,
-                              final InstanceSessionMemberService instanceSessionMemberService,
+                              final InstanceDesktopSessionService instanceDesktopSessionService,
                               final ImageProtocolService imageProtocolService,
                               final InstanceExpirationService instanceExpirationService,
                               final InstanceActivityService instanceActivityService,
@@ -67,8 +66,7 @@ public class VdiProviderService {
         this.userService = userService;
         this.instanceService = instanceService;
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
-        this.instanceSessionService = instanceSessionService;
-        this.instanceSessionMemberService = instanceSessionMemberService;
+        this.instanceDesktopSessionService = instanceDesktopSessionService;
         this.imageProtocolService = imageProtocolService;
         this.instanceExpirationService = instanceExpirationService;
         this.instanceActivityService = instanceActivityService;
@@ -94,7 +92,7 @@ public class VdiProviderService {
         final String publicAccessToken = instanceAuthenticationToken.getPublicAccessToken();
 
         // Determine role of connected person
-        InstanceMemberRole role = instanceSessionService.getUserSessionRole(instance, user);
+        InstanceMemberRole role = instanceDesktopSessionService.getUserSessionRole(instance, user);
         boolean usingPublicAccessToken = false;
 
         // Check if we should examine the accessToken
@@ -107,88 +105,81 @@ public class VdiProviderService {
         ConnectedUser connectedUser = new ConnectedUser(user.getId(), user.getFullName(), role);
 
         final Integer port = this.getProtocolPort(protocol);
-        final InstanceSession instanceSession = this.instanceSessionService.getLatestByInstanceAndProtocol(instance, protocol);
-        final boolean canConnectWhileOwnerAway = this.instanceSessionService.canConnectWhileOwnerAway(instance, user);
-        final boolean ownerIsConnected = this.instanceSessionMemberService.isOwnerConnected(instance, protocol);
+        final InstanceDesktopSession instanceDesktopSession = this.instanceDesktopSessionService.getLatestByInstanceId(instance.getId());
+        final boolean canConnectWhileOwnerAway = this.instanceDesktopSessionService.canConnectWhileOwnerAway(instance, user);
         final InstanceMember owner = instance.getOwner();
         final boolean ownerIsExternalUser = !owner.getUser().hasRoleWithName(Role.STAFF_ROLE);
 
-        final String activeConnectionId = instanceSession != null ? instanceSession.getConnectionId() : null;
-        final VdiInstance vdiInstance = this.buildVdiInstance(instance, port, canConnectWhileOwnerAway, ownerIsExternalUser);
+        final String activeConnectionId = instanceDesktopSession != null ? instanceDesktopSession.getConnectionId() : null;
+        final boolean ownerIsConnected = this.instanceDesktopSessionService.isOwnerConnected(activeConnectionId);
 
+        final VdiInstance vdiInstance = this.buildVdiInstance(instance, port, canConnectWhileOwnerAway, ownerIsExternalUser);
 
         return new VdiAuthenticationToken(vdiInstance, connectedUser, usingPublicAccessToken, activeConnectionId, ownerIsConnected);
     }
 
     public void onSessionConnect(final Long instanceId, final String protocol, final String connectionId, final String clientId, final ConnectedUser user) {
-        // Get latest session for instance and protocol
-        InstanceSession instanceSession = instanceSessionService.getLatestByInstanceIdAndProtocol(instanceId, protocol);
 
-        // Check if one exists and compare the connectionId
-        if (instanceSession != null && !instanceSession.getConnectionId().equals(connectionId)) {
-            // Connection Id differs so remove the old one
-            instanceSession.setCurrent(false);
-            this.instanceSessionService.save(instanceSession);
-            logger.info("Instance session {} for User {} is no longer valid: removing it", instanceSession.getConnectionId(), getInstanceAndUser(instanceId, user));
-
-            instanceSession = null;
-        }
-
-        if (instanceSession == null) {
-            instanceSession = instanceSessionService.create(instanceId, protocol, connectionId);
-            logger.info("User {} created {} session {}", getInstanceAndUser(instanceId, user), protocol, instanceSession.getConnectionId());
-        }
+        // Create a new InstanceDesktopSession
+        final InstanceDesktopSession instanceDesktopSession = instanceDesktopSessionService.create(connectionId, clientId, instanceId, user.id(), user.role(), protocol);
+        logger.info("User {} created {} session {}", getInstanceAndUser(instanceId, user), protocol, connectionId);
 
         boolean unlockSession = vdiConfiguration.ownerDisconnectionPolicy().equals(VDIConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)
             && user.role().equals(InstanceMemberRole.OWNER)
-            && !this.isOwnerConnected(instanceSession.getId());
-
-        // Update the connected clients of the session
-        this.instanceSessionMemberService.create(instanceSession, clientId, this.userService.getById(user.id()), user.role());
+            && !instanceDesktopSessionService.isOwnerConnected(connectionId);
 
         // Remove instance from instance_expiration table if it is there due to inactivity
         this.instanceExpirationService.onInstanceActivated(instanceId);
 
         if (unlockSession) {
             // Unlock session for all clients
-            this.unlockSession(instanceSession);
+            this.unlockSession(connectionId, instanceId);
 
         } else {
-            this.connectUser(instanceSession, clientId, user);
+            this.connectUser(connectionId, clientId, instanceId, user);
         }
     }
 
     public void onSessionDisconnect(final String connectionId, final String clientId, final ConnectedUser user) {
-        InstanceSession session = instanceSessionService.getLatestByConnectionId(connectionId);
-        if (session != null) {
-            // Remove client/member from instance session
-            instanceSessionService.deleteSessionMember(session, clientId);
+        final InstanceDesktopSession instanceDesktopSession = this.instanceDesktopSessionService.getByConnectionIdAndClientId(connectionId, clientId);
+        if (instanceDesktopSession != null) {
+            final Long instanceId = instanceDesktopSession.getInstanceId();
+            // Close the instance desktop session
+            this.instanceDesktopSessionService.close(instanceDesktopSession);
 
-            if (user.role().equals(InstanceMemberRole.OWNER) && !this.isOwnerConnected(session.getId())) {
+            if (user.role().equals(InstanceMemberRole.OWNER) && !this.instanceDesktopSessionService.isOwnerConnected(connectionId)) {
                 if (this.vdiConfiguration.ownerDisconnectionPolicy().equals(VDIConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM)) {
-                    this.lockSession(session, user);
+                    this.lockSession(connectionId, instanceId, user);
 
                 } else {
                     logger.info("There is no owner ar admin connected so all clients will be disconnected");
-                    this.closeSession(session);
+                    this.closeSession(connectionId, instanceId);
                 }
 
             } else {
                 // broadcast events for a user disconnected and current users
-                this.disconnectUser(session, clientId, user);
+                this.disconnectUser(connectionId, clientId, instanceId, user);
             }
         }
     }
 
     public void onSessionFailure(final Long instanceId, final String protocol, final String connectionId, final String clientId, final ConnectedUser user) {
-        logger.warn("Failed to connect {} to given {} session {} so creating a new one", getInstanceAndUser(instanceId, user), protocol, connectionId);
+        logger.warn("Failed to connect {} to given {} session {}", getInstanceAndUser(instanceId, user), protocol, connectionId);
         // Session connection failed so invalidate it
-        InstanceSession session = instanceSessionService.getLatestByConnectionId(connectionId);
-        session.setCurrent(false);
-        this.instanceSessionService.updatePartial(session);
+        final InstanceDesktopSession instanceDesktopSession = this.instanceDesktopSessionService.getByConnectionIdAndClientId(connectionId, clientId);
+        this.instanceDesktopSessionService.close(instanceDesktopSession);
     }
 
     public void onSessionActivity(final Long instanceId, final String connectionId, final String clientId, final ConnectedUser user, final Date lastSeenAt, final Date lastInteractionAt, final InstanceActivityType instanceActivityType) {
+
+        final InstanceDesktopSession instanceDesktopSession = this.instanceDesktopSessionService.getByConnectionIdAndClientId(connectionId, clientId);
+        if (instanceDesktopSession != null) {
+            this.instanceDesktopSessionService.updateInteractionAt(instanceDesktopSession);
+        }
+
+        if (instanceActivityType != null) {
+            this.instanceActivityService.create(user.id(), instanceId, instanceActivityType);
+        }
 
         final InstancePartial instance = this.instanceService.getPartialById(instanceId);
         if (instance != null) {
@@ -196,26 +187,17 @@ public class VdiProviderService {
             instance.setLastSeenAt(lastSeenAt);
             instance.setLastInteractionAt(lastInteractionAt);
             instanceService.updatePartial(instance);
-
-            final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByConnectionIdAndClientId(connectionId, clientId);
-            if (instanceSessionMember != null) {
-                instanceSessionMember.setLastInteractionAt(lastInteractionAt);
-                instanceSessionMemberService.updateInteractionAt(instanceSessionMember);
-
-                if (instanceActivityType != null) {
-                    this.instanceActivityService.create(instanceSessionMember.getUserId(), instanceSessionMember.getInstanceId(), instanceActivityType);
-                }
-            }
         }
     }
 
     public void onSessionRttData(List<VdiRttSample> samples) {
         List<DesktopSessionRttSample> sessionRttSamples = new ArrayList<>();
         for (VdiRttSample sample : samples) {
-            final InstanceSessionMemberPartial instanceSessionMember = this.instanceSessionMemberService.getPartialByConnectionIdAndClientId(sample.connectionId(), sample.clientId());
-            if (instanceSessionMember != null) {
+            final InstanceDesktopSession instanceDesktopSession = this.instanceDesktopSessionService.getByConnectionIdAndClientId(sample.connectionId(), sample.clientId());
+
+            if (instanceDesktopSession != null) {
                 DesktopSessionRttSample desktopSessionRttSample = DesktopSessionRttSample.Builder()
-                    .instanceSessionMemberId(instanceSessionMember.getId())
+                    .instanceSessionMemberId(instanceDesktopSession.getId())
                     .date(sample.date())
                     .samplePeriodMinutes(sample.samplePeriodMinutes())
                     .clientMeanRttMs(sample.clientMeanRttMs())
@@ -233,63 +215,59 @@ public class VdiProviderService {
         }
     }
 
-    private void connectUser(final InstanceSession instanceSession, final String clientId, final ConnectedUser user) {
-        this.messageBroker.broadcast(new UserConnectedMessage(instanceSession.getConnectionId(), clientId, user));
-        this.sendUsersConnectedEvent(instanceSession);
+    private void connectUser(final String connectionId, final String clientId, final Long instanceId, final ConnectedUser user) {
+        this.messageBroker.broadcast(new UserConnectedMessage(connectionId, clientId, user));
+        this.sendUsersConnectedEvent(connectionId, instanceId);
     }
 
-    private void disconnectUser(final InstanceSession instanceSession, final String clientId, final ConnectedUser user) {
-        this.messageBroker.broadcast(new UserDisconnectedMessage(instanceSession.getConnectionId(), clientId, user));
-        this.sendUsersConnectedEvent(instanceSession);
+    private void disconnectUser(final String connectionId, final String clientId, final Long instanceId, final ConnectedUser user) {
+        this.messageBroker.broadcast(new UserDisconnectedMessage(connectionId, clientId, user));
+        this.sendUsersConnectedEvent(connectionId, instanceId);
     }
 
-    private void closeSession(final InstanceSession instanceSession) {
-        this.messageBroker.broadcast(new SessionClosedMessage(instanceSession.getConnectionId()));
+    private void closeSession(final String connectionId, final Long instanceId) {
+        this.messageBroker.broadcast(new SessionClosedMessage(connectionId));
     }
 
-    private void lockSession(final InstanceSession instanceSession, final ConnectedUser user) {
-        this.messageBroker.broadcast(new SessionLockedMessage(instanceSession.getConnectionId(), user));
-        this.sendUsersConnectedEvent(instanceSession);
+    private void lockSession(final String connectionId, final Long instanceId, final ConnectedUser user) {
+        this.messageBroker.broadcast(new SessionLockedMessage(connectionId, user));
+        this.sendUsersConnectedEvent(connectionId, instanceId);
     }
 
-    private void unlockSession(final InstanceSession instanceSession) {
-        this.messageBroker.broadcast(new SessionUnlockedMessage(instanceSession.getConnectionId()));
-        this.sendUsersConnectedEvent(instanceSession);
+    private void unlockSession(final String connectionId, final Long instanceId) {
+        this.messageBroker.broadcast(new SessionUnlockedMessage(connectionId));
+        this.sendUsersConnectedEvent(connectionId, instanceId);
     }
 
-    private void sendUsersConnectedEvent(final InstanceSession instanceSession) {
-        final String protocol = instanceSession.getProtocol();
+    private void sendUsersConnectedEvent(final String connectionId, final Long instanceId) {
+        List<Tuple2<InstanceDesktopSession, ConnectedUser>> instanceDesktopSessions = this.instanceDesktopSessionService.getAllWithConnectedUserByConnectionId(connectionId);
+        logger.info("Instance {} has {} connected users", instanceId, instanceDesktopSessions.size());
 
-        List<InstanceSessionMemberPartial> instanceSessionMembers = this.instanceSessionMemberService.getAllPartialsByInstanceSessionId(instanceSession.getId());
 
-        List<ConnectedUser> users = this.convertToConnectedUsers(instanceSession, instanceSessionMembers).stream().distinct().toList();
+        List<ConnectedUser> users = this.convertToConnectedUsers(connectionId, instanceDesktopSessions).stream().distinct().toList();
         if (!users.isEmpty()) {
-            logger.info("Instance {} with protocol {} has the following users connected: {}", instanceSession.getId(), protocol, users.stream().map(ConnectedUser::toString).toList());
+            logger.info("Instance {} has the following users connected: {}", instanceId, users.stream().map(ConnectedUser::toString).toList());
 
-            instanceSessionMembers.forEach(member -> {
-                this.eventDispatcher.sendEventToClient(member.getClientId(), USERS_CONNECTED_EVENT, new UsersConnectedEvent(users, instanceSession.getInstanceId()));
+            instanceDesktopSessions.forEach(tuple -> {
+                final InstanceDesktopSession instanceDesktopSession = tuple.x();
+                this.eventDispatcher.sendEventToClient(instanceDesktopSession.getClientId(), USERS_CONNECTED_EVENT, new UsersConnectedEvent(users, instanceId));
             });
         }
     }
 
-    private List<ConnectedUser> convertToConnectedUsers(final InstanceSession instanceSession, final List<InstanceSessionMemberPartial> instanceSessionMembers) {
-        logger.info("Instance {} has {} connected users", instanceSession.getInstanceId(), instanceSessionMembers.size());
-
-        final boolean ownerIsConnected = this.isOwnerConnected(instanceSession.getId());
+    private List<ConnectedUser> convertToConnectedUsers(final String connectionId, final List<Tuple2<InstanceDesktopSession, ConnectedUser>> instanceDesktopSessions) {
+        final boolean ownerIsConnected = this.instanceDesktopSessionService.isOwnerConnected(connectionId);
         boolean sessionLocked = !ownerIsConnected && vdiConfiguration.ownerDisconnectionPolicy().equals(VDIConfiguration.OWNER_DISCONNECTION_POLICY_LOCK_ROOM);
 
-        return instanceSessionMembers.stream().map(instanceSessionMember -> {
-            InstanceMemberRole role = instanceSessionMember.getRole();
+        return instanceDesktopSessions.stream().map(tuple -> {
+            final InstanceDesktopSession instanceDesktopSession = tuple.x();
+            final ConnectedUser connectedUser = tuple.y();
+            InstanceMemberRole role = instanceDesktopSession.getRole();
             if (sessionLocked && role.equals(InstanceMemberRole.USER)) {
-                role= InstanceMemberRole.GUEST;
+                role = InstanceMemberRole.GUEST;
             }
-            return new ConnectedUser(instanceSessionMember.getUserId(), instanceSessionMember.getUserFullName(), role);
+            return new ConnectedUser(connectedUser.id(), connectedUser.fullName(), role);
         }).toList();
-    }
-
-    private boolean isOwnerConnected(final Long sessionId) {
-        List<InstanceSessionMemberPartial> instanceSessionMembers = this.instanceSessionMemberService.getAllPartialsByInstanceSessionId(sessionId);
-        return instanceSessionMembers.stream().anyMatch(instanceSessionMember -> instanceSessionMember.getRole().equals(InstanceMemberRole.OWNER));
     }
 
     private String getInstanceAndUser(Long instanceId, ConnectedUser user) {
@@ -337,7 +315,7 @@ public class VdiProviderService {
     }
 
     private void cleanupSessions() {
-        this.instanceSessionService.cleanupSession();
+        this.instanceDesktopSessionService.closeAllSessions();
     }
 
 }

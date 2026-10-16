@@ -1,10 +1,10 @@
 package eu.ill.visa.web.graphql.resources;
 
-import eu.ill.visa.business.services.InstanceSessionMemberService;
+import eu.ill.visa.business.services.InstanceDesktopSessionService;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.graphql.inputs.PaginationInput;
 import eu.ill.visa.web.graphql.types.Connection;
-import eu.ill.visa.web.graphql.types.InstanceSessionMemberType;
+import eu.ill.visa.web.graphql.types.InstanceDesktopSessionType;
 import eu.ill.visa.web.graphql.types.PageInfo;
 import io.smallrye.graphql.api.AdaptToScalar;
 import io.smallrye.graphql.api.Scalar;
@@ -20,13 +20,13 @@ import static eu.ill.visa.web.graphql.inputs.PaginationInput.toPagination;
 
 @GraphQLApi
 @RolesAllowed(Role.ADMIN_ROLE)
-public class InstanceSessionMemberResource {
+public class InstanceDesktopSessionResource {
 
-    private final InstanceSessionMemberService instanceSessionMemberService;
+    private final InstanceDesktopSessionService instanceDesktopSessionService;
 
     @Inject
-    public InstanceSessionMemberResource(final InstanceSessionMemberService instanceSessionMemberService) {
-        this.instanceSessionMemberService = instanceSessionMemberService;
+    public InstanceDesktopSessionResource(final InstanceDesktopSessionService instanceDesktopSessionService) {
+        this.instanceDesktopSessionService = instanceDesktopSessionService;
     }
 
 
@@ -37,11 +37,11 @@ public class InstanceSessionMemberResource {
      * @return a list of sessions
      */
     @Query
-    public @NotNull Connection<InstanceSessionMemberType> sessions(@NotNull PaginationInput pagination) {
-        final List<InstanceSessionMemberType> results = instanceSessionMemberService.getAll(toPagination(pagination)).stream()
-            .map(InstanceSessionMemberType::new)
+    public @NotNull Connection<InstanceDesktopSessionType> sessions(@NotNull PaginationInput pagination) {
+        final List<InstanceDesktopSessionType> results = instanceDesktopSessionService.getAll(toPagination(pagination)).stream()
+            .map(InstanceDesktopSessionType::new)
             .toList();
-        final PageInfo pageInfo = new PageInfo(instanceSessionMemberService.countAll(), pagination.getLimit(), pagination.getOffset());
+        final PageInfo pageInfo = new PageInfo(instanceDesktopSessionService.countAll(), pagination.getLimit(), pagination.getOffset());
         return new Connection<>(pageInfo, results);
     }
 
@@ -52,7 +52,7 @@ public class InstanceSessionMemberResource {
      */
     @Query
     public @NotNull @AdaptToScalar(Scalar.Int.class) Long countSessions() {
-        return instanceSessionMemberService.countAll();
+        return instanceDesktopSessionService.countAll();
     }
 
     /**
@@ -62,7 +62,7 @@ public class InstanceSessionMemberResource {
      */
     @Query
     public @NotNull @AdaptToScalar(Scalar.Int.class) Long countActiveSessions() {
-        return instanceSessionMemberService.countAllActive();
+        return instanceDesktopSessionService.countAllActive();
     }
 
 }

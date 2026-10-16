@@ -29,7 +29,7 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 public class InstanceResolver {
 
     private final CloudClientService cloudClientService;
-    private final InstanceSessionMemberService instanceSessionMemberService;
+    private final InstanceDesktopSessionService instanceDesktopSessionService;
     private final InstanceMemberService instanceMemberService;
     private final ExperimentService experimentService;
     private final InstanceAttributeService instanceAttributeService;
@@ -41,7 +41,7 @@ public class InstanceResolver {
 
     @Inject
     public InstanceResolver(final CloudClientService cloudClientService,
-                            final InstanceSessionMemberService instanceSessionMemberService,
+                            final InstanceDesktopSessionService instanceDesktopSessionService,
                             final InstanceMemberService instanceMemberService,
                             final ExperimentService experimentService,
                             final InstanceAttributeService instanceAttributeService,
@@ -51,7 +51,7 @@ public class InstanceResolver {
                             final HypervisorService hypervisorService,
                             final DesktopSessionRttSampleService desktopSessionRttSampleService) {
         this.cloudClientService = cloudClientService;
-        this.instanceSessionMemberService = instanceSessionMemberService;
+        this.instanceDesktopSessionService = instanceDesktopSessionService;
         this.instanceMemberService = instanceMemberService;
         this.experimentService = experimentService;
         this.instanceAttributeService = instanceAttributeService;
@@ -179,15 +179,15 @@ public class InstanceResolver {
             .toList();
     }
 
-    public List<List<InstanceSessionMemberType>> activeSessions(@Source final List<InstanceType> instances) {
-        return instanceSessionMemberService.getAllByInstanceIds(instances.stream().map(InstanceType::getId).toList()).stream()
-            .map(instanceSessionMembers -> instanceSessionMembers.stream().map(InstanceSessionMemberType::new).toList())
+    public List<List<InstanceDesktopSessionType>> activeSessions(@Source final List<InstanceType> instances) {
+        return instanceDesktopSessionService.getAllByInstanceIds(instances.stream().map(InstanceType::getId).toList()).stream()
+            .map(instanceSessionMembers -> instanceSessionMembers.stream().map(InstanceDesktopSessionType::new).toList())
             .toList();
     }
 
-    public List<InstanceSessionMemberType> sessions(@Source final InstanceType instance) {
-        return instanceSessionMemberService.getAllHistorySessionMembersByInstanceId(instance.getId()).stream()
-            .map(InstanceSessionMemberType::new)
+    public List<InstanceDesktopSessionType> sessions(@Source final InstanceType instance) {
+        return instanceDesktopSessionService.getAllHistoricalByInstanceId(instance.getId()).stream()
+            .map(InstanceDesktopSessionType::new)
             .toList();
     }
 
