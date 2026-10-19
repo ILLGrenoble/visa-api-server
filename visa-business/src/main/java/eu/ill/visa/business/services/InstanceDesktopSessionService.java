@@ -183,6 +183,13 @@ public class InstanceDesktopSessionService {
         return false;
     }
 
+    public void cleanupSessions() {
+        this.repository.cleanup();
+
+        // Do the cleanup here... not ideal but at least it is centralised
+        this.instanceJupyterSessionService.cleanupSession();
+    }
+
     public void closeAllSessions() {
         this.repository.closeAll();
 

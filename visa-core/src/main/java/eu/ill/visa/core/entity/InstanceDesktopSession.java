@@ -129,6 +129,11 @@ import java.util.Date;
             SET ids.closedAt = CURRENT_TIMESTAMP, ids.updatedAt = CURRENT_TIMESTAMP
             WHERE ids.closedAt IS NULL
     """),
+    @NamedQuery(name = "instanceDesktopSession.cleanup", query = """
+            UPDATE InstanceDesktopSession ids
+            SET ids.closedAt = ids.updatedAt
+            WHERE ids.closedAt IS NULL
+    """),
     @NamedQuery(name = "instanceDesktopSession.closeAllByInstanceIdAndConnectionIdAndClientId", query = """
         UPDATE InstanceDesktopSession ids
         SET ids.closedAt = CURRENT_TIMESTAMP, ids.updatedAt = CURRENT_TIMESTAMP

@@ -170,6 +170,7 @@ public class VdiProviderService {
 
         final InstanceDesktopSession instanceDesktopSession = this.instanceDesktopSessionService.getByConnectionIdAndClientId(connectionId, clientId);
         if (instanceDesktopSession != null) {
+            instanceDesktopSession.setLastInteractionAt(lastInteractionAt);
             this.instanceDesktopSessionService.updateInteractionAt(instanceDesktopSession);
         }
 
@@ -311,7 +312,7 @@ public class VdiProviderService {
     }
 
     private void cleanupSessions() {
-        this.instanceDesktopSessionService.closeAllSessions();
+        this.instanceDesktopSessionService.cleanupSessions();
     }
 
 }

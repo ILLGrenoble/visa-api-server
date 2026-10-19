@@ -1,13 +1,12 @@
 package eu.ill.visa.vdi.business.services;
 
-import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiInstance;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
+import eu.ill.visa.vdi.apiconnect.VisaApiServiceCommunicator;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
-import eu.ill.visa.common.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
@@ -33,15 +32,15 @@ public class GuacamoleDesktopService extends DesktopService {
 
     private final static Logger logger = LoggerFactory.getLogger(GuacamoleDesktopService.class);
 
-    private final VisaApiService visaApiService;
+    private final VisaApiServiceCommunicator visaApiServiceCommunicator;
     private final VirtualDesktopConfiguration configuration;
     private final ConnectionThreadExecutor executorService;
 
     @Inject
-    public GuacamoleDesktopService(final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance,
+    public GuacamoleDesktopService(final VisaApiServiceCommunicator visaApiServiceCommunicator,
                                    final VirtualDesktopConfiguration configuration,
                                    final ConnectionThreadExecutor executorService) {
-        this.visaApiService = visaApiServiceInstance.get();
+        this.visaApiServiceCommunicator = visaApiServiceCommunicator;
         this.configuration = configuration;
         this.executorService = executorService;
     }
@@ -77,7 +76,7 @@ public class GuacamoleDesktopService extends DesktopService {
                 String autologin = instance.autoLogin();
                 config.setParameter("username", username);
                 if (autologin != null && autologin.equals("VISA_PAM")) {
-                    config.setParameter("password", this.visaApiService.createVdiConnectionSignature(username));
+                    config.setParameter("password", this.visaApiServiceCommunicator.createVdiConnectionSignature(username));
                 }
                 config.setParameter("server-layout", instance.keyboardLayout());
                 // merge guacamole configuration parameters
@@ -134,12 +133,7 @@ public class GuacamoleDesktopService extends DesktopService {
             } catch (GuacamoleException exception) {
                 logger.warn("Failed to connect {} to given guacamole session {} so creating a new one", getInstanceAndUser(instance, user), connectionId);
                 // If it fails then invalidate current session
-                try {
-                    this.visaApiService.onSessionConnectionFailed(instance.id(), GUACAMOLE_PROTOCOL, connectionId, client.clientId(), user);
-
-                } catch (ApiCommunicationException e) {
-                    logger.warn(e.getMessage());
-                }
+                this.visaApiServiceCommunicator.onSessionConnectionFailed(instance.id(), GUACAMOLE_PROTOCOL, connectionId, client.clientId(), user);
 
                 // Create a new session
                 return this.createSocketAndSession(instance, user);

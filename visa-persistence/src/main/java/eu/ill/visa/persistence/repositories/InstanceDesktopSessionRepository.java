@@ -13,7 +13,6 @@ import jakarta.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -145,6 +144,11 @@ public class InstanceDesktopSessionRepository extends AbstractRepository<Instanc
 
     public void closeAll() {
         getEntityManager().createNamedQuery("instanceDesktopSession.closeAll")
+            .executeUpdate();
+    }
+
+    public void cleanup() {
+        getEntityManager().createNamedQuery("instanceDesktopSession.cleanup")
             .executeUpdate();
     }
 

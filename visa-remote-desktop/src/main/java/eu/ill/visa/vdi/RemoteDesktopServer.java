@@ -2,9 +2,9 @@ package eu.ill.visa.vdi;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.gateway.ClientEventsGateway;
+import eu.ill.visa.vdi.apiconnect.VisaApiServiceCommunicator;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.vdi.display.sockets.GuacamoleRemoteDesktopSocket;
 import eu.ill.visa.vdi.display.sockets.WebXRemoteDesktopSocket;
 import eu.ill.visa.vdi.display.subscribers.GuacamoleRemoteDesktopEventSubscriber;
@@ -16,6 +16,7 @@ import eu.ill.visa.vdi.gateway.events.AccessRequestResponseEvent;
 import eu.ill.visa.vdi.gateway.events.AccessRevokedEvent;
 import eu.ill.visa.vdi.gateway.subscribers.AccessRevokedSubscriber;
 import eu.ill.visa.vdi.gateway.subscribers.EventChannelAccessRequestResponseSubscriber;
+import io.quarkus.runtime.Shutdown;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -32,7 +33,7 @@ public class RemoteDesktopServer {
     private final VirtualDesktopConfiguration configuration;
     private final ClientEventsGateway clientEventsGateway;
     private final EventDispatcher eventDispatcher;
-    private final VisaApiService visaApiService;
+    private final VisaApiServiceCommunicator visaApiServiceCommunicator;
     private final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket;
     private final WebXRemoteDesktopSocket webXRemoteDesktopSocket;
 
@@ -42,7 +43,7 @@ public class RemoteDesktopServer {
                                final VirtualDesktopConfiguration configuration,
                                final ClientEventsGateway clientEventsGateway,
                                final EventDispatcher eventDispatcher,
-                               final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance,
+                               final VisaApiServiceCommunicator visaApiServiceCommunicator,
                                final GuacamoleRemoteDesktopSocket guacamoleRemoteDesktopSocket,
                                final WebXRemoteDesktopSocket webXRemoteDesktopSocket) {
         this.desktopConnectionService = desktopConnectionService;
@@ -50,15 +51,21 @@ public class RemoteDesktopServer {
         this.configuration = configuration;
         this.clientEventsGateway = clientEventsGateway;
         this.eventDispatcher = eventDispatcher;
-        this.visaApiService = visaApiServiceInstance.get();
+        this.visaApiServiceCommunicator = visaApiServiceCommunicator;
         this.guacamoleRemoteDesktopSocket = guacamoleRemoteDesktopSocket;
         this.webXRemoteDesktopSocket = webXRemoteDesktopSocket;
     }
 
     @Startup
     public void startServer() {
-        logger.info("Virtual Desktop Server is enabled");
         this.bindSubscribers();
+
+        this.visaApiServiceCommunicator.start();
+    }
+
+    @Shutdown
+    public void stopServer() {
+        this.visaApiServiceCommunicator.stop();
     }
 
     private void bindSubscribers() {
@@ -69,12 +76,12 @@ public class RemoteDesktopServer {
             .next(new AccessRevokedSubscriber(this.desktopConnectionService));
 
         // Set up guacamole display listeners
-        this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.eventDispatcher, this.visaApiService));
+        this.guacamoleRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.eventDispatcher, this.visaApiServiceCommunicator));
         this.guacamoleRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
         this.guacamoleRemoteDesktopSocket.setEventSubscriber(new GuacamoleRemoteDesktopEventSubscriber(this.desktopConnectionService, this.configuration.maxSessionInactivityTimeMinutes()));
 
         // Set up webx display listeners
-        this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.eventDispatcher, this.visaApiService));
+        this.webXRemoteDesktopSocket.setConnectSubscriber(new RemoteDesktopConnectSubscriber(this.desktopConnectionService, this.desktopAccessService, this.eventDispatcher, this.visaApiServiceCommunicator));
         this.webXRemoteDesktopSocket.setDisconnectSubscriber(new RemoteDesktopDisconnectSubscriber(this.desktopConnectionService, this.desktopAccessService));
         this.webXRemoteDesktopSocket.setEventSubscriber(new WebXRemoteDesktopEventSubscriber(this.desktopConnectionService, this.configuration.maxSessionInactivityTimeMinutes()));
     }

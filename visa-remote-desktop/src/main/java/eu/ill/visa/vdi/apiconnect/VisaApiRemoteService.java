@@ -1,4 +1,4 @@
-package eu.ill.visa.vdi.business.services;
+package eu.ill.visa.vdi.apiconnect;
 
 import eu.ill.visa.common.vdi.apiconnect.ClientActivityInput;
 import eu.ill.visa.common.vdi.apiconnect.ClientConnectionInput;
@@ -10,8 +10,6 @@ import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
 import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
-import eu.ill.visa.vdi.apiconnect.UnauthorizedRuntimeException;
-import eu.ill.visa.vdi.apiconnect.VisaApiClient;
 import eu.ill.visa.common.vdi.apiconnect.exceptions.ApiCommunicationException;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -128,7 +126,7 @@ public class VisaApiRemoteService implements VisaApiService {
         }
     }
 
-    public void createDesktopSessionRttSamples(List<VdiRttSample> samples) throws ApiCommunicationException {
+    public void createDesktopSessionRttSamples(final List<VdiRttSample> samples) throws ApiCommunicationException {
         // Server will:
         // - Fine InstanceSessionMember associated to clientId and InstanceSessionId of each sample
         // - Save the RTT data

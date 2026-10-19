@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
-
 public abstract class RemoteDesktopEventSubscriber<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteDesktopEventSubscriber.class);
@@ -67,25 +65,17 @@ public abstract class RemoteDesktopEventSubscriber<T> {
             if (lastInstanceUpdateTime == null || (currentDate.getTime() - lastInstanceUpdateTime.getTime() >= INSTANCE_SESSION_UPDATE_TIME_MS)) {
                 remoteDesktopConnection.setLastInstanceUpdateTime(currentDate);
 
-                // Use virtual thread to update interaction times so that the websocket can return ASAP
-                Thread.startVirtualThread(() -> {
-                    try {
-                        // Determine if the instance is still being actively used by the user
-                        long timeSinceLastInteractionMs = currentDate.getTime() - remoteDesktopConnection.getLastInteractionAt().getTime();
-                        long timeSinceLastInteractionMinutes = TimeUnit.MINUTES.convert(timeSinceLastInteractionMs, TimeUnit.MILLISECONDS);
-                        if (timeSinceLastInteractionMinutes >= maxInactivityTimeMinutes) {
-                            logger.info("{} has been inactive for {} minutes: disconnecting the user", desktopSessionMember, timeSinceLastInteractionMinutes);
-                            desktopSessionMember.remoteDesktopConnection().getClient().disconnect();
+                // Determine if the instance is still being actively used by the user
+                long timeSinceLastInteractionMs = currentDate.getTime() - remoteDesktopConnection.getLastInteractionAt().getTime();
+                long timeSinceLastInteractionMinutes = TimeUnit.MINUTES.convert(timeSinceLastInteractionMs, TimeUnit.MILLISECONDS);
+                if (timeSinceLastInteractionMinutes >= maxInactivityTimeMinutes) {
+                    logger.info("{} has been inactive for {} minutes: disconnecting the user", desktopSessionMember, timeSinceLastInteractionMinutes);
+                    desktopSessionMember.remoteDesktopConnection().getClient().disconnect();
 
-                        } else {
-                            // Update database values
-                            this.desktopSessionService.updateSessionMemberActivity(desktopSessionMember);
-                        }
-
-                    } catch (Exception error) {
-                        logger.error("Failed to update instance {} activity: {}", desktopSession.getInstance().id(), formatException(error));
-                    }
-                });
+                } else {
+                    // Update database values
+                    this.desktopSessionService.updateSessionMemberActivity(desktopSessionMember);
+                }
             }
         });
     }

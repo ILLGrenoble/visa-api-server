@@ -2,7 +2,6 @@ package eu.ill.visa.vdi.business.services;
 
 import eu.ill.visa.broker.EventDispatcher;
 import eu.ill.visa.broker.MessageBroker;
-import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.common.vdi.broker.*;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
@@ -11,6 +10,7 @@ import eu.ill.visa.common.utils.domain.SampleStats;
 import eu.ill.visa.common.utils.domain.Timer;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
 import eu.ill.visa.common.vdi.domain.VdiInstance;
+import eu.ill.visa.vdi.apiconnect.VisaApiServiceCommunicator;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
@@ -42,7 +42,7 @@ public class DesktopSessionService {
     private final WebXDesktopService webXDesktopService;
     private final EventDispatcher eventDispatcher;
     private final ConnectionThreadExecutor connectionThreadExecutor;
-    private final VisaApiService visaApiService;
+    private final VisaApiServiceCommunicator visaApiServiceCommunicator;
 
     private final MessageBroker messageBroker;
 
@@ -57,13 +57,13 @@ public class DesktopSessionService {
                                  final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance,
                                  final EventDispatcher eventDispatcher,
                                  final ConnectionThreadExecutor connectionThreadExecutor,
-                                 final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance) {
+                                 final VisaApiServiceCommunicator visaApiServiceCommunicator) {
         this.guacamoleDesktopService = guacamoleDesktopService;
         this.webXDesktopService = webXDesktopService;
         this.messageBroker = messageBrokerInstance.get();
         this.eventDispatcher = eventDispatcher;
         this.connectionThreadExecutor = connectionThreadExecutor;
-        this.visaApiService = visaApiServiceInstance.get();
+        this.visaApiServiceCommunicator = visaApiServiceCommunicator;
 
         this.messageBroker.subscribe(UserConnectedMessage.class)
             .next((message) -> this.onUserConnected(message.connectionId(), message.clientId(), message.user()));
@@ -122,7 +122,7 @@ public class DesktopSessionService {
         this.connectionThreadExecutor.startConnectionThread(remoteDesktopConnection.getConnectionThread());
 
         // Notify the server of new connection
-        this.visaApiService.onClientConnection(instance.id(), client.protocol(), connectionId, client.clientId(), user);
+        this.visaApiServiceCommunicator.onClientConnection(instance.id(), client.protocol(), connectionId, client.clientId(), user);
 
         logger.info("After connection, currently have {} remote desktop clients (Guacamole = {}, WebX = {})",
             this.countSessionMembers(null),
@@ -142,12 +142,7 @@ public class DesktopSessionService {
         desktopSessionMember.remoteDesktopConnection().getConnectionThread().closeTunnel();
 
         // Notify the server of disconnection
-        try {
-            this.visaApiService.onClientDisconnection(desktopSession.getConnectionId(), desktopSessionMember.clientId(), desktopSessionMember.connectedUser());
-
-        } catch (ApiCommunicationException e) {
-            logger.error(e.getMessage());
-        }
+        this.visaApiServiceCommunicator.onClientDisconnection(desktopSession.getConnectionId(), desktopSessionMember.clientId(), desktopSessionMember.connectedUser());
 
         logger.info("After disconnection, currently have {} remote desktop clients (Guacamole = {}, WebX = {})",
             this.countSessionMembers(null),
@@ -223,17 +218,12 @@ public class DesktopSessionService {
         }
 
 
-        try {
-            if (samples.isEmpty()) {
-                logger.debug("... no samples recorded");
+        if (samples.isEmpty()) {
+            logger.debug("... no samples recorded");
 
-            } else {
-                this.visaApiService.createDesktopSessionRttSamples(samples);
-                logger.debug("... stored {} samples", samples.size());
-            }
-
-        } catch (ApiCommunicationException e) {
-            logger.error("Failed to store {} samples: {}", samples.size(), e.getMessage());
+        } else {
+            this.visaApiServiceCommunicator.createDesktopSessionRttSamples(samples);
+            logger.debug("... stored {} samples", samples.size());
         }
     }
 
@@ -250,13 +240,13 @@ public class DesktopSessionService {
         return Optional.ofNullable(this.desktopSessionMembers.get(clientId));
     }
 
-    public void updateSessionMemberActivity(final DesktopSessionMember desktopSessionMember) throws ApiCommunicationException {
+    public void updateSessionMemberActivity(final DesktopSessionMember desktopSessionMember) {
         final DesktopSession desktopSession = desktopSessionMember.session();
         final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
         final String connectionId = desktopSession.getConnectionId();
         final String clientId = desktopSessionMember.clientId();
 
-        this.visaApiService.updateClientActivity(desktopSessionMember.session().getInstance().id(), connectionId, clientId, desktopSessionMember.connectedUser(), remoteDesktopConnection.getLastInstanceUpdateTime(), remoteDesktopConnection.getLastInteractionAt(), remoteDesktopConnection.getInstanceActivity());
+        this.visaApiServiceCommunicator.updateClientActivity(desktopSessionMember.session().getInstance().id(), connectionId, clientId, desktopSessionMember.connectedUser(), remoteDesktopConnection.getLastInstanceUpdateTime(), remoteDesktopConnection.getLastInteractionAt(), remoteDesktopConnection.getInstanceActivity());
         remoteDesktopConnection.resetInstanceActivity();
     }
 
