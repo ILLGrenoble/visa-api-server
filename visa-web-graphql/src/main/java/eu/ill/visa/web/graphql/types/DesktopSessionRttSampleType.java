@@ -2,6 +2,8 @@ package eu.ill.visa.web.graphql.types;
 
 
 import eu.ill.visa.core.entity.DesktopSessionRttSample;
+import io.smallrye.graphql.api.AdaptToScalar;
+import io.smallrye.graphql.api.Scalar;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.graphql.Type;
 
@@ -9,20 +11,25 @@ import java.util.Date;
 
 @Type("DesktopSessionRttSample")
 public class DesktopSessionRttSampleType {
+    @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long id;
-    private final @NotNull Long instanceSessionMemberId;
+    @AdaptToScalar(Scalar.Int.class)
+    private final @NotNull Long instanceDesktopSessionId;
     private final @NotNull Date date;
+    @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long samplePeriodMinutes;
     private final Double clientMeanRttMs;
     private final Double clientSdRttMs;
+    @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long clientRttSampleCount;
     private final Double instanceMeanRttMs;
     private final Double instanceSdRttMs;
+    @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long instanceRttSampleCount;
 
     public DesktopSessionRttSampleType(DesktopSessionRttSample sample) {
         this.id = sample.getId();
-        this.instanceSessionMemberId = sample.getInstanceSessionMemberId();
+        this.instanceDesktopSessionId = sample.getInstanceDesktopSessionId();
         this.date = sample.getDate();
         this.samplePeriodMinutes = sample.getSamplePeriodMinutes();
         this.clientMeanRttMs = sample.getClientMeanRttMs();
@@ -37,8 +44,8 @@ public class DesktopSessionRttSampleType {
         return id;
     }
 
-    public Long getInstanceSessionMemberId() {
-        return instanceSessionMemberId;
+    public Long getInstanceDesktopSessionId() {
+        return instanceDesktopSessionId;
     }
 
     public Date getDate() {

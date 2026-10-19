@@ -16,7 +16,6 @@ import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.core.entity.partial.InstancePartial;
-import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import eu.ill.visa.persistence.models.Tuple2;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -38,7 +37,6 @@ public class VdiProviderService {
 
     private static final Logger logger = LoggerFactory.getLogger(VdiProviderService.class);
 
-    private final UserService userService;
     private final InstanceService instanceService;
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
     private final InstanceDesktopSessionService instanceDesktopSessionService;
@@ -52,8 +50,7 @@ public class VdiProviderService {
     private final MessageBroker messageBroker;
 
     @Inject
-    public VdiProviderService(final UserService userService,
-                              final InstanceService instanceService,
+    public VdiProviderService(final InstanceService instanceService,
                               final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
                               final InstanceDesktopSessionService instanceDesktopSessionService,
                               final ImageProtocolService imageProtocolService,
@@ -63,7 +60,6 @@ public class VdiProviderService {
                               final DesktopSessionRttSampleService desktopSessionRttSampleService,
                               final EventDispatcher eventDispatcher,
                               final jakarta.enterprise.inject.Instance<MessageBroker> messageBrokerInstance) {
-        this.userService = userService;
         this.instanceService = instanceService;
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
         this.instanceDesktopSessionService = instanceDesktopSessionService;
@@ -197,7 +193,7 @@ public class VdiProviderService {
 
             if (instanceDesktopSession != null) {
                 DesktopSessionRttSample desktopSessionRttSample = DesktopSessionRttSample.Builder()
-                    .instanceSessionMemberId(instanceDesktopSession.getId())
+                    .instanceDesktopSessionId(instanceDesktopSession.getId())
                     .date(sample.date())
                     .samplePeriodMinutes(sample.samplePeriodMinutes())
                     .clientMeanRttMs(sample.clientMeanRttMs())
@@ -275,7 +271,7 @@ public class VdiProviderService {
     }
 
     private Integer getProtocolPort(final String protocol) {
-        if (protocol.equals(InstanceSession.WEBX_PROTOCOL)) {
+        if (protocol.equals(InstanceDesktopSession.WEBX_PROTOCOL)) {
             final ImageProtocol imageProtocol = requireNonNullElse(
                 imageProtocolService.getByName("WEBX"),
                 new ImageProtocol("WEBX", 5555)
@@ -283,7 +279,7 @@ public class VdiProviderService {
 
             return imageProtocol.getPort();
 
-        } else if (protocol.equals(InstanceSession.GUACAMOLE_PROTOCOL)) {
+        } else if (protocol.equals(InstanceDesktopSession.GUACAMOLE_PROTOCOL)) {
             final ImageProtocol imageProtocol = requireNonNullElse(
                 imageProtocolService.getByName("GUACD"),
                 new ImageProtocol("GUACD", 4822)

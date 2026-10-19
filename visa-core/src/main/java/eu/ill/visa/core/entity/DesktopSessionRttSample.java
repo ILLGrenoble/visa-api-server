@@ -7,21 +7,21 @@ import java.util.Date;
 
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "desktopSessionRttSample.getByInstanceSessionMemberId", query = """
+    @NamedQuery(name = "desktopSessionRttSample.getByInstanceDesktopSessionId", query = """
         SELECT s FROM DesktopSessionRttSample s
-        WHERE s.instanceSessionMemberId = :instanceSessionMemberId
+        WHERE s.instanceDesktopSessionId = :instanceDesktopSessionId
         ORDER BY s.date
     """),
-    @NamedQuery(name = "desktopSessionRttSample.getByInstanceSessionMemberIds", query = """
+    @NamedQuery(name = "desktopSessionRttSample.getByInstanceDesktopSessionIds", query = """
         SELECT s FROM DesktopSessionRttSample s
-        WHERE s.instanceSessionMemberId IN :instanceSessionMemberIds
+        WHERE s.instanceDesktopSessionId IN :instanceDesktopSessionIds
         ORDER BY s.date
     """),
     @NamedQuery(name = "desktopSessionRttSample.getByInstanceId", query = """
         SELECT s
         FROM DesktopSessionRttSample s
-        LEFT JOIN InstanceSessionMember ism ON s.instanceSessionMemberId = ism.id
-        LEFT JOIN Instance i ON ism.instanceSession.instanceId = i.id
+        LEFT JOIN InstanceDesktopSession ids ON s.instanceDesktopSessionId = ids.id
+        LEFT JOIN Instance i ON ids.instanceId = i.id
         WHERE i.id IN :instanceId
         ORDER BY s.date
     """),
@@ -38,9 +38,8 @@ import java.util.Date;
     @NamedQuery(name = "desktopSessionRttSample.getByHypervisorSamplesSinceDate", query = """
         SELECT h, s
         FROM DesktopSessionRttSample s
-        LEFT JOIN InstanceSessionMember ism ON s.instanceSessionMemberId = ism.id
-        LEFT JOIN InstanceSession isess ON ism.instanceSession.id = isess.id
-        LEFT JOIN Instance i ON isess.instanceId = i.id
+        LEFT JOIN InstanceDesktopSession ids ON s.instanceDesktopSessionId = ids.id
+        LEFT JOIN Instance i ON ids.instanceId = i.id
         LEFT JOIN Hypervisor h ON i.hypervisorId = h.id
         WHERE s.date >= :date
         ORDER BY s.date
@@ -54,9 +53,11 @@ public class DesktopSessionRttSample {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    // Avoid costly request to get InstanceSessionMember: just use a standard column with the Id for these stats
-    @Column(name = "instance_session_member_id", nullable = false)
-    private Long instanceSessionMemberId;
+    // Avoid costly request to get instanceDesktopSession: just use a standard column with the Id for these stats
+    // Make it nullable: allows for easy table changes: the reference to the desktop session is only needed once we already
+    // have a session.
+    @Column(name = "instance_desktop_session_id")
+    private Long instanceDesktopSessionId;
 
     @Column(name = "date", nullable = false)
     private Date date;
@@ -90,12 +91,12 @@ public class DesktopSessionRttSample {
         this.id = id;
     }
 
-    public Long getInstanceSessionMemberId() {
-        return instanceSessionMemberId;
+    public Long getInstanceDesktopSessionId() {
+        return instanceDesktopSessionId;
     }
 
-    public void setInstanceSessionMemberId(Long instanceSessionMemberId) {
-        this.instanceSessionMemberId = instanceSessionMemberId;
+    public void setInstanceDesktopSessionId(Long instanceDesktopSessionId) {
+        this.instanceDesktopSessionId = instanceDesktopSessionId;
     }
 
     public Date getDate() {
@@ -167,7 +168,7 @@ public class DesktopSessionRttSample {
     }
 
     public static class Builder {
-        private Long instanceSessionMemberId;
+        private Long instanceDesktopSessionId;
         private Date date;
         private Long samplePeriodMinutes;
         private Double clientMeanRttMs;
@@ -177,8 +178,8 @@ public class DesktopSessionRttSample {
         private Double instanceSdRttMs;
         private Long instanceRttSampleCount;
 
-        public Builder instanceSessionMemberId(Long instanceSessionMemberId) {
-            this.instanceSessionMemberId = instanceSessionMemberId;
+        public Builder instanceDesktopSessionId(Long instanceDesktopSessionId) {
+            this.instanceDesktopSessionId = instanceDesktopSessionId;
             return this;
         }
 
@@ -224,7 +225,7 @@ public class DesktopSessionRttSample {
 
         public DesktopSessionRttSample build() {
             DesktopSessionRttSample sample = new DesktopSessionRttSample();
-            sample.setInstanceSessionMemberId(instanceSessionMemberId);
+            sample.setInstanceDesktopSessionId(instanceDesktopSessionId);
             sample.setDate(date);
             sample.setSamplePeriodMinutes(samplePeriodMinutes);
             sample.setClientMeanRttMs(clientMeanRttMs);

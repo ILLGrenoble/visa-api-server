@@ -37,6 +37,14 @@ public class InstanceDesktopSessionService {
         this.instanceJupyterSessionService = instanceJupyterSessionService;
     }
 
+    public InstanceDesktopSession getById(final Long id) {
+        return this.repository.getById(id);
+    }
+
+    public List<InstanceDesktopSession> getAll() {
+        return this.getAll(null);
+    }
+
     public List<InstanceDesktopSession> getAll(Pagination pagination) {
         return this.repository.getAll(pagination);
     }

@@ -9,7 +9,7 @@ import eu.ill.visa.common.vdi.apiconnect.VdiConnectionSignature;
 import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
-import eu.ill.visa.core.entity.InstanceSession;
+import eu.ill.visa.core.entity.InstanceDesktopSession;
 import eu.ill.visa.core.entity.Role;
 import eu.ill.visa.web.rest.controllers.AbstractController;
 import jakarta.annotation.security.RolesAllowed;
@@ -43,7 +43,7 @@ public class VdiAccessController extends AbstractController {
     @GET
     @Path("/authenticate/{protocol}/{token}")
     public VdiAuthenticationToken authenticate(final @PathParam("protocol") String protocol, final @PathParam("token") String token) {
-        if (!Arrays.asList(InstanceSession.WEBX_PROTOCOL, InstanceSession.GUACAMOLE_PROTOCOL).contains(protocol)) {
+        if (!Arrays.asList(InstanceDesktopSession.WEBX_PROTOCOL, InstanceDesktopSession.GUACAMOLE_PROTOCOL).contains(protocol)) {
             throw new BadRequestException("invalid protocol");
         }
 

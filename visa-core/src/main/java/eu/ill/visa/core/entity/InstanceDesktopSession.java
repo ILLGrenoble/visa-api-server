@@ -9,6 +9,14 @@ import java.util.Date;
 
 @Entity
 @NamedQueries({
+    @NamedQuery(name = "instanceDesktopSession.getById", query = """
+        SELECT ids
+        FROM InstanceDesktopSession ids
+        LEFT JOIN Instance i on ids.instanceId = i.id
+        WHERE ids.id = :id
+        AND ids.closedAt IS NULL
+        AND i.deletedAt IS NULL
+    """),
     @NamedQuery(name = "instanceDesktopSession.getAll", query = """
         SELECT ids
         FROM InstanceDesktopSession ids

@@ -26,6 +26,17 @@ public class InstanceDesktopSessionRepository extends AbstractRepository<Instanc
         super(entityManager);
     }
 
+    public InstanceDesktopSession getById(final Long id) {
+        try {
+            final TypedQuery<InstanceDesktopSession> query = getEntityManager().createNamedQuery("instanceDesktopSession.getById", InstanceDesktopSession.class);
+            query.setParameter("id", id);
+            return query.getSingleResult();
+
+        } catch (NoResultException exception) {
+            return null;
+        }
+    }
+
     public List<InstanceDesktopSession> getAll() {
         return this.getAll(null);
     }

@@ -31,14 +31,14 @@ public class DesktopSessionRttSampleService {
         this.repository = repository;
     }
 
-    public List<DesktopSessionRttSample> getByInstanceSessionMemberId(Long instanceSessionMemberId) {
-        return this.repository.getByInstanceSessionMemberId(instanceSessionMemberId);
+    public List<DesktopSessionRttSample> getByInstanceDesktopSessionId(Long instanceDesktopSessionId) {
+        return this.repository.getByInstanceDesktopSessionId(instanceDesktopSessionId);
     }
 
-    public List<List<DesktopSessionRttSample>> getByInstanceSessionMemberIds(List<Long> instanceSessionMemberIds) {
-        List<DesktopSessionRttSample> samples = this.repository.getByInstanceSessionMemberIds(instanceSessionMemberIds);
-        return instanceSessionMemberIds.stream().map(id -> {
-            return samples.stream().filter(sample -> sample.getInstanceSessionMemberId().equals(id)).toList();
+    public List<List<DesktopSessionRttSample>> getByInstanceDesktopSessionIds(List<Long> instanceDesktopSessionIds) {
+        List<DesktopSessionRttSample> samples = this.repository.getByInstanceDesktopSessionIds(instanceDesktopSessionIds);
+        return instanceDesktopSessionIds.stream().map(id -> {
+            return samples.stream().filter(sample -> sample.getInstanceDesktopSessionId().equals(id)).toList();
         }).toList();
     }
 
@@ -89,7 +89,7 @@ public class DesktopSessionRttSampleService {
             samples.stream()
                 .collect(Collectors.groupingBy(
                     sample -> new HourlySampleKey(
-                        sample.getInstanceSessionMemberId(),
+                        sample.getInstanceDesktopSessionId(),
                         getHourlyBucket(sample.getDate())
                     )
                 ));
@@ -152,7 +152,7 @@ public class DesktopSessionRttSampleService {
             HourlySampleKey key = entry.getKey();
             List<DesktopSessionRttSample> samples = entry.getValue();
 
-            Long instanceSessionMemberId = key.instanceSessionMemberId;
+            Long instanceDesktopSessionId = key.instanceDesktopSessionId;
             Date date = Date.from(key.hour);
 
             // calculate clientStats
@@ -162,7 +162,7 @@ public class DesktopSessionRttSampleService {
             SampleStats instanceStats = this.mergeInstanceStats(samples, date);
 
             DesktopSessionRttSample hourlySample = DesktopSessionRttSample.Builder()
-                .instanceSessionMemberId(instanceSessionMemberId)
+                .instanceDesktopSessionId(instanceDesktopSessionId)
                 .date(date)
                 .samplePeriodMinutes(60L)
                 .clientMeanRttMs(clientStats.mean())
@@ -196,6 +196,6 @@ public class DesktopSessionRttSampleService {
         return date.toInstant().truncatedTo(ChronoUnit.MINUTES);
     }
 
-    public record HourlySampleKey(Long instanceSessionMemberId, Instant hour) {}
+    public record HourlySampleKey(Long instanceDesktopSessionId, Instant hour) {}
     public record HypervisorMinutelySampleKey(Hypervisor hypervisor, Instant minute) {}
 }
