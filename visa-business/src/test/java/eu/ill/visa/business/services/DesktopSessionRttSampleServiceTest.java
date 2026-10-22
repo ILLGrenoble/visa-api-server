@@ -25,8 +25,8 @@ public class DesktopSessionRttSampleServiceTest {
 
     @Test
     @DisplayName("Test get by instance desktop session Id")
-    void testGetByInstanceDesktopSessionId() {
-        List<DesktopSessionRttSample> samples = this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11700L);
+    void testGetBySessionId() {
+        List<DesktopSessionRttSample> samples = this.desktopSessionRttSampleService.getBySessionId(11700L);
         assertEquals(10, samples.size());
     }
 
@@ -46,13 +46,13 @@ public class DesktopSessionRttSampleServiceTest {
         assertEquals(5, grouped.size());
 
         for (List<DesktopSessionRttSample> samplesList : grouped.values()) {
-            if (samplesList.get(0).getInstanceDesktopSessionId().equals(11700L)) {
+            if (samplesList.get(0).getSessionId().equals(11700L)) {
                 assertEquals(5, samplesList.size());
-            } else if (samplesList.get(0).getInstanceDesktopSessionId().equals(11701L)) {
+            } else if (samplesList.get(0).getSessionId().equals(11701L)) {
                 assertEquals(5, samplesList.size());
-            } else if (samplesList.get(0).getInstanceDesktopSessionId().equals(11702L)) {
+            } else if (samplesList.get(0).getSessionId().equals(11702L)) {
                 assertEquals(2, samplesList.size());
-            } else if (samplesList.get(0).getInstanceDesktopSessionId().equals(11703L)) {
+            } else if (samplesList.get(0).getSessionId().equals(11703L)) {
                 assertEquals(2, samplesList.size());
             }
         }
@@ -133,11 +133,11 @@ public class DesktopSessionRttSampleServiceTest {
         List<DesktopSessionRttSample> samplesBefore = this.desktopSessionRttSampleService.getAllRequiringResampling(7);
         assertEquals(19, samplesBefore.size());
 
-        assertEquals(10, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11700L).size());
-        assertEquals(5, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11701L).size());
-        assertEquals(2, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11702L).size());
-        assertEquals(2, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11703L).size());
-        assertEquals(5, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11800L).size());
+        assertEquals(10, this.desktopSessionRttSampleService.getBySessionId(11700L).size());
+        assertEquals(5, this.desktopSessionRttSampleService.getBySessionId(11701L).size());
+        assertEquals(2, this.desktopSessionRttSampleService.getBySessionId(11702L).size());
+        assertEquals(2, this.desktopSessionRttSampleService.getBySessionId(11703L).size());
+        assertEquals(5, this.desktopSessionRttSampleService.getBySessionId(11800L).size());
 
         Pair<Integer, Integer> results = this.desktopSessionRttSampleService.performResampling(7);
         assertEquals(19, results.getLeft());
@@ -146,11 +146,11 @@ public class DesktopSessionRttSampleServiceTest {
         List<DesktopSessionRttSample> samplesAfter = this.desktopSessionRttSampleService.getAllRequiringResampling(7);
         assertEquals(0, samplesAfter.size());
 
-        assertEquals(2, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11700L).size());
-        assertEquals(1, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11701L).size());
-        assertEquals(1, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11702L).size());
-        assertEquals(1, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11703L).size());
-        assertEquals(5, this.desktopSessionRttSampleService.getByInstanceDesktopSessionId(11800L).size());
+        assertEquals(2, this.desktopSessionRttSampleService.getBySessionId(11700L).size());
+        assertEquals(1, this.desktopSessionRttSampleService.getBySessionId(11701L).size());
+        assertEquals(1, this.desktopSessionRttSampleService.getBySessionId(11702L).size());
+        assertEquals(1, this.desktopSessionRttSampleService.getBySessionId(11703L).size());
+        assertEquals(5, this.desktopSessionRttSampleService.getBySessionId(11800L).size());
     }
 
 }

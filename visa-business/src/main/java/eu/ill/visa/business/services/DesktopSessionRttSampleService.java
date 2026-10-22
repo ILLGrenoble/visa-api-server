@@ -31,14 +31,14 @@ public class DesktopSessionRttSampleService {
         this.repository = repository;
     }
 
-    public List<DesktopSessionRttSample> getByInstanceDesktopSessionId(Long instanceDesktopSessionId) {
-        return this.repository.getByInstanceDesktopSessionId(instanceDesktopSessionId);
+    public List<DesktopSessionRttSample> getBySessionId(Long sessionId) {
+        return this.repository.getBySessionId(sessionId);
     }
 
-    public List<List<DesktopSessionRttSample>> getByInstanceDesktopSessionIds(List<Long> instanceDesktopSessionIds) {
-        List<DesktopSessionRttSample> samples = this.repository.getByInstanceDesktopSessionIds(instanceDesktopSessionIds);
-        return instanceDesktopSessionIds.stream().map(id -> {
-            return samples.stream().filter(sample -> sample.getInstanceDesktopSessionId().equals(id)).toList();
+    public List<List<DesktopSessionRttSample>> getBySessionIds(List<Long> sessionIds) {
+        List<DesktopSessionRttSample> samples = this.repository.getSessionIds(sessionIds);
+        return sessionIds.stream().map(id -> {
+            return samples.stream().filter(sample -> sample.getSessionId().equals(id)).toList();
         }).toList();
     }
 
@@ -89,7 +89,7 @@ public class DesktopSessionRttSampleService {
             samples.stream()
                 .collect(Collectors.groupingBy(
                     sample -> new HourlySampleKey(
-                        sample.getInstanceDesktopSessionId(),
+                        sample.getSessionId(),
                         getHourlyBucket(sample.getDate())
                     )
                 ));

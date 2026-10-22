@@ -7,20 +7,20 @@ import java.util.Date;
 
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "desktopSessionRttSample.getByInstanceDesktopSessionId", query = """
+    @NamedQuery(name = "desktopSessionRttSample.getBySessionId", query = """
         SELECT s FROM DesktopSessionRttSample s
-        WHERE s.instanceDesktopSessionId = :instanceDesktopSessionId
+        WHERE s.sessionId = :sessionId
         ORDER BY s.date
     """),
-    @NamedQuery(name = "desktopSessionRttSample.getByInstanceDesktopSessionIds", query = """
+    @NamedQuery(name = "desktopSessionRttSample.getBySessionIds", query = """
         SELECT s FROM DesktopSessionRttSample s
-        WHERE s.instanceDesktopSessionId IN :instanceDesktopSessionIds
+        WHERE s.sessionId IN :sessionIds
         ORDER BY s.date
     """),
     @NamedQuery(name = "desktopSessionRttSample.getByInstanceId", query = """
         SELECT s
         FROM DesktopSessionRttSample s
-        LEFT JOIN InstanceDesktopSession ids ON s.instanceDesktopSessionId = ids.id
+        LEFT JOIN InstanceDesktopSession ids ON s.sessionId = ids.id
         LEFT JOIN Instance i ON ids.instanceId = i.id
         WHERE i.id IN :instanceId
         ORDER BY s.date
@@ -38,7 +38,7 @@ import java.util.Date;
     @NamedQuery(name = "desktopSessionRttSample.getByHypervisorSamplesSinceDate", query = """
         SELECT h, s
         FROM DesktopSessionRttSample s
-        LEFT JOIN InstanceDesktopSession ids ON s.instanceDesktopSessionId = ids.id
+        LEFT JOIN InstanceDesktopSession ids ON s.sessionId = ids.id
         LEFT JOIN Instance i ON ids.instanceId = i.id
         LEFT JOIN Hypervisor h ON i.hypervisorId = h.id
         WHERE s.date >= :date
@@ -56,8 +56,8 @@ public class DesktopSessionRttSample {
     // Avoid costly request to get instanceDesktopSession: just use a standard column with the Id for these stats
     // Make it nullable: allows for easy table changes: the reference to the desktop session is only needed once we already
     // have a session.
-    @Column(name = "instance_desktop_session_id")
-    private Long instanceDesktopSessionId;
+    @Column(name = "session_id")
+    private Long sessionId;
 
     @Column(name = "date", nullable = false)
     private Date date;
@@ -91,12 +91,12 @@ public class DesktopSessionRttSample {
         this.id = id;
     }
 
-    public Long getInstanceDesktopSessionId() {
-        return instanceDesktopSessionId;
+    public Long getSessionId() {
+        return sessionId;
     }
 
-    public void setInstanceDesktopSessionId(Long instanceDesktopSessionId) {
-        this.instanceDesktopSessionId = instanceDesktopSessionId;
+    public void setSessionId(Long instanceDesktopSessionId) {
+        this.sessionId = instanceDesktopSessionId;
     }
 
     public Date getDate() {
@@ -225,7 +225,7 @@ public class DesktopSessionRttSample {
 
         public DesktopSessionRttSample build() {
             DesktopSessionRttSample sample = new DesktopSessionRttSample();
-            sample.setInstanceDesktopSessionId(instanceDesktopSessionId);
+            sample.setSessionId(instanceDesktopSessionId);
             sample.setDate(date);
             sample.setSamplePeriodMinutes(samplePeriodMinutes);
             sample.setClientMeanRttMs(clientMeanRttMs);

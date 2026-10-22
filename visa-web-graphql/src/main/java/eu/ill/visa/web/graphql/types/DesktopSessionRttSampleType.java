@@ -14,7 +14,7 @@ public class DesktopSessionRttSampleType {
     @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long id;
     @AdaptToScalar(Scalar.Int.class)
-    private final @NotNull Long instanceDesktopSessionId;
+    private final @NotNull Long sessionId;
     private final @NotNull Date date;
     @AdaptToScalar(Scalar.Int.class)
     private final @NotNull Long samplePeriodMinutes;
@@ -29,7 +29,7 @@ public class DesktopSessionRttSampleType {
 
     public DesktopSessionRttSampleType(DesktopSessionRttSample sample) {
         this.id = sample.getId();
-        this.instanceDesktopSessionId = sample.getInstanceDesktopSessionId();
+        this.sessionId = sample.getSessionId();
         this.date = sample.getDate();
         this.samplePeriodMinutes = sample.getSamplePeriodMinutes();
         this.clientMeanRttMs = sample.getClientMeanRttMs();
@@ -44,8 +44,8 @@ public class DesktopSessionRttSampleType {
         return id;
     }
 
-    public Long getInstanceDesktopSessionId() {
-        return instanceDesktopSessionId;
+    public Long getSessionId() {
+        return sessionId;
     }
 
     public Date getDate() {

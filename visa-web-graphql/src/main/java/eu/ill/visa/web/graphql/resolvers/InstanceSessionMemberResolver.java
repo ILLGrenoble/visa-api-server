@@ -38,7 +38,7 @@ public class InstanceSessionMemberResolver {
     }
 
     public @NotNull List<List<DesktopSessionRttSampleType>> rttSamples(@Source List<InstanceDesktopSessionType> instanceSessionMembers) {
-        return this.desktopSessionRttSampleService.getByInstanceDesktopSessionIds(instanceSessionMembers.stream().map(InstanceDesktopSessionType::getId).toList()).stream()
+        return this.desktopSessionRttSampleService.getBySessionIds(instanceSessionMembers.stream().map(InstanceDesktopSessionType::getId).toList()).stream()
             .map(samples -> samples.stream()
                 .map(DesktopSessionRttSampleType::new)
                 .toList()
