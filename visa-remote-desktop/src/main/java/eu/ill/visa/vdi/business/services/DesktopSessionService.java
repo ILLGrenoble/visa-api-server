@@ -19,11 +19,13 @@ import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.*;
+import eu.ill.visa.core.domain.Timer;
 import eu.ill.visa.vdi.gateway.events.UserConnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UserDisconnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UsersConnectedEvent;
 import io.quarkus.runtime.Shutdown;
 import io.quarkus.runtime.Startup;
+import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static eu.ill.visa.vdi.domain.models.SessionEvent.*;
 
@@ -57,6 +60,8 @@ public class DesktopSessionService {
 
     private final List<DesktopSession> desktopSessions = new ArrayList<>();
     private final Map<String, DesktopSessionMember> desktopSessionMembers = new HashMap<>();
+
+    private final Cancellable rttDataUpdater;
 
     @Inject
     public DesktopSessionService(final InstanceService instanceService,
@@ -98,10 +103,13 @@ public class DesktopSessionService {
             .next((message) -> this.onSessionLocked(message.sessionId(), message.user()));
         this.messageBroker.subscribe(SessionUnlockedMessage.class)
             .next((message) -> this.onSessionUnlocked(message.sessionId()));
+
+        this.rttDataUpdater = Timer.setInterval(this::storeDesktopSessionConnectionStats, 60, TimeUnit.SECONDS);
     }
 
     @Shutdown
     public void shutdown() {
+        this.rttDataUpdater.cancel();
         this.messageBroker.shutdown();
     }
 
@@ -245,7 +253,8 @@ public class DesktopSessionService {
     }
 
 
-    public long storeDesktopSessionConnectionStats() {
+    private void storeDesktopSessionConnectionStats() {
+        logger.debug("Executing instance session sample job...");
         List<DesktopSessionRttSample> samples = new ArrayList<>();
         synchronized (this.desktopSessionMembers) {
             this.desktopSessionMembers.values().forEach(desktopSessionMember -> {
@@ -285,11 +294,15 @@ public class DesktopSessionService {
             });
         }
 
-        for (DesktopSessionRttSample desktopSessionRttSample : samples) {
-            this.desktopSessionRttSampleService.save(desktopSessionRttSample);
-        }
+        if (samples.isEmpty()) {
+            logger.debug("... no samples recorded");
 
-        return samples.size();
+        } else {
+            for (DesktopSessionRttSample desktopSessionRttSample : samples) {
+                this.desktopSessionRttSampleService.save(desktopSessionRttSample);
+            }
+            logger.debug("... stored {} samples", samples.size());
+        }
     }
 
     private void closeSession(final Long sessionId) {
