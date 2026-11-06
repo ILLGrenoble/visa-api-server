@@ -55,7 +55,7 @@ public class DesktopSessionRttSample {
     private Long id;
 
     // Avoid costly request to get InstanceSessionMember: just use a standard column with the Id for these stats
-    @Column(name = "instance_session_member_id", nullable = false)
+    @Column(name = "session_id")
     private Long instanceSessionMemberId;
 
     @Column(name = "date", nullable = false)
