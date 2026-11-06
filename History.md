@@ -1,3 +1,29 @@
+3.9.0 06/11/2026
+================
+  * Add access for application token role to the Application Client Method (ACM) /acm/instances/{id}
+  * Update WebX-Relay to 2.0.0 including:
+    * improved parallelisation of connections to multiple hosts
+    * improved synchronisation of connection/disconnection within a host
+    * improved connection reliability (reconnect+retry for req-resp connections)
+    * improved connection speeds
+    * Integrate minor changes to thread management and logging.
+  * Add list of users as "booking organisers" to booking request model:
+    * both those who can create bookings and those who have been assigned as organisers can access the bookings menu in the client
+    * Organisers can assign users to instances and connect to their desktop sessions
+    * Send emails to organisers when they are added to booking requests. Send emails to organisers as well as owners when a booking request has been validated.
+  * Change autoAcceptExtensionRequest to extensionRequestPolicy:
+    * can now stop extension requests being available for older images.
+    * Compatibility maintained for previous auto-accepted images.
+    * Stop users from making subsequent extension requests if already one refused.
+  * Cleanup instance actions (account instance controller) and simplify user-initiated delete process.
+  * Network metrics between VISA server and instances and client browsers:
+    * Use WebX to calculate Round-Trip Times (RTTs) to instances and clients
+    * Display RTTs in admin session view (graphql endpoint)
+    * Obtain RTTs for historic instance sessions (display in admin instance view)
+    * Obtain mean RTTs for hypervisors (from associated instances)
+    * Resample instance RTTs to hourly bins after 7 days
+  * Bug fix on flavour availability calculation
+
 3.8.4 08/06/2026
 ================
  * Improved transition from hypervisor-determined and cloud-resources-determined flavour availabilities (booking periods). Ensure that cloud resources are limited also by the hypervisor resources.
