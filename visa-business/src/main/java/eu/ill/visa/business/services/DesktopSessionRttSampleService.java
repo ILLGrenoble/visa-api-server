@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.core.domain.SampleStats;
+import eu.ill.visa.common.utils.domain.SampleStats;
 import eu.ill.visa.core.entity.DesktopSessionRttSample;
 import eu.ill.visa.core.entity.Hypervisor;
 import eu.ill.visa.persistence.repositories.DesktopSessionRttSampleRepository;

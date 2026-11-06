@@ -8,6 +8,7 @@ quarkus:
     access-log:
       enabled: ${VISA_LOGGING_ACCESS_LOG_ENABLED:true}
       pattern: combined
+      exclude-pattern: /api/vdi/.*
     cors:
       ~: true
       origins:  ${VISA_CORS_ORIGIN:*}
@@ -20,6 +21,8 @@ quarkus:
     enabled: ${VISA_SCHEDULER_ENABLED:true}
   devservices:
     enabled: true
+  websocket:
+    dispatch-to-worker: true
   mailer:
     mock: ${VISA_NOTIFICATION_EMAIL_ADAPTER_MOCKED:false}
     host: ${VISA_NOTIFICATION_EMAIL_ADAPTER_HOST:change.mail.com}
@@ -75,8 +78,6 @@ quarkus:
         level: DEBUG
       "org.apache.guacamole":
         level: INFO
-#      "org.jboss.resteasy.reactive.client.logging":
-#        level: DEBUG
 
 cloud:
   defaultProviderEnabled: ${VISA_CLOUD_DEFAULT_PROVIDER_ENABLED:true}
@@ -141,6 +142,9 @@ business:
     enabled: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_ENABLED:false}
     url: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_URL}
     authToken: ${VISA_SECURITY_GROUP_SERVICE_CLIENT_AUTH_TOKEN}
+  vdi:
+    ownerDisconnectionPolicy: ${VISA_VDI_OWNER_DISCONNECTION_POLICY:DISCONNECT_ALL}
+    cleanupSessionsOnStartup: ${VISA_VDI_CLEANUP_SESSIONS_ON_STARTUP:false}
 
 broker:
   redisEnabled: ${VISA_VDI_REDIS_ENABLED:false}
@@ -150,12 +154,10 @@ broker:
   redisHealthMonitorEnabled: ${VISA_VDI_REDIS_HEALTH_MONITOR_ENABLED:true}
 
 vdi:
-  enabled: ${VISA_VDI_ENABLED:true}
-  ownerDisconnectionPolicy: ${VISA_VDI_OWNER_DISCONNECTION_POLICY:DISCONNECT_ALL}
-  cleanupSessionsOnStartup: ${VISA_VDI_CLEANUP_SESSIONS_ON_STARTUP:false}
   protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}
-  numberOfWsThreads: ${VISA_VDI_NUMBER_OF_WS_THREADS:8}
   maxSessionInactivityTimeMinutes: ${VISA_VDI_MAX_SESSION_INACTIVITY_TIME_MINUTES:360}
+  isMicroservice: false
+  apiServerAuthToken: ${VISA_VDI_API_SERVER_AUTH_TOKEN}
   guacd:
     ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
     port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
@@ -163,6 +165,7 @@ vdi:
   webx:
     runtimeMaxQualityIndex: ${VISA_VDI_WEBX_ENGINE_RUNTIME_MAX_QUALITY_INDEX:10}
     logLevel: ${VISA_VDI_WEBX_ENGINE_LOG_LEVEL:debug}
+
 client:
   login:
     issuer: ${VISA_CLIENT_CONFIG_LOGIN_ISSUER}
@@ -182,6 +185,9 @@ client:
   contactEmail: ${VISA_CLIENT_CONFIG_CONTACT_EMAIL}
   experiments:
     openDataIncluded: ${VISA_CLIENT_CONFIG_INCLUDE_OPEN_DATA:false}
+
+security:
+  vdiAuthToken: ${VISA_VDI_API_SERVER_AUTH_TOKEN}
 
 "%prod":
   quarkus:

@@ -61,6 +61,11 @@ public class InstanceExpirationService {
         return this.repository.getByInstance(instance);
     }
 
+    public InstanceExpiration getByInstanceId(@NotNull Long instanceId) {
+        // Will return those that have deletion pending (due to inactivity or from instance lifetime limit)
+        return this.repository.getByInstanceId(instanceId);
+    }
+
     public Date getExpirationDate(@NotNull Instance instance) {
         // Get from inactivity
         InstanceExpiration instanceExpiration = this.getByInstance(instance);
@@ -205,9 +210,14 @@ public class InstanceExpirationService {
     }
 
     public void onInstanceActivated(Instance instance) {
+        this.onInstanceActivated(instance.getId());
+    }
+
+    public void onInstanceActivated(Long instanceId) {
         // See if an expiration exists for the instance
-        InstanceExpiration instanceExpiration = this.getByInstance(instance);
+        InstanceExpiration instanceExpiration = this.getByInstanceId(instanceId);
         if (instanceExpiration != null) {
+            Instance instance = instanceExpiration.getInstance();
 
             // check expiration due to inactivity rather than max_lifetime
             if (instance.getTerminationDate() == null || instance.getTerminationDate().compareTo(instanceExpiration.getExpirationDate()) > 0) {

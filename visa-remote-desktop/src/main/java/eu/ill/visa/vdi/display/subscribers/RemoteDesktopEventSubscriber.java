@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.display.subscribers;
 
-import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import eu.ill.visa.vdi.domain.models.DesktopSession;
@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 public abstract class RemoteDesktopEventSubscriber<T> {
 
@@ -37,7 +39,7 @@ public abstract class RemoteDesktopEventSubscriber<T> {
 
             final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
 
-            final InstanceMemberRole role = desktopSessionMember.connectedUser().getRole();
+            final InstanceMemberRole role = desktopSessionMember.connectedUser().role();
 
             // Get activity type (returns null for anything other than mouse or keyboard activity)
             InstanceActivityType controlActivityType = this.getControlActivityType(data);
@@ -81,11 +83,11 @@ public abstract class RemoteDesktopEventSubscriber<T> {
                         }
 
                     } catch (Exception error) {
-                        logger.error("Failed to update instance {} activity: {}", desktopSession.getInstanceId(), error.getMessage());
+                        logger.error("Failed to update instance {} activity: {}", desktopSession.getInstance().id(), formatException(error));
                     }
                 });
             }
-       });
+        });
     }
 
     protected abstract InstanceActivityType getControlActivityType(T data);

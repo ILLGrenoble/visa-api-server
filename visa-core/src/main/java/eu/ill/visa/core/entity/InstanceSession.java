@@ -49,6 +49,15 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
         AND i.deletedAt IS NULL
         ORDER BY isess.id DESC
     """),
+    @NamedQuery(name = "instanceSession.getAllByConnectionId", query = """
+        SELECT isess
+        FROM InstanceSession isess
+        LEFT JOIN Instance i on isess.instanceId = i.id
+        WHERE isess.connectionId = :connectionId
+        AND isess.current = true
+        AND i.deletedAt IS NULL
+        ORDER BY isess.id DESC
+    """),
     @NamedQuery(name = "instanceSession.updatePartialById", query = """
             UPDATE InstanceSession i
             SET i.current = :current

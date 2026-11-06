@@ -1,9 +1,9 @@
 package eu.ill.visa.persistence.repositories;
 
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.domain.*;
 import eu.ill.visa.core.domain.filters.InstanceFilter;
 import eu.ill.visa.core.entity.*;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
 import eu.ill.visa.core.entity.partial.InstancePartial;
 import eu.ill.visa.core.entity.partial.NumberInstancesByCloudClient;

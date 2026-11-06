@@ -1,8 +1,8 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.InstanceConfiguration;
+import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
 import eu.ill.visa.core.entity.InstanceActivity;
-import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
 import eu.ill.visa.persistence.repositories.InstanceActivityRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

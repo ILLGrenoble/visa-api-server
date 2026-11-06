@@ -1,7 +1,7 @@
 package eu.ill.visa.core.entity.partial;
 
 
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Date;
@@ -11,17 +11,19 @@ public class InstanceSessionMemberPartial {
     private final Long id;
     private final InstanceMemberRole role;
     private Boolean active;
+    private final String clientId;
     private Date lastInteractionAt;
     private final Long instanceId;
     private final String userId;
     private final String userFirstName;
     private final String userLastName;
 
-    public InstanceSessionMemberPartial(Long id, InstanceMemberRole role, Boolean active, Date lastInteractionAt, Long instanceId, String userId, String userFirstName, String userLastName) {
+    public InstanceSessionMemberPartial(Long id, InstanceMemberRole role, Boolean active, String clientId, Date lastInteractionAt, Long instanceId, String userId, String userFirstName, String userLastName) {
         this.userId = userId;
         this.id = id;
         this.role = role;
         this.active = active;
+        this.clientId = clientId;
         this.lastInteractionAt = lastInteractionAt;
         this.instanceId = instanceId;
         this.userFirstName = userFirstName;
@@ -42,6 +44,10 @@ public class InstanceSessionMemberPartial {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getClientId() {
+        return clientId;
     }
 
     public Date getLastInteractionAt() {

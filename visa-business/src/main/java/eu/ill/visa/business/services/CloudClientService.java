@@ -5,7 +5,7 @@ import eu.ill.visa.cloud.ProviderConfiguration;
 import eu.ill.visa.cloud.ProviderConfigurationImpl;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.cloud.services.CloudClientGateway;
-import eu.ill.visa.core.domain.Timer;
+import eu.ill.visa.common.utils.domain.Timer;
 import eu.ill.visa.core.entity.CloudProviderConfiguration;
 import io.quarkus.runtime.Startup;
 import jakarta.inject.Singleton;

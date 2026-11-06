@@ -2,7 +2,7 @@ package eu.ill.visa.web.graphql.resolvers;
 
 import eu.ill.visa.business.services.DesktopSessionRttSampleService;
 import eu.ill.visa.business.services.InstanceService;
-import eu.ill.visa.core.domain.SampleStats;
+import eu.ill.visa.common.utils.domain.SampleStats;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.web.graphql.types.HypervisorAllocationType;
 import eu.ill.visa.web.graphql.types.HypervisorType;

@@ -1,0 +1,56 @@
+quarkus:
+  http:
+    port: ${VISA_VDI_PORT:8087}
+    host: ${VISA_VDI_HOST:localhost}
+  devservices:
+    enabled: true
+  websocket:
+    dispatch-to-worker: true
+  rest-client:
+    #    logging:
+    #      scope: request-response
+    #      body-limit: 1000
+    visa-api-server:
+      url: ${VISA_VDI_API_SERVER_URL}
+      connect-timeout: 1000
+#      logging:
+#        scope: request-response
+  redis:
+    hosts-provider-name: redis-pubsub-hosts-provider
+    tls:
+      enabled: ${VISA_VDI_REDIS_TLS_ENABLED:false}
+      trust-all: ${VISA_VDI_REDIS_TLS_TRUST_ALL:false}
+    devservices:
+      enabled: false
+  log:
+    category:
+      "eu.ill.visa":
+        level: ${VISA_VDI_LOGGING_LEVEL:INFO}
+      "eu.ill.webx":
+        level: DEBUG
+      "org.apache.guacamole":
+        level: INFO
+  package:
+    jar:
+      type: uber-jar
+
+
+broker:
+  redisEnabled: ${VISA_VDI_REDIS_ENABLED:false}
+  redisURL: ${VISA_VDI_REDIS_URL}
+  redisPassword: ${VISA_VDI_REDIS_PASSWORD}
+  redisDatabase: ${VISA_VDI_REDIS_DATABASE:0}
+  redisHealthMonitorEnabled: ${VISA_VDI_REDIS_HEALTH_MONITOR_ENABLED:true}
+
+vdi:
+  protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}
+  maxSessionInactivityTimeMinutes: ${VISA_VDI_MAX_SESSION_INACTIVITY_TIME_MINUTES:360}
+  isMicroservice: true
+  apiServerAuthToken: ${VISA_VDI_API_SERVER_AUTH_TOKEN}
+  guacd:
+    ignore-cert: ${VISA_VDI_GUACD_PARAMETER_IGNORE_CERT:true}
+    port: ${VISA_VDI_GUACD_PARAMETER_PORT:3389}
+    color-depth: ${VISA_VDI_GUACD_PARAMETER_COLOR_DEPTH:16}
+  webx:
+    runtimeMaxQualityIndex: ${VISA_VDI_WEBX_ENGINE_RUNTIME_MAX_QUALITY_INDEX:10}
+    logLevel: ${VISA_VDI_WEBX_ENGINE_LOG_LEVEL:debug}

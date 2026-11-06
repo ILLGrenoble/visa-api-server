@@ -18,6 +18,9 @@ import java.util.Date;
     @NamedQuery(name = "instanceExpiration.getByInstance", query = """
             SELECT i FROM InstanceExpiration i WHERE i.instance = :instance
     """),
+    @NamedQuery(name = "instanceExpiration.getByInstanceId", query = """
+            SELECT i FROM InstanceExpiration i WHERE i.instance.id = :instanceId
+    """),
     @NamedQuery(name = "instanceExpiration.getAllExpired", query = """
             SELECT i FROM InstanceExpiration i WHERE i.expirationDate <= :expirationDate
     """),

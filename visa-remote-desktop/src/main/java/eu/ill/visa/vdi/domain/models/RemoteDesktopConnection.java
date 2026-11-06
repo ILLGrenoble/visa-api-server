@@ -1,8 +1,8 @@
 package eu.ill.visa.vdi.domain.models;
 
-import eu.ill.visa.core.domain.SampleStats;
-import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
+import eu.ill.visa.common.utils.domain.SampleStats;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
+import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,7 @@ public class RemoteDesktopConnection {
 
     private final SocketClient client;
     private final ConnectionThread connectionThread;
+    private final String connectionId;
 
     private Date lastInstanceUpdateTime;
     private Date lastInteractionAt = new Date();
@@ -21,9 +22,10 @@ public class RemoteDesktopConnection {
 
     private final RttSampler connectionRttSampler = new RttSampler();
 
-    public RemoteDesktopConnection(SocketClient client, ConnectionThread connectionThread) {
+    public RemoteDesktopConnection(SocketClient client, ConnectionThread connectionThread, String connectionId) {
         this.client = client;
         this.connectionThread = connectionThread;
+        this.connectionId = connectionId;
     }
 
     public SocketClient getClient() {
@@ -32,6 +34,10 @@ public class RemoteDesktopConnection {
 
     public ConnectionThread getConnectionThread() {
         return connectionThread;
+    }
+
+    public String getConnectionId() {
+        return connectionId;
     }
 
     public Date getLastInstanceUpdateTime() {

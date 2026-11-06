@@ -1,7 +1,7 @@
 package eu.ill.visa.broker.brokers.redis;
 
 
-import eu.ill.visa.core.domain.Timer;
+import eu.ill.visa.common.utils.domain.Timer;
 import io.quarkus.redis.datasource.pubsub.PubSubCommands;
 import io.smallrye.mutiny.subscription.Cancellable;
 import org.slf4j.Logger;
@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 public class RedisPubSubHealthMonitor {
 
@@ -79,7 +81,7 @@ public class RedisPubSubHealthMonitor {
                         publisher.publish(CHANNEL, new RedisMessageCarrier(PING_MESSAGE));
 
                     } catch (Exception error) {
-                        logger.error("Error while publishing Redis pub/sub health monitor ping", error);
+                        logger.error("Error while publishing Redis pub/sub health monitor ping: {}", formatException(error));
                         if (this.redisPingTimeout != null) {
                             this.redisPingTimeout.cancel();
                             this.redisPingTimeout = null;

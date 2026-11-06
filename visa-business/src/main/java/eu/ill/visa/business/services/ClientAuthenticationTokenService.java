@@ -1,6 +1,6 @@
 package eu.ill.visa.business.services;
 
-import eu.ill.visa.business.InvalidTokenException;
+import eu.ill.visa.common.vdi.apiconnect.exceptions.InvalidTokenException;
 import eu.ill.visa.core.entity.ClientAuthenticationToken;
 import eu.ill.visa.core.entity.User;
 import eu.ill.visa.persistence.repositories.ClientAuthenticationTokenRepository;

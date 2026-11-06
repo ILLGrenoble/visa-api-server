@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.business.concurrency;
 
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.common.vdi.domain.VdiInstance;
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.webx.WebXTunnel;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,11 +16,11 @@ public class ConnectionThreadExecutor {
 
     private final ExecutorService executorService = newCachedThreadPool(Thread.ofPlatform().name("vdi-connection-thread-", 0).factory());
 
-    public ConnectionThread createGuacamoleConnectionThread(SocketClient client, GuacamoleTunnel tunnel, Instance instance, ConnectedUser user) {
+    public ConnectionThread createGuacamoleConnectionThread(SocketClient client, GuacamoleTunnel tunnel, VdiInstance instance, ConnectedUser user) {
         return new GuacamoleConnectionThread(client, tunnel, instance, user);
     }
 
-    public ConnectionThread createWebXConnectionThread(SocketClient client, WebXTunnel tunnel, Instance instance, ConnectedUser user) {
+    public ConnectionThread createWebXConnectionThread(SocketClient client, WebXTunnel tunnel, VdiInstance instance, ConnectedUser user) {
         return new WebXConnectionThread(client, tunnel, instance, user);
     }
 

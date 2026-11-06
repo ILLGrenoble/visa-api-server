@@ -1,6 +1,6 @@
 package eu.ill.visa.core.entity;
 
-import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
+import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
 import jakarta.persistence.*;
 
 @Entity

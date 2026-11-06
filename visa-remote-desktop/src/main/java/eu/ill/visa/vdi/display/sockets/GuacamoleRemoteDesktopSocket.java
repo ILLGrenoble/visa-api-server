@@ -1,10 +1,8 @@
 package eu.ill.visa.vdi.display.sockets;
 
-import eu.ill.visa.vdi.business.services.DesktopExecutorService;
 import eu.ill.visa.vdi.business.services.DesktopService;
-import eu.ill.visa.vdi.domain.models.SocketClient;
 import eu.ill.visa.vdi.display.subscribers.GuacamoleRemoteDesktopEventSubscriber;
-import jakarta.inject.Inject;
+import eu.ill.visa.vdi.domain.models.SocketClient;
 import jakarta.inject.Singleton;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -19,11 +17,6 @@ public class GuacamoleRemoteDesktopSocket extends RemoteDesktopSocket {
     private static final Logger logger = LoggerFactory.getLogger(GuacamoleRemoteDesktopSocket.class);
 
     private GuacamoleRemoteDesktopEventSubscriber guacamoleRemoteDesktopEventSubscriber;
-
-    @Inject
-    public GuacamoleRemoteDesktopSocket(final DesktopExecutorService desktopExecutorService) {
-        super(desktopExecutorService);
-    }
 
     public void setEventSubscriber(GuacamoleRemoteDesktopEventSubscriber guacamoleRemoteDesktopEventSubscriber) {
         this.guacamoleRemoteDesktopEventSubscriber = guacamoleRemoteDesktopEventSubscriber;

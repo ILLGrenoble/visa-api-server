@@ -1,6 +1,6 @@
 package eu.ill.visa.core.entity;
 
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import jakarta.persistence.*;
 
 import java.util.Date;

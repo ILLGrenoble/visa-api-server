@@ -4,7 +4,6 @@ public interface SessionEvent {
 
     String USER_CONNECTED_EVENT = "vdi:user_connected";
     String USER_DISCONNECTED_EVENT = "vdi:user_disconnected";
-    String USERS_CONNECTED_EVENT = "vdi:users_connected";
     String OWNER_AWAY_EVENT = "vdi:owner_away";
     String SESSION_LOCKED_EVENT = "vdi:session_locked";
     String SESSION_UNLOCKED_EVENT = "vdi:session_unlocked";

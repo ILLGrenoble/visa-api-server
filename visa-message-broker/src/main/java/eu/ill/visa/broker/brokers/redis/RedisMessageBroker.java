@@ -9,6 +9,8 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
+
 @LookupIfProperty(name = "broker.redisEnabled", stringValue = "true")
 @Singleton
 public class RedisMessageBroker implements MessageBroker {
@@ -29,7 +31,7 @@ public class RedisMessageBroker implements MessageBroker {
             this.redisPubSub.shutdown();
 
         } catch (Exception e) {
-            logger.warn("Failed to shutdown Redis pubSubs: {}", e.getMessage());
+            logger.warn("Failed to shutdown Redis pubSubs: {}", formatException(e));
         }
     }
 

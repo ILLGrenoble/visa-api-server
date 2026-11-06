@@ -1,9 +1,9 @@
 package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.business.services.*;
-import eu.ill.visa.core.domain.filters.ExperimentFilter;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
+import eu.ill.visa.core.domain.filters.ExperimentFilter;
 import eu.ill.visa.core.entity.*;
 import eu.ill.visa.web.rest.ClientConfiguration;
 import eu.ill.visa.web.rest.dtos.*;
@@ -22,8 +22,8 @@ import org.jboss.resteasy.reactive.RestResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole.OWNER;
 import static eu.ill.visa.core.entity.Role.*;
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
 import static org.jboss.resteasy.reactive.RestResponse.Status.CREATED;
 
 @Path("/account")

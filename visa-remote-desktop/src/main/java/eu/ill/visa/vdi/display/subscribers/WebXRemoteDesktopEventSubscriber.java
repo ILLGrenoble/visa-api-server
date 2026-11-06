@@ -1,7 +1,7 @@
 package eu.ill.visa.vdi.display.subscribers;
 
-import eu.ill.visa.core.entity.enumerations.InstanceActivityType;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
+import eu.ill.visa.common.vdi.domain.enums.InstanceActivityType;
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
 import org.slf4j.Logger;

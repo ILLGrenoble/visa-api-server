@@ -1,7 +1,7 @@
 package eu.ill.visa.business.services;
 
 import eu.ill.visa.business.services.DesktopSessionRttSampleService.HourlySampleKey;
-import eu.ill.visa.core.domain.SampleStats;
+import eu.ill.visa.common.utils.domain.SampleStats;
 import eu.ill.visa.core.entity.DesktopSessionRttSample;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;

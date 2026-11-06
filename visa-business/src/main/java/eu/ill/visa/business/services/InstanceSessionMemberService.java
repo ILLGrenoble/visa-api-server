@@ -1,11 +1,11 @@
 package eu.ill.visa.business.services;
 
+import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceSession;
 import eu.ill.visa.core.entity.InstanceSessionMember;
 import eu.ill.visa.core.entity.User;
-import eu.ill.visa.core.entity.enumerations.InstanceMemberRole;
 import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import eu.ill.visa.persistence.repositories.InstanceSessionMemberRepository;
 import jakarta.inject.Inject;
@@ -92,6 +92,10 @@ public class InstanceSessionMemberService {
 
     public InstanceSessionMemberPartial getPartialByInstanceSessionIdAndClientId(Long instanceSessionId, final String clientId) {
         return this.repository.getPartialByInstanceSessionIdAndClientId(instanceSessionId, clientId);
+    }
+
+    public InstanceSessionMemberPartial getPartialByConnectionIdAndClientId(String connectionId, final String clientId) {
+        return this.repository.getPartialByConnectionIdAndClientId(connectionId, clientId);
     }
 
     public void deactivateSessionMember(final InstanceSessionMemberPartial instanceSessionMember) {

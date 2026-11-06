@@ -1,6 +1,7 @@
 package eu.ill.visa.security.authentication;
 
 
+import eu.ill.visa.security.suppliers.SimpleHeaderTokenIdentitySupplier;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.quarkus.security.credential.PasswordCredential;
@@ -36,6 +37,8 @@ public class HybridAuthenticationMechanism implements HttpAuthenticationMechanis
     private static final int BEARER_PREFIX_LENGTH;
     private static final int BASIC_PREFIX_LENGTH;
 
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     static {
         LOWERCASE_BEARER_PREFIX = BEARER_PREFIX.toLowerCase(Locale.ENGLISH);
         BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
@@ -68,7 +71,27 @@ public class HybridAuthenticationMechanism implements HttpAuthenticationMechanis
     }
 
     private Optional<AuthenticationRequest> fromHeader(final HttpServerRequest request) {
-        String authHeader = request.getHeader("Authorization");
+        Optional<AuthenticationRequest> authRequestOptional = this.fromAuthorizationHeader(request);
+        if (authRequestOptional.isEmpty()) {
+            authRequestOptional = this.fromVdiAuthHeader(request);
+        }
+        return authRequestOptional;
+    }
+
+    private Optional<AuthenticationRequest> fromVdiAuthHeader(final HttpServerRequest request) {
+        String authHeader = request.getHeader(SimpleHeaderTokenIdentitySupplier.X_VDI_AUTH_TOKEN_HEADER);
+
+        if (authHeader == null || authHeader.isBlank()) {
+            return Optional.empty();
+        }
+
+        logger.debug("[AccountToken] Obtained VDI Auth token from request for URI {}", request.uri());
+        TokenCredential tokenCredential = new TokenCredential(authHeader, SimpleHeaderTokenIdentitySupplier.X_VDI_AUTH_TOKEN_HEADER);
+        return Optional.of(new SimpleHeaderTokenAuthenticationRequest(tokenCredential));
+    }
+
+    private Optional<AuthenticationRequest> fromAuthorizationHeader(final HttpServerRequest request) {
+        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
         if (authHeader == null || authHeader.isBlank()) {
             return Optional.empty();
@@ -99,4 +122,5 @@ public class HybridAuthenticationMechanism implements HttpAuthenticationMechanis
         }
         return Optional.empty();
     }
+
 }

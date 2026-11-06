@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static eu.ill.visa.core.entity.enumerations.InstanceMemberRole.OWNER;
+import static eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole.OWNER;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 

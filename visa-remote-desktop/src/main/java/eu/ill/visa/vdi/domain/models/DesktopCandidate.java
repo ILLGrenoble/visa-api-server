@@ -1,9 +1,12 @@
 package eu.ill.visa.vdi.domain.models;
 
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
+import eu.ill.visa.common.vdi.domain.VdiInstance;
+
 public record DesktopCandidate(SocketClient client,
-                               Long sessionId,
+                               String connectionId,
                                ConnectedUser connectedUser,
-                               Long instanceId,
+                               VdiInstance instance,
                                NopSender nopSender) {
 
     public void keepAlive() {

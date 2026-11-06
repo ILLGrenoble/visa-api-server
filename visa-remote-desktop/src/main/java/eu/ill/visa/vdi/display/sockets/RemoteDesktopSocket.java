@@ -1,6 +1,5 @@
 package eu.ill.visa.vdi.display.sockets;
 
-import eu.ill.visa.vdi.business.services.DesktopExecutorService;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.domain.models.SocketClient;
@@ -9,7 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.ExecutionException;
+
+import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
 public abstract class RemoteDesktopSocket {
 
@@ -51,7 +51,7 @@ public abstract class RemoteDesktopSocket {
                 }
 
             } catch (Exception error) {
-                logger.error("Remote Desktop Event ({}) for socket client {} failed with protocol {}", type, socketClient.clientId(), socketClient.protocol(), error);
+                logger.error("Remote Desktop Event ({}) for socket client {} failed with protocol {}: {}", type, socketClient.clientId(), socketClient.protocol(), formatException(error));
             }
         }
     }
@@ -60,11 +60,6 @@ public abstract class RemoteDesktopSocket {
 
     private RemoteDesktopConnectSubscriber connectSubscriber;
     private RemoteDesktopDisconnectSubscriber disconnectSubscriber;
-    private final DesktopExecutorService desktopExecutorService;
-
-    public RemoteDesktopSocket(final DesktopExecutorService desktopExecutorService) {
-        this.desktopExecutorService = desktopExecutorService;
-    }
 
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {
         this.connectSubscriber = connectSubscriber;
@@ -75,26 +70,16 @@ public abstract class RemoteDesktopSocket {
     }
 
     protected void onOpen(final SocketClient socketClient) {
-        this.await(new WorkerEvent(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT));
+        new WorkerEvent(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT).run();
     }
 
     protected void onClose(final SocketClient socketClient) {
-        this.await(new WorkerEvent(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT));
+        new WorkerEvent(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT).run();
     }
 
     protected void onMessage(final SocketClient socketClient, Runnable handler) {
-        // Run immediately on current thread: DB access delegated to other non-blocking threads
         new WorkerEvent(socketClient, handler, WorkerEventType.MESSAGE).run();
     }
 
     protected abstract void sendNop(final SocketClient socketClient);
-
-    private void await(WorkerEvent workerEvent) {
-        try {
-            desktopExecutorService.runAsync(workerEvent).get();
-
-        } catch (InterruptedException | ExecutionException error) {
-            logger.error("Failed to run on thread Remote Desktop Event ({}) for client {}", workerEvent.type, workerEvent.socketClient.clientId(), error);
-        }
-    }
 }

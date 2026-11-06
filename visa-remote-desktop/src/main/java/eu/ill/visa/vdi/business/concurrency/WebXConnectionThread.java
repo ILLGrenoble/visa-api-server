@@ -1,8 +1,8 @@
 package eu.ill.visa.vdi.business.concurrency;
 
-import eu.ill.visa.core.domain.Timer;
-import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.vdi.domain.models.ConnectedUser;
+import eu.ill.visa.common.vdi.domain.VdiInstance;
+import eu.ill.visa.common.utils.domain.Timer;
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.vdi.domain.models.PingResponseData;
 import eu.ill.visa.vdi.domain.models.PingResponseHandler;
 import eu.ill.visa.vdi.domain.models.SocketClient;
@@ -22,7 +22,7 @@ public class WebXConnectionThread extends ConnectionThread {
     private final WebXTunnel tunnel;
     private Cancellable pingResponseTimer;
 
-    public WebXConnectionThread(final SocketClient client, final WebXTunnel tunnel, final Instance instance, final ConnectedUser user) {
+    public WebXConnectionThread(final SocketClient client, final WebXTunnel tunnel, final VdiInstance instance, final ConnectedUser user) {
         super(client, instance, user);
         this.tunnel = tunnel;
     }
