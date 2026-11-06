@@ -51,6 +51,7 @@ public class DesktopSessionService {
 
     private final Cancellable rttDataUpdater;
 
+
     @Inject
     public DesktopSessionService(final GuacamoleDesktopService guacamoleDesktopService,
                                  final WebXDesktopService webXDesktopService,
