@@ -110,12 +110,8 @@ public class InstanceDesktopSessionService {
         this.repository.close(instanceDesktopSession);
     }
 
-    public void updateClientPingAt(final InstanceDesktopSession instanceDesktopSession) {
-        this.repository.updateClientPingAt(instanceDesktopSession);
-    }
-
-    public void updateInteractionAt(final InstanceDesktopSession instanceDesktopSession) {
-        this.repository.updateInteractionAt(instanceDesktopSession);
+    public void updateSessionActivity(final InstanceDesktopSession instanceDesktopSession) {
+        this.repository.updateSessionActivity(instanceDesktopSession);
     }
 
     public boolean isOwnerConnected(final String connectionId) {

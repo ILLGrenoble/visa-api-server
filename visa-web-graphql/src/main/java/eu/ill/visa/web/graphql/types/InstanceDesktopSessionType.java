@@ -22,7 +22,7 @@ public class InstanceDesktopSessionType {
 
     private final @NotNull Date createdAt;
     private final Date updatedAt;
-    private final Date lastClientPingAt;
+    private final Date lastSeenAt;
     private final Date lastInteractionAt;
     private final Date closedAt;
     private final @NotNull String connectionId;
@@ -36,7 +36,7 @@ public class InstanceDesktopSessionType {
         this.userId = session.getUserId();
         this.createdAt = session.getCreatedAt();
         this.updatedAt = session.getUpdatedAt();
-        this.lastClientPingAt = session.getLastClientPingAt();
+        this.lastSeenAt = session.getLastSeenAt();
         this.lastInteractionAt = session.getLastInteractionAt();
         this.closedAt = session.getClosedAt();
         this.connectionId = session.getConnectionId();
@@ -65,8 +65,8 @@ public class InstanceDesktopSessionType {
         return updatedAt;
     }
 
-    public Date getLastClientPingAt() {
-        return lastClientPingAt;
+    public Date getLastSeenAt() {
+        return lastSeenAt;
     }
 
     public Date getLastInteractionAt() {

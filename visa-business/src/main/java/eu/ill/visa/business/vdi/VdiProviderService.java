@@ -171,7 +171,8 @@ public class VdiProviderService {
         final InstanceDesktopSession instanceDesktopSession = this.instanceDesktopSessionService.getByConnectionIdAndClientId(connectionId, clientId);
         if (instanceDesktopSession != null) {
             instanceDesktopSession.setLastInteractionAt(lastInteractionAt);
-            this.instanceDesktopSessionService.updateInteractionAt(instanceDesktopSession);
+            instanceDesktopSession.setLastSeenAt(lastSeenAt);
+            this.instanceDesktopSessionService.updateSessionActivity(instanceDesktopSession);
         }
 
         if (instanceActivityType != null) {

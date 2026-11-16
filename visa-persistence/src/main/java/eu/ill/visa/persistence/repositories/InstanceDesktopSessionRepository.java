@@ -166,20 +166,13 @@ public class InstanceDesktopSessionRepository extends AbstractRepository<Instanc
             .executeUpdate();
     }
 
-    public void updateClientPingAt(final InstanceDesktopSession instanceDesktopSession) {
-        getEntityManager().createNamedQuery("instanceDesktopSession.updateClientPingById")
+    public void updateSessionActivity(final InstanceDesktopSession instanceDesktopSession) {
+        getEntityManager().createNamedQuery("instanceDesktopSession.updateSessionActivityById")
             .setParameter("id", instanceDesktopSession.getId())
-            .setParameter("lastClientPingAt", instanceDesktopSession.getLastClientPingAt())
-            .executeUpdate();
-    }
-
-    public void updateInteractionAt(final InstanceDesktopSession instanceDesktopSession) {
-        getEntityManager().createNamedQuery("instanceDesktopSession.updateInteractionAtById")
-            .setParameter("id", instanceDesktopSession.getId())
+            .setParameter("lastSeenAt", instanceDesktopSession.getLastSeenAt())
             .setParameter("lastInteractionAt", instanceDesktopSession.getLastInteractionAt())
             .executeUpdate();
     }
-
 
     public void save(final InstanceDesktopSession instanceDesktopSession) {
         if (instanceDesktopSession.getId() == null) {

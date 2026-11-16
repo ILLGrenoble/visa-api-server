@@ -148,14 +148,9 @@ import java.util.Date;
             WHERE ids.id = :id
             AND ids.closedAt IS NULL
     """),
-    @NamedQuery(name = "instanceDesktopSession.updateClientPingById", query = """
+    @NamedQuery(name = "instanceDesktopSession.updateSessionActivityById", query = """
             UPDATE InstanceDesktopSession ids
-            SET ids.lastClientPingAt = :lastClientPingAt, ids.updatedAt = CURRENT_TIMESTAMP
-            WHERE ids.id = :id
-    """),
-    @NamedQuery(name = "instanceDesktopSession.updateInteractionAtById", query = """
-            UPDATE InstanceDesktopSession ids
-            SET ids.lastInteractionAt = :lastInteractionAt, ids.updatedAt = CURRENT_TIMESTAMP
+            SET ids.lastSeenAt = :lastSeenAt, ids.lastInteractionAt = :lastInteractionAt, ids.updatedAt = CURRENT_TIMESTAMP
             WHERE ids.id = :id
     """),
 })
@@ -192,8 +187,8 @@ public class InstanceDesktopSession extends Timestampable {
     @Column(name = "last_interaction_at", nullable = true)
     private Date lastInteractionAt = new Date();
 
-    @Column(name = "last_client_ping_at", nullable = true)
-    private Date lastClientPingAt = new Date();
+    @Column(name = "last_seen_at", nullable = true)
+    private Date lastSeenAt = new Date();
 
     @Column(name = "closed_at", nullable = true)
     private Date closedAt;
@@ -279,12 +274,12 @@ public class InstanceDesktopSession extends Timestampable {
         this.lastInteractionAt = lastInteractionAt;
     }
 
-    public Date getLastClientPingAt() {
-        return lastClientPingAt;
+    public Date getLastSeenAt() {
+        return lastSeenAt;
     }
 
-    public void setLastClientPingAt(Date lastClientPingAt) {
-        this.lastClientPingAt = lastClientPingAt;
+    public void setLastSeenAt(Date lastSeenAt) {
+        this.lastSeenAt = lastSeenAt;
     }
 
     public Date getClosedAt() {
