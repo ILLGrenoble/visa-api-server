@@ -143,6 +143,8 @@ business:
   vdi:
     ownerDisconnectionPolicy: ${VISA_VDI_OWNER_DISCONNECTION_POLICY:DISCONNECT_ALL}
     cleanupSessionsOnStartup: ${VISA_VDI_CLEANUP_SESSIONS_ON_STARTUP:false}
+  scheduler:
+    enabled: ${VISA_SCHEDULER_ENABLED:true}
 
 broker:
   redisEnabled: ${VISA_VDI_REDIS_ENABLED:false}
@@ -199,8 +201,6 @@ security:
         max-size: ${VISA_DATABASE_MAX_POOL_SIZE:20}
       db-kind: postgresql
       db-version: ${VISA_DATABASE_VERSION}
-    scheduler:
-      enabled: ${VISA_SCHEDULER_ENABLED:true}
     redis:
       hosts-provider-name: redis-pubsub-hosts-provider
       tls:
@@ -224,8 +224,6 @@ security:
         max-size: ${VISA_DATABASE_MAX_POOL_SIZE:20}
       db-kind: postgresql
       db-version: ${VISA_DATABASE_VERSION}
-    scheduler:
-      enabled: ${VISA_SCHEDULER_ENABLED:true}
     redis:
       hosts-provider-name: redis-pubsub-hosts-provider
       tls:
@@ -261,6 +259,8 @@ security:
       logging:
         host: mailer.com
         mock: true
+    scheduler:
+      enabled: false
     rest-client:
       account-service:
         url: accounts.dummy.org
@@ -274,6 +274,8 @@ security:
     securityGroupServiceClient:
       enabled: false
     mailer:
+      enabled: false
+    scheduler:
       enabled: false
 
   cloud:

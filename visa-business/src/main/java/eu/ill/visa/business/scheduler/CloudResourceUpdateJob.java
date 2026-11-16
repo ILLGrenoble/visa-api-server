@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.business.services.CloudResourcesService;
 import io.quarkus.scheduler.Scheduled;
@@ -21,7 +21,7 @@ public class CloudResourceUpdateJob {
     }
 
     // Update usage every minute
-    @Scheduled(cron="15 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="15 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public synchronized void updateUsage() {
         this.cloudResourcesService.updateCloudResources();
     }

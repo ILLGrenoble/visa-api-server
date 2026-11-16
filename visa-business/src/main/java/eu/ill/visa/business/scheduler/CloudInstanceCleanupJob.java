@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.business.services.InstanceService;
 import eu.ill.visa.cloud.domain.CloudInstanceIdentifier;
@@ -27,7 +27,7 @@ public class CloudInstanceCleanupJob {
     }
 
     // Run every day at 2am
-    @Scheduled(cron="0 0 2 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0 0 2 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public void execute() {
         logger.info("Executing cloud instance cleanup job");
 

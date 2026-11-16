@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.core.domain.fetches.InstanceFetch;
 import io.quarkus.scheduler.Scheduled;
@@ -35,7 +35,7 @@ public class InstanceSecurityGroupUpdateJob {
     }
 
     // Run every day at 6am
-    @Scheduled(cron="0 0 6 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0 0 6 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public void execute() {
         logger.info("Executing instance security group update job");
 

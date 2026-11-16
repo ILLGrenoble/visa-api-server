@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.business.services.InstanceActivityService;
 import io.quarkus.scheduler.Scheduled;
@@ -20,7 +20,7 @@ public class InstanceActivityCleanupJob {
     }
 
     // Run every day at 1am
-    @Scheduled(cron="0 0 1 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0 0 1 ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public void execute() {
 
         try {

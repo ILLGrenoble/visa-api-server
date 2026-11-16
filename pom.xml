@@ -20,7 +20,6 @@
                 <module>visa-persistence</module>
                 <module>visa-cloud</module>
                 <module>visa-business</module>
-                <module>visa-scheduler</module>
                 <module>visa-security</module>
                 <module>visa-remote-desktop</module>
                 <module>visa-web-gateway</module>
@@ -54,7 +53,6 @@
                 <module>visa-persistence</module>
                 <module>visa-cloud</module>
                 <module>visa-business</module>
-                <module>visa-scheduler</module>
                 <module>visa-security</module>
                 <module>visa-remote-desktop</module>
                 <module>visa-web-gateway</module>

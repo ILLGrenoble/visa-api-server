@@ -18,4 +18,6 @@ public interface BusinessConfiguration {
     ErrorReportEmailConfiguration errorReportEmail();
 
     VDIConfiguration vdi();
+
+    SchedulerConfiguration scheduler();
 }

@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.core.entity.InstanceCommand;
 import io.quarkus.scheduler.Scheduled;
@@ -24,7 +24,7 @@ public class InstanceCommandExecutorJob {
     }
 
     // Run every 2 seconds
-    @Scheduled(cron="0/2 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0/2 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public synchronized void execute() {
         List<InstanceCommand> pendingCommands = this.instanceCommandService.getAllPending();
         if (!pendingCommands.isEmpty()) {

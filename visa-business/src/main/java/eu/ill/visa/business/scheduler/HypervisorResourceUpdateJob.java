@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.business.services.HypervisorService;
 import eu.ill.visa.business.services.InstanceService;
@@ -30,7 +30,7 @@ public class HypervisorResourceUpdateJob {
     }
 
     // Update inventory and usage every 10 seconds
-    @Scheduled(cron="0/10 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0/10 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public synchronized void updateMigrationUsage() {
         List<Instance> migratingInstances = this.instanceService.getAllWithStates(Arrays.asList(InstanceState.MIGRATING, InstanceState.ACTIVE_MIGRATING));
         if (!migratingInstances.isEmpty()) {
@@ -39,7 +39,7 @@ public class HypervisorResourceUpdateJob {
     }
 
     // Update inventory and usage every minute
-    @Scheduled(cron="30 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="30 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public synchronized void updateUsage() {
         List<Instance> migratingInstances = this.instanceService.getAllWithStates(Arrays.asList(InstanceState.MIGRATING, InstanceState.ACTIVE_MIGRATING));
         if (migratingInstances.isEmpty()) {

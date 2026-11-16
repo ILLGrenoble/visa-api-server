@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.core.entity.InstanceAuthenticationToken;
 import io.quarkus.scheduler.Scheduled;
@@ -23,7 +23,7 @@ public class InstanceAuthenticationTokenDeleteJob {
     }
 
     // Run every 15 seconds
-    @Scheduled(cron="0/15 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0/15 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public void execute() {
         final AtomicInteger count = new AtomicInteger(0);
         final List<InstanceAuthenticationToken> tokens = this.instanceAuthenticationTokenService.getAll();

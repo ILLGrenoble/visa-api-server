@@ -48,6 +48,11 @@ public class ConfigurationProducer {
     }
 
     @Produces
+    public SchedulerConfiguration scheduler() {
+        return this.businessConfiguration.scheduler();
+    }
+
+    @Produces
     @Unremovable
     public ErrorReportEmailConfiguration errorReportEmail() {
         return this.businessConfiguration.errorReportEmail();

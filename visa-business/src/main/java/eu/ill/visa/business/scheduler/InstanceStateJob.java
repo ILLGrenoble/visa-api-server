@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.business.services.InstanceCommandService;
 import eu.ill.visa.business.services.InstanceService;
@@ -6,6 +6,7 @@ import eu.ill.visa.core.entity.Instance;
 import eu.ill.visa.core.entity.InstanceCommand;
 import eu.ill.visa.core.entity.enumerations.InstanceCommandType;
 import eu.ill.visa.core.entity.enumerations.InstanceState;
+import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -31,7 +32,7 @@ public class InstanceStateJob {
     }
 
     // Run every minute
-    @Scheduled(cron="0 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public void updateAllInstancesStates() {
         List<Instance> instances = this.instanceService.getAll(List.of());
         logger.debug("Job running to update all instance states ({} instances)", instances.size());
@@ -40,7 +41,7 @@ public class InstanceStateJob {
     }
 
     // Run every 5 seconds
-    @Scheduled(cron="0/5 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0/5 * * * * ?",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public void updateNonStableInstancesStates() {
         List<InstanceState> states = Arrays.asList(
             InstanceState.BUILDING,

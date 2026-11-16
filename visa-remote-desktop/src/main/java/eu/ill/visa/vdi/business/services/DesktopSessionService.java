@@ -49,9 +49,6 @@ public class DesktopSessionService {
     private final List<DesktopSession> desktopSessions = new ArrayList<>();
     private final Map<String, DesktopSessionMember> desktopSessionMembers = new HashMap<>();
 
-    private final Cancellable rttDataUpdater;
-
-
     @Inject
     public DesktopSessionService(final GuacamoleDesktopService guacamoleDesktopService,
                                  final WebXDesktopService webXDesktopService,
@@ -78,13 +75,10 @@ public class DesktopSessionService {
             .next((message) -> this.onSessionLocked(message.connectionId(), message.user()));
         this.messageBroker.subscribe(SessionUnlockedMessage.class)
             .next((message) -> this.onSessionUnlocked(message.connectionId()));
-
-        this.rttDataUpdater = Timer.setInterval(this::storeDesktopSessionConnectionStats, 60, TimeUnit.SECONDS);
     }
 
     @Shutdown
     public void shutdown() {
-        this.rttDataUpdater.cancel();
         this.messageBroker.shutdown();
     }
 
@@ -177,8 +171,7 @@ public class DesktopSessionService {
     }
 
 
-    private void storeDesktopSessionConnectionStats() {
-        logger.debug("Executing instance session sample job...");
+    public long storeDesktopSessionConnectionStats() {
         List<VdiRttSample> samples = new ArrayList<>();
         synchronized (this.desktopSessionMembers) {
             this.desktopSessionMembers.values().forEach(desktopSessionMember -> {
@@ -218,14 +211,11 @@ public class DesktopSessionService {
             });
         }
 
-
-        if (samples.isEmpty()) {
-            logger.debug("... no samples recorded");
-
-        } else {
+        if (!samples.isEmpty()) {
             this.visaApiServiceCommunicator.createDesktopSessionRttSamples(samples);
-            logger.debug("... stored {} samples", samples.size());
         }
+
+        return samples.size();
     }
 
     public Optional<DesktopSession> findDesktopSession(final String connectionId) {

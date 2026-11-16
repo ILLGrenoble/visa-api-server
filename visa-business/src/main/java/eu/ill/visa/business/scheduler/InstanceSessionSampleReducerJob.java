@@ -1,4 +1,4 @@
-package eu.ill.visa.scheduler.jobs;
+package eu.ill.visa.business.scheduler;
 
 import eu.ill.visa.business.services.DesktopSessionRttSampleService;
 import eu.ill.visa.business.services.InstanceService;
@@ -25,7 +25,7 @@ public class InstanceSessionSampleReducerJob {
     }
 
     // Run every hour
-    @Scheduled(cron="0 5 * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="0 5 * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP, skipExecutionIf = SchedulerNotEnabled.class)
     public void execute() {
         logger.info("Executing instance session sample reducer job...");
 
