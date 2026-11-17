@@ -17,6 +17,7 @@ public class RemoteDesktopConnection {
     private final String connectionId;
 
     private Date lastInstanceUpdateTime;
+    private Date lastClientEventAt = new Date();
     private Date lastInteractionAt = new Date();
     private InstanceActivityType instanceActivityType;
 
@@ -46,6 +47,14 @@ public class RemoteDesktopConnection {
 
     public void setLastInstanceUpdateTime(Date lastInstanceUpdateTime) {
         this.lastInstanceUpdateTime = lastInstanceUpdateTime;
+    }
+
+    public Date getLastClientEventAt() {
+        return lastClientEventAt;
+    }
+
+    public void setLastClientEventAt(Date lastClientEventAt) {
+        this.lastClientEventAt = lastClientEventAt;
     }
 
     public Date getLastInteractionAt() {

@@ -47,6 +47,9 @@ public abstract class RemoteDesktopEventSubscriber<T> {
                 return;
             }
 
+            // Update last event time
+            remoteDesktopConnection.setLastClientEventAt(new Date());
+
             // Update the instance activity if mouse/keyboard event has been sent to the server
             if (controlActivityType != null) {
                 remoteDesktopConnection.setInstanceActivity(controlActivityType);

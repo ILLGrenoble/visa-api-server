@@ -7,7 +7,6 @@ import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.common.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.common.utils.domain.SampleStats;
-import eu.ill.visa.common.utils.domain.Timer;
 import eu.ill.visa.common.vdi.domain.VdiRttSample;
 import eu.ill.visa.common.vdi.domain.VdiInstance;
 import eu.ill.visa.vdi.apiconnect.VisaApiServiceCommunicator;
@@ -20,7 +19,6 @@ import eu.ill.visa.vdi.gateway.events.UserConnectedEvent;
 import eu.ill.visa.vdi.gateway.events.UserDisconnectedEvent;
 import io.quarkus.runtime.Shutdown;
 import io.quarkus.runtime.Startup;
-import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static eu.ill.visa.vdi.domain.models.SessionEvent.*;
 
@@ -37,6 +34,7 @@ import static eu.ill.visa.vdi.domain.models.SessionEvent.*;
 public class DesktopSessionService {
 
     private final static Logger logger = LoggerFactory.getLogger(DesktopSessionService.class);
+    private static final int STALE_SESSION_TIME_SECONDS = 60;
 
     private final GuacamoleDesktopService guacamoleDesktopService;
     private final WebXDesktopService webXDesktopService;
@@ -170,45 +168,47 @@ public class DesktopSessionService {
         }
     }
 
-
     public long storeDesktopSessionConnectionStats() {
-        List<VdiRttSample> samples = new ArrayList<>();
+        List<DesktopSessionMember> copiedDesktopSessionMembers;
         synchronized (this.desktopSessionMembers) {
-            this.desktopSessionMembers.values().forEach(desktopSessionMember -> {
-                final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
-                final Pair<SampleStats, SampleStats> sampleStatsSampleStatsPair = remoteDesktopConnection.calculateRttSampleStats();
+            copiedDesktopSessionMembers = new ArrayList<>(this.desktopSessionMembers.values());
+        }
 
-                final SampleStats clientStats = sampleStatsSampleStatsPair.getLeft();
-                final SampleStats instanceStats = sampleStatsSampleStatsPair.getRight();
+        List<VdiRttSample> samples = new ArrayList<>();
+        for (DesktopSessionMember desktopSessionMember : copiedDesktopSessionMembers) {
+            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
+            final Pair<SampleStats, SampleStats> sampleStatsSampleStatsPair = remoteDesktopConnection.calculateRttSampleStats();
 
-                Date now = new Date();
-                Date firstSampleDate = Collections.min(Arrays.asList(clientStats.firstSampleDate(), instanceStats.firstSampleDate()));
-                long seconds = (now.getTime() - firstSampleDate.getTime()) / 1000;
-                long minutes = Math.round(seconds / 60.0);
+            final SampleStats clientStats = sampleStatsSampleStatsPair.getLeft();
+            final SampleStats instanceStats = sampleStatsSampleStatsPair.getRight();
 
-                final DesktopSession desktopSession = desktopSessionMember.session();
-                final String connectionId = desktopSession.getConnectionId();
-                final String clientId = desktopSessionMember.clientId();
+            Date now = new Date();
+            Date firstSampleDate = Collections.min(Arrays.asList(clientStats.firstSampleDate(), instanceStats.firstSampleDate()));
+            long seconds = (now.getTime() - firstSampleDate.getTime()) / 1000;
+            long minutes = Math.round(seconds / 60.0);
 
-                if (minutes > 0) {
-                    VdiRttSample desktopSessionRttSample = VdiRttSample.Builder()
-                        .connectionId(connectionId)
-                        .clientId(clientId)
-                        .date(firstSampleDate)
-                        .samplePeriodMinutes(minutes)
-                        .clientMeanRttMs(clientStats.mean())
-                        .clientSdRttMs(clientStats.standardDeviation())
-                        .clientRttSampleCount(clientStats.sampleCount())
-                        .instanceMeanRttMs(instanceStats.mean())
-                        .instanceSdRttMs(instanceStats.standardDeviation())
-                        .instanceRttSampleCount(instanceStats.sampleCount())
-                        .build();
+            final DesktopSession desktopSession = desktopSessionMember.session();
+            final String connectionId = desktopSession.getConnectionId();
+            final String clientId = desktopSessionMember.clientId();
 
-                    samples.add(desktopSessionRttSample);
-                }
+            if (minutes > 0) {
+                VdiRttSample desktopSessionRttSample = VdiRttSample.Builder()
+                    .connectionId(connectionId)
+                    .clientId(clientId)
+                    .date(firstSampleDate)
+                    .samplePeriodMinutes(minutes)
+                    .clientMeanRttMs(clientStats.mean())
+                    .clientSdRttMs(clientStats.standardDeviation())
+                    .clientRttSampleCount(clientStats.sampleCount())
+                    .instanceMeanRttMs(instanceStats.mean())
+                    .instanceSdRttMs(instanceStats.standardDeviation())
+                    .instanceRttSampleCount(instanceStats.sampleCount())
+                    .build();
 
-                remoteDesktopConnection.resetRttSamples();
-            });
+                samples.add(desktopSessionRttSample);
+            }
+
+            remoteDesktopConnection.resetRttSamples();
         }
 
         if (!samples.isEmpty()) {
@@ -216,6 +216,28 @@ public class DesktopSessionService {
         }
 
         return samples.size();
+    }
+
+    public long cleanupStaleDesktopSessions() {
+        List<DesktopSessionMember> copiedDesktopSessionMembers;
+        synchronized (this.desktopSessionMembers) {
+            copiedDesktopSessionMembers = new ArrayList<>(this.desktopSessionMembers.values());
+        }
+        long staleCount = 0;
+        for (DesktopSessionMember desktopSessionMember : copiedDesktopSessionMembers) {
+            final RemoteDesktopConnection remoteDesktopConnection = desktopSessionMember.remoteDesktopConnection();
+
+            Date now = new Date();
+            long timeSinceLastEventS = (now.getTime() - remoteDesktopConnection.getLastClientEventAt().getTime()) / 1000;
+            if (timeSinceLastEventS > STALE_SESSION_TIME_SECONDS) {
+                staleCount++;
+
+                logger.warn("Stale desktop session member {}: disconnecting", desktopSessionMember);
+                this.onDesktopMemberDisconnect(desktopSessionMember);
+            }
+
+        }
+        return staleCount;
     }
 
     public Optional<DesktopSession> findDesktopSession(final String connectionId) {
@@ -237,7 +259,7 @@ public class DesktopSessionService {
         final String connectionId = desktopSession.getConnectionId();
         final String clientId = desktopSessionMember.clientId();
 
-        this.visaApiServiceCommunicator.updateClientActivity(desktopSessionMember.session().getInstance().id(), connectionId, clientId, desktopSessionMember.connectedUser(), remoteDesktopConnection.getLastInstanceUpdateTime(), remoteDesktopConnection.getLastInteractionAt(), remoteDesktopConnection.getInstanceActivity());
+        this.visaApiServiceCommunicator.updateClientActivity(desktopSessionMember.session().getInstance().id(), connectionId, clientId, desktopSessionMember.connectedUser(), remoteDesktopConnection.getLastClientEventAt(), remoteDesktopConnection.getLastInteractionAt(), remoteDesktopConnection.getInstanceActivity());
         remoteDesktopConnection.resetInstanceActivity();
     }
 
