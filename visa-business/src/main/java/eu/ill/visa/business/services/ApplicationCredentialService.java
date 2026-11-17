@@ -80,7 +80,7 @@ public class ApplicationCredentialService {
         byte[] textBytes = text.getBytes();
         byte[] saltBytes = salt.getBytes();
 
-        byte[] encodedHash = BCrypt.generate(textBytes, saltBytes, 4);
+        byte[] encodedHash = BCrypt.generate(textBytes, saltBytes, 4, false);
         return this.bytesToHex(encodedHash);
     }
 
