@@ -95,7 +95,7 @@ public class VisaApiServiceCommunicator {
 
             } catch (InterruptedException exception) {
                 if (running.get()) {
-                    logger.error("Interrupted while waiting for async VISA API Messages to process", exception);
+                    logger.error("Interrupted while waiting for async VISA API Messages to process: {}", exception.getMessage());
                 }
             }
         }
