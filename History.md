@@ -1,3 +1,7 @@
+3.5.3 18/11/2026
+================
+ * Rebuild with latest Amazon Corretto 21 image (fixes CVE-2026-114938)
+  
 3.5.2 16/10/2025
 ================
  * Fix null pointer exception when getting instance from instance authentication token
