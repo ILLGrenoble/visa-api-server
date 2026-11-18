@@ -1,3 +1,7 @@
+3.9.1 18/11/2026
+================
+ * Rebuild with latest Amazon Corretto 21 image (fixes CVE-2026-114938)
+
 3.9.0 06/11/2026
 ================
   * Add access for application token role to the Application Client Method (ACM) /acm/instances/{id}
