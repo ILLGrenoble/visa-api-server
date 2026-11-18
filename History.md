@@ -1,3 +1,7 @@
+3.7.2 18/11/2026
+================
+ - Rebuild with latest Amazon Corretto 21 image (fixes CVE-2026-114938)
+
 3.7.1 20/01/2026
 ================
  - Apply patch for multiple openstack address provider UUIDs (comma-separated list).
