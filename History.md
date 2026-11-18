@@ -1,3 +1,7 @@
+3.8.5 18/11/2026
+================
+ * Rebuild with latest Amazon Corretto 21 image (fixes CVE-2026-114938)
+
 3.8.4 08/06/2026
 ================
  * Improved transition from hypervisor-determined and cloud-resources-determined flavour availabilities (booking periods). Ensure that cloud resources are limited also by the hypervisor resources.
