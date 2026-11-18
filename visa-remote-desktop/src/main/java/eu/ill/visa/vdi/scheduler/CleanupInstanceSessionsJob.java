@@ -20,16 +20,16 @@ public class CleanupInstanceSessionsJob {
     }
 
     // Run every minute
-    @Scheduled(cron="0 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
+    @Scheduled(cron="30 * * ? * *",  concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     public void execute() {
-        logger.info("Executing desktop session cleanup job...");
+        logger.debug("Executing desktop session cleanup job...");
 
         long count = this.desktopSessionService.cleanupStaleDesktopSessions();
         if (count == 0) {
-            logger.info("... no stale desktop sessions");
+            logger.debug("... no stale desktop sessions");
 
         } else {
-            logger.info("... Removed {} stale sessions", count);
+            logger.debug("... Removed {} stale sessions", count);
         }
     }
 }
