@@ -1,3 +1,7 @@
+3.6.1 18/11/2026
+================
+ * Rebuild with latest Amazon Corretto 21 image (fixes CVE-2026-114938)
+
 3.6.0 17/11/2025
 ================
  * Notify via redis load-balanced servers when cloud client configuration changes
