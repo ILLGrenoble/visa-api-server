@@ -5,8 +5,14 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Objects;
 
+import static java.lang.String.format;
+
 @RegisterForReflection
 public record ConnectedUser(String id, String fullName, InstanceMemberRole role) {
+
+    public ConnectedUser(String id, String firstName, String lastName, InstanceMemberRole role) {
+        this(id, format("%s %s", firstName, lastName),  role);
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -187,8 +187,8 @@ public class UserRepository extends AbstractRepository<User> {
 
         final List<Predicate> predicates = new ArrayList<>();
 
-        if (filter.getId() != null) {
-            predicates.add(cb.equal(root.get("id"), filter.getId()));
+        if (filter.getIds() != null && !filter.getIds().isEmpty()) {
+            predicates.add(root.get("id").in(filter.getIds()));
         }
 
         if (filter.getRole() != null) {

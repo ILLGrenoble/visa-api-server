@@ -22,7 +22,24 @@ quarkus:
       trust-all: ${VISA_VDI_REDIS_TLS_TRUST_ALL:false}
     devservices:
       enabled: false
+  mailer:
+    logging:
+      mock: ${VISA_LOGGING_EMAIL_APPENDER_MOCKED:false}
+      host: ${VISA_LOGGING_EMAIL_APPENDER_HOST:change.mail.com}
+      port: ${VISA_LOGGING_EMAIL_APPENDER_PORT:25}
+      tls: ${VISA_LOGGING_EMAIL_APPENDER_TLS:false}
+      start-tls: ${VISA_LOGGING_EMAIL_APPENDER_START_TLS:DISABLED}
   log:
+    console:
+      filter: error-email-filter
+    file:
+      enabled: ${VISA_LOGGING_FILE_ENABLED:true}
+      path: ${VISA_LOGGING_FILE_DIRECTORY:/tmp}/vdi.log
+      format: ${VISA_LOGGING_FILE_FORMAT:%d %-5p [%c] (%t) %s%e%n}
+      level: ${VISA_LOGGING_FILE_THRESHOLD:INFO}
+      rotation:
+        max-file-size: ${VISA_LOGGING_FILE_MAX_FILE_SIZE:100M}
+        max-backup-index: ${VISA_LOGGING_FILE_ARCHIVED_FILE_COUNT:0}
     category:
       "eu.ill.visa":
         level: ${VISA_VDI_LOGGING_LEVEL:INFO}
@@ -41,6 +58,15 @@ broker:
   redisPassword: ${VISA_VDI_REDIS_PASSWORD}
   redisDatabase: ${VISA_VDI_REDIS_DATABASE:0}
   redisHealthMonitorEnabled: ${VISA_VDI_REDIS_HEALTH_MONITOR_ENABLED:true}
+
+common:
+  errorReportEmail:
+    enabled: ${VISA_LOGGING_EMAIL_APPENDER_ENABLED:false}
+    to:
+      - ${VISA_LOGGING_EMAIL_APPENDER_RECIPIENT_ADDRESS}
+    from: ${VISA_LOGGING_EMAIL_APPENDER_FROM_ADDRESS}
+    subject: ${VISA_LOGGING_EMAIL_SUBJECT}
+    maxErrors: ${VISA_LOGGING_EMAIL_MAX_ERRORS:50}
 
 vdi:
   protocol: ${VISA_VDI_GUACD_PARAMETER_PROTOCOL:rdp}

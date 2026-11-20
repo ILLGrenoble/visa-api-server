@@ -6,6 +6,7 @@ import eu.ill.visa.core.entity.User;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
@@ -37,7 +38,11 @@ public class InstanceCommandRepository extends AbstractRepository<InstanceComman
     public InstanceCommand getById(Long id) {
         TypedQuery<InstanceCommand> query = getEntityManager().createNamedQuery("instanceCommand.getById", InstanceCommand.class);
         query.setParameter("id", id);
-        return query.getSingleResult();
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException exception) {
+            return null;
+        }
     }
 
     public void delete(InstanceCommand instanceCommand) {

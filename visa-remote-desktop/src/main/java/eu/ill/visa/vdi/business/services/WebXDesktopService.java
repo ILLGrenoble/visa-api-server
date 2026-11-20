@@ -1,13 +1,12 @@
 package eu.ill.visa.vdi.business.services;
 
-import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiInstance;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
 import eu.ill.visa.vdi.VirtualDesktopConfiguration;
+import eu.ill.visa.vdi.apiconnect.VisaApiServiceCommunicator;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThread;
 import eu.ill.visa.vdi.business.concurrency.ConnectionThreadExecutor;
-import eu.ill.visa.common.vdi.apiconnect.exceptions.ApiCommunicationException;
 import eu.ill.visa.vdi.domain.exceptions.ConnectionException;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.models.RemoteDesktopConnection;
@@ -55,15 +54,15 @@ public class WebXDesktopService extends DesktopService {
         entry("no-no-qwerty", "no")
     );
 
-    private final VisaApiService visaApiService;
+    private final VisaApiServiceCommunicator visaApiServiceCommunicator;
     private final ConnectionThreadExecutor executorService;
     private final VirtualDesktopConfiguration configuration;
 
     @Inject
-    public WebXDesktopService(final jakarta.enterprise.inject.Instance<VisaApiService> visaApiServiceInstance,
+    public WebXDesktopService(final VisaApiServiceCommunicator visaApiServiceCommunicator,
                               final ConnectionThreadExecutor executorService,
                               final VirtualDesktopConfiguration configuration) {
-        this.visaApiService = visaApiServiceInstance.get();
+        this.visaApiServiceCommunicator = visaApiServiceCommunicator;
         this.executorService = executorService;
         this.configuration = configuration;
     }
@@ -82,7 +81,7 @@ public class WebXDesktopService extends DesktopService {
                 String autologin = instance.autoLogin();
                 String password = null;
                 if (autologin != null && autologin.equals("VISA_PAM")) {
-                    password = this.visaApiService.createVdiConnectionSignature(username);
+                    password = this.visaApiServiceCommunicator.createVdiConnectionSignature(username);
                 }
                 String keyboardLayout = KeyboardLayoutConversion.getOrDefault(instance.keyboardLayout(), instance.keyboardLayout());
 
@@ -165,12 +164,7 @@ public class WebXDesktopService extends DesktopService {
             } catch (WebXConnectionException exception) {
                 logger.warn("Failed to connect {} to given WebX session {} so creating a new one", getInstanceAndUser(instance, user), connectionId);
                 // If it fails then invalidate current session
-                try {
-                    this.visaApiService.onSessionConnectionFailed(instance.id(), WEBX_PROTOCOL, connectionId, client.clientId(), user);
-
-                } catch (ApiCommunicationException e) {
-                    logger.warn(e.getMessage());
-                }
+                this.visaApiServiceCommunicator.onSessionConnectionFailed(instance.id(), WEBX_PROTOCOL, connectionId, client.clientId(), user);
 
                 // Create a new session
                 return this.createTunnelAndSession(client, instance, user);

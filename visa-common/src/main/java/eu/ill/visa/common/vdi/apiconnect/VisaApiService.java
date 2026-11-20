@@ -26,5 +26,5 @@ public interface VisaApiService {
 
     void updateClientActivity(final Long instanceId, final String connectionId, final String clientId, final ConnectedUser connectedUser, final Date lastSeenAt, final Date lastInteractionAt, final InstanceActivityType instanceActivityType) throws ApiCommunicationException;
 
-    void createDesktopSessionRttSamples(List<VdiRttSample> samples) throws ApiCommunicationException;
+    void createDesktopSessionRttSamples(final List<VdiRttSample> samples) throws ApiCommunicationException;
 }

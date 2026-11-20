@@ -6,9 +6,9 @@ import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.common.vdi.domain.VdiAuthenticationToken;
 import eu.ill.visa.common.vdi.domain.VdiInstance;
 import eu.ill.visa.common.vdi.domain.enums.InstanceMemberRole;
+import eu.ill.visa.vdi.apiconnect.VisaApiServiceCommunicator;
 import eu.ill.visa.vdi.business.services.DesktopAccessService;
 import eu.ill.visa.vdi.business.services.DesktopSessionService;
-import eu.ill.visa.common.vdi.apiconnect.VisaApiService;
 import eu.ill.visa.vdi.domain.exceptions.OwnerNotConnectedException;
 import eu.ill.visa.vdi.domain.exceptions.UnauthorizedException;
 import eu.ill.visa.vdi.domain.models.NopSender;
@@ -28,16 +28,16 @@ public class RemoteDesktopConnectSubscriber {
     private final DesktopSessionService desktopSessionService;
     private final DesktopAccessService desktopAccessService;
     private final EventDispatcher eventDispatcher;
-    private final VisaApiService visaApiService;
+    private final VisaApiServiceCommunicator visaApiServiceCommunicator;
 
     public RemoteDesktopConnectSubscriber(final DesktopSessionService desktopSessionService,
                                           final DesktopAccessService desktopAccessService,
                                           final EventDispatcher eventDispatcher,
-                                          final VisaApiService visaApiService) {
+                                          final VisaApiServiceCommunicator visaApiServiceCommunicator) {
         this.desktopSessionService = desktopSessionService;
         this.desktopAccessService = desktopAccessService;
         this.eventDispatcher = eventDispatcher;
-        this.visaApiService = visaApiService;
+        this.visaApiServiceCommunicator = visaApiServiceCommunicator;
     }
 
     public void onConnect(final SocketClient socketClient, final NopSender nopSender) {
@@ -47,7 +47,7 @@ public class RemoteDesktopConnectSubscriber {
         try {
             // Validate the token and get the user and instance
             final String token = socketClient.getPathParameter(TOKEN_PATH_PARAMETER);
-            final VdiAuthenticationToken instanceAuthenticationToken = this.visaApiService.authenticate(socketClient.protocol(), token);
+            final VdiAuthenticationToken instanceAuthenticationToken = this.visaApiServiceCommunicator.authenticate(socketClient.protocol(), token);
             final ConnectedUser connectedUser = instanceAuthenticationToken.connectedUser();
             final VdiInstance instance = instanceAuthenticationToken.instance();
             final Boolean isPublicAccessToken = instanceAuthenticationToken.isPublicAccessToken();

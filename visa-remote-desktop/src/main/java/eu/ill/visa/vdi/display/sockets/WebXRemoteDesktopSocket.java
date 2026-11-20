@@ -25,12 +25,12 @@ public class WebXRemoteDesktopSocket extends RemoteDesktopSocket {
 
     @OnOpen
     protected void onOpen(Session session, @PathParam("clientId") String clientId) {
-        super.onOpen(new SocketClient(session, clientId, DesktopService.WEBX_PROTOCOL));
+        super.onOpen(this.addClient(session, clientId, DesktopService.WEBX_PROTOCOL));
     }
 
     @OnClose
     protected void onClose(Session session, @PathParam("clientId") String clientId) {
-        super.onClose(new SocketClient(session, clientId, DesktopService.WEBX_PROTOCOL));
+        super.onClose(this.removeClient(clientId));
     }
 
     protected void sendNop(final SocketClient socketClient) {
@@ -44,7 +44,7 @@ public class WebXRemoteDesktopSocket extends RemoteDesktopSocket {
 
     @OnMessage
     private void onMessage(Session session, @PathParam("clientId") String clientId, byte[] data) {
-        final SocketClient socketClient = new SocketClient(session, clientId, DesktopService.WEBX_PROTOCOL);
+        final SocketClient socketClient = this.getClient(clientId);
         this.onMessage(socketClient, () -> this.webXRemoteDesktopEventSubscriber.onEvent(socketClient, data));
     }
 }

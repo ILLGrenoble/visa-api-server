@@ -5,12 +5,8 @@ import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
 import eu.ill.visa.cloud.services.CloudClient;
 import eu.ill.visa.core.entity.Instance;
-import eu.ill.visa.core.entity.InstanceSession;
-import eu.ill.visa.core.entity.partial.InstanceSessionMemberPartial;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import java.util.List;
 
 @ApplicationScoped
 public class InstanceActionServiceProvider {
@@ -18,8 +14,7 @@ public class InstanceActionServiceProvider {
     private final EmailManager emailManager;
     private final InstanceService instanceService;
 
-    private final InstanceSessionService instanceSessionService;
-    private final InstanceSessionMemberService instanceSessionMemberService;
+    private final InstanceDesktopSessionService instanceDesktopSessionService;
     private final InstanceCommandService instanceCommandService;
     private final SecurityGroupService securityGroupService;
     private final InstrumentService instrumentService;
@@ -34,8 +29,7 @@ public class InstanceActionServiceProvider {
 
     @Inject
     public InstanceActionServiceProvider(final InstanceService instanceService,
-                                         final InstanceSessionService instanceSessionService,
-                                         final InstanceSessionMemberService instanceSessionMemberService,
+                                         final InstanceDesktopSessionService instanceDesktopSessionService,
                                          final InstanceCommandService instanceCommandService,
                                          final SecurityGroupService securityGroupService,
                                          final InstrumentService instrumentService,
@@ -48,8 +42,7 @@ public class InstanceActionServiceProvider {
                                          final EventDispatcher eventDispatcher,
                                          final HypervisorService hypervisorService) {
         this.instanceService = instanceService;
-        this.instanceSessionService = instanceSessionService;
-        this.instanceSessionMemberService = instanceSessionMemberService;
+        this.instanceDesktopSessionService = instanceDesktopSessionService;
         this.instanceCommandService = instanceCommandService;
         this.securityGroupService = securityGroupService;
         this.instrumentService = instrumentService;
@@ -69,18 +62,7 @@ public class InstanceActionServiceProvider {
      * @param instance the instance
      */
     public void clearSessionsForInstance(Instance instance) {
-        this.instanceSessionService.cleanupForInstance(instance);
-
-        final List<InstanceSession> sessions = this.instanceSessionService.getAllByInstance(instance);
-        for (InstanceSession session : sessions) {
-            session.setCurrent(false);
-            this.instanceSessionService.updatePartial(session);
-        }
-
-        final List<InstanceSessionMemberPartial> sessionMembers = this.instanceSessionMemberService.getAllPartialsByInstanceId(instance.getId());
-        for (InstanceSessionMemberPartial member : sessionMembers) {
-            this.instanceSessionMemberService.deactivateSessionMember(member);
-        }
+        this.instanceDesktopSessionService.closeAllSessions();
     }
 
     public InstanceService getInstanceService() {

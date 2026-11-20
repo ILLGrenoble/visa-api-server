@@ -3,11 +3,14 @@ package eu.ill.visa.vdi.display.sockets;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopConnectSubscriber;
 import eu.ill.visa.vdi.display.subscribers.RemoteDesktopDisconnectSubscriber;
 import eu.ill.visa.vdi.domain.models.SocketClient;
+import jakarta.websocket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import static eu.ill.visa.common.utils.exceptions.ExceptionFormatter.formatException;
 
@@ -61,6 +64,26 @@ public abstract class RemoteDesktopSocket {
     private RemoteDesktopConnectSubscriber connectSubscriber;
     private RemoteDesktopDisconnectSubscriber disconnectSubscriber;
 
+    private final HashMap<String, SocketClient> clients = new HashMap<>();
+
+    protected SocketClient addClient(final Session session, final String clientId, final String protocol) {
+        synchronized (clients) {
+            return this.clients.computeIfAbsent(clientId, k -> new SocketClient(session, clientId, protocol));
+        }
+    }
+
+    protected SocketClient getClient(final String clientId) {
+        synchronized (clients) {
+            return this.clients.get(clientId);
+        }
+    }
+
+    protected SocketClient removeClient(final String clientId) {
+        synchronized (clients) {
+            return this.clients.remove(clientId);
+        }
+    }
+
     public void setConnectSubscriber(RemoteDesktopConnectSubscriber connectSubscriber) {
         this.connectSubscriber = connectSubscriber;
     }
@@ -70,14 +93,25 @@ public abstract class RemoteDesktopSocket {
     }
 
     protected void onOpen(final SocketClient socketClient) {
-        new WorkerEvent(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT).run();
+        synchronized (socketClient) {
+            new WorkerEvent(socketClient, () -> this.connectSubscriber.onConnect(socketClient, this::sendNop), WorkerEventType.CONNECT).run();
+        }
     }
 
     protected void onClose(final SocketClient socketClient) {
-        new WorkerEvent(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT).run();
+        if (socketClient == null) {
+            return;
+        }
+        synchronized (socketClient) {
+            new WorkerEvent(socketClient, () -> this.disconnectSubscriber.onDisconnect(socketClient), WorkerEventType.DISCONNECT).run();
+        }
     }
 
     protected void onMessage(final SocketClient socketClient, Runnable handler) {
+        if (socketClient == null) {
+            return;
+        }
+
         new WorkerEvent(socketClient, handler, WorkerEventType.MESSAGE).run();
     }
 

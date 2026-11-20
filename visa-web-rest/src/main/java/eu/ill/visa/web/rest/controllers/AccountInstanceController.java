@@ -2,6 +2,7 @@ package eu.ill.visa.web.rest.controllers;
 
 import eu.ill.visa.business.notification.EmailManager;
 import eu.ill.visa.business.services.*;
+import eu.ill.visa.common.vdi.domain.ConnectedUser;
 import eu.ill.visa.core.domain.OrderBy;
 import eu.ill.visa.core.domain.Pagination;
 import eu.ill.visa.core.domain.fetches.InstanceFetch;
@@ -53,8 +54,7 @@ public class AccountInstanceController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(AccountInstanceController.class);
     private final InstanceService instanceService;
     private final InstanceMemberService instanceMemberService;
-    private final InstanceSessionService instanceSessionService;
-    private final InstanceSessionMemberService instanceSessionMemberService;
+    private final InstanceDesktopSessionService instanceDesktopSessionService;
     private final InstanceCommandService instanceCommandService;
     private final InstanceExtensionRequestService instanceExtensionRequestService;
     private final InstanceAuthenticationTokenService instanceAuthenticationTokenService;
@@ -74,8 +74,7 @@ public class AccountInstanceController extends AbstractController {
     public AccountInstanceController(final UserService userService,
                                      final InstanceService instanceService,
                                      final InstanceMemberService instanceMemberService,
-                                     final InstanceSessionService instanceSessionService,
-                                     final InstanceSessionMemberService instanceSessionMemberService,
+                                     final InstanceDesktopSessionService instanceDesktopSessionService,
                                      final InstanceCommandService instanceCommandService,
                                      final InstanceExtensionRequestService instanceExtensionRequestService,
                                      final InstanceAuthenticationTokenService instanceAuthenticationTokenService,
@@ -92,8 +91,7 @@ public class AccountInstanceController extends AbstractController {
         this.userService = userService;
         this.instanceService = instanceService;
         this.instanceMemberService = instanceMemberService;
-        this.instanceSessionService = instanceSessionService;
-        this.instanceSessionMemberService = instanceSessionMemberService;
+        this.instanceDesktopSessionService = instanceDesktopSessionService;
         this.instanceCommandService = instanceCommandService;
         this.instanceExtensionRequestService = instanceExtensionRequestService;
         this.instanceAuthenticationTokenService = instanceAuthenticationTokenService;
@@ -425,15 +423,12 @@ public class AccountInstanceController extends AbstractController {
 
     @GET
     @Path("/{instance}/sessions/active/members")
-    public MetaResponse<List<InstanceSessionMemberDto>> allActiveSessionMembers(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
+    public MetaResponse<List<ConnectedUser>> allActiveSessionMembers(@Context final SecurityContext securityContext, @PathParam("instance") Instance instance) {
         final User user = this.getUserPrincipal(securityContext);
 
         if (this.instanceService.isAuthorisedForInstance(user, instance)) {
-            List<InstanceSessionMember> sessionMembers = this.instanceSessionMemberService.getAllByInstance(instance);
-
-            return createResponse(sessionMembers.stream()
-                .map(InstanceSessionMemberDto::new)
-                .collect(toList()));
+            List<ConnectedUser> connectedUsers = this.instanceDesktopSessionService.getAllConnectedUsersByInstanceId(instance.getId());
+            return createResponse(connectedUsers);
         }
 
         throw new NotFoundException();
@@ -778,7 +773,7 @@ public class AccountInstanceController extends AbstractController {
                 }
             }
         }
-        instanceDto.setCanConnectWhileOwnerAway(instanceSessionService.canConnectWhileOwnerAway(instance, user));
+        instanceDto.setCanConnectWhileOwnerAway(instanceDesktopSessionService.canConnectWhileOwnerAway(instance, user));
         instanceDto.setUnrestrictedAccess((instance.getUnrestrictedMemberAccess() != null));
 
         return instanceDto;
@@ -787,13 +782,16 @@ public class AccountInstanceController extends AbstractController {
     private void updateVdiProtocol(Instance instance) {
         // Check if instance vdi protocol has been set or not
         if (instance.getVdiProtocol() == null) {
-            final InstanceSession lastInstanceSession = this.instanceSessionService.getLastByInstance(instance);
+            final InstanceDesktopSession latestInstanceDesktopSession = this.instanceDesktopSessionService.getLatestByInstanceId(instance.getId());
             final ImageProtocol guacamoleImageProtocol = instance.getPlan().getImage().getProtocolByName("GUACD");
             final ImageProtocol webXImageProtocol = instance.getPlan().getImage().getProtocolByName("WEBX");
-            if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.WEBX_PROTOCOL) && webXImageProtocol != null) {
+
+            if (latestInstanceDesktopSession != null && latestInstanceDesktopSession.getProtocol().equals(InstanceDesktopSession.WEBX_PROTOCOL) && webXImageProtocol != null) {
                 instance.setVdiProtocol(webXImageProtocol);
-            } else if (lastInstanceSession != null && lastInstanceSession.getProtocol().equals(InstanceSession.GUACAMOLE_PROTOCOL) && guacamoleImageProtocol != null) {
+
+            } else if (latestInstanceDesktopSession != null && latestInstanceDesktopSession.getProtocol().equals(InstanceDesktopSession.GUACAMOLE_PROTOCOL) && guacamoleImageProtocol != null) {
                 instance.setVdiProtocol(guacamoleImageProtocol);
+
             } else {
                 instance.setVdiProtocol(this.imageService.getDefaultVdiProtocolForImage(instance.getPlan().getImage()));
             }

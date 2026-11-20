@@ -210,17 +210,12 @@ VALUES (1000, '24e7437a-eae5-48c4-923e-778c42a6acf8', 1000, '1', '2019-01-01', '
 INSERT INTO instance_authentication_token (id, token, instance_id, user_id, created_at, updated_at)
 VALUES (1001, '24e7437b-eae5-48c4-923e-778c42a6acf8', 1000, '2', '2019-01-01', '2019-01-01');
 
-INSERT INTO instance_session (id, instance_id, connection_id, created_at, updated_at, current)
-VALUES (1000, 1000, '24e7437a-eae5-48c4-923e-778c42a6acf8', '2019-01-01', '2019-01-01', true);
-INSERT INTO instance_session (id, instance_id, connection_id, created_at, updated_at, current)
-VALUES (1001, 1001, '24e7437a-eae5-48c4-923e-778c42a6acf8', '2019-01-01', '2019-01-01', true);
-INSERT INTO instance_session (id, instance_id, connection_id, created_at, updated_at, current)
-VALUES (1002, 1002, '24e7437a-eae5-48c4-923e-778c42a6acf8', '2019-01-01', '2019-01-01', true);
-
-INSERT INTO instance_session_member (id, session_id, role, active, instance_session_id, user_id, created_at, updated_at)
-VALUES (1000, '24e7437a-eae5-48c4-923e-778c42a6acf8', 'OWNER', true, 1000, '1', '2019-01-01', '2019-01-01');
-INSERT INTO instance_session_member (id, session_id, role, active, instance_session_id, user_id, created_at, updated_at)
-VALUES (1001, '24e7437a-eae5-48c4-823e-778c42a6acf8', 'USER', true, 1000, '2', '2019-01-01', '2019-01-01');
+INSERT INTO instance_desktop_session (id, instance_id, user_id, connection_id, client_id, role, closed_at, created_at, updated_at)
+VALUES (1000, 1000, 1, '24e7437a-eae5-48c4-923e-778c42a6acf8', '24e7437a-eae5-48c4-923e-778c42a6acf8-1', 'OWNER', NULL, '2019-01-01', '2019-01-01');
+INSERT INTO instance_desktop_session (id, instance_id, user_id, connection_id, client_id, role, closed_at, created_at, updated_at)
+VALUES (1001, 1000, 2, '24e7437a-eae5-48c4-923e-778c42a6acf8', '24e7437a-eae5-48c4-923e-778c42a6acf8-2', 'USER', NULL, '2019-01-01', '2019-01-01');
+INSERT INTO instance_desktop_session (id, instance_id, user_id, connection_id, client_id, role, closed_at, created_at, updated_at)
+VALUES (1002, 1005, 2, '24e7437a-eae5-48c4-1234-778c42a6acf8', '24e7437a-eae5-48c4-1234-778c42a6acf8-1', 'OWNER', NULL, '2019-01-01', '2019-01-01');
 
 INSERT INTO instance_experiment (instance_id, experiment_id) VALUES (1000, '0001-0001-000001');
 INSERT INTO instance_experiment (instance_id, experiment_id) VALUES (1003, '0006-0001-000001');

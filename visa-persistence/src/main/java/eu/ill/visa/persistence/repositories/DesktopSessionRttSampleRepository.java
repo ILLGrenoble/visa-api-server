@@ -23,15 +23,15 @@ public class DesktopSessionRttSampleRepository extends AbstractRepository<Deskto
         super(entityManager);
     }
 
-    public List<DesktopSessionRttSample> getByInstanceSessionMemberId(Long instanceSessionMemberId) {
-        final TypedQuery<DesktopSessionRttSample> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getByInstanceSessionMemberId", DesktopSessionRttSample.class);
-        query.setParameter("instanceSessionMemberId", instanceSessionMemberId);
+    public List<DesktopSessionRttSample> getBySessionId(Long sessionId) {
+        final TypedQuery<DesktopSessionRttSample> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getBySessionId", DesktopSessionRttSample.class);
+        query.setParameter("sessionId", sessionId);
         return query.getResultList();
     }
 
-    public List<DesktopSessionRttSample> getByInstanceSessionMemberIds(List<Long> instanceSessionMemberIds) {
-        final TypedQuery<DesktopSessionRttSample> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getByInstanceSessionMemberIds", DesktopSessionRttSample.class);
-        query.setParameter("instanceSessionMemberIds", instanceSessionMemberIds);
+    public List<DesktopSessionRttSample> getSessionIds(List<Long> sessionIds) {
+        final TypedQuery<DesktopSessionRttSample> query = getEntityManager().createNamedQuery("desktopSessionRttSample.getBySessionIds", DesktopSessionRttSample.class);
+        query.setParameter("sessionIds", sessionIds);
         return query.getResultList();
     }
 

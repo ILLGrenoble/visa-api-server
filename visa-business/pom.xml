@@ -14,7 +14,7 @@
     <properties>
         <commons-lang.version>3.14.0</commons-lang.version>
         <pebble.version>3.2.4</pebble.version>
-        <bouncycastle.version>1.81</bouncycastle.version>
+        <bouncycastle.version>1.87</bouncycastle.version>
     </properties>
 
     <dependencies>
@@ -33,11 +33,6 @@
             <groupId>eu.ill.visa</groupId>
             <artifactId>visa-message-broker</artifactId>
             <version>3.9.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-mailer</artifactId>
         </dependency>
 
         <dependency>

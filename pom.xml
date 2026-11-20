@@ -20,7 +20,6 @@
                 <module>visa-persistence</module>
                 <module>visa-cloud</module>
                 <module>visa-business</module>
-                <module>visa-scheduler</module>
                 <module>visa-security</module>
                 <module>visa-remote-desktop</module>
                 <module>visa-web-gateway</module>
@@ -54,7 +53,6 @@
                 <module>visa-persistence</module>
                 <module>visa-cloud</module>
                 <module>visa-business</module>
-                <module>visa-scheduler</module>
                 <module>visa-security</module>
                 <module>visa-remote-desktop</module>
                 <module>visa-web-gateway</module>
@@ -85,6 +83,9 @@
                                 </configuration>
                             </execution>
                         </executions>
+                        <configuration>
+                          <argLine>@{argLine}</argLine>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -129,6 +130,9 @@
                                 </configuration>
                             </execution>
                         </executions>
+                        <configuration>
+                          <argLine>@{argLine}</argLine>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -143,15 +147,16 @@
     <packaging>pom</packaging>
 
     <properties>
-        <compiler-plugin.version>3.14.0</compiler-plugin.version>
+        <compiler-plugin.version>3.15.0</compiler-plugin.version>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <skipITs>true</skipITs>
-        <surefire-plugin.version>3.5.3</surefire-plugin.version>
-        <quarkus.platform.version>3.24.2</quarkus.platform.version>
+        <surefire-plugin.version>3.5.6</surefire-plugin.version>
+        <quarkus.platform.version>3.40.1.2</quarkus.platform.version>
+        <quarkus.warnIfBuildGoalMissing>false</quarkus.warnIfBuildGoalMissing>
         <commons-lang.version>3.14.0</commons-lang.version>
     </properties>
 
@@ -200,7 +205,7 @@
 
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
+            <artifactId>quarkus-junit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -212,6 +217,7 @@
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
                 <version>${quarkus.platform.version}</version>
+                <extensions>true</extensions>
             </plugin>
 
             <plugin>
