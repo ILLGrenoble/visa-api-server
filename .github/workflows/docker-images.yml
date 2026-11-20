@@ -1,4 +1,4 @@
-name: Build and push visa-vdi docker image
+name: Build and push visa-api-server docker image
 
 on:
   push:
@@ -17,8 +17,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Docker meta
-        id: meta
+      - name: VISA API Server Docker metadata
+        id: meta-api
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/illgrenoble/visa-api-server
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: VISA VDI Docker metadata
+        id: meta-vdi
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/illgrenoble/visa-vdi
@@ -36,13 +48,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push VISA API Server
+        uses: docker/build-push-action@v7
+        with:
+          context    : .
+          file       : ./docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+
+      - name: Build and push VISA VDI
         uses: docker/build-push-action@v7
         with:
           context    : .
           file       : ./docker/Dockerfile.vdi.dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta-vdi.outputs.tags }}
 
       - name: Trigger external deploy pipeline
         if: success() && github.ref == 'refs/heads/dev'
