@@ -1,4 +1,4 @@
-name: Build and push visa-api-server docker image
+name: Build and push visa-api-server and visa-vdi docker images
 
 on:
   push:
