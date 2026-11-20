@@ -3,7 +3,7 @@ name: Build and push visa-api-server docker image
 on:
   push:
     branches: [ dev ]
-    tags: [ "*.*.*", "*.*.*.*" ]
+    tags: [ "*.*.*" ]
   pull_request:
     branches: [ dev ]
 
