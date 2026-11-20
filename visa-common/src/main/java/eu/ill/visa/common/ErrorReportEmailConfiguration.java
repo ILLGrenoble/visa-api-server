@@ -1,4 +1,4 @@
-package eu.ill.visa.business;
+package eu.ill.visa.common;
 
 import java.util.List;
 import java.util.Optional;

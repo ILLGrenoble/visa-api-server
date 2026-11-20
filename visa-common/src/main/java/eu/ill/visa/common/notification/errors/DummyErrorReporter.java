@@ -1,4 +1,4 @@
-package eu.ill.visa.business.notification.logging.filters;
+package eu.ill.visa.common.notification.errors;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.logging.LogRecord;
 
 @Unremovable
-@LookupIfProperty(name = "business.errorReportEmail.enabled", stringValue = "false")
+@LookupIfProperty(name = "common.errorReportEmail.enabled", stringValue = "false")
 @Singleton
 public class DummyErrorReporter implements ErrorReporter {
 

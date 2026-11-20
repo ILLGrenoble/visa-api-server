@@ -1,14 +1,11 @@
-package eu.ill.visa.business.notification.logging.filters;
+package eu.ill.visa.common.notification.errors;
 
-import eu.ill.visa.business.ErrorReportEmailConfiguration;
-import eu.ill.visa.common.utils.domain.Timer;
+import eu.ill.visa.common.ErrorReportEmailConfiguration;
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.MailerName;
 import io.quarkus.mailer.reactive.ReactiveMailer;
-import io.quarkus.runtime.Shutdown;
-import io.smallrye.mutiny.subscription.Cancellable;
 import jakarta.inject.Singleton;
 import org.jboss.logmanager.ExtLogRecord;
 import org.slf4j.Logger;
@@ -24,19 +21,16 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.LogRecord;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
 @Unremovable
-@LookupIfProperty(name = "business.errorReportEmail.enabled", stringValue = "true")
+@LookupIfProperty(name = "common.errorReportEmail.enabled", stringValue = "true")
 @Singleton
 public class ActiveErrorReporter implements ErrorReporter {
 
-    private final static int MAX_ERRORS_WORKER_TIME_MS = 5000;
-    private final static int PENDING_ERRORS_WORKER_TIME_MS = 60000;
     private final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private static final Logger logger = LoggerFactory.getLogger(ActiveErrorReporter.class);
@@ -49,9 +43,6 @@ public class ActiveErrorReporter implements ErrorReporter {
     private final int maxErrorsPerReport;
 
     private final boolean enabled;
-
-    private final Cancellable maxErrorsIntervalSubscription;
-    private final Cancellable pendingErrorsIntervalSubscription;
 
     private List<ErrorEvent> events = new ArrayList<>();
 
@@ -79,32 +70,19 @@ public class ActiveErrorReporter implements ErrorReporter {
         if (enabled) {
             logger.info("Error reporting is enabled");
 
-            this.maxErrorsIntervalSubscription = Timer.setInterval(this::handleMaxErrors, MAX_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
-            this.pendingErrorsIntervalSubscription = Timer.setInterval(this::handlePendingErrors, PENDING_ERRORS_WORKER_TIME_MS, TimeUnit.MILLISECONDS);
-
         } else {
             logger.info("Error reporting is disabled (configuration is not valid)");
-            maxErrorsIntervalSubscription = null;
-            pendingErrorsIntervalSubscription = null;
-        }
-    }
-
-    @Shutdown
-    public void stop() {
-        if (enabled) {
-            this.maxErrorsIntervalSubscription.cancel();
-            this.pendingErrorsIntervalSubscription.cancel();
         }
     }
 
     public synchronized void handleMaxErrors() {
-        if (this.events.size() >= this.maxErrorsPerReport) {
+        if (this.enabled && this.events.size() >= this.maxErrorsPerReport) {
             this.generateReportInVirtualThread(events);
         }
     }
 
     public synchronized void handlePendingErrors() {
-        if (!this.events.isEmpty()) {
+        if (this.enabled && !this.events.isEmpty()) {
             this.generateReportInVirtualThread(events);
         }
     }

@@ -19,6 +19,14 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-config-yaml</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-mailer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-scheduler</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

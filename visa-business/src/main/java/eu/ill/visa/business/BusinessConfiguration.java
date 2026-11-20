@@ -15,8 +15,6 @@ public interface BusinessConfiguration {
 
     SecurityGroupServiceClientConfiguration securityGroupServiceClient();
 
-    ErrorReportEmailConfiguration errorReportEmail();
-
     VDIConfiguration vdi();
 
     SchedulerConfiguration scheduler();
