@@ -9,7 +9,10 @@ on:
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, ubuntu-24.04-arm ]
+    runs-on: ${{ matrix.os }}
     permissions:
       packages: write
       contents: read
