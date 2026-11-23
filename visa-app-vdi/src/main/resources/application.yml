@@ -1,5 +1,6 @@
 quarkus:
   http:
+    root-path: /api
     port: ${VISA_VDI_PORT:8087}
     host: ${VISA_VDI_HOST:localhost}
   devservices:
