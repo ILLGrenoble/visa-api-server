@@ -22,7 +22,7 @@ jobs:
 
       - name: VISA API Server Docker metadata
         id: meta-api
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/illgrenoble/visa-api-server
           tags: |
