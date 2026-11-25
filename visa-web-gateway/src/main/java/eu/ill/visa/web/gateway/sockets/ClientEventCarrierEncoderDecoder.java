@@ -14,7 +14,7 @@ public class ClientEventCarrierEncoderDecoder implements Encoder.Text<ClientEven
     private final ObjectMapper mapper = new ObjectMapper();
 
     public ClientEventCarrierEncoderDecoder() {
-        this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        this.mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     }
 
     @Override

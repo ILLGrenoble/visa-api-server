@@ -12,8 +12,7 @@
     <artifactId>visa-business</artifactId>
 
     <properties>
-        <commons-lang.version>3.14.0</commons-lang.version>
-        <pebble.version>3.2.4</pebble.version>
+        <pebble.version>4.1.3</pebble.version>
         <bouncycastle.version>1.87</bouncycastle.version>
     </properties>
 
@@ -41,10 +40,6 @@
             <version>${pebble.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-security</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>

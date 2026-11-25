@@ -13,7 +13,7 @@ public class RegisterObjectMapperCustomizer implements ObjectMapperCustomizer {
 
     @Override
     public void customize(ObjectMapper objectMapper) {
-        objectMapper.setSerializationInclusion(ALWAYS);
+        objectMapper.setDefaultPropertyInclusion(ALWAYS);
         objectMapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.enable(STRICT_DUPLICATE_DETECTION);
         //        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX"));
