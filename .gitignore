@@ -68,6 +68,9 @@ hs_err_pid*
 # Plugin directory
 /.quarkus/cli/plugins/
 
+oidc-config.json
+oidc-token.json
+
 *.env
 certs/
 pgdata*
